@@ -1145,8 +1145,7 @@ function CCWatch_LoadVariables()
 	CCWatch_LoadConfCCs();
 	CCWatch_LoadCustomCCs();
 	CCWatch_UpdateTextures();
---	CCWatch_UpdateClassSpells(false);
-	CCWatch_UpdateClassSpells(true);
+	CCWatch_UpdateClassSpells(false);
 
 	CCWATCH.STATUS = CCWatch_Save[CCWATCH.PROFILE].status;
 	CCWATCH.INVERT = CCWatch_Save[CCWATCH.PROFILE].invert;
