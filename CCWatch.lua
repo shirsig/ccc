@@ -382,13 +382,11 @@ CCWatch_EventHandler["SPELLCAST_STOP"] = function()
 			end
 
 			if( index ~= 0 ) then
--- Found the effect in a group, hence it is active, hence we are resetting it
+				-- no UNIT_AURA event if it's already active
 				CCWATCH.UNIT_AURA.TIME = GetTime();
 				CCWATCH.UNIT_AURA.TARGET = target;
-				CCWATCH.CCS[effect].TARGET = target;
-				local diff = CCWATCH.UNIT_AURA.TIME - CCWATCH.CCS[effect].TIMER_START;
-				CCWATCH.CCS[effect].TIMER_START = CCWATCH.CCS[effect].TIMER_START + diff;
-				CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_END + diff;
+				CCWatch_QueueEvent(effect, target, GetTime(), 1)
+				CCWatch_EffectHandler[1]()
 			end
 		end
 	end
@@ -444,7 +442,6 @@ CCWatch_EventHandler["CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"] = function()
 		if( CCWATCH.STYLE > 1 or CCWatch_CheckRecentTargets(mobname) ) then
 			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
 				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
-
 				CCWatch_EffectHandler[1]();
 			end
 		end
@@ -458,7 +455,6 @@ CCWatch_EventHandler["CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"] = function()
 		if( CCWATCH.STYLE > 1 or CCWatch_CheckRecentTargets(mobname) ) then
 			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~=0 then
 				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
-
 				CCWatch_EffectHandler[1]();
 			end
 		end
