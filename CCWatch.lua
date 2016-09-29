@@ -1,21 +1,3 @@
-CCWatchDetails = {
-	name = "CCWatch",
-	version = CWATCH_VERSION,
-	releaseDate = "March 27, 2006",
-	author = "phoenixfire2001&elwen",
-	website = "http://www.curse-gaming.com/mod.php?addid=3650",
-	category = MYADDONS_CATEGORY_COMBAT,
-	description = CCWATCH_DESCRIPTION,
-	optionsframe = "CCWatchOptionsFrame"
-};
-
-CCWatchHelp = {
-	"/ccw : affiche les commandes possibles\n"..
-	"/ccw config : affiche l'interface graphique\n"..
-	"\n"..
-	""
-}
-
 --CCWATCH_INITIALIZATION_EVENT = "SPELL_CHANGED"
 
 CCWatchLoaded = false;
@@ -81,20 +63,15 @@ end
 function CCWatch_Config()
 	CCWATCH.CCS = {}
 
-	if CCWatch_ConfigCC ~= nil then
-		CCWatch_ConfigCC();
-	else
-		CCWatch_AddMessage("No CC config");
-	end
-	if CCWatch_ConfigDebuff ~= nil then
-		CCWatch_ConfigDebuff();
-	else
-		CCWatch_AddMessage("No Debuff config");
-	end
-	if CCWatch_ConfigBuff ~= nil then
-		CCWatch_ConfigBuff();
-	else
-		CCWatch_AddMessage("No Buff config");
+	CCWatch_ConfigCC()
+	CCWatch_ConfigDebuff()
+	CCWatch_ConfigBuff()
+
+	for _, cc in CCWATCH.CCS do
+		cc.TARGET = ''
+		cc.PLAYER = nil
+		cc.TIMER_START = 0
+		cc.TIMER_END = 0
 	end
 end
 
@@ -348,15 +325,6 @@ end
 CCWatch_EventHandler = {}
 
 local SpellCast = nil;
-
---CCWatch_EventHandler[CCWATCH_INITIALIZATION_EVENT] = function()
---	if not CCWatchObject then
---		if(myAddOnsFrame_Register) then
---			myAddOnsFrame_Register(CCWatchDetails, CCWatchHelp);
---		end
---		CCWatch_LoadVariables();
---	end
---end
 
 CCWatch_EventHandler["SPELLCAST_START"] = function()
 	SpellCast = arg1;
@@ -1029,9 +997,6 @@ end
 
 function CCWatch_LoadVariablesOnUpdate(arg1)
 	if not CCWATCH.LOADEDVARIABLES then
-		if(myAddOnsFrame_Register) then
-			myAddOnsFrame_Register(CCWatchDetails, CCWatchHelp);
-		end
 		CCWatch_LoadVariables();
 		CCWATCH.LOADEDVARIABLES = true;
 	end
