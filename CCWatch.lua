@@ -11,6 +11,316 @@ CCW_EWARN_APPLIED = 2;
 CCW_EWARN_BROKEN = 4;
 CCW_EWARN_LOWTIME = 8;
 
+local bars = {}
+
+function register_bar(name, time, text, icon, color)
+	text = text or name
+	icon = icon or [[Interface\Icons\INV_Misc_QuestionMark]]
+	color = color or {0, 1, 0, 1}
+
+	local bar = {}
+	bars[name] = bar
+	bar.name, bar.time, bar.text, bar.icon = name, time, text, icon
+	bar.color = {unpack(color)}
+	bar.color[4] = 1
+	bar.running = nil
+	bar.endtime = 0
+	bar.fadetime = 1
+	bar.fadeout = true
+	bar.reversed = nil
+	bar.frame = bar_frame(name)
+
+	return bar.frame
+end
+
+function bar_frame(name)
+	local bar = bars[name]
+
+	local color = bar.color or {1, 0, 1, 1}
+	local bgcolor = {0, .5, .5, .5}
+	local icon = bar.icon or nil
+	local iconpos = 'LEFT'
+	local texture = [[Interface\TargetingFrame\UI-StatusBar]]
+	local width = 200
+	local height = 16
+	local point = 'CENTER'
+	local rframe = UIParent
+	local rpoint = 'CENTER'
+	local xoffset = 0
+	local yoffset = 0
+	local text = bar.text
+	local fontsize = 11
+	local textcolor = {1, 1, 1, 1}
+	local timertextcolor = {1, 1, 1, 1}
+	local scale = 1
+
+	local timertextwidth = fontsize * 3.6
+	local font, _, style = GameFontHighlight:GetFont()
+
+	bar.width = 200
+	bar.bgcolor = bgcolor
+	bar.textcolor = textcolor
+	bar.timertextcolor = timertextcolor
+	bar.gradienttable = {}
+
+	local f = CreateFrame('Button', nil, UIParent)
+
+	f:Hide()
+	f.owner = name
+
+	f:SetWidth(width + height)
+	f:SetHeight(height)
+	f:ClearAllPoints()
+	f:SetPoint(point, rframe, rpoint, xoffset, yoffset)
+
+	f:EnableMouse(false)
+	f:RegisterForClicks()
+	f:SetScript('OnClick', nil)
+	f:SetScale(scale)
+
+	f.icon = CreateFrame('Button', nil, f)
+	f.icon:ClearAllPoints()
+	f.icon.owner = name
+	f.icon:EnableMouse(false)
+	f.icon:RegisterForClicks()
+	f.icon:SetScript('OnClick', nil)
+	-- an icno is square and the height of the bar, so yes 2x height there
+	f.icon:SetHeight(height)
+	f.icon:SetWidth(height)
+	f.icon:SetPoint('LEFT', f, iconpos, 0, 0)
+	f.icon:SetNormalTexture(icon)
+	f.icon:GetNormalTexture():SetTexCoord(.08, .92, .08, .92)
+--	if f.icon:GetNormalTexture() then
+--		f.icon:GetNormalTexture():SetTexCoord(0, 1, 0, 1)
+--	end
+	f.icon:SetAlpha(1)
+	f.icon:Show()
+
+	f.statusbarbg = CreateFrame('StatusBar', nil, f)
+	f.statusbarbg:SetFrameLevel(f.statusbarbg:GetFrameLevel() - 1)
+	f.statusbarbg:ClearAllPoints()
+	f.statusbarbg:SetHeight(height)
+	f.statusbarbg:SetWidth(width)
+	-- offset the height of the frame on the x-axis for the icon.
+	f.statusbarbg:SetPoint('TOPLEFT', f, 'TOPLEFT', height, 0)
+	f.statusbarbg:SetStatusBarTexture(texture)
+	f.statusbarbg:SetStatusBarColor(bgcolor[1], bgcolor[2], bgcolor[3], bgcolor[4])
+	f.statusbarbg:SetMinMaxValues(0, 100)
+	f.statusbarbg:SetValue(100)
+
+	f.statusbar = CreateFrame('StatusBar', nil, f)
+	f.statusbar:ClearAllPoints()
+	f.statusbar:SetHeight(height)
+	f.statusbar:SetWidth(width)
+	-- offset the height of the frame on the x-axis for the icon.
+	f.statusbar:SetPoint('TOPLEFT', f, 'TOPLEFT', height, 0)
+	f.statusbar:SetStatusBarTexture(texture)
+	f.statusbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
+	f.statusbar:SetMinMaxValues(0, 1)
+	f.statusbar:SetValue(1)
+
+	f.spark = f.statusbar:CreateTexture(nil, 'OVERLAY')
+	f.spark:SetTexture[[Interface\CastingBar\UI-CastingBar-Spark]]
+	f.spark:SetWidth(16)
+	f.spark:SetHeight(height + 25)
+	f.spark:SetBlendMode'ADD'
+	f.spark:Show()
+
+	f.timertext = f.statusbar:CreateFontString(nil, 'OVERLAY')
+	f.timertext:SetFontObject(GameFontHighlight)
+	f.timertext:SetFont(font, fontsize, style)
+	f.timertext:SetHeight(height)
+	f.timertext:SetWidth(timertextwidth)
+	f.timertext:SetPoint('LEFT', f.statusbar, 'LEFT', 0, 0)
+	f.timertext:SetJustifyH'RIGHT'
+	f.timertext:SetText''
+	f.timertext:SetTextColor(timertextcolor[1], timertextcolor[2], timertextcolor[3], timertextcolor[4])
+
+	f.text = f.statusbar:CreateFontString(nil, 'OVERLAY')
+	f.text:SetFontObject(GameFontHighlight)
+	f.text:SetFont(font, fontsize, style)
+	f.text:SetHeight(height)
+	f.text:SetWidth((width - timertextwidth) * .9)
+	f.text:SetPoint('RIGHT', f.statusbar, 'RIGHT', 0, 0)
+	f.text:SetJustifyH'LEFT'
+	f.text:SetText(text)
+	f.text:SetTextColor(textcolor[1], textcolor[2], textcolor[3], textcolor[4])
+
+	if bar.onclick then
+		f:EnableMouse(true)
+		f:RegisterForClicks('LeftButtonUp', 'RightButtonUp', 'MiddleButtonUp', 'Button4Up', 'Button5Up')
+		f:SetScript('OnClick', function()
+			CandyBar:OnClick()
+		end)
+		f.icon:EnableMouse(true)
+		f.icon:RegisterForClicks('LeftButtonUp', 'RightButtonUp', 'MiddleButtonUp', 'Button4Up', 'Button5Up')
+		f.icon:SetScript('OnClick', function()
+			CandyBar:OnClick()
+		end)
+	end
+
+	return f
+end
+
+function start_bar(name, fireforget)
+	local bar = bars[name]
+
+	local t = GetTime()
+	if bar.paused then
+		local pauseoffset = t - bar.pausetime
+		bar.endtime = bar.endtime + pauseoffset
+		bar.starttime = bar.starttime + pauseoffset
+	else
+		-- bar hasn't elapsed a second.
+		bar.elapsed = 0
+		bar.endtime = t + bar.time
+		bar.starttime = t
+	end
+	bar.fireforget = fireforget
+	bar.running = true
+	bar.paused = nil
+	bar.fading = nil
+--	CandyBar:AcquireBarFrame(name) -- this will reset the barframe incase we were fading out when it was restarted
+	bar.frame:Show()
+--	if bar.group then
+--		CandyBar:UpdateGroup(bar.group) -- update the group
+--	end
+--	CandyBar.frame:Show()
+end
+
+function stop_bar(name)
+	local bar = bars[name]
+
+	bar.running = nil
+	bar.paused = nil
+
+	if bar.fadeout then
+		bar.frame.spark:Hide()
+		bar.fading = true
+		bar.fadeelapsed = 0
+		local t = GetTime()
+		if bar.endtime > t then
+			bar.endtime = t
+		end
+	else
+		bar.frame:Hide()
+		bar.starttime = nil
+		bar.endtime = 0
+--		if bar.group then
+--			CandyBar:UpdateGroup(bar.group)
+--		end
+--		if bar.fireforget then
+--			return CandyBar:Unregister(name)
+--		end
+	end
+--	if not CandyBar:HasHandlers() then
+--		CandyBar.frame:Hide()
+--	end
+end
+
+function fade_bar(name)
+	local bar = bars[name]
+
+	if bar.fadeelapsed > bar.fadetime then
+		bar.fading = nil
+		bar.starttime = nil
+		bar.endtime = 0
+		bar.frame:Hide()
+--		if bar.group then
+--			CandyBar:UpdateGroup(bar.group)
+--		end
+--		if bar.fireforget then
+--			return CandyBar:Unregister(name)
+--		end
+	else
+		local t = bar.fadetime - bar.fadeelapsed
+		local p = t / bar.fadetime
+		local color = bar.color
+		local bgcolor = bar.bgcolor
+		local textcolor = bar.textcolor
+		local timertextcolor = bar.timertextcolor
+		local colora = color[4] * p
+		local bgcolora = bgcolor[4] * p
+		local textcolora = textcolor[4] * p
+		local timertextcolora = timertextcolor[4] * p
+
+		bar.frame.statusbarbg:SetStatusBarColor(bgcolor[1], bgcolor[2], bgcolor[3], bgcolora)
+		bar.frame.statusbar:SetStatusBarColor(color[1], color[2], color[3], colora)
+		bar.frame.text:SetTextColor(textcolor[1], textcolor[2], textcolor[3], textcolora)
+		bar.frame.timertext:SetTextColor(timertextcolor[1], timertextcolor[2], timertextcolor[3], timertextcolora)
+		bar.frame.icon:SetAlpha(p)
+	end
+end
+
+function update_bar(name)
+	local bar = bars[name]
+
+	local t = bar.time - bar.elapsed
+
+	local reversed = bar.reversed
+
+	do
+		local timetext
+		local h = floor(t / 3600)
+		local m = t - h * 3600
+		m = floor(m / 60)
+		local s = t - (h * 3600 + m * 60)
+		if h > 0 then
+			timetext = format('%d:%02d', h, m)
+		elseif m > 0 then
+			timetext = format('%d:%02d', m, floor(s))
+		elseif s < 10 then
+			timetext = format('%1.1f', s)
+		else
+			timetext = format('%.0f', floor(s))
+		end
+		bar.frame.timertext:SetText(timetext)
+	end
+
+	local perc = t / bar.time
+
+	bar.frame.statusbar:SetValue(reversed and 1 - perc or perc)
+
+	local sp =  bar.width * perc
+	sp = reversed and -sp or sp
+	bar.frame.spark:SetPoint('CENTER', bar.frame.statusbar, reversed and 'RIGHT' or 'LEFT', sp, 0)
+end
+
+CreateFrame'Frame':SetScript('OnUpdate', function()
+	local t = GetTime()
+	for k, v in bars do
+		if v.running then
+			v.elapsed = t - v.starttime
+			if v.endtime <= t then
+				local c = bars[i]
+--				if c.completion then
+--					c.completion(getArgs(c, "completion", 1))
+--				end
+				stop_bar(k)
+			else
+				update_bar(k)
+			end
+		elseif v.fading then
+			v.fadeelapsed = (t - v.endtime)
+			fade_bar(k)
+		end
+	end
+end)
+
+--bar('kek', 10, 'kektext', [[Interface\Icons\INV_Misc_QuestionMark]], {1, 1, 1})
+--start_bar('kek')
+
+for _, type in {'CC', 'Buff', 'Debuff'} do
+	for i = 1, CCWATCH_MAXBARS do
+		local name = 'CCWatchBar' .. type .. i
+		local f = register_bar(name, 10)
+		f:SetParent(getglobal('CCWatch' .. type))
+		f:SetPoint('TOPLEFT', 0, -100 + i * 20)
+		f:SetScript('OnShow', getglobal(name .. '_OnShow'))
+		setglobal(name, f)
+	end
+end
+
 --[[
 local function DebugCompareStrings(str1, str2)
 	local str = "";
@@ -932,8 +1242,8 @@ function CCWatch_GroupUpdate(group, GROUPS, ext)
 	elseif( activebar:GetAlpha() > 0 ) then
 	-- otherwise fade out this bar if not unlocked
 		if( CCWATCH.STATUS == 1 ) then
-			local activebarText = getglobal("CCWatchBar"..ext..group.."Text");
-			activebarText:SetText("TimeOut");
+			-- local activebarText = getglobal("CCWatchBar"..ext..group.."Text");
+			-- activebarText:SetText("TimeOut");
 			local alpha = activebar:GetAlpha() - 0.2;
 			if( alpha > 0 ) then
 				activebar:SetAlpha(alpha);
@@ -1498,315 +1808,3 @@ end
 function CCWatch_AddMessage(msg)
 	DEFAULT_CHAT_FRAME:AddMessage('<CCWatch> ' .. msg)
 end
-
-local bars = {}
-
-function register_bar(name, time, text, icon, color)
-	text = text or name
-	color = color or {0, 1, 0, 1}
-
-	local bar = {}
-	bars[name] = bar
-	bar.name, bar.time, bar.text, bar.icon = name, time, text, icon
-	bar.color = {unpack(color)}
-	bar.color[4] = 1
-	bar.running = nil
-	bar.endtime = 0
-	bar.fadetime = 1
-	bar.fadeout = true
-	bar.reversed = nil
-	bar.frame = bar_frame(name)
-
-	return bar.frame
-end
-
-function bar_frame(name)
-	local bar = bars[name]
-
-	local color = bar.color or {1, 0, 1, 1}
-	local bgcolor = {0, .5, .5, .5}
-	local icon = bar.icon or nil
-	local iconpos = 'LEFT'
-	local texture = [[Interface\TargetingFrame\UI-StatusBar]]
-	local width = 200
-	local height = 16
-	local point = 'CENTER'
-	local rframe = UIParent
-	local rpoint = 'CENTER'
-	local xoffset = 0
-	local yoffset = 0
-	local text = bar.text
-	local fontsize = 11
-	local textcolor = {1, 1, 1, 1}
-	local timertextcolor = {1, 1, 1, 1}
-	local scale = 1
-
-	local timertextwidth = fontsize * 3.6
-	local font, _, style = GameFontHighlight:GetFont()
-
-	bar.width = 200
-	bar.bgcolor = bgcolor
-	bar.textcolor = textcolor
-	bar.timertextcolor = timertextcolor
-	bar.gradienttable = {}
-
-	local f = CreateFrame('Button', nil, UIParent)
-
-	f:Hide()
-	f.owner = name
-
-	f:SetWidth(width + height)
-	f:SetHeight(height)
-	f:ClearAllPoints()
-	f:SetPoint(point, rframe, rpoint, xoffset, yoffset)
-
-	f:EnableMouse(false)
-	f:RegisterForClicks()
-	f:SetScript('OnClick', nil)
-	f:SetScale(scale)
-
-	f.icon = CreateFrame('Button', nil, f)
-	f.icon:ClearAllPoints()
-	f.icon.owner = name
-	f.icon:EnableMouse(false)
-	f.icon:RegisterForClicks()
-	f.icon:SetScript('OnClick', nil)
-	-- an icno is square and the height of the bar, so yes 2x height there
-	f.icon:SetHeight(height)
-	f.icon:SetWidth(height)
-	f.icon:SetPoint('LEFT', f, iconpos, 0, 0)
-	f.icon:SetNormalTexture(icon)
-	f.icon:GetNormalTexture():SetTexCoord(.08, .92, .08, .92)
---	if f.icon:GetNormalTexture() then
---		f.icon:GetNormalTexture():SetTexCoord(0, 1, 0, 1)
---	end
-	f.icon:SetAlpha(1)
-	f.icon:Show()
-
-	f.statusbarbg = CreateFrame('StatusBar', nil, f)
-	f.statusbarbg:SetFrameLevel(f.statusbarbg:GetFrameLevel() - 1)
-	f.statusbarbg:ClearAllPoints()
-	f.statusbarbg:SetHeight(height)
-	f.statusbarbg:SetWidth(width)
-	-- offset the height of the frame on the x-axis for the icon.
-	f.statusbarbg:SetPoint('TOPLEFT', f, 'TOPLEFT', height, 0)
-	f.statusbarbg:SetStatusBarTexture(texture)
-	f.statusbarbg:SetStatusBarColor(bgcolor[1], bgcolor[2], bgcolor[3], bgcolor[4])
-	f.statusbarbg:SetMinMaxValues(0, 100)
-	f.statusbarbg:SetValue(100)
-
-	f.statusbar = CreateFrame('StatusBar', nil, f)
-	f.statusbar:ClearAllPoints()
-	f.statusbar:SetHeight(height)
-	f.statusbar:SetWidth(width)
-	-- offset the height of the frame on the x-axis for the icon.
-	f.statusbar:SetPoint('TOPLEFT', f, 'TOPLEFT', height, 0)
-	f.statusbar:SetStatusBarTexture(texture)
-	f.statusbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
-	f.statusbar:SetMinMaxValues(0, 1)
-	f.statusbar:SetValue(1)
-
-	f.spark = f.statusbar:CreateTexture(nil, 'OVERLAY')
-	f.spark:SetTexture[[Interface\CastingBar\UI-CastingBar-Spark]]
-	f.spark:SetWidth(16)
-	f.spark:SetHeight(height + 25)
-	f.spark:SetBlendMode'ADD'
-	f.spark:Show()
-
-	f.timertext = f.statusbar:CreateFontString(nil, 'OVERLAY')
-	f.timertext:SetFontObject(GameFontHighlight)
-	f.timertext:SetFont(font, fontsize, style)
-	f.timertext:SetHeight(height)
-	f.timertext:SetWidth(timertextwidth)
-	f.timertext:SetPoint('LEFT', f.statusbar, 'LEFT', 0, 0)
-	f.timertext:SetJustifyH'RIGHT'
-	f.timertext:SetText''
-	f.timertext:SetTextColor(timertextcolor[1], timertextcolor[2], timertextcolor[3], timertextcolor[4])
-
-	f.text = f.statusbar:CreateFontString(nil, 'OVERLAY')
-	f.text:SetFontObject(GameFontHighlight)
-	f.text:SetFont(font, fontsize, style)
-	f.text:SetHeight(height)
-	f.text:SetWidth((width - timertextwidth) * .9)
-	f.text:SetPoint('RIGHT', f.statusbar, 'RIGHT', 0, 0)
-	f.text:SetJustifyH'LEFT'
-	f.text:SetText(text)
-	f.text:SetTextColor(textcolor[1], textcolor[2], textcolor[3], textcolor[4])
-
-	if bar.onclick then
-		f:EnableMouse(true)
-		f:RegisterForClicks('LeftButtonUp', 'RightButtonUp', 'MiddleButtonUp', 'Button4Up', 'Button5Up')
-		f:SetScript('OnClick', function()
-			CandyBar:OnClick()
-		end)
-		f.icon:EnableMouse(true)
-		f.icon:RegisterForClicks('LeftButtonUp', 'RightButtonUp', 'MiddleButtonUp', 'Button4Up', 'Button5Up')
-		f.icon:SetScript('OnClick', function()
-			CandyBar:OnClick()
-		end)
-	end
-
-	return f
-end
-
-function start_bar(name, fireforget)
-	local bar = bars[name]
-
-	local t = GetTime()
-	if bar.paused then
-		local pauseoffset = t - bar.pausetime
-		bar.endtime = bar.endtime + pauseoffset
-		bar.starttime = bar.starttime + pauseoffset
-	else
-		-- bar hasn't elapsed a second.
-		bar.elapsed = 0
-		bar.endtime = t + bar.time
-		bar.starttime = t
-	end
-	bar.fireforget = fireforget
-	bar.running = true
-	bar.paused = nil
-	bar.fading = nil
---	CandyBar:AcquireBarFrame(name) -- this will reset the barframe incase we were fading out when it was restarted
-	bar.frame:Show()
---	if bar.group then
---		CandyBar:UpdateGroup(bar.group) -- update the group
---	end
---	CandyBar.frame:Show()
-end
-
-function stop_bar(name)
-	local bar = bars[name]
-
-	bar.running = nil
-	bar.paused = nil
-
-	if bar.fadeout then
-		bar.frame.spark:Hide()
-		bar.fading = true
-		bar.fadeelapsed = 0
-		local t = GetTime()
-		if bar.endtime > t then
-			bar.endtime = t
-		end
-	else
-		bar.frame:Hide()
-		bar.starttime = nil
-		bar.endtime = 0
---		if bar.group then
---			CandyBar:UpdateGroup(bar.group)
---		end
---		if bar.fireforget then
---			return CandyBar:Unregister(name)
---		end
-	end
---	if not CandyBar:HasHandlers() then
---		CandyBar.frame:Hide()
---	end
-end
-
-function fade_bar(name)
-	local bar = bars[name]
-
-	if bar.fadeelapsed > bar.fadetime then
-		bar.fading = nil
-		bar.starttime = nil
-		bar.endtime = 0
-		bar.frame:Hide()
---		if bar.group then
---			CandyBar:UpdateGroup(bar.group)
---		end
---		if bar.fireforget then
---			return CandyBar:Unregister(name)
---		end
-	else
-		local t = bar.fadetime - bar.fadeelapsed
-		local p = t / bar.fadetime
-		local color = bar.color
-		local bgcolor = bar.bgcolor
-		local textcolor = bar.textcolor
-		local timertextcolor = bar.timertextcolor
-		local colora = color[4] * p
-		local bgcolora = bgcolor[4] * p
-		local textcolora = textcolor[4] * p
-		local timertextcolora = timertextcolor[4] * p
-
-		bar.frame.statusbarbg:SetStatusBarColor(bgcolor[1], bgcolor[2], bgcolor[3], bgcolora)
-		bar.frame.statusbar:SetStatusBarColor(color[1], color[2], color[3], colora)
-		bar.frame.text:SetTextColor(textcolor[1], textcolor[2], textcolor[3], textcolora)
-		bar.frame.timertext:SetTextColor(timertextcolor[1], timertextcolor[2], timertextcolor[3], timertextcolora)
-		bar.frame.icon:SetAlpha(p)
-	end
-end
-
-function update_bar(name)
-	local bar = bars[name]
-
-	local t = bar.time - bar.elapsed
-
-	local reversed = bar.reversed
-
-	do
-		local timetext
-		local h = floor(t / 3600)
-		local m = t - h * 3600
-		m = floor(m / 60)
-		local s = t - (h * 3600 + m * 60)
-		if h > 0 then
-			timetext = format('%d:%02d', h, m)
-		elseif m > 0 then
-			timetext = format('%d:%02d', m, floor(s))
-		elseif s < 10 then
-			timetext = format('%1.1f', s)
-		else
-			timetext = format('%.0f', floor(s))
-		end
-		bar.frame.timertext:SetText(timetext)
-	end
-
-	local perc = t / bar.time
-
-	bar.frame.statusbar:SetValue(reversed and 1 - perc or perc)
-
-	local sp =  bar.width * perc
-	sp = reversed and -sp or sp
-	bar.frame.spark:SetPoint('CENTER', bar.frame.statusbar, reversed and 'RIGHT' or 'LEFT', sp, 0)
-end
-
-CreateFrame'Frame':SetScript('OnUpdate', function()
-	local t = GetTime()
-	for k, v in bars do
-		if v.running then
-			v.elapsed = t - v.starttime
-			if v.endtime <= t then
-				local c = bars[i]
---				if c.completion then
---					c.completion(getArgs(c, "completion", 1))
---				end
-				stop_bar(k)
-			else
-				update_bar(k)
-			end
-		elseif v.fading then
-			v.fadeelapsed = (t - v.endtime)
-			fade_bar(k)
-		end
-	end
-end)
-
---bar('kek', 10, 'kektext', [[Interface\Icons\INV_Misc_QuestionMark]], {1, 1, 1})
---start_bar('kek')
-
-for _, type in {'CC', 'Buff', 'Debuff'} do
-	for i = 1, CCWATCH_MAXBARS do
-		local name = 'CCWatchBar' .. type .. i
-		local f = register_bar(name)
-		f:SetParent(getglobal('CCWatch' .. type))
-		f:SetPoint('TOPLEFT', 0, -100 + i * 20)
-		f:SetScript('OnShow', getglobal(name .. '_OnShow'))
-		setglobal(name, f)
-		p(getglobal(name), name)
-	end
-end
-
-
