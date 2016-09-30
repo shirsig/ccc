@@ -162,7 +162,7 @@
 	</Frame>
 
 
-	<Frame name="CCWatchBarCC1" parent="CCWatchCC" inherits="CCWatchBarTemplate">
+<!-- 	<Frame name="CCWatchBarCC1" parent="CCWatchCC" inherits="CCWatchBarTemplate">
 		<Anchors>
 			<Anchor point="TOPLEFT">
 				<Offset>
@@ -385,7 +385,7 @@
 			</OnShow>
 		</Scripts>
 	</Frame>
-
+ -->
 
 <!-- original SW hack for initialization due to lack of working GetTalentInfo() in the VARIABLE_LOADED, PLAYER_LOGIN, PLAYER_ENTERING_WORLD events -->
 	<Frame name="CCWatch_Variable_Frame" hidden="false">
