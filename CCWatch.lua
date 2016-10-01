@@ -13,13 +13,22 @@ CCW_EWARN_LOWTIME = 8;
 
 local bars = {}
 
-function register_bar(name, time, text, icon, color)
+function create_bar(name)
+
+	local bar = {}
+	bars[name] = bar
+	create_bar_frame(name)
+
+	return bar.frame
+end
+
+function start_bar(name, time, text, icon, color, fireforget)
+	local bar = bars[name]
+
 	text = text or name
 	icon = icon or [[Interface\Icons\INV_Misc_QuestionMark]]
 	color = color or {0, 1, 0, 1}
 
-	local bar = {}
-	bars[name] = bar
 	bar.name, bar.time, bar.text, bar.icon = name, time, text, icon
 	bar.color = {unpack(color)}
 	bar.color[4] = 1
@@ -28,12 +37,61 @@ function register_bar(name, time, text, icon, color)
 	bar.fadetime = 1
 	bar.fadeout = true
 	bar.reversed = nil
-	bar.frame = bar_frame(name)
 
-	return bar.frame
+	local t = GetTime()
+	if bar.paused then
+		local pauseoffset = t - bar.pausetime
+		bar.endtime = bar.endtime + pauseoffset
+		bar.starttime = bar.starttime + pauseoffset
+	else
+		-- bar hasn't elapsed a second.
+		bar.elapsed = 0
+		bar.endtime = t + bar.time
+		bar.starttime = t
+	end
+	bar.fireforget = fireforget
+	bar.running = true
+	bar.paused = nil
+	bar.fading = nil
+--	CandyBar:AcquireBarFrame(name) -- this will reset the barframe incase we were fading out when it was restarted
+	bar.frame:Show()
+--	if bar.group then
+--		CandyBar:UpdateGroup(bar.group) -- update the group
+--	end
+--	CandyBar.frame:Show()
 end
 
-function bar_frame(name)
+function stop_bar(name)
+	local bar = bars[name]
+
+	bar.running = nil
+	bar.paused = nil
+
+	if bar.fadeout then
+		bar.frame.spark:Hide()
+		bar.fading = true
+		bar.fadeelapsed = 0
+		local t = GetTime()
+		if bar.endtime > t then
+			bar.endtime = t
+		end
+	else
+		bar.frame:Hide()
+		bar.starttime = nil
+		bar.endtime = 0
+--		if bar.group then
+--			CandyBar:UpdateGroup(bar.group)
+--		end
+--		if bar.fireforget then
+--			return CandyBar:Unregister(name)
+--		end
+	end
+--	if not CandyBar:HasHandlers() then
+--		CandyBar.frame:Hide()
+--	end
+end
+
+function create_bar_frame(name)
 	local bar = bars[name]
 
 	local color = bar.color or {1, 0, 1, 1}
@@ -88,7 +146,7 @@ function bar_frame(name)
 	f.icon:SetHeight(height)
 	f.icon:SetWidth(height)
 	f.icon:SetPoint('LEFT', f, iconpos, 0, 0)
-	f.icon:SetNormalTexture(icon)
+	f.icon:SetNormalTexture('')
 	f.icon:GetNormalTexture():SetTexCoord(.08, .92, .08, .92)
 --	if f.icon:GetNormalTexture() then
 --		f.icon:GetNormalTexture():SetTexCoord(0, 1, 0, 1)
@@ -159,63 +217,7 @@ function bar_frame(name)
 		end)
 	end
 
-	return f
-end
-
-function start_bar(name, fireforget)
-	local bar = bars[name]
-
-	local t = GetTime()
-	if bar.paused then
-		local pauseoffset = t - bar.pausetime
-		bar.endtime = bar.endtime + pauseoffset
-		bar.starttime = bar.starttime + pauseoffset
-	else
-		-- bar hasn't elapsed a second.
-		bar.elapsed = 0
-		bar.endtime = t + bar.time
-		bar.starttime = t
-	end
-	bar.fireforget = fireforget
-	bar.running = true
-	bar.paused = nil
-	bar.fading = nil
---	CandyBar:AcquireBarFrame(name) -- this will reset the barframe incase we were fading out when it was restarted
-	bar.frame:Show()
---	if bar.group then
---		CandyBar:UpdateGroup(bar.group) -- update the group
---	end
---	CandyBar.frame:Show()
-end
-
-function stop_bar(name)
-	local bar = bars[name]
-
-	bar.running = nil
-	bar.paused = nil
-
-	if bar.fadeout then
-		bar.frame.spark:Hide()
-		bar.fading = true
-		bar.fadeelapsed = 0
-		local t = GetTime()
-		if bar.endtime > t then
-			bar.endtime = t
-		end
-	else
-		bar.frame:Hide()
-		bar.starttime = nil
-		bar.endtime = 0
---		if bar.group then
---			CandyBar:UpdateGroup(bar.group)
---		end
---		if bar.fireforget then
---			return CandyBar:Unregister(name)
---		end
-	end
---	if not CandyBar:HasHandlers() then
---		CandyBar.frame:Hide()
---	end
+	bar.frame = f
 end
 
 function fade_bar(name)
@@ -313,7 +315,7 @@ end)
 for _, type in {'CC', 'Buff', 'Debuff'} do
 	for i = 1, CCWATCH_MAXBARS do
 		local name = 'CCWatchBar' .. type .. i
-		local f = register_bar(name, 10)
+		local f = create_bar(name)
 		f:SetParent(getglobal('CCWatch' .. type))
 		f:SetPoint('TOPLEFT', 0, -100 + i * 20)
 		f:SetScript('OnShow', getglobal(name .. '_OnShow'))
@@ -1109,17 +1111,17 @@ function CCWatchBar_OnShow(group, GROUPS, ext)
 
 --	local status = GetTime();
 
-	barname = "CCWatchBar"..ext..group;
-	local activebar = getglobal(barname);
-	activebar:SetBackdropColor(0, 0, 0, 0.35);
-	activebar:SetAlpha(CCWATCH.ALPHA);
+	barname = "CCWatchBar"..ext..group
+	local activebar = getglobal(barname)
+	-- activebar:SetBackdropColor(0, 0, 0, 0.35);
+	activebar:SetAlpha(CCWATCH.ALPHA)
 
-	getglobal(barname.."StatusBar"):SetStatusBarColor(CCWATCH.COTNORMALCOLOR.r, CCWATCH.COTNORMALCOLOR.g, CCWATCH.COTNORMALCOLOR.b);
-	if( table.getn(GROUPS[group].EFFECT) == 0 ) then
-		getglobal(barname.."Text"):SetText("CCWatch Bar "..ext.." "..group);
+	-- getglobal(barname.."StatusBar"):SetStatusBarColor(CCWATCH.COTNORMALCOLOR.r, CCWATCH.COTNORMALCOLOR.g, CCWATCH.COTNORMALCOLOR.b)
+	if getn(GROUPS[group].EFFECT) == 0 then
+		getglobal(barname.."Text"):SetText("CCWatch Bar "..ext.." "..group)
 	end
 
-	getglobal(barname.."StatusBarSpark"):SetPoint("CENTER", barname.."StatusBar", "LEFT", 0, 0);
+	-- getglobal(barname.."StatusBarSpark"):SetPoint("CENTER", barname.."StatusBar", "LEFT", 0, 0)
 end
 
 
@@ -1142,26 +1144,24 @@ function CCWatchBarBuff4_OnShow() CCWatchBarBuff_OnShow(4) end
 function CCWatchBarBuff5_OnShow() CCWatchBarBuff_OnShow(5) end
 
 function CCWatch_OnUpdate()
-	if( CCWATCH.STATUS == 0 ) then
+	if CCWATCH.STATUS == 0 then
 		return
 	end
-
---	local status = GetTime();
-	table.foreach( CCWATCH.GROUPSCC, CCWatch_GroupCCUpdate );
-	table.foreach( CCWATCH.GROUPSDEBUFF, CCWatch_GroupDebuffUpdate );
-	table.foreach( CCWATCH.GROUPSBUFF, CCWatch_GroupBuffUpdate );
+	table.foreach(CCWATCH.GROUPSCC, CCWatch_GroupCCUpdate)
+	table.foreach(CCWATCH.GROUPSDEBUFF, CCWatch_GroupDebuffUpdate)
+	table.foreach(CCWATCH.GROUPSBUFF, CCWatch_GroupBuffUpdate)
 end
 
 function CCWatch_GroupCCUpdate(group)
-	CCWatch_GroupUpdate(group, CCWATCH.GROUPSCC, "CC");
+	CCWatch_GroupUpdate(group, CCWATCH.GROUPSCC, 'CC')
 end
 
 function CCWatch_GroupDebuffUpdate(group)
-	CCWatch_GroupUpdate(group, CCWATCH.GROUPSDEBUFF, "Debuff");
+	CCWatch_GroupUpdate(group, CCWATCH.GROUPSDEBUFF, 'Debuff')
 end
 
 function CCWatch_GroupBuffUpdate(group)
-	CCWatch_GroupUpdate(group, CCWATCH.GROUPSBUFF, "Buff");
+	CCWatch_GroupUpdate(group, CCWATCH.GROUPSBUFF, 'Buff')
 end
 
 local function ComputeColor(colorhigh, colorlow, high, low, cur)
@@ -1185,75 +1185,74 @@ local function GetTheRightColorFromTime(curTime)
 end
 
 function CCWatch_GroupUpdate(group, GROUPS, ext)
-	local activebar = getglobal("CCWatchBar"..ext..group)
+	local activebar = getglobal("CCWatchBar" .. ext .. group)
 
-	if( table.getn(GROUPS[group].EFFECT) > 0 ) then
+	if getn(GROUPS[group].EFFECT) > 0 then
 	-- active effect on this bar
-		activebar:SetAlpha(CCWATCH.ALPHA);
+		activebar:SetAlpha(CCWATCH.ALPHA)
 
-		local status = GetTime();
+		local t = GetTime()
 		local effect = GROUPS[group].EFFECT[1]
-		local activebarStatusBar = getglobal("CCWatchBar"..ext..group.."StatusBar");
-		local activebarTextBar = getglobal("CCWatchBar"..ext..group.."StatusBarText");
-		local str = "";
+		local activebarStatusBar = f.statusbar
+		-- local activebarTextBar = getglobal("CCWatchBar" .. ext .. group .. "StatusBarText")
 
-		if( status <= CCWATCH.CCS[effect].TIMER_END  ) then
+		if t <= CCWATCH.CCS[effect].TIMER_END  then
 		-- CC hasn't expired
 			activebarStatusBar:SetMinMaxValues(CCWATCH.CCS[effect].TIMER_START, CCWATCH.CCS[effect].TIMER_END);
-			local sparkPosition = ((status - CCWATCH.CCS[effect].TIMER_START) / (CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START)) * CCWATCH.WIDTH;
-			if( CCWATCH.INVERT ) then
-				sparkPosition = CCWATCH.WIDTH - sparkPosition;
-				activebarStatusBar:SetValue(CCWATCH.CCS[effect].TIMER_START + CCWATCH.CCS[effect].TIMER_END - status);
+			local sparkPosition = ((t - CCWATCH.CCS[effect].TIMER_START) / (CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START)) * CCWATCH.WIDTH
+			if CCWATCH.INVERT then
+				sparkPosition = CCWATCH.WIDTH - sparkPosition
+				activebarStatusBar:SetValue(CCWATCH.CCS[effect].TIMER_START + CCWATCH.CCS[effect].TIMER_END - t)
 			else
-				activebarStatusBar:SetValue(status);
+				activebarStatusBar:SetValue(t)
 			end
-			local elapsedTime = CCWATCH.CCS[effect].TIMER_END - status;
-			if( sparkPosition < 1 ) then
-				sparkPosition = 1;
-			end
-			local activebarSpark = getglobal("CCWatchBar"..ext..group.."StatusBarSpark");
-			activebarSpark:SetPoint("CENTER", "CCWatchBar"..ext..group.."StatusBar", "LEFT", sparkPosition, 0);
-			if CCWATCH.TIMERS == 1 then
-				str = format("%.2f", status - CCWATCH.CCS[effect].TIMER_START);
-			elseif CCWATCH.TIMERS == 2 then
-				str = format("%.2f", elapsedTime);
-			end
-			activebarTextBar:SetText(str);
+			local elapsedTime = CCWATCH.CCS[effect].TIMER_END - t
+			-- if sparkPosition < 1 then
+			-- 	sparkPosition = 1
+			-- end
+			-- local activebarSpark = getglobal("CCWatchBar" .. ext .. group .. "StatusBarSpark")
+			-- activebarSpark:SetPoint("CENTER", "CCWatchBar" .. ext .. group .. "StatusBar", "LEFT", sparkPosition, 0)
+			-- if CCWATCH.TIMERS == 1 then
+			-- 	str = format("%.2f", t - CCWATCH.CCS[effect].TIMER_START)
+			-- elseif CCWATCH.TIMERS == 2 then
+			-- 	str = format("%.2f", elapsedTime)
+			-- end
+			-- activebarTextBar:SetText(str)
 			if CCWATCH.COLOROVERTIME and not CCWATCH.CCS[effect].COLOR then
-				local r, g, b = GetTheRightColorFromTime(elapsedTime);
-				activebarStatusBar:SetStatusBarColor(r, g, b);
+				local r, g, b = GetTheRightColorFromTime(elapsedTime)
+				activebarStatusBar:SetStatusBarColor(r, g, b)
 			end
 
 			if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME) then
 				if CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START > CCWATCH.WARNLOW and CCWATCH.WARNLOW > elapsedTime then
 					if CCWATCH.CCS[effect].WARN == 1 then 
 						CCWatchWarn(CCWATCH_WARN_LOWTIME, effect, CCWATCH.CCS[effect].TARGET, CCWATCH.WARNLOW);
-						CCWATCH.CCS[effect].WARN = 2;
+						CCWATCH.CCS[effect].WARN = 2
 					end
 				elseif CCWATCH.CCS[effect].WARN == 2 then -- reset if ever disconnected while fighting
-					CCWATCH.CCS[effect].WARN = 1;
+					CCWATCH.CCS[effect].WARN = 1
 				end
 			end
-		elseif status > CCWATCH.CCS[effect].TIMER_END + 0.2 then
+		elseif t > CCWATCH.CCS[effect].TIMER_END + .2 then
 		-- CC has expired. Try to leave room for a fade effect to be catched, then remove anyway
 			CCWatch_RemoveEffect(effect, false)
 		end
 
-	elseif( activebar:GetAlpha() > 0 ) then
+	elseif activebar:GetAlpha() > 0 then
 	-- otherwise fade out this bar if not unlocked
-		if( CCWATCH.STATUS == 1 ) then
+		if CCWATCH.STATUS == 1 then
 			-- local activebarText = getglobal("CCWatchBar"..ext..group.."Text");
 			-- activebarText:SetText("TimeOut");
-			local alpha = activebar:GetAlpha() - 0.2;
-			if( alpha > 0 ) then
-				activebar:SetAlpha(alpha);
+			local alpha = activebar:GetAlpha() - 0.2
+			if alpha > 0 then
+				activebar:SetAlpha(alpha)
 			else
-				activebar:Hide();
+				activebar:Hide()
 			end
 		end
 	else
 	-- done fading, hide this bar
-		activebar:Hide();
+		activebar:Hide()
 	end
 end
 
