@@ -288,26 +288,26 @@ function update_bar(name)
 	bar.frame.spark:SetPoint('CENTER', bar.frame.statusbar, reversed and 'RIGHT' or 'LEFT', sp, 0)
 end
 
-CreateFrame'Frame':SetScript('OnUpdate', function()
-	local t = GetTime()
-	for k, v in bars do
-		if v.running then
-			v.elapsed = t - v.starttime
-			if v.endtime <= t then
-				local c = bars[i]
---				if c.completion then
---					c.completion(getArgs(c, "completion", 1))
---				end
-				stop_bar(k)
-			else
-				update_bar(k)
-			end
-		elseif v.fading then
-			v.fadeelapsed = (t - v.endtime)
-			fade_bar(k)
-		end
-	end
-end)
+-- CreateFrame'Frame':SetScript('OnUpdate', function()
+-- 	local t = GetTime()
+-- 	for k, v in bars do
+-- 		if v.running then
+-- 			v.elapsed = t - v.starttime
+-- 			if v.endtime <= t then
+-- 				local c = bars[i]
+-- --				if c.completion then
+-- --					c.completion(getArgs(c, "completion", 1))
+-- --				end
+-- 				stop_bar(k)
+-- 			else
+-- 				update_bar(k)
+-- 			end
+-- 		elseif v.fading then
+-- 			v.fadeelapsed = (t - v.endtime)
+-- 			fade_bar(k)
+-- 		end
+-- 	end
+-- end)
 
 --bar('kek', 10, 'kektext', [[Interface\Icons\INV_Misc_QuestionMark]], {1, 1, 1})
 --start_bar('kek')
@@ -1043,7 +1043,7 @@ function CCWatch_QueueEffect(effect)
 
 	table.insert( GROUPS[group].EFFECT, 1, effect )
 
-	local activebarText = getglobal("CCWatchBar"..ext..group.."Text");
+	local activebarText = bars["CCWatchBar"..ext..group].frame.text
 	activebarText:SetText(effect..": "..CCWATCH.CCS[effect].TARGET);
 
 	-- if queue was empty show bar
@@ -1057,39 +1057,39 @@ function CCWatch_QueueEffect(effect)
 end
 
 function CCWatch_UnqueueEffect(effect)
-	local group = CCWATCH.CCS[effect].GROUP;
+	local group = CCWATCH.CCS[effect].GROUP
 	local GROUPS;
-	local ext = "";
+	local ext = ""
 
 	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
-		GROUPS = CCWATCH.GROUPSBUFF;
-		ext = "Buff";
+		GROUPS = CCWATCH.GROUPSBUFF
+		ext = "Buff"
 	elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
-		GROUPS = CCWATCH.GROUPSDEBUFF;
-		ext = "Debuff";
+		GROUPS = CCWATCH.GROUPSDEBUFF
+		ext = "Debuff"
 	else
-		GROUPS = CCWATCH.GROUPSCC;
-		ext = "CC";
+		GROUPS = CCWATCH.GROUPSCC
+		ext = "CC"
 	end
 
-	local index = 0;
+	local index = 0
 	-- find the effect in the queue, if it's not there index stays 0
-	table.foreach( GROUPS[group].EFFECT, function(k,v) if( v == effect ) then index = k end end );
-	if( index ~= 0 ) then
+	table.foreach(GROUPS[group].EFFECT, function(k,v) if( v == effect ) then index = k end end)
+	if index ~= 0 then
 --		CCWATCH.CCS[GROUPS[group].EFFECT[index]].TARGET = ""; -- resetting target for mob death removal
 -- commented because of conflict with DR requiring to keep the target name.
 -- the name resetting was an unneeded attempt to avoid extra unqueue
-		table.remove( GROUPS[group].EFFECT, index );
+		tremove(GROUPS[group].EFFECT, index)
 	end
 
 	-- if queue isn't empty set new name
-	if( table.getn(GROUPS[group].EFFECT) > 0 ) then
-		local activebarText = getglobal("CCWatchBar"..ext..group.."Text");
-		local effect = GROUPS[group].EFFECT[1];
-		activebarText:SetText(effect..": "..CCWATCH.CCS[effect].TARGET);
+	if getn(GROUPS[group].EFFECT) > 0 then
+		local activebarText = bars["CCWatchBar" .. ext .. group].frame.text
+		local effect = GROUPS[group].EFFECT[1]
+		activebarText:SetText(effect .. ": " .. CCWATCH.CCS[effect].TARGET)
 	else
-		local activebarText = getglobal("CCWatchBar"..ext..group.."Text");
-		activebarText:SetText("CCWatch "..ext.." Bar "..group);
+		local activebarText = bars["CCWatchBar" .. ext .. group].frame.text
+		activebarText:SetText("CCWatch " .. ext .. " Bar " .. group)
 	end
 end
 
@@ -1193,15 +1193,15 @@ function CCWatch_GroupUpdate(group, GROUPS, ext)
 
 		local t = GetTime()
 		local effect = GROUPS[group].EFFECT[1]
-		local activebarStatusBar = f.statusbar
+		local activebarStatusBar = activebar.statusbar
 		-- local activebarTextBar = getglobal("CCWatchBar" .. ext .. group .. "StatusBarText")
 
 		if t <= CCWATCH.CCS[effect].TIMER_END  then
 		-- CC hasn't expired
 			activebarStatusBar:SetMinMaxValues(CCWATCH.CCS[effect].TIMER_START, CCWATCH.CCS[effect].TIMER_END);
-			local sparkPosition = ((t - CCWATCH.CCS[effect].TIMER_START) / (CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START)) * CCWATCH.WIDTH
+			-- local sparkPosition = ((t - CCWATCH.CCS[effect].TIMER_START) / (CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START)) * CCWATCH.WIDTH
 			if CCWATCH.INVERT then
-				sparkPosition = CCWATCH.WIDTH - sparkPosition
+				-- sparkPosition = CCWATCH.WIDTH - sparkPosition
 				activebarStatusBar:SetValue(CCWATCH.CCS[effect].TIMER_START + CCWATCH.CCS[effect].TIMER_END - t)
 			else
 				activebarStatusBar:SetValue(t)
@@ -1474,30 +1474,30 @@ function CCWatch_LoadVariables()
 end
 
 function CCWatch_SetLeadingTimer(bLeading)
-	local point;
-	local relpoint;
-	if bLeading then
-		point = "RIGHT";
-		relpoint = "LEFT";
-	else
-		point = "LEFT";
-		relpoint = "RIGHT";
-	end
+	-- local point;
+	-- local relpoint;
+	-- if bLeading then
+	-- 	point = "RIGHT";
+	-- 	relpoint = "LEFT";
+	-- else
+	-- 	point = "LEFT";
+	-- 	relpoint = "RIGHT";
+	-- end
 	
-	local i;
-	local bar;
+	-- local i;
+	-- local text;
 	-- for i=1,CCWATCH_MAXBARS do
-	-- 	bar = getglobal("CCWatchBarCC"..i.."StatusBarText");
-	-- 	bar:ClearAllPoints();
-	-- 	bar:SetPoint(point, getglobal("CCWatchBarCC"..i.."StatusBar"), relpoint);
+	-- 	text = bars["CCWatchBarCC"..i..].text
+	-- 	text:ClearAllPoints();
+	-- 	text:SetPoint(point, getglobal("CCWatchBarCC"..i.."StatusBar"), relpoint);
 
-	-- 	bar = getglobal("CCWatchBarDebuff"..i.."StatusBarText");
-	-- 	bar:ClearAllPoints();
-	-- 	bar:SetPoint(point, getglobal("CCWatchBarDebuff"..i.."StatusBar"), relpoint);
+	-- 	text = getglobal("CCWatchBarDebuff"..i.."StatusBarText");
+	-- 	text:ClearAllPoints();
+	-- 	text:SetPoint(point, getglobal("CCWatchBarDebuff"..i.."StatusBar"), relpoint);
 
-	-- 	bar = getglobal("CCWatchBarBuff"..i.."StatusBarText");
-	-- 	bar:ClearAllPoints();
-	-- 	bar:SetPoint(point, getglobal("CCWatchBarBuff"..i.."StatusBar"), relpoint);
+	-- 	text = getglobal("CCWatchBarBuff"..i.."StatusBarText");
+	-- 	text:ClearAllPoints();
+	-- 	text:SetPoint(point, getglobal("CCWatchBarBuff"..i.."StatusBar"), relpoint);
 	-- end
 end
 
@@ -1752,14 +1752,14 @@ end
 
 function CCWatch_SetWidth(width)
 	local i, j, k;
-	-- for j, k in ipairs({"CC","Debuff","Buff"}) do
-	-- 	for i=1,CCWATCH_MAXBARS do
-	-- 		getglobal("CCWatchBar"..k..i):SetWidth(width + 10);
-	-- 		getglobal("CCWatchBar"..k..i.."Text"):SetWidth(width);
-	-- 		getglobal("CCWatchBar"..k..i.."StatusBar"):SetWidth(width);
-	-- 	end
-	-- 	getglobal("CCWatch"..k):SetWidth(width + 10);
-	-- end
+	for j, k in ipairs({"CC","Debuff","Buff"}) do
+		for i=1,CCWATCH_MAXBARS do
+			getglobal("CCWatchBar"..k..i):SetWidth(width + 10);
+			-- getglobal("CCWatchBar"..k..i.."Text"):SetWidth(width);
+			-- getglobal("CCWatchBar"..k..i.."StatusBar"):SetWidth(width);
+		end
+		getglobal("CCWatch"..k):SetWidth(width + 10);
+	end
 end
 
 
