@@ -684,26 +684,27 @@ end
 CCWatch_EffectHandler[2] = function()
 -- faded
 	local effect = CCWATCH.EFFECT[1].TYPE
+
 	local target = CCWATCH.CCS[effect].TARGET
 	local bUnqueueDone = false;
 	if target == CCWATCH.EFFECT[1].TARGET then
 	-- target and CC target names match, wait for UNIT_AURA to ensure target match
 		if CCWATCH.STYLE ~= 0 or math.abs( CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME ) < CCWATCH.THRESHOLD then
 			CCWATCH.CCS[effect].TIMER_END = GetTime()
-			CCWatch_RemoveEffect(effect, false)
+			-- CCWatch_RemoveEffect(effect, false)
 			CCWatch_UnqueueEvent()
 			bUnqueueDone = true
 	-- unless the debuff is gone from the target, then no need for UNIT_AURA to confirm it
 		elseif CCWATCH.STYLE == 0 and CCWatch_EffectGone(effect) then
 			CCWATCH.CCS[effect].TIMER_END = GetTime()
-			CCWatch_RemoveEffect(effect, false)
+			-- CCWatch_RemoveEffect(effect, false)
 			CCWatch_UnqueueEvent()
 			bUnqueueDone = true
 		end
 	else
 	-- target and CC target names don't match, retargetting has occured, no need to wait for UNIT_AuRA
 		CCWATCH.CCS[effect].TIMER_END = GetTime();
-		CCWatch_RemoveEffect(effect, false);
+		-- CCWatch_RemoveEffect(effect, false);
 		CCWatch_UnqueueEvent();
 		bUnqueueDone = true;
 	end
@@ -995,7 +996,7 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 
 		local t = GetTime()
 
-		if t < CCWATCH.CCS[effect].TIMER_END - .2 then -- TODO why needed
+		if t < CCWATCH.CCS[effect].TIMER_END then -- TODO why needed
 			local duration = CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START
 			local remaining = CCWATCH.CCS[effect].TIMER_END - t
 			local fraction = remaining / duration
