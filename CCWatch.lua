@@ -479,49 +479,69 @@ end
 
 CCWatch_EventHandler = {}
 
-local SpellCast = nil
-
-function CCWatch_EventHandler.SPELLCAST_START()
-	SpellCast = arg1
---	duration = arg2;	-- might wanna play with it to deduce the used rank
-end
-
-function CCWatch_EventHandler.SPELLCAST_STOP()
-	local effect
-	effect = SpellCast
-	local target = UnitName'target'
-	if effect ~= nil and target ~= nil then
-		if CCWATCH.CCS[effect] then
-			local group = CCWATCH.CCS[effect].GROUP
-			local etype = CCWATCH.CCS[effect].ETYPE
-			local index = 0
-			-- find the effect in the queue, if it's not there index stays 0
-			if etype == ETYPE_BUFF then
-				table.foreach(CCWATCH.GROUPSBUFF[group].EFFECT, function(k,v) if v == effect then index = k end end)
-			elseif etype == ETYPE_DEBUFF then
-				table.foreach(CCWATCH.GROUPSDEBUFF[group].EFFECT, function(k,v) if v == effect then index = k end end)
-			else
-				table.foreach(CCWATCH.GROUPSCC[group].EFFECT, function(k,v) if v == effect then index = k end end)
+do
+	local function find_effect(effect, group, etype)
+		if etype == ETYPE_BUFF then
+			for i, v in CCWATCH.GROUPSBUFF[group].EFFECT do
+				if v == effect then return i end
 			end
-
-			if index ~= 0 then
-				-- no UNIT_AURA event if it's already active
-				CCWATCH.UNIT_AURA.TIME = GetTime()
-				CCWATCH.UNIT_AURA.TARGET = target
-				CCWatch_QueueEvent(effect, target, GetTime(), 1)
-				CCWatch_EffectHandler[1]()
+		elseif etype == ETYPE_DEBUFF then
+			for i, v in CCWATCH.GROUPSDEBUFF[group].EFFECT do
+				if v == effect then return i end
+			end
+		else
+			for i, v in CCWATCH.GROUPSCC[group].EFFECT do
+				if v == effect then return i end
 			end
 		end
 	end
-	SpellCast = nil
-end
 
-function CCWatch_EventHandler.SPELLCAST_FAILED()
-	SpellCast = nil
-end
+	local effect, applied_effect, old_starttime, old_endtime
 
-function CCWatch_EventHandler.SPELLCAST_INTERRUPTED()
-	SpellCast = nil
+	function CCWatch_EventHandler.SPELLCAST_START()
+		effect = arg1
+		old_endtime = 0
+	--	duration = arg2;	-- might wanna play with it to deduce the used rank
+	end
+
+	function CCWatch_EventHandler.SPELLCAST_STOP()
+		local target = UnitName'target'
+		if effect and target then
+			if CCWATCH.CCS[effect] then
+				applied_effect = effect
+				old_starttime = CCWATCH.CCS[effect].TIMER_START
+				old_endtime = CCWATCH.CCS[effect].TIMER_END
+
+				local group = CCWATCH.CCS[effect].GROUP
+				local etype = CCWATCH.CCS[effect].ETYPE
+
+				if find_effect(effect, group, etype) then
+					-- no UNIT_AURA event if it's already active
+					CCWATCH.UNIT_AURA.TIME = GetTime()
+					CCWATCH.UNIT_AURA.TARGET = target
+					CCWatch_QueueEvent(effect, target, GetTime(), 1)
+					CCWatch_EffectHandler[1]()
+				end
+			end
+		end
+		effect = nil
+	end
+
+	function CCWatch_EventHandler.SPELLCAST_FAILED()
+		if applied_effect and CCWATCH.CCS[applied_effect] then
+			CCWATCH.CCS[applied_effect].TIMER_START = old_starttime
+			CCWATCH.CCS[applied_effect].TIMER_END = old_endtime
+		end
+		applied_effect = nil
+	end
+
+	function CCWatch_EventHandler.SPELLCAST_INTERRUPTED()
+		if applied_effect and CCWATCH.CCS[applied_effect] then
+			CCWATCH.CCS[applied_effect].TIMER_START = old_starttime
+			CCWATCH.CCS[applied_effect].TIMER_END = old_endtime
+		end
+		applied_effect = nil
+	end
 end
 
 function CCWatch_EventHandler.UNIT_AURA()
@@ -684,7 +704,6 @@ end
 CCWatch_EffectHandler[2] = function()
 -- faded
 	local effect = CCWATCH.EFFECT[1].TYPE
-
 	local target = CCWATCH.CCS[effect].TARGET
 	local bUnqueueDone = false;
 	if target == CCWATCH.EFFECT[1].TARGET then
@@ -703,10 +722,10 @@ CCWatch_EffectHandler[2] = function()
 		end
 	else
 	-- target and CC target names don't match, retargetting has occured, no need to wait for UNIT_AuRA
-		CCWATCH.CCS[effect].TIMER_END = GetTime();
-		-- CCWatch_RemoveEffect(effect, false);
-		CCWatch_UnqueueEvent();
-		bUnqueueDone = true;
+		CCWATCH.CCS[effect].TIMER_END = GetTime()
+		-- CCWatch_RemoveEffect(effect, false)
+		CCWatch_UnqueueEvent()
+		bUnqueueDone = true
 	end
 
 	-- another hack, to avoid spamming, because when the effect is broken, SOMETIME, WoW also send a faded message (see combat log)
@@ -722,7 +741,7 @@ CCWatch_EffectHandler[3] = function()
 	local bUnqueueDone = false
 	if target == CCWATCH.EFFECT[1].TARGET then
 	-- target and CC target names match, wait for UNIT_AURA to ensure target match
-		if CCWATCH.STYLE ~= 0 or math.abs( CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME ) < CCWATCH.THRESHOLD then
+		if CCWATCH.STYLE ~= 0 or math.abs(CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME) < CCWATCH.THRESHOLD then
 			CCWATCH.CCS[effect].TIMER_END = GetTime()
 			CCWatch_RemoveEffect(effect, false)
 			CCWatch_UnqueueEvent()
@@ -1410,7 +1429,7 @@ function CCWatch_GetSpellRank(spellname, spelleffect, bPrint)
 			return
 		end
 
-		if( name == spellname ) then
+		if name == spellname then
 			local currank = 1
 			while currank <= maxrank do
 				if tonumber(string.sub(rank,string.len(rank))) == currank then
