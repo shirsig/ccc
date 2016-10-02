@@ -1,5 +1,3 @@
---CCWATCH_INITIALIZATION_EVENT = "SPELL_CHANGED"
-
 CCWatchLoaded = false;
 
 CCWatchObject = nil;
@@ -17,6 +15,8 @@ function create_bar(name)
 
 	local bar = {}
 	bars[name] = bar
+	bar.endtime = 0
+	bar.fadetime = 1
 	create_bar_frame(name)
 
 	return bar.frame
@@ -27,14 +27,14 @@ function start_bar(name, time, text, icon, color, fireforget)
 
 	text = text or name
 	icon = icon or [[Interface\Icons\INV_Misc_QuestionMark]]
-	color = color or {0, 1, 0, 1}
+	color = color or {0, 1, 0}
 
 	bar.name, bar.time, bar.text, bar.icon = name, time, text, icon
 	bar.color = {unpack(color)}
 	bar.color[4] = 1
 	bar.running = nil
-	bar.endtime = 0
-	bar.fadetime = 1
+	-- bar.endtime = 0
+	-- bar.fadetime = 1
 	bar.fadeout = true
 	bar.reversed = nil
 
@@ -79,9 +79,6 @@ function stop_bar(name)
 		bar.frame:Hide()
 		bar.starttime = nil
 		bar.endtime = 0
---		if bar.group then
---			CandyBar:UpdateGroup(bar.group)
---		end
 --		if bar.fireforget then
 --			return CandyBar:Unregister(name)
 --		end
@@ -94,7 +91,7 @@ end
 function create_bar_frame(name)
 	local bar = bars[name]
 
-	local color = bar.color or {1, 0, 1, 1}
+	local color = bar.color or {1, 0, 1}
 	local bgcolor = {0, .5, .5, .5}
 	local icon = bar.icon or nil
 	local iconpos = 'LEFT'
@@ -142,15 +139,11 @@ function create_bar_frame(name)
 	f.icon:EnableMouse(false)
 	f.icon:RegisterForClicks()
 	f.icon:SetScript('OnClick', nil)
-	-- an icno is square and the height of the bar, so yes 2x height there
 	f.icon:SetHeight(height)
 	f.icon:SetWidth(height)
 	f.icon:SetPoint('LEFT', f, iconpos, 0, 0)
-	f.icon:SetNormalTexture('')
+	f.icon:SetNormalTexture[[Interface\Icons\INV_Misc_QuestionMark]]
 	f.icon:GetNormalTexture():SetTexCoord(.08, .92, .08, .92)
---	if f.icon:GetNormalTexture() then
---		f.icon:GetNormalTexture():SetTexCoord(0, 1, 0, 1)
---	end
 	f.icon:SetAlpha(1)
 	f.icon:Show()
 
@@ -159,7 +152,6 @@ function create_bar_frame(name)
 	f.statusbarbg:ClearAllPoints()
 	f.statusbarbg:SetHeight(height)
 	f.statusbarbg:SetWidth(width)
-	-- offset the height of the frame on the x-axis for the icon.
 	f.statusbarbg:SetPoint('TOPLEFT', f, 'TOPLEFT', height, 0)
 	f.statusbarbg:SetStatusBarTexture(texture)
 	f.statusbarbg:SetStatusBarColor(bgcolor[1], bgcolor[2], bgcolor[3], bgcolor[4])
@@ -170,7 +162,6 @@ function create_bar_frame(name)
 	f.statusbar:ClearAllPoints()
 	f.statusbar:SetHeight(height)
 	f.statusbar:SetWidth(width)
-	-- offset the height of the frame on the x-axis for the icon.
 	f.statusbar:SetPoint('TOPLEFT', f, 'TOPLEFT', height, 0)
 	f.statusbar:SetStatusBarTexture(texture)
 	f.statusbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
@@ -226,31 +217,12 @@ function fade_bar(name)
 	if bar.fadeelapsed > bar.fadetime then
 		bar.fading = nil
 		bar.starttime = nil
-		bar.endtime = 0
 		bar.frame:Hide()
---		if bar.group then
---			CandyBar:UpdateGroup(bar.group)
---		end
---		if bar.fireforget then
---			return CandyBar:Unregister(name)
---		end
+		bar.frame:SetAlpha(0)
 	else
 		local t = bar.fadetime - bar.fadeelapsed
-		local p = t / bar.fadetime
-		local color = bar.color
-		local bgcolor = bar.bgcolor
-		local textcolor = bar.textcolor
-		local timertextcolor = bar.timertextcolor
-		local colora = color[4] * p
-		local bgcolora = bgcolor[4] * p
-		local textcolora = textcolor[4] * p
-		local timertextcolora = timertextcolor[4] * p
-
-		bar.frame.statusbarbg:SetStatusBarColor(bgcolor[1], bgcolor[2], bgcolor[3], bgcolora)
-		bar.frame.statusbar:SetStatusBarColor(color[1], color[2], color[3], colora)
-		bar.frame.text:SetTextColor(textcolor[1], textcolor[2], textcolor[3], textcolora)
-		bar.frame.timertext:SetTextColor(timertextcolor[1], timertextcolor[2], timertextcolor[3], timertextcolora)
-		bar.frame.icon:SetAlpha(p)
+		local a = t / bar.fadetime
+		bar.frame:SetAlpha(a)
 	end
 end
 
@@ -288,71 +260,26 @@ function update_bar(name)
 	bar.frame.spark:SetPoint('CENTER', bar.frame.statusbar, reversed and 'RIGHT' or 'LEFT', sp, 0)
 end
 
--- CreateFrame'Frame':SetScript('OnUpdate', function()
--- 	local t = GetTime()
--- 	for k, v in bars do
--- 		if v.running then
--- 			v.elapsed = t - v.starttime
--- 			if v.endtime <= t then
--- 				local c = bars[i]
--- --				if c.completion then
--- --					c.completion(getArgs(c, "completion", 1))
--- --				end
--- 				stop_bar(k)
--- 			else
--- 				update_bar(k)
--- 			end
--- 		elseif v.fading then
--- 			v.fadeelapsed = (t - v.endtime)
--- 			fade_bar(k)
--- 		end
--- 	end
--- end)
-
---bar('kek', 10, 'kektext', [[Interface\Icons\INV_Misc_QuestionMark]], {1, 1, 1})
---start_bar('kek')
-
-for _, type in {'CC', 'Buff', 'Debuff'} do
-	for i = 1, CCWATCH_MAXBARS do
-		local name = 'CCWatchBar' .. type .. i
-		local f = create_bar(name)
-		f:SetParent(getglobal('CCWatch' .. type))
-		f:SetPoint('TOPLEFT', 0, -100 + i * 20)
-		f:SetScript('OnShow', getglobal(name .. '_OnShow'))
-		setglobal(name, f)
-	end
-end
-
---[[
-local function DebugCompareStrings(str1, str2)
-	local str = "";
-	if str1 == str2 then
-		test = str1.." == "..str2;
+function format_time(t)
+	local h = floor(t / 3600)
+	local m = floor((t - h * 3600) / 60)
+	local s = t - (h * 3600 + m * 60)
+	if h > 0 then
+		return format('%d:%02d', h, m)
+	elseif m > 0 then
+		return format('%d:%02d', m, floor(s))
+	elseif s < 10 then
+		return format('%1.1f', s)
 	else
-		local str = "";
-		local len = string.len(str1);
-		if len > string.len(str2) then
-			len = string.len(str2);
-		end
-		local i;
-		for i=1,len do
-			s1char = string.sub(str1, i, i);
-			s2char = string.sub(str1, i, i);
-			str = i.." : "..s1char.." ["..string.byte(s1char) .."] -> "..s2char.." ["..string.byte(s2char).."]";
-			if s1char ~= s2char then
-				str = str.." => DIFFERENT";
-			end
-			CCWatch_AddMessage(str);
-		end
+		return format('%.0f', floor(s))
 	end
 end
---]]
 
 function CCWatchWarn(msg, effect, target, time)
 	local ncc = 0;
 	local cc = CCWATCH.WARNTYPE;
 	-- Emote, Say, Party, Raid, Yell, Custom:<ccname>
-	if cc == "RAID" and UnitInRaid("player") == nil then
+	if cc == "RAID" and UnitInRaid'player' == nil then
 		cc = "PARTY";
 	end
 	if cc == "PARTY" and GetNumPartyMembers() == 0 then
@@ -388,186 +315,192 @@ function CCWatch_Config()
 end
 
 function CCWatch_OnLoad()
+	for _, type in {'CC', 'Buff', 'Debuff'} do
+		for i = 1, CCWATCH_MAXBARS do
+			local name = 'CCWatchBar' .. type .. i
+			local f = create_bar(name)
+			f:SetParent(getglobal('CCWatch' .. type))
+			f:SetPoint('TOPLEFT', 0, -100 + i * 20)
+			f:SetScript('OnShow', getglobal(name .. '_OnShow'))
+			setglobal(name, f)
+		end
+	end
+
 	CCWatch_Globals();
 	CCWatch_Config();
 
 	CCWatchObject = this;
 
---	this:RegisterEvent(CCWATCH_INITIALIZATION_EVENT);
 	this:RegisterEvent("UNIT_AURA");
 	this:RegisterEvent("UNIT_COMBAT");
 
-	if UnitLevel("player") < 60 then
-		this:RegisterEvent("CHAT_MSG_COMBAT_XP_GAIN");
+	if UnitLevel'player' < 60 then
+		this:RegisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
 -- TODO : add this
 --		this:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN");
  	end
 -- register this also for < 60 (pvp)
-	this:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH");
+	this:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH")
 
-	this:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER");
-	this:RegisterEvent("CHAT_MSG_SPELL_BREAK_AURA");
+	this:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER")
+	this:RegisterEvent("CHAT_MSG_SPELL_BREAK_AURA")
 
-	this:RegisterEvent("SPELLCAST_START");
-	this:RegisterEvent("SPELLCAST_STOP");
-	this:RegisterEvent("SPELLCAST_FAILED");
-	this:RegisterEvent("SPELLCAST_INTERRUPTED");
+	this:RegisterEvent("SPELLCAST_START")
+	this:RegisterEvent("SPELLCAST_STOP")
+	this:RegisterEvent("SPELLCAST_FAILED")
+	this:RegisterEvent("SPELLCAST_INTERRUPTED")
 
-	this:RegisterEvent("PLAYER_TARGET_CHANGED");
+	this:RegisterEvent("PLAYER_TARGET_CHANGED")
 
-	SLASH_CCWATCH1 = "/ccwatch";
-	SLASH_CCWATCH2 = "/ccw";
-	SlashCmdList["CCWATCH"] = function(msg)
-		CCWatch_SlashCommandHandler(msg);
-	end
+	SLASH_CCWATCH1 = "/ccwatch"
+	SLASH_CCWATCH2 = "/ccw"
+	SlashCmdList.CCWATCH = CCWatch_SlashCommandHandler
 
-	CCWatch_AddMessage(CCWATCH_FULLVERSION..CCWATCH_LOADED);
+	CCWatch_AddMessage(CCWATCH_FULLVERSION..CCWATCH_LOADED)
 end
 
 function CCWatch_BarUnlock()
-	CCWATCH.STATUS = 2;
-	CCWatchCC:EnableMouse(1);
-	CCWatchDebuff:EnableMouse(1);
-	CCWatchBuff:EnableMouse(1);
+	CCWATCH.STATUS = 2
+	CCWatchCC:EnableMouse(1)
+	CCWatchDebuff:EnableMouse(1)
+	CCWatchBuff:EnableMouse(1)
 
-	local i;
-	for i=1,CCWATCH_MAXBARS do
-		getglobal("CCWatchBarCC"..i):Show();
-		getglobal("CCWatchBarDebuff"..i):Show();
-		getglobal("CCWatchBarBuff"..i):Show();
+	for i = 1, CCWATCH_MAXBARS do
+		getglobal("CCWatchBarCC"..i):Show()
+		getglobal("CCWatchBarDebuff"..i):Show()
+		getglobal("CCWatchBarBuff"..i):Show()
 	end
 end
 
 function CCWatch_BarLock()
-	CCWATCH.STATUS = 1;
-	CCWatchCC:EnableMouse(0);
-	CCWatchDebuff:EnableMouse(0);
-	CCWatchBuff:EnableMouse(0);
+	CCWATCH.STATUS = 1
+	CCWatchCC:EnableMouse(0)
+	CCWatchDebuff:EnableMouse(0)
+	CCWatchBuff:EnableMouse(0)
 
-	local i;
-	for i=1,CCWATCH_MAXBARS do
-		getglobal("CCWatchBarCC"..i):Hide();
-		getglobal("CCWatchBarDebuff"..i):Hide();
-		getglobal("CCWatchBarBuff"..i):Hide();
+	for i = 1, CCWATCH_MAXBARS do
+		getglobal("CCWatchBarCC"..i):Hide()
+		getglobal("CCWatchBarDebuff"..i):Hide()
+		getglobal("CCWatchBarBuff"..i):Hide()
 	end
 end
 
 function CCWatch_SlashCommandHandler(msg)
-	if( msg ) then
-		local command = string.lower(msg);
-		if( command == "on" ) then
-			if( CCWATCH.STATUS == 0 ) then
-				CCWATCH.STATUS = 1;
-				CCWatch_Save[CCWATCH.PROFILE].status = CCWATCH.STATUS;
-				CCWatch_AddMessage(CCWATCH_ENABLED);
+	if msg then
+		local command = string.lower(msg)
+		if command == "on" then
+			if CCWATCH.STATUS == 0 then
+				CCWATCH.STATUS = 1
+				CCWatch_Save[CCWATCH.PROFILE].status = CCWATCH.STATUS
+				CCWatch_AddMessage(CCWATCH_ENABLED)
 			end
-		elseif( command == "off" ) then
-			if( CCWATCH.STATUS ~= 0 ) then
-				CCWATCH.STATUS = 0;
-				CCWatch_Save[CCWATCH.PROFILE].status = CCWATCH.STATUS;
-				CCWatch_AddMessage(CCWATCH_DISABLED);
+		elseif command == "off" then
+			if CCWATCH.STATUS ~= 0 then
+				CCWATCH.STATUS = 0
+				CCWatch_Save[CCWATCH.PROFILE].status = CCWATCH.STATUS
+				CCWatch_AddMessage(CCWATCH_DISABLED)
 			end
-		elseif( command == "unlock" ) then
-			CCWatch_BarUnlock();
-			CCWatch_AddMessage(CCWATCH_UNLOCKED);
-			CCWatchOptionsFrameUnlock:SetChecked(true);
-		elseif( command == "lock" ) then
-			CCWatch_BarLock();
-			CCWatch_AddMessage(CCWATCH_LOCKED);
-			CCWatchOptionsFrameUnlock:SetChecked(false);
-		elseif( command == "invert" ) then
-			CCWATCH.INVERT = not CCWATCH.INVERT;
-			CCWatch_Save[CCWATCH.PROFILE].invert = CCWATCH.INVERT;
+		elseif command == "unlock" then
+			CCWatch_BarUnlock()
+			CCWatch_AddMessage(CCWATCH_UNLOCKED)
+			CCWatchOptionsFrameUnlock:SetChecked(true)
+		elseif command == "lock" then
+			CCWatch_BarLock()
+			CCWatch_AddMessage(CCWATCH_LOCKED)
+			CCWatchOptionsFrameUnlock:SetChecked(false)
+		elseif command == "invert" then
+			CCWATCH.INVERT = not CCWATCH.INVERT
+			CCWatch_Save[CCWATCH.PROFILE].invert = CCWATCH.INVERT
 			if CCWATCH.INVERT then
-				CCWatch_AddMessage(CCWATCH_INVERSION_ON);
+				CCWatch_AddMessage(CCWATCH_INVERSION_ON)
 			else
-				CCWatch_AddMessage(CCWATCH_INVERSION_OFF);
+				CCWatch_AddMessage(CCWATCH_INVERSION_OFF)
 			end
-			CCWatchOptionsFrameInvert:SetChecked(CCWATCH.INVERT);
-		elseif( command == "timers off" ) then
-			CCWatch_Save[CCWATCH.PROFILE].timers = 0;
-			CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers;
+			CCWatchOptionsFrameInvert:SetChecked(CCWATCH.INVERT)
+		elseif command == "timers off" then
+			CCWatch_Save[CCWATCH.PROFILE].timers = 0
+			CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers
 			CCWatch_AddMessage(CCWATCH_TIMERS_OFF)
-			CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_OFF);
-		elseif( command == "timers on" ) then
-			CCWatch_Save[CCWATCH.PROFILE].timers = 1;
-			CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers;
+			CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_OFF)
+		elseif command == "timers on" then
+			CCWatch_Save[CCWATCH.PROFILE].timers = 1
+			CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers
 			CCWatch_AddMessage(CCWATCH_TIMERS_ON)
-			CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_ON);
-		elseif( command == "timers rev" ) then
-			CCWatch_Save[CCWATCH.PROFILE].timers = 2;
-			CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers;
+			CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_ON)
+		elseif command == "timers rev" then
+			CCWatch_Save[CCWATCH.PROFILE].timers = 2
+			CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers
 			CCWatch_AddMessage(CCWATCH_TIMERS_REVERSE)
-			CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_REVERSE);
-		elseif( command == "grow off" ) then
-			CCWatch_Save[CCWATCH.PROFILE].growth = 0;
-			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth;
+			CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_REVERSE)
+		elseif command == "grow off" then
+			CCWatch_Save[CCWATCH.PROFILE].growth = 0
+			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
 			CCWatch_AddMessage(CCWATCH_GROW_OFF)
-			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_OFF);
-		elseif( command == "grow up" ) then
-			CCWatch_Save[CCWATCH.PROFILE].growth = 1;
-			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth;
+			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_OFF)
+		elseif command == "grow up" then
+			CCWatch_Save[CCWATCH.PROFILE].growth = 1
+			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
 			CCWatch_AddMessage(CCWATCH_GROW_UP)
-			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_UP);
-		elseif( command == "grow down" ) then
-			CCWatch_Save[CCWATCH.PROFILE].growth = 2;
-			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth;
+			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_UP)
+		elseif command == "grow down" then
+			CCWatch_Save[CCWATCH.PROFILE].growth = 2
+			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
 			CCWatch_AddMessage(CCWATCH_GROW_DOWN)
-			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN);
-		elseif( command == "clear" ) then
-			CCWatch_Save[CCWATCH.PROFILE] = nil;
-			CCWatch_Globals();
-			CCWatch_Config();
-			CCWatch_LoadVariables();
-		elseif( command == "u" ) then
-			CCWatch_Config();
-			CCWatch_LoadConfCCs();
-			CCWatch_LoadCustomCCs();
-			CCWatch_UpdateClassSpells(true);
+			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN)
+		elseif command == "clear" then
+			CCWatch_Save[CCWATCH.PROFILE] = nil
+			CCWatch_Globals()
+			CCWatch_Config()
+			CCWatch_LoadVariables()
+		elseif command == "u" then
+			CCWatch_Config()
+			CCWatch_LoadConfCCs()
+			CCWatch_LoadCustomCCs()
+			CCWatch_UpdateClassSpells(true)
 		elseif( command == "config" ) then
-			CCWatchOptionsFrame:Show();
-		elseif( string.sub(command, 1, 5) == "scale" ) then
+			CCWatchOptionsFrame:Show()
+		elseif string.sub(command, 1, 5) == "scale" then
 			local scale = tonumber(string.sub(command, 7))
-			if( scale <= 3.0 and scale >= 0.25 ) then
-				CCWatch_Save[CCWATCH.PROFILE].scale = scale;
-				CCWATCH.SCALE = scale;
-				CCWatchCC:SetScale(CCWATCH.SCALE);
-				CCWatchDebuff:SetScale(CCWATCH.SCALE);
-				CCWatchBuff:SetScale(CCWATCH.SCALE);
-				CCWatch_AddMessage(CCWATCH_SCALE..scale);
-				CCWatchSliderScale:SetValue(CCWATCH.SCALE);
+			if scale <= 3 and scale >= .25 then
+				CCWatch_Save[CCWATCH.PROFILE].scale = scale
+				CCWATCH.SCALE = scale
+				CCWatchCC:SetScale(CCWATCH.SCALE)
+				CCWatchDebuff:SetScale(CCWATCH.SCALE)
+				CCWatchBuff:SetScale(CCWATCH.SCALE)
+				CCWatch_AddMessage(CCWATCH_SCALE..scale)
+				CCWatchSliderScale:SetValue(CCWATCH.SCALE)
 			else
 				CCWatch_Help()
 			end
-		elseif( string.sub(command, 1, 5) == "width" ) then
+		elseif string.sub(command, 1, 5) == "width" then
 			local width = tonumber(string.sub(command, 7))
-			if( width <= 300 and width >= 50 ) then
-				CCWatch_Save[CCWATCH.PROFILE].width = width;
-				CCWATCH.WIDTH = width;
-				CCWatch_SetWidth(CCWATCH.WIDTH);
-				CCWatch_AddMessage(CCWATCH_WIDTH..width);
-				CCWatchSliderWidth:SetValue(CCWATCH.WIDTH);
+			if width <= 300 and width >= 50 then
+				CCWatch_Save[CCWATCH.PROFILE].width = width
+				CCWATCH.WIDTH = width
+				CCWatch_SetWidth(CCWATCH.WIDTH)
+				CCWatch_AddMessage(CCWATCH_WIDTH..width)
+				CCWatchSliderWidth:SetValue(CCWATCH.WIDTH)
 			else
 				CCWatch_Help()
 			end
-		elseif( string.sub(command, 1, 5) == "alpha" ) then
+		elseif string.sub(command, 1, 5) == "alpha" then
 			local alpha = tonumber(string.sub(command, 7))
-			if( alpha <= 1 and alpha >= 0 ) then
-				CCWatch_Save[CCWATCH.PROFILE].alpha = alpha;
-				CCWATCH.ALPHA = alpha;
-				CCWatch_AddMessage(CCWATCH_ALPHA..alpha);
-				CCWatchSliderAlpha:SetValue(CCWATCH.ALPHA);
+			if alpha <= 1 and alpha >= 0 then
+				CCWatch_Save[CCWATCH.PROFILE].alpha = alpha
+				CCWATCH.ALPHA = alpha
+				CCWatch_AddMessage(CCWATCH_ALPHA..alpha)
+				CCWatchSliderAlpha:SetValue(CCWATCH.ALPHA)
 			else
 				CCWatch_Help()
 			end
-		elseif( command == "print" ) then
+		elseif command == "print" then
 			CCWatch_AddMessage(CCWATCH_PROFILE_TEXT..CCWATCH.PROFILE);
-			if( CCWATCH.STATUS == 0 ) then
-				CCWatch_AddMessage(CCWATCH_DISABLED);
-			elseif( CCWATCH.STATUS == 2 ) then
-				CCWatch_AddMessage(CCWATCH_UNLOCKED);
+			if CCWATCH.STATUS == 0 then
+				CCWatch_AddMessage(CCWATCH_DISABLED)
+			elseif CCWATCH.STATUS == 2 then
+				CCWatch_AddMessage(CCWATCH_UNLOCKED)
 			else
-				CCWatch_AddMessage(CCWATCH_ENABLED);
+				CCWatch_AddMessage(CCWATCH_ENABLED)
 			end
 			if CCWATCH.INVERT then
 				CCWatch_AddMessage(CCWATCH_INVERSION_ON);
@@ -582,228 +515,213 @@ function CCWatch_SlashCommandHandler(msg)
 				CCWatch_AddMessage(CCWATCH_TIMERS_REVERSE);
 			end
 			if CCWATCH.GROWTH == 0 then
-				CCWatch_AddMessage(CCWATCH_GROW_OFF);
+				CCWatch_AddMessage(CCWATCH_GROW_OFF)
 			elseif CCWATCH.GROWTH == 1 then
-				CCWatch_AddMessage(CCWATCH_GROW_UP);
+				CCWatch_AddMessage(CCWATCH_GROW_UP)
 			else
-				CCWatch_AddMessage(CCWATCH_GROW_DOWN);
+				CCWatch_AddMessage(CCWATCH_GROW_DOWN)
 			end
-			CCWatch_Config();
-			CCWatch_LoadConfCCs();
-			CCWatch_LoadCustomCCs();
-			CCWatch_UpdateClassSpells(true); -- Update at the same time
+			CCWatch_Config()
+			CCWatch_LoadConfCCs()
+			CCWatch_LoadCustomCCs()
+			CCWatch_UpdateClassSpells(true) -- Update at the same time
 
-			CCWatch_AddMessage(CCWATCH_SCALE..CCWATCH.SCALE);
-			CCWatch_AddMessage(CCWATCH_WIDTH..CCWATCH.WIDTH);
-			CCWatch_AddMessage(CCWATCH_ALPHA..CCWATCH.ALPHA);
-		elseif( string.sub(command, 1, 6) == "warncc" ) then
+			CCWatch_AddMessage(CCWATCH_SCALE..CCWATCH.SCALE)
+			CCWatch_AddMessage(CCWATCH_WIDTH..CCWATCH.WIDTH)
+			CCWatch_AddMessage(CCWATCH_ALPHA..CCWATCH.ALPHA)
+		elseif string.sub(command, 1, 6) == "warncc" then
 			local cc = string.sub(command, 8);
 			if cc ~= "EMOTE" or cc ~= "SAY" or cc ~= "PARTY" or cc ~= "RAID"
 				or cc ~= "YELL" or cc ~= "CHANNEL" then
-				CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC = cc;
+				CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC = cc
 				CCWATCH.WARNCUSTOMCC = cc;
-				CCWatch_Save[CCWATCH.PROFILE].WarnType = "CHANNEL";
-				CCWatch_AddMessage(CCWATCH_WARNCC_CUSTOM..cc);
+				CCWatch_Save[CCWATCH.PROFILE].WarnType = "CHANNEL"
+				CCWatch_AddMessage(CCWATCH_WARNCC_CUSTOM..cc)
 			else
-				CCWatch_Save[CCWATCH.PROFILE].WarnType = cc;
-				CCWatch_AddMessage(CCWATCH_WARNCC_SETTO..cc);
+				CCWatch_Save[CCWATCH.PROFILE].WarnType = cc
+				CCWatch_AddMessage(CCWATCH_WARNCC_SETTO..cc)
 			end
-			CCWATCH.WARNTYPE = CCWatch_Save[CCWATCH.PROFILE].WarnType;
-		elseif( command == "warn" ) then
+			CCWATCH.WARNTYPE = CCWatch_Save[CCWATCH.PROFILE].WarnType
+		elseif command == "warn" then
 			if CCWATCH.WARNMSG then
-				CCWATCH.WARNMSG = 0;
-				CCWatch_AddMessage(CCWATCH_WARN_DISABLED);
+				CCWATCH.WARNMSG = 0
+				CCWatch_AddMessage(CCWATCH_WARN_DISABLED)
 			else
-				CCWATCH.WARNMSG = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME);
-				CCWatch_AddMessage(CCWATCH_WARN_ENABLED);
-				UpdateWarnUIPage();
+				CCWATCH.WARNMSG = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME)
+				CCWatch_AddMessage(CCWATCH_WARN_ENABLED)
+				UpdateWarnUIPage()
 			end
-			CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG;
+			CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
 		else
-			CCWatch_Help();
+			CCWatch_Help()
 		end
 	end
 end
 
 function CCWatch_OnEvent(event)
---	if ( CCWATCH.STATUS == 0 and event ~= CCWATCH_INITIALIZATION_EVENT ) then
-	if ( CCWATCH.STATUS == 0 ) then
+	if CCWATCH.STATUS == 0 then
 		return
 	end
-
-	CCWatch_EventHandler[event](arg1, arg2, arg3, arg4, arg5);
+	CCWatch_EventHandler[event](arg1, arg2, arg3, arg4, arg5)
 end
 
 CCWatch_EventHandler = {}
 
-local SpellCast = nil;
+local SpellCast = nil
 
-CCWatch_EventHandler["SPELLCAST_START"] = function()
-	SpellCast = arg1;
+function CCWatch_EventHandler.SPELLCAST_START()
+	SpellCast = arg1
 --	duration = arg2;	-- might wanna play with it to deduce the used rank
 end
 
-CCWatch_EventHandler["SPELLCAST_STOP"] = function()
-	local effect;
-	effect = SpellCast;
-	local target = UnitName("target");
+function CCWatch_EventHandler.SPELLCAST_STOP()
+	local effect
+	effect = SpellCast
+	local target = UnitName'target'
 	if effect ~= nil and target ~= nil then
 		if CCWATCH.CCS[effect] then
-			local group = CCWATCH.CCS[effect].GROUP;
-			local etype = CCWATCH.CCS[effect].ETYPE;
-			local index = 0;
+			local group = CCWATCH.CCS[effect].GROUP
+			local etype = CCWATCH.CCS[effect].ETYPE
+			local index = 0
 			-- find the effect in the queue, if it's not there index stays 0
 			if etype == ETYPE_BUFF then
-				table.foreach( CCWATCH.GROUPSBUFF[group].EFFECT, function(k,v) if( v == effect ) then index = k end end );
+				table.foreach(CCWATCH.GROUPSBUFF[group].EFFECT, function(k,v) if v == effect then index = k end end)
 			elseif etype == ETYPE_DEBUFF then
-				table.foreach( CCWATCH.GROUPSDEBUFF[group].EFFECT, function(k,v) if( v == effect ) then index = k end end );
+				table.foreach(CCWATCH.GROUPSDEBUFF[group].EFFECT, function(k,v) if v == effect then index = k end end)
 			else
-				table.foreach( CCWATCH.GROUPSCC[group].EFFECT, function(k,v) if( v == effect ) then index = k end end );
+				table.foreach(CCWATCH.GROUPSCC[group].EFFECT, function(k,v) if v == effect then index = k end end)
 			end
 
-			if( index ~= 0 ) then
+			if index ~= 0 then
 				-- no UNIT_AURA event if it's already active
-				CCWATCH.UNIT_AURA.TIME = GetTime();
-				CCWATCH.UNIT_AURA.TARGET = target;
+				CCWATCH.UNIT_AURA.TIME = GetTime()
+				CCWATCH.UNIT_AURA.TARGET = target
 				CCWatch_QueueEvent(effect, target, GetTime(), 1)
 				CCWatch_EffectHandler[1]()
 			end
 		end
 	end
-	SpellCast = nil;
+	SpellCast = nil
 end
 
-CCWatch_EventHandler["SPELLCAST_FAILED"] = function()
-	SpellCast = nil;
+function CCWatch_EventHandler.SPELLCAST_FAILED()
+	SpellCast = nil
 end
 
-CCWatch_EventHandler["SPELLCAST_INTERRUPTED"] = function()
-	SpellCast = nil;
+function CCWatch_EventHandler.SPELLCAST_INTERRUPTED()
+	SpellCast = nil
 end
 
-CCWatch_EventHandler["UNIT_AURA"] = function()
-	if( arg1 == "target") then
-		CCWATCH.UNIT_AURA.TARGET = UnitName("target");
-		CCWATCH.UNIT_AURA.TIME = GetTime();
+function CCWatch_EventHandler.UNIT_AURA()
+	if arg1 == 'target' then
+		CCWATCH.UNIT_AURA.TARGET = UnitName'target'
+		CCWATCH.UNIT_AURA.TIME = GetTime()
 
 		-- get rid of any old events so they don't clutter the queue
-		while table.getn(CCWATCH.EFFECT) > 0 and (CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME) > CCWATCH.THRESHOLD do
-			CCWatch_UnqueueEvent();
+		while getn(CCWATCH.EFFECT) > 0 and (CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME) > CCWATCH.THRESHOLD do
+			CCWatch_UnqueueEvent()
 		end
 
-		if table.getn(CCWATCH.EFFECT) > 0 then
-			CCWatch_EffectHandler[CCWATCH.EFFECT[1].STATUS]();
+		if getn(CCWATCH.EFFECT) > 0 then
+			CCWatch_EffectHandler[CCWATCH.EFFECT[1].STATUS]()
 		end
 	end
 end
 
-CCWatch_EventHandler["PLAYER_TARGET_CHANGED"] = function()
+function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
 	if not UnitCanAttack("player", "target") then
-		return;
+		return
 	end
-	local index = 0;
-	local target = UnitName("target");
+	local index = 0
+	local target = UnitName'target'
 -- 1. Check if current target is present in the list
-	table.foreach( CCWATCH.LASTTARGETS, function(k,v) if( v.TARGET == target ) then index = k end end );
-	local ltime = GetTime();
+	table.foreach(CCWATCH.LASTTARGETS, function(k,v) if v.TARGET == target then index = k end end)
+	local ltime = GetTime()
 	if index == 0 then
 -- 2. add it
-		CCWatch_AddLastTarget(target, ltime);
+		CCWatch_AddLastTarget(target, ltime)
 	else
 -- or update target time effect
-		CCWATCH.LASTTARGETS[index].TIME = ltime;
+		CCWATCH.LASTTARGETS[index].TIME = ltime
 	end
 end
 
-CCWatch_EventHandler["CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"] = function()
-	local mobname;
-	local effect;
-	for mobname, effect in string.gfind( arg1, CCWATCH_TEXT_ON ) do
-		if( CCWATCH.STYLE > 1 or CCWatch_CheckRecentTargets(mobname) ) then
+function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
+	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
+		if CCWATCH.STYLE > 1 or CCWatch_CheckRecentTargets(mobname) then
 			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
 				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
-				CCWatch_EffectHandler[1]();
+				CCWatch_EffectHandler[1]()
 			end
 		end
 	end
 end
 
-CCWatch_EventHandler["CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"] = function()
-	local mobname;
-	local effect;
-	for mobname, effect in string.gfind( arg1, CCWATCH_TEXT_BUFF_ON ) do
-		if( CCWATCH.STYLE > 1 or CCWatch_CheckRecentTargets(mobname) ) then
+function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
+	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
+		if CCWATCH.STYLE > 1 or CCWatch_CheckRecentTargets(mobname) then
 			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~=0 then
 				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
-				CCWatch_EffectHandler[1]();
+				CCWatch_EffectHandler[1]()
 			end
 		end
 	end
 end
 
-CCWatch_EventHandler["CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"] = CCWatch_EventHandler["CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"];
-CCWatch_EventHandler["CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"] = CCWatch_EventHandler["CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"];
+CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS = CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS
+CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE = CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE
 
-CCWatch_EventHandler["CHAT_MSG_SPELL_AURA_GONE_OTHER"] = function()
-	local mobname;
-	local effect;
-	for effect, mobname in string.gfind( arg1, CCWATCH_TEXT_OFF ) do
+function CCWatch_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
+	for effect, mobname in string.gfind(arg1, CCWATCH_TEXT_OFF) do
 		if CCWATCH.CCS[effect] then
-			if( CCWATCH.CCS[effect].TARGET == mobname ) then
+			if CCWATCH.CCS[effect].TARGET == mobname then
 				CCWatch_QueueEvent(effect, mobname, GetTime(), 2)
-
-				CCWatch_EffectHandler[2]();
+				CCWatch_EffectHandler[2]()
 			end
 		end
 	end
 end
 
-CCWatch_EventHandler["CHAT_MSG_SPELL_BREAK_AURA"] = function()
-	local mobname;
-	local effect;
-	for mobname, effect in string.gfind( arg1, CCWATCH_TEXT_BREAK ) do
-		if( CCWATCH.CCS[effect] ) then
-			if( CCWATCH.CCS[effect].TARGET == mobname ) then
-			CCWatch_QueueEvent(effect, mobname, GetTime(), 3)
-
-			CCWatch_EffectHandler[3]();
+function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
+	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_BREAK) do
+		if CCWATCH.CCS[effect] then
+			if CCWATCH.CCS[effect].TARGET == mobname then
+				CCWatch_QueueEvent(effect, mobname, GetTime(), 3)
+				CCWatch_EffectHandler[3]()
 			end
 		end
 	end
 end
 
-local DeadMob = "";
-local function CCWHandleTargetDeath(k, v)
-	if( v ) then
-		if( v.TARGET == DeadMob ) then
---CCWatch_AddMessage("Removing effect "..k);
-			CCWATCH.CCS[k].TIMER_END = GetTime();
-			CCWatch_RemoveEffect(k, false);
+do
+	local DeadMob = ''
+	local function CCWHandleTargetDeath(k, v)
+		if v then
+			if v.TARGET == DeadMob then
+				CCWATCH.CCS[k].TIMER_END = GetTime()
+				CCWatch_RemoveEffect(k, false)
+			end
+		end
+	end
+
+	function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
+		for mobname in string.gfind(arg1, CCWATCH_TEXT_DIE) do
+			DeadMob = mobname
+			table.foreach(CCWATCH.CCS, CCWHandleTargetDeath)
+		end
+	end
+
+	function CCWatch_EventHandler.CHAT_MSG_COMBAT_XP_GAIN()
+		for mobname in string.gfind(arg1, CCWATCH_TEXT_DIEXP) do
+			DeadMob = mobname
+			table.foreach(CCWATCH.CCS, CCWHandleTargetDeath)
 		end
 	end
 end
 
-CCWatch_EventHandler["CHAT_MSG_COMBAT_HOSTILE_DEATH"] = function()
-	local mobname;
-	for mobname in string.gfind( arg1, CCWATCH_TEXT_DIE ) do
--- for each effect (arg oO) check if target is current
-		DeadMob = mobname;
-		table.foreach(CCWATCH.CCS, CCWHandleTargetDeath);
-	end
-end
-
-CCWatch_EventHandler["CHAT_MSG_COMBAT_XP_GAIN"] = function()
-	local mobname;
-	for mobname in string.gfind( arg1, CCWATCH_TEXT_DIEXP ) do
--- for each effect (arg oO) check if target is current
-		DeadMob = mobname;
-		table.foreach(CCWATCH.CCS, CCWHandleTargetDeath);
-	end
-end
-
-CCWatch_EventHandler["UNIT_COMBAT"] = function()
-	if( GetComboPoints() > 0 ) then
-		CCWATCH.COMBO = GetComboPoints();
+function CCWatch_EventHandler.UNIT_COMBAT()
+	if GetComboPoints() > 0 then
+		CCWATCH.COMBO = GetComboPoints()
 	end
 end
 
@@ -816,59 +734,59 @@ end
 
 CCWatch_EffectHandler[1] = function()
 -- applied
-	if( CCWATCH.STYLE ~= 0 or math.abs( CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME ) < CCWATCH.THRESHOLD ) then
-		local effect = CCWATCH.EFFECT[1].TYPE;
-		local mobname = CCWATCH.EFFECT[1].TARGET;
+	if CCWATCH.STYLE ~= 0 or math.abs( CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME ) < CCWATCH.THRESHOLD then
+		local effect = CCWATCH.EFFECT[1].TYPE
+		local mobname = CCWATCH.EFFECT[1].TARGET
 
-		if( GetTime() > ( CCWATCH.CCS[effect].TIMER_END + 15 ) or mobname ~= CCWATCH.CCS[effect].TARGET ) then
+		if GetTime() > ( CCWATCH.CCS[effect].TIMER_END + 15 ) or mobname ~= CCWATCH.CCS[effect].TARGET then
 -- quick & dirty hack for shared DR between Seduce & Fear)
-			if( effect == CCWATCH_FEAR or effect == CCWATCH_SEDUCE ) then
-				CCWATCH.CCS[CCWATCH_FEAR].DIMINISH = 1;
-				CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH = 1;
+			if effect == CCWATCH_FEAR or effect == CCWATCH_SEDUCE then
+				CCWATCH.CCS[CCWATCH_FEAR].DIMINISH = 1
+				CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH = 1
 			else
-				CCWATCH.CCS[effect].DIMINISH = 1;
+				CCWATCH.CCS[effect].DIMINISH = 1
 			end
 		end
 
-		CCWATCH.CCS[effect].TARGET = mobname;
-		CCWATCH.CCS[effect].PLAYER = UnitIsPlayer("target");
-		CCWATCH.CCS[effect].TIMER_START = GetTime();
-		if( CCWATCH.CCS[effect].PVPCC and CCWATCH.CCS[effect].PLAYER ) then
-			CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + (CCWATCH.CCS[effect].PVPCC / CCWATCH.CCS[effect].DIMINISH);
+		CCWATCH.CCS[effect].TARGET = mobname
+		CCWATCH.CCS[effect].PLAYER = UnitIsPlayer'target'
+		CCWATCH.CCS[effect].TIMER_START = GetTime()
+		if CCWATCH.CCS[effect].PVPCC and CCWATCH.CCS[effect].PLAYER then
+			CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + (CCWATCH.CCS[effect].PVPCC / CCWATCH.CCS[effect].DIMINISH)
 		else
-			CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + (CCWATCH.CCS[effect].LENGTH / CCWATCH.CCS[effect].DIMINISH);
+			CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + (CCWATCH.CCS[effect].LENGTH / CCWATCH.CCS[effect].DIMINISH)
 		end
-		if( CCWATCH.CCS[effect].COMBO ) then
-			CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_END + CCWATCH.CCS[effect].A * CCWATCH.COMBO;
+		if CCWATCH.CCS[effect].COMBO then
+			CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
 		end
 
-		CCWatch_AddEffect(effect);
+		CCWatch_AddEffect(effect)
 
-		CCWatch_UnqueueEvent();
+		CCWatch_UnqueueEvent()
 		if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) then
-			CCWatchWarn(CCWATCH_WARN_APPLIED, effect, mobname);
+			CCWatchWarn(CCWATCH_WARN_APPLIED, effect, mobname)
 		end
 	end
 end
 
 CCWatch_EffectHandler[2] = function()
 -- faded
-	local effect = CCWATCH.EFFECT[1].TYPE;
-	local target = CCWATCH.CCS[effect].TARGET;
+	local effect = CCWATCH.EFFECT[1].TYPE
+	local target = CCWATCH.CCS[effect].TARGET
 	local bUnqueueDone = false;
-	if( target == CCWATCH.EFFECT[1].TARGET ) then
+	if target == CCWATCH.EFFECT[1].TARGET then
 	-- target and CC target names match, wait for UNIT_AURA to ensure target match
-		if( CCWATCH.STYLE ~= 0 or math.abs( CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME ) < CCWATCH.THRESHOLD ) then
-			CCWATCH.CCS[effect].TIMER_END = GetTime();
-			CCWatch_RemoveEffect(effect, false);
-			CCWatch_UnqueueEvent();
-			bUnqueueDone = true;
+		if CCWATCH.STYLE ~= 0 or math.abs( CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME ) < CCWATCH.THRESHOLD then
+			CCWATCH.CCS[effect].TIMER_END = GetTime()
+			CCWatch_RemoveEffect(effect, false)
+			CCWatch_UnqueueEvent()
+			bUnqueueDone = true
 	-- unless the debuff is gone from the target, then no need for UNIT_AURA to confirm it
 		elseif CCWATCH.STYLE == 0 and CCWatch_EffectGone(effect) then
 			CCWATCH.CCS[effect].TIMER_END = GetTime()
-			CCWatch_RemoveEffect(effect, false);
-			CCWatch_UnqueueEvent();
-			bUnqueueDone = true;
+			CCWatch_RemoveEffect(effect, false)
+			CCWatch_UnqueueEvent()
+			bUnqueueDone = true
 		end
 	else
 	-- target and CC target names don't match, retargetting has occured, no need to wait for UNIT_AuRA
@@ -880,92 +798,90 @@ CCWatch_EffectHandler[2] = function()
 
 	-- another hack, to avoid spamming, because when the effect is broken, SOMETIME, WoW also send a faded message (see combat log)
 	if bUnqueueDone and CCWATCH.CCS[effect].WARN > 0 and CCWATCH.CCS[effect].WARN ~= 3 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED) then
-		CCWatchWarn(CCWATCH_WARN_FADED, effect, target);
+		CCWatchWarn(CCWATCH_WARN_FADED, effect, target)
 	end
 end
 
 CCWatch_EffectHandler[3] = function()
 -- broken
-	local effect = CCWATCH.EFFECT[1].TYPE;
-	local target = CCWATCH.CCS[effect].TARGET;
-	local bUnqueueDone = false;
-	if( target == CCWATCH.EFFECT[1].TARGET ) then
+	local effect = CCWATCH.EFFECT[1].TYPE
+	local target = CCWATCH.CCS[effect].TARGET
+	local bUnqueueDone = false
+	if target == CCWATCH.EFFECT[1].TARGET then
 	-- target and CC target names match, wait for UNIT_AURA to ensure target match
-		if( CCWATCH.STYLE ~= 0 or math.abs( CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME ) < CCWATCH.THRESHOLD ) then
-			CCWATCH.CCS[effect].TIMER_END = GetTime();
-			CCWatch_RemoveEffect(effect, false);
-			CCWatch_UnqueueEvent();
-			bUnqueueDone = true;
+		if CCWATCH.STYLE ~= 0 or math.abs( CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME ) < CCWATCH.THRESHOLD then
+			CCWATCH.CCS[effect].TIMER_END = GetTime()
+			CCWatch_RemoveEffect(effect, false)
+			CCWatch_UnqueueEvent()
+			bUnqueueDone = true
 	-- unless the debuff is gone from the target, then no need for UNIT_AURA to confirm it
 		elseif CCWATCH.STYLE == 0 and CCWatch_EffectGone(effect) then
 			CCWATCH.CCS[effect].TIMER_END = GetTime()
-			CCWatch_RemoveEffect(effect, false);
-			CCWatch_UnqueueEvent();
-			bUnqueueDone = true;
+			CCWatch_RemoveEffect(effect, false)
+			CCWatch_UnqueueEvent()
+			bUnqueueDone = true
 		end
 	else
 	-- target and CC target names don't match, retargetting has occured, no need to wait for UNIT_AuRA
-		CCWATCH.CCS[effect].TIMER_END = GetTime();
-
-		CCWatch_RemoveEffect(effect, false);
-		CCWatch_UnqueueEvent();
-		bUnqueueDone = true;
+		CCWATCH.CCS[effect].TIMER_END = GetTime()
+		CCWatch_RemoveEffect(effect, false)
+		CCWatch_UnqueueEvent()
+		bUnqueueDone = true
 	end
 	if bUnqueueDone and CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) then
-		CCWatchWarn(CCWATCH_WARN_BROKEN, effect, target);
-		CCWATCH.CCS[effect].WARN = 3;
+		CCWatchWarn(CCWATCH_WARN_BROKEN, effect, target)
+		CCWATCH.CCS[effect].WARN = 3
 	end
 end
 
 
 function CCWatch_QueueEvent(effect, mobname, time, status)
 	local effect_structure = {}
-	effect_structure.TYPE = effect;
-	effect_structure.TARGET = mobname;
-	effect_structure.TIME = time;
+	effect_structure.TYPE = effect
+	effect_structure.TARGET = mobname
+	effect_structure.TIME = time
 	effect_structure.STATUS = status
-	table.insert( CCWATCH.EFFECT, effect_structure )
+	tinsert(CCWATCH.EFFECT, effect_structure)
 end
 
 function CCWatch_UnqueueEvent()
-	table.remove( CCWATCH.EFFECT, 1)
+	tremove(CCWATCH.EFFECT, 1)
 end
 
 function CCWatch_EffectGone(effect)
-	local i;
-	local effectgone = false; -- assume effect is gone unless we find it
-	for i = 1,16 do
+	local effectgone = false -- assume effect is gone unless we find it
+	for i = 1, 16 do
 		if UnitDebuff("target", i) == CCWATCH.CCS[effect].TEXTURE then
 			effectgone = true
 		end
 	end
-	return effectgone;
+	return effectgone
 end
 
 function CCWatch_AddEffect(effect)
 	-- first remove any old copies of this effect, to avoid nasty overlap and properly set diminishing returns for multi-CC
 	local group = CCWATCH.CCS[effect].group
-	local GROUPS;
+	local GROUPS
 	CCWatch_RemoveEffect(effect, true)
 
 	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
-		GROUPS = CCWATCH.GROUPSBUFF;
+		GROUPS = CCWATCH.GROUPSBUFF
 	elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
-		GROUPS = CCWATCH.GROUPSDEBUFF;
+		GROUPS = CCWATCH.GROUPSDEBUFF
 	else
-		GROUPS = CCWATCH.GROUPSCC;
+		GROUPS = CCWATCH.GROUPSCC
 	end
 	if CCWATCH.GROWTH == 1 then
 		group = 1
 		-- start at the bottom and find the first available bar, otherwise queue to #CCWATCH_MAXBARS
-		while group < CCWATCH_MAXBARS and table.getn(GROUPS[group].EFFECT) > 0 do
+		while group < CCWATCH_MAXBARS and getn(GROUPS[group].EFFECT) > 0 do
 			group = group + 1
 		end
 		CCWATCH.CCS[effect].GROUP = group
 	elseif CCWATCH.GROWTH == 2 then
 		group = CCWATCH_MAXBARS
 		-- start at the top and find the first available bar, otherwise queue to #1
-		while group > 1 and table.getn(GROUPS[group].EFFECT) > 0 do
+		while group > 1 and getn(GROUPS[group].EFFECT) > 0 do
 			group = group - 1
 		end
 		CCWATCH.CCS[effect].GROUP = group
@@ -976,44 +892,44 @@ function CCWatch_AddEffect(effect)
 end
 
 function CCWatch_RemoveEffect(effect, dr)
-	local group = CCWATCH.CCS[effect].GROUP;
-	local GROUPS;
-	CCWatch_UnqueueEffect(effect);
+	local group = CCWATCH.CCS[effect].GROUP
+	local GROUPS
+	CCWatch_UnqueueEffect(effect)
 
 	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
-		GROUPS = CCWATCH.GROUPSBUFF;
+		GROUPS = CCWATCH.GROUPSBUFF
 	elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
-		GROUPS = CCWATCH.GROUPSDEBUFF;
+		GROUPS = CCWATCH.GROUPSDEBUFF
 	else
-		GROUPS = CCWATCH.GROUPSCC;
+		GROUPS = CCWATCH.GROUPSCC
 	end
 
 	if CCWATCH.GROWTH == 1 then
-		while group < CCWATCH_MAXBARS and table.getn(GROUPS[group].EFFECT) == 0 and table.getn(GROUPS[group+1].EFFECT) > 0 do
-			local move_effect = GROUPS[group+1].EFFECT[1];
-			CCWatch_UnqueueEffect(move_effect);
+		while group < CCWATCH_MAXBARS and getn(GROUPS[group].EFFECT) == 0 and getn(GROUPS[group+1].EFFECT) > 0 do
+			local move_effect = GROUPS[group+1].EFFECT[1]
+			CCWatch_UnqueueEffect(move_effect)
 			CCWATCH.CCS[move_effect].GROUP = group
-			CCWatch_QueueEffect(move_effect);
+			CCWatch_QueueEffect(move_effect)
 			group = group + 1
 		end
 	elseif CCWATCH.GROWTH == 2 then
-		while group > 1 and table.getn(GROUPS[group].EFFECT) == 0 and table.getn(GROUPS[group-1].EFFECT) > 0 do
-			local move_effect = GROUPS[group-1].EFFECT[1];
-			CCWatch_UnqueueEffect(move_effect);
+		while group > 1 and getn(GROUPS[group].EFFECT) == 0 and getn(GROUPS[group-1].EFFECT) > 0 do
+			local move_effect = GROUPS[group-1].EFFECT[1]
+			CCWatch_UnqueueEffect(move_effect)
 			CCWATCH.CCS[move_effect].GROUP = group
-			CCWatch_QueueEffect(move_effect);
+			CCWatch_QueueEffect(move_effect)
 			group = group - 1
 		end
 	end
 
 	-- set diminishing returns based on CCS[effect].DIMINISHES (documented in CCWatch_ConfigXX.lua)
-	if( dr and ((CCWATCH.CCS[effect].PLAYER and CCWATCH.CCS[effect].DIMINISHES > 0) or CCWATCH.CCS[effect].DIMINISHES == 1) ) then
+	if dr and ((CCWATCH.CCS[effect].PLAYER and CCWATCH.CCS[effect].DIMINISHES > 0) or CCWATCH.CCS[effect].DIMINISHES == 1) then
 -- quick & dirty hack for shared DR between Seduce & Fear)
-		if( effect == CCWATCH_FEAR or effect == CCWATCH_SEDUCE ) then
-			CCWATCH.CCS[CCWATCH_FEAR].DIMINISH = 2 * CCWATCH.CCS[CCWATCH_FEAR].DIMINISH;
-			CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH = 2 * CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH;
+		if effect == CCWATCH_FEAR or effect == CCWATCH_SEDUCE then
+			CCWATCH.CCS[CCWATCH_FEAR].DIMINISH = 2 * CCWATCH.CCS[CCWATCH_FEAR].DIMINISH
+			CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH = 2 * CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH
 		else
-			CCWATCH.CCS[effect].DIMINISH = 2 * CCWATCH.CCS[effect].DIMINISH;
+			CCWATCH.CCS[effect].DIMINISH = 2 * CCWATCH.CCS[effect].DIMINISH
 		end
 	end
 
@@ -1021,33 +937,33 @@ function CCWatch_RemoveEffect(effect, dr)
 	-- 2 = warn at low time already sent
 	-- 3 = broken message seen so no faded message to send if any received
 	if CCWATCH.CCS[effect].WARN > 0 then
-		CCWATCH.CCS[effect].WARN = 1;
+		CCWATCH.CCS[effect].WARN = 1
 	end
 end
 
 function CCWatch_QueueEffect(effect)
-	local group = CCWATCH.CCS[effect].GROUP;
-	local GROUPS;
-	local ext = "";
+	local group = CCWATCH.CCS[effect].GROUP
+	local GROUPS
+	local ext = ''
 
 	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
-		GROUPS = CCWATCH.GROUPSBUFF;
-		ext = "Buff";
+		GROUPS = CCWATCH.GROUPSBUFF
+		ext = "Buff"
 	elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
-		GROUPS = CCWATCH.GROUPSDEBUFF;
-		ext = "Debuff";
+		GROUPS = CCWATCH.GROUPSDEBUFF
+		ext = "Debuff"
 	else
-		GROUPS = CCWATCH.GROUPSCC;
-		ext = "CC";
+		GROUPS = CCWATCH.GROUPSCC
+		ext = "CC"
 	end
 
-	table.insert( GROUPS[group].EFFECT, 1, effect )
+	tinsert( GROUPS[group].EFFECT, 1, effect )
 
 	local activebarText = bars["CCWatchBar"..ext..group].frame.text
 	activebarText:SetText(effect..": "..CCWATCH.CCS[effect].TARGET);
 
 	-- if queue was empty show bar
-	if( table.getn(GROUPS[group].EFFECT) == 1 ) then
+	if( getn(GROUPS[group].EFFECT) == 1 ) then
 		local activebar = getglobal("CCWatchBar"..ext..group);
 		activebar:Show();
 		if CCWATCH.CCS[effect].COLOR then
@@ -1058,7 +974,7 @@ end
 
 function CCWatch_UnqueueEffect(effect)
 	local group = CCWATCH.CCS[effect].GROUP
-	local GROUPS;
+	local GROUPS
 	local ext = ""
 
 	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
@@ -1072,10 +988,10 @@ function CCWatch_UnqueueEffect(effect)
 		ext = "CC"
 	end
 
-	local index = 0
+	local index
 	-- find the effect in the queue, if it's not there index stays 0
 	table.foreach(GROUPS[group].EFFECT, function(k,v) if( v == effect ) then index = k end end)
-	if index ~= 0 then
+	if index then
 --		CCWATCH.CCS[GROUPS[group].EFFECT[index]].TARGET = ""; -- resetting target for mob death removal
 -- commented because of conflict with DR requiring to keep the target name.
 -- the name resetting was an unneeded attempt to avoid extra unqueue
@@ -1088,8 +1004,8 @@ function CCWatch_UnqueueEffect(effect)
 		local effect = GROUPS[group].EFFECT[1]
 		activebarText:SetText(effect .. ": " .. CCWATCH.CCS[effect].TARGET)
 	else
-		local activebarText = bars["CCWatchBar" .. ext .. group].frame.text
-		activebarText:SetText("CCWatch " .. ext .. " Bar " .. group)
+		-- local activebarText = bars["CCWatchBar" .. ext .. group].frame.text
+		-- activebarText:SetText("CCWatch " .. ext .. " Bar " .. group)
 	end
 end
 
@@ -1106,21 +1022,12 @@ function CCWatchBarBuff_OnShow(group)
 end
 
 function CCWatchBar_OnShow(group, GROUPS, ext)
-	local barname = "CCWatch"..ext;
-	getglobal(barname):SetScale(CCWATCH.SCALE);
-
---	local status = GetTime();
-
-	barname = "CCWatchBar"..ext..group
-	local activebar = getglobal(barname)
-	-- activebar:SetBackdropColor(0, 0, 0, 0.35);
-	activebar:SetAlpha(CCWATCH.ALPHA)
-
+	getglobal('CCWatch' .. ext):SetScale(CCWATCH.SCALE)
+	getglobal('CCWatchBar' .. ext .. group):SetAlpha(CCWATCH.ALPHA)
 	-- getglobal(barname.."StatusBar"):SetStatusBarColor(CCWATCH.COTNORMALCOLOR.r, CCWATCH.COTNORMALCOLOR.g, CCWATCH.COTNORMALCOLOR.b)
 	if getn(GROUPS[group].EFFECT) == 0 then
-		getglobal(barname.."Text"):SetText("CCWatch Bar "..ext.." "..group)
+		bars[barname].frame.text:SetText('CCWatch Bar '..ext..' '..group)
 	end
-
 	-- getglobal(barname.."StatusBarSpark"):SetPoint("CENTER", barname.."StatusBar", "LEFT", 0, 0)
 end
 
@@ -1164,95 +1071,59 @@ function CCWatch_GroupBuffUpdate(group)
 	CCWatch_GroupUpdate(group, CCWATCH.GROUPSBUFF, 'Buff')
 end
 
-local function ComputeColor(colorhigh, colorlow, high, low, cur)
-	local factor = (cur - low) / (high - low);
--- should be divided by 2, but would lead to too dark cases
-	return	(colorhigh.r*factor + colorlow.r*(1-factor)),
-		(colorhigh.g*factor + colorlow.g*(1-factor)),
-		(colorhigh.b*factor + colorlow.b*(1-factor));
-end
-
-local function GetTheRightColorFromTime(curTime)
-	if curTime > 2 * CCWATCH.COTLOWVALUE then
-		return CCWATCH.COTNORMALCOLOR.r, CCWATCH.COTNORMALCOLOR.g, CCWATCH.COTNORMALCOLOR.b;
-	elseif curTime > CCWATCH.COTLOWVALUE then
-		return ComputeColor(CCWATCH.COTNORMALCOLOR, CCWATCH.COTLOWCOLOR, 2*CCWATCH.COTLOWVALUE, CCWATCH.COTLOWVALUE, curTime);
-	elseif curTime > CCWATCH.COTURGEVALUE then
-		return ComputeColor(CCWATCH.COTLOWCOLOR, CCWATCH.COTURGECOLOR, CCWATCH.COTLOWVALUE, CCWATCH.COTURGEVALUE, curTime);
-	else
-		return CCWATCH.COTURGECOLOR.r, CCWATCH.COTURGECOLOR.g, CCWATCH.COTURGECOLOR.b;
-	end
-end
-
-function CCWatch_GroupUpdate(group, GROUPS, ext)
-	local activebar = getglobal("CCWatchBar" .. ext .. group)
+function CCWatch_GroupUpdate(group, GROUPS, type)
+	local bar = bars['CCWatchBar' .. type .. group]
+	local frame = bar.frame
 
 	if getn(GROUPS[group].EFFECT) > 0 then
-	-- active effect on this bar
-		activebar:SetAlpha(CCWATCH.ALPHA)
+		bar.stopped = nil
+		local effect = GROUPS[group].EFFECT[1]
+
+		frame:SetAlpha(CCWATCH.ALPHA)
 
 		local t = GetTime()
-		local effect = GROUPS[group].EFFECT[1]
-		local activebarStatusBar = activebar.statusbar
-		-- local activebarTextBar = getglobal("CCWatchBar" .. ext .. group .. "StatusBarText")
 
 		if t <= CCWATCH.CCS[effect].TIMER_END  then
-		-- CC hasn't expired
-			activebarStatusBar:SetMinMaxValues(CCWATCH.CCS[effect].TIMER_START, CCWATCH.CCS[effect].TIMER_END);
-			-- local sparkPosition = ((t - CCWATCH.CCS[effect].TIMER_START) / (CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START)) * CCWATCH.WIDTH
-			if CCWATCH.INVERT then
-				-- sparkPosition = CCWATCH.WIDTH - sparkPosition
-				activebarStatusBar:SetValue(CCWATCH.CCS[effect].TIMER_START + CCWATCH.CCS[effect].TIMER_END - t)
-			else
-				activebarStatusBar:SetValue(t)
-			end
-			local elapsedTime = CCWATCH.CCS[effect].TIMER_END - t
-			-- if sparkPosition < 1 then
-			-- 	sparkPosition = 1
-			-- end
-			-- local activebarSpark = getglobal("CCWatchBar" .. ext .. group .. "StatusBarSpark")
-			-- activebarSpark:SetPoint("CENTER", "CCWatchBar" .. ext .. group .. "StatusBar", "LEFT", sparkPosition, 0)
-			-- if CCWATCH.TIMERS == 1 then
-			-- 	str = format("%.2f", t - CCWATCH.CCS[effect].TIMER_START)
-			-- elseif CCWATCH.TIMERS == 2 then
-			-- 	str = format("%.2f", elapsedTime)
-			-- end
-			-- activebarTextBar:SetText(str)
-			if CCWATCH.COLOROVERTIME and not CCWATCH.CCS[effect].COLOR then
-				local r, g, b = GetTheRightColorFromTime(elapsedTime)
-				activebarStatusBar:SetStatusBarColor(r, g, b)
-			end
+			local duration = CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START
+			local remaining = CCWATCH.CCS[effect].TIMER_END - t
+			local fraction = remaining / duration
+
+			local frame = bars['CCWatchBar' .. type .. group].frame
+
+			frame.statusbar:SetValue(CCWATCH.INVERT and 1 - fraction or fraction)
+
+			local sparkPosition = bar.width * fraction
+			frame.spark:Show()
+			frame.spark:SetPoint('CENTER', bar.frame.statusbar, CCWATCH.INVERT and 'RIGHT' or 'LEFT', CCWATCH.INVERT and -sparkPosition or sparkPosition, 0)
+
+			frame.timertext:SetText(format_time(remaining))
+
+			local f = fraction > 1/3 and 1 or fraction / (1/3)
+			local r, g, b = unpack(CCWATCH.CCS[effect].SCHOOL or {1, 0, 1})
+			frame.statusbar:SetStatusBarColor(f*r + 1-f, f*g, f*b)
 
 			if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME) then
-				if CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START > CCWATCH.WARNLOW and CCWATCH.WARNLOW > elapsedTime then
+				if CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START > CCWATCH.WARNLOW and CCWATCH.WARNLOW > remaining then
 					if CCWATCH.CCS[effect].WARN == 1 then 
-						CCWatchWarn(CCWATCH_WARN_LOWTIME, effect, CCWATCH.CCS[effect].TARGET, CCWATCH.WARNLOW);
+						CCWatchWarn(CCWATCH_WARN_LOWTIME, effect, CCWATCH.CCS[effect].TARGET, CCWATCH.WARNLOW)
 						CCWATCH.CCS[effect].WARN = 2
 					end
 				elseif CCWATCH.CCS[effect].WARN == 2 then -- reset if ever disconnected while fighting
 					CCWATCH.CCS[effect].WARN = 1
 				end
 			end
-		elseif t > CCWATCH.CCS[effect].TIMER_END + .2 then
-		-- CC has expired. Try to leave room for a fade effect to be catched, then remove anyway
+		elseif t > CCWATCH.CCS[effect].TIMER_END then
 			CCWatch_RemoveEffect(effect, false)
 		end
-
-	elseif activebar:GetAlpha() > 0 then
-	-- otherwise fade out this bar if not unlocked
-		if CCWATCH.STATUS == 1 then
-			-- local activebarText = getglobal("CCWatchBar"..ext..group.."Text");
-			-- activebarText:SetText("TimeOut");
-			local alpha = activebar:GetAlpha() - 0.2
-			if alpha > 0 then
-				activebar:SetAlpha(alpha)
-			else
-				activebar:Hide()
-			end
-		end
+	elseif frame:GetAlpha() > 0 then
+		-- frame.statusbar:SetValue(0)
+		frame.statusbar:SetStatusBarColor(1, 0, 0)
+		frame.spark:Hide()
+		bar.stopped = bar.stopped or GetTime()
+		bar.fadeelapsed = GetTime() - bar.stopped
+		fade_bar('CCWatchBar' .. type .. group)
 	else
-	-- done fading, hide this bar
-		activebar:Hide()
+		frame:Hide()
 	end
 end
 
@@ -1387,15 +1258,15 @@ function CCWatch_LoadVariables()
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor == nil then
-		CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor = { r=1, g=0, b=0 };
+		CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor = { r=1, g=0, b=0 }
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].CoTLowColor == nil then
-		CCWatch_Save[CCWATCH.PROFILE].CoTLowColor = { r=1, g=0.5, b=0 };
+		CCWatch_Save[CCWATCH.PROFILE].CoTLowColor = { r=1, g=0.5, b=0 }
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor == nil then
-		CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor = { r=1, g=1, b=0 };
+		CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor = { r=1, g=1, b=0 }
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue == nil then
@@ -1406,47 +1277,40 @@ function CCWatch_LoadVariables()
 		CCWatch_Save[CCWATCH.PROFILE].CoTLowValue = 5;
 	end
 
-	if CCWatch_Save[CCWATCH.PROFILE].LeadingTimer == nil then
-		CCWatch_Save[CCWATCH.PROFILE].LeadingTimer = true;
-	end
+	CCWATCH.ARCANIST = CCWatch_Save[CCWATCH.PROFILE].arcanist
 
-	CCWATCH.ARCANIST = CCWatch_Save[CCWATCH.PROFILE].arcanist;
+	CCWatch_LoadConfCCs()
+	CCWatch_LoadCustomCCs()
+	CCWatch_UpdateTextures()
+	CCWatch_UpdateClassSpells(false)
 
-	CCWatch_LoadConfCCs();
-	CCWatch_LoadCustomCCs();
-	CCWatch_UpdateTextures();
-	CCWatch_UpdateClassSpells(false);
+	CCWATCH.STATUS = CCWatch_Save[CCWATCH.PROFILE].status
+	CCWATCH.INVERT = CCWatch_Save[CCWATCH.PROFILE].invert
+	CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers
+	CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
+	CCWATCH.SCALE = CCWatch_Save[CCWATCH.PROFILE].scale
+	CCWATCH.WIDTH = CCWatch_Save[CCWATCH.PROFILE].width
+	CCWATCH.ALPHA = CCWatch_Save[CCWATCH.PROFILE].alpha
 
-	CCWATCH.STATUS = CCWatch_Save[CCWATCH.PROFILE].status;
-	CCWATCH.INVERT = CCWatch_Save[CCWATCH.PROFILE].invert;
-	CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers;
-	CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth;
-	CCWATCH.SCALE = CCWatch_Save[CCWATCH.PROFILE].scale;
-	CCWATCH.WIDTH = CCWatch_Save[CCWATCH.PROFILE].width;
-	CCWATCH.ALPHA = CCWatch_Save[CCWATCH.PROFILE].alpha;
-
-	CCWATCH.MONITORING = CCWatch_Save[CCWATCH.PROFILE].Monitoring;
-	CCWATCH.WARNTYPE = CCWatch_Save[CCWATCH.PROFILE].WarnType;
-	CCWATCH.WARNLOW = CCWatch_Save[CCWATCH.PROFILE].WarnLow;
-	CCWATCH.WARNMSG = CCWatch_Save[CCWATCH.PROFILE].WarnMsg;
-	CCWATCH.WARNCUSTOMCC = CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC;
-	CCWATCH.COLOROVERTIME = CCWatch_Save[CCWATCH.PROFILE].ColorOverTime;
-	CCWATCH.COTURGECOLOR = CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor;
-	CCWATCH.COTLOWCOLOR = CCWatch_Save[CCWATCH.PROFILE].CoTLowColor;
-	CCWATCH.COTNORMALCOLOR = CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor;
-	CCWATCH.COTURGEVALUE = CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue;
-	CCWATCH.COTLOWVALUE = CCWatch_Save[CCWATCH.PROFILE].CoTLowValue;
-
-	CCWATCH.LEADINGTIMER = CCWatch_Save[CCWATCH.PROFILE].LeadingTimer;
-	CCWatch_SetLeadingTimer(CCWATCH.LEADINGTIMER);
+	CCWATCH.MONITORING = CCWatch_Save[CCWATCH.PROFILE].Monitoring
+	CCWATCH.WARNTYPE = CCWatch_Save[CCWATCH.PROFILE].WarnType
+	CCWATCH.WARNLOW = CCWatch_Save[CCWATCH.PROFILE].WarnLow
+	CCWATCH.WARNMSG = CCWatch_Save[CCWATCH.PROFILE].WarnMsg
+	CCWATCH.WARNCUSTOMCC = CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC
+	CCWATCH.COLOROVERTIME = CCWatch_Save[CCWATCH.PROFILE].ColorOverTime
+	CCWATCH.COTURGECOLOR = CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor
+	CCWATCH.COTLOWCOLOR = CCWatch_Save[CCWATCH.PROFILE].CoTLowColor
+	CCWATCH.COTNORMALCOLOR = CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor
+	CCWATCH.COTURGEVALUE = CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue
+	CCWATCH.COTLOWVALUE = CCWatch_Save[CCWATCH.PROFILE].CoTLowValue
 
 	if bit.band(CCWATCH.MONITORING, ETYPE_CC) ~= 0 or bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF) ~= 0 then
-		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE");
-		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE");
+		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE")
+		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE")
 	end
 	if bit.band(CCWATCH.MONITORING, ETYPE_BUFF) ~= 0 then
-		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS");
-		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS");
+		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS")
+		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS")
 	end
 
 	CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style;
@@ -1456,51 +1320,21 @@ function CCWatch_LoadVariables()
 	CCWatchBuff:SetScale(CCWATCH.SCALE);
 	CCWatch_SetWidth(CCWATCH.WIDTH);
 
-	if( CCWATCH.STATUS == 2 ) then
-		CCWatch_BarUnlock();
+	if CCWATCH.STATUS == 2 then
+		CCWatch_BarUnlock()
 	end
 
-	CCWatchOptions_Init();
+	CCWatchOptions_Init()
 
-	CCWatch_BarLock();
+	CCWatch_BarLock()
 
 -- Pure cosmetic for Unlock move
-	local i;
-	for i=1,CCWATCH_MAXBARS do
-		-- getglobal("CCWatchBarCC"..i.."StatusBarText"):SetText("0.00");
-		-- getglobal("CCWatchBarDebuff"..i.."StatusBarText"):SetText("0.00");
-		-- getglobal("CCWatchBarBuff"..i.."StatusBarText"):SetText("0.00");
+	for i = 1, CCWATCH_MAXBARS do
+		-- getglobal("CCWatchBarCC"..i.."StatusBarText"):SetText("0.00")
+		-- getglobal("CCWatchBarDebuff"..i.."StatusBarText"):SetText("0.00")
+		-- getglobal("CCWatchBarBuff"..i.."StatusBarText"):SetText("0.00")
 	end
 end
-
-function CCWatch_SetLeadingTimer(bLeading)
-	-- local point;
-	-- local relpoint;
-	-- if bLeading then
-	-- 	point = "RIGHT";
-	-- 	relpoint = "LEFT";
-	-- else
-	-- 	point = "LEFT";
-	-- 	relpoint = "RIGHT";
-	-- end
-	
-	-- local i;
-	-- local text;
-	-- for i=1,CCWATCH_MAXBARS do
-	-- 	text = bars["CCWatchBarCC"..i..].text
-	-- 	text:ClearAllPoints();
-	-- 	text:SetPoint(point, getglobal("CCWatchBarCC"..i.."StatusBar"), relpoint);
-
-	-- 	text = getglobal("CCWatchBarDebuff"..i.."StatusBarText");
-	-- 	text:ClearAllPoints();
-	-- 	text:SetPoint(point, getglobal("CCWatchBarDebuff"..i.."StatusBar"), relpoint);
-
-	-- 	text = getglobal("CCWatchBarBuff"..i.."StatusBarText");
-	-- 	text:ClearAllPoints();
-	-- 	text:SetPoint(point, getglobal("CCWatchBarBuff"..i.."StatusBar"), relpoint);
-	-- end
-end
-
 
 function CCWatch_UpdateTextures()
 	local i = 1
@@ -1588,7 +1422,6 @@ function CCWatch_UpdateImpTrap(bPrint)
 	end
 end
 
-
 function CCWatch_UpdateImpSeduce(bPrint)
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 7 );
 	if texture then
@@ -1600,7 +1433,6 @@ function CCWatch_UpdateImpSeduce(bPrint)
 		end
 	end
 end
-
 
 function CCWatch_UpdateBrutalImpact(bPrint)
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 4 );
@@ -1615,7 +1447,6 @@ function CCWatch_UpdateBrutalImpact(bPrint)
 		end
 	end
 end
-
 
 function CCWatch_UpdatePermafrost(bPrint)
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 2 );
@@ -1643,11 +1474,10 @@ function CCWatch_UpdateImpShadowWordPain(bPrint)
 	end
 end
 
-
 function CCWatch_GetSpellRank(spellname, spelleffect, bPrint)
-	local i = 1;
-	local gotone = false;
-	local maxrank = CCWATCH_SPELLS[spellname].RANKS;
+	local i = 1
+	local gotone = false
+	local maxrank = CCWATCH_SPELLS[spellname].RANKS
 
 	while true do
 		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
@@ -1655,27 +1485,27 @@ function CCWatch_GetSpellRank(spellname, spelleffect, bPrint)
 		if not name then
 			if not gotone then
 				if bPrint then
-					CCWatch_AddMessage(spellname.." "..CCWATCH_NOTDETECTED);
+					CCWatch_AddMessage(spellname.." "..CCWATCH_NOTDETECTED)
 				end
-				if( CCWATCH.CCS[spelleffect].LENGTH == nil ) then
-					CCWATCH.CCS[spelleffect].LENGTH = CCWATCH_SPELLS[spellname].DURATION[maxrank];
+				if CCWATCH.CCS[spelleffect].LENGTH == nil then
+					CCWATCH.CCS[spelleffect].LENGTH = CCWATCH_SPELLS[spellname].DURATION[maxrank]
 				end
 			end
-			return;
+			return
 		end
 
 		if( name == spellname ) then
-			local currank = 1;
+			local currank = 1
 			while currank <= maxrank do
-				if( tonumber(string.sub(rank,string.len(rank))) == currank) then
+				if tonumber(string.sub(rank,string.len(rank))) == currank then
 					if bPrint then
-						CCWatch_AddMessage(spellname.." "..CCWATCH_RANK.." "..currank.." "..CCWATCH_DETECTED);
+						CCWatch_AddMessage(spellname.." "..CCWATCH_RANK.." "..currank.." "..CCWATCH_DETECTED)
 					end
 
-					CCWATCH.CCS[spelleffect].LENGTH = CCWATCH_SPELLS[spellname].DURATION[currank];
-					gotone = true;
+					CCWATCH.CCS[spelleffect].LENGTH = CCWATCH_SPELLS[spellname].DURATION[currank]
+					gotone = true
 				end
-				currank = currank + 1;
+				currank = currank + 1
 			end
 		end
 
@@ -1684,124 +1514,117 @@ function CCWatch_GetSpellRank(spellname, spelleffect, bPrint)
 end
 
 function CCWatch_UpdateClassSpells(bPrint)
-	local _, eclass = UnitClass("player");
-	CCWatchOptionsFrameArcanist:Hide();
+	local _, eclass = UnitClass'player'
+	CCWatchOptionsFrameArcanist:Hide()
 	if eclass == "ROGUE" then
-		CCWatch_GetSpellRank(CCWATCH_SAP, CCWATCH_SAP, bPrint);
-		CCWatch_UpdateImpGouge(bPrint);
-		CCWatch_UpdateKidneyShot(bPrint);
+		CCWatch_GetSpellRank(CCWATCH_SAP, CCWATCH_SAP, bPrint)
+		CCWatch_UpdateImpGouge(bPrint)
+		CCWatch_UpdateKidneyShot(bPrint)
 		if CCWatch_ConfigBuff ~= nil then
-			CCWatch_UpdateImpGarotte(bPrint);
+			CCWatch_UpdateImpGarotte(bPrint)
 		end
 	elseif eclass == "WARLOCK" then
-		CCWatch_GetSpellRank(CCWATCH_FEAR, CCWATCH_FEAR, bPrint);
-		CCWatch_GetSpellRank(CCWATCH_BANISH, CCWATCH_BANISH, bPrint);
-		CCWatch_UpdateImpSeduce(bPrint);
+		CCWatch_GetSpellRank(CCWATCH_FEAR, CCWATCH_FEAR, bPrint)
+		CCWatch_GetSpellRank(CCWATCH_BANISH, CCWATCH_BANISH, bPrint)
+		CCWatch_UpdateImpSeduce(bPrint)
 	elseif eclass == "PALADIN" then
-		CCWatch_GetSpellRank(CCWATCH_HOJ, CCWATCH_HOJ, bPrint);
+		CCWatch_GetSpellRank(CCWATCH_HOJ, CCWATCH_HOJ, bPrint)
 		if CCWatch_ConfigBuff ~= nil then
-			CCWatch_GetSpellRank(CCWATCH_DIVINESHIELD, CCWATCH_DIVINESHIELD, bPrint);
+			CCWatch_GetSpellRank(CCWATCH_DIVINESHIELD, CCWATCH_DIVINESHIELD, bPrint)
 		end
 	elseif eclass == "HUNTER" then
-		CCWatch_GetSpellRank(CCWATCH_FREEZINGTRAP_SPELL, CCWATCH_FREEZINGTRAP, bPrint);
-		CCWatch_GetSpellRank(CCWATCH_SCAREBEAST, CCWATCH_SCAREBEAST, bPrint);
-		CCWatch_UpdateImpTrap(bPrint);
+		CCWatch_GetSpellRank(CCWATCH_FREEZINGTRAP_SPELL, CCWATCH_FREEZINGTRAP, bPrint)
+		CCWatch_GetSpellRank(CCWATCH_SCAREBEAST, CCWATCH_SCAREBEAST, bPrint)
+		CCWatch_UpdateImpTrap(bPrint)
 	elseif eclass == "PRIEST" then
-		CCWatch_GetSpellRank(CCWATCH_SHACKLE, CCWATCH_SHACKLE, bPrint);
+		CCWatch_GetSpellRank(CCWATCH_SHACKLE, CCWATCH_SHACKLE, bPrint)
 		if CCWatch_ConfigDebuff ~= nil then
-			CCWatch_UpdateImpShadowWordPain(bPrint);
+			CCWatch_UpdateImpShadowWordPain(bPrint)
 		end
 	elseif eclass == "MAGE" then
-		CCWatch_GetSpellRank(CCWATCH_POLYMORPH, CCWATCH_POLYMORPH, bPrint);
+		CCWatch_GetSpellRank(CCWATCH_POLYMORPH, CCWATCH_POLYMORPH, bPrint)
 		if CCWatch_ConfigDebuff ~= nil then
-			CCWatch_GetSpellRank(CCWATCH_FROSTBOLT, CCWATCH_FROSTBOLT, bPrint);
-			CCWatch_GetSpellRank(CCWATCH_FIREBALL, CCWATCH_FIREBALL, bPrint);
-			CCWatch_UpdatePermafrost(bPrint);
+			CCWatch_GetSpellRank(CCWATCH_FROSTBOLT, CCWATCH_FROSTBOLT, bPrint)
+			CCWatch_GetSpellRank(CCWATCH_FIREBALL, CCWATCH_FIREBALL, bPrint)
+			CCWatch_UpdatePermafrost(bPrint)
 		end
-		CCWatchOptionsFrameArcanist:Show();
+		CCWatchOptionsFrameArcanist:Show()
 		if CCWATCH.ARCANIST then
-			CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH = CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH + 15;
+			CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH = CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH + 15
 		end
 	elseif eclass == "DRUID" then
-		CCWatch_GetSpellRank(CCWATCH_ROOTS, CCWATCH_ROOTS, bPrint);
-		CCWatch_GetSpellRank(CCWATCH_HIBERNATE, CCWATCH_HIBERNATE, bPrint);
-		CCWatch_GetSpellRank(CCWATCH_BASH, CCWATCH_BASH, bPrint);
-		CCWatch_UpdateBrutalImpact(bPrint);
+		CCWatch_GetSpellRank(CCWATCH_ROOTS, CCWATCH_ROOTS, bPrint)
+		CCWatch_GetSpellRank(CCWATCH_HIBERNATE, CCWATCH_HIBERNATE, bPrint)
+		CCWatch_GetSpellRank(CCWATCH_BASH, CCWATCH_BASH, bPrint)
+		CCWatch_UpdateBrutalImpact(bPrint)
 	end
 end
 
 function CCWatch_Help()
-	CCWatch_AddMessage(CCWATCH_FULLVERSION..CCWATCH_HELP1);
-	CCWatch_AddMessage(CCWATCH_HELP2);
-	CCWatch_AddMessage(CCWATCH_HELP3);
-	CCWatch_AddMessage(CCWATCH_HELP4);
-	CCWatch_AddMessage(CCWATCH_HELP5);
-	CCWatch_AddMessage(CCWATCH_HELP6);
-	CCWatch_AddMessage(CCWATCH_HELP7);
-	CCWatch_AddMessage(CCWATCH_HELP8);
-	CCWatch_AddMessage(CCWATCH_HELP9);
-	CCWatch_AddMessage(CCWATCH_HELP10);
-	CCWatch_AddMessage(CCWATCH_HELP11);
-	CCWatch_AddMessage(CCWATCH_HELP12);
-	CCWatch_AddMessage(CCWATCH_HELP13);
-	CCWatch_AddMessage(CCWATCH_HELP14);
-	CCWatch_AddMessage(CCWATCH_HELP15);
-	CCWatch_AddMessage(CCWATCH_HELP16);
-	CCWatch_AddMessage(CCWATCH_HELP17);
+	CCWatch_AddMessage(CCWATCH_FULLVERSION..CCWATCH_HELP1)
+	CCWatch_AddMessage(CCWATCH_HELP2)
+	CCWatch_AddMessage(CCWATCH_HELP3)
+	CCWatch_AddMessage(CCWATCH_HELP4)
+	CCWatch_AddMessage(CCWATCH_HELP5)
+	CCWatch_AddMessage(CCWATCH_HELP6)
+	CCWatch_AddMessage(CCWATCH_HELP7)
+	CCWatch_AddMessage(CCWATCH_HELP8)
+	CCWatch_AddMessage(CCWATCH_HELP9)
+	CCWatch_AddMessage(CCWATCH_HELP10)
+	CCWatch_AddMessage(CCWATCH_HELP11)
+	CCWatch_AddMessage(CCWATCH_HELP12)
+	CCWatch_AddMessage(CCWATCH_HELP13)
+	CCWatch_AddMessage(CCWATCH_HELP14)
+	CCWatch_AddMessage(CCWATCH_HELP15)
+	CCWatch_AddMessage(CCWATCH_HELP16)
+	CCWatch_AddMessage(CCWATCH_HELP17)
 end
 
 function CCWatch_SetWidth(width)
-	local i, j, k;
-	for j, k in ipairs({"CC","Debuff","Buff"}) do
-		for i=1,CCWATCH_MAXBARS do
-			getglobal("CCWatchBar"..k..i):SetWidth(width + 10);
+	for _, k in {"CC","Debuff","Buff"} do
+		for i = 1, CCWATCH_MAXBARS do
+			getglobal("CCWatchBar"..k..i):SetWidth(width + 10)
 			-- getglobal("CCWatchBar"..k..i.."Text"):SetWidth(width);
 			-- getglobal("CCWatchBar"..k..i.."StatusBar"):SetWidth(width);
 		end
-		getglobal("CCWatch"..k):SetWidth(width + 10);
+		getglobal("CCWatch"..k):SetWidth(width + 10)
 	end
 end
 
-
-
 function CCWatch_CheckRecentTargets(mobname)
-	local target = UnitName("target");
+	local target = UnitName'target'
 -- Simple compare if using current target monitoring
 	if CCWATCH.STYLE == 0 then
-		return mobname == target;
+		return mobname == target
 	end
-	local index = 0;
+	local index = 0
 -- Check mobname against the list
-	table.foreach( CCWATCH.LASTTARGETS, function(k,v) if( v.TARGET == mobname ) then index = k end end );
+	table.foreach(CCWATCH.LASTTARGETS, function(k,v) if v.TARGET == mobname then index = k end end)
 	if index ~= 0 then
-		return true;
+		return true
 	end
 
 -- return false if target not found
-	return false;
+	return false
 end
 
 function CCWatch_AddLastTarget(mobname, time)
 	local lt_struct = {}
-	lt_struct.TARGET = mobname;
-	lt_struct.TIME = time;
+	lt_struct.TARGET = mobname
+	lt_struct.TIME = time
 
 --	CCWatch_AddMessage("Adding "..mobname);
 
 -- if the array is full
-	if table.getn(CCWATCH.LASTTARGETS) >= 5 then
+	if getn(CCWATCH.LASTTARGETS) >= 5 then
 -- remove the oldest target
-		local oldest = 0;
-		local index = 0;
-		table.foreach(CCWATCH.LASTTARGETS, function(k,v) if oldest == 0 then oldest = v.TIME; index = k; elseif( v.TIME < oldest ) then oldest = v.TIME; index = k; end end);
+		local oldest = 0
+		local index = 0
+		table.foreach(CCWATCH.LASTTARGETS, function(k,v) if oldest == 0 then oldest = v.TIME; index = k; elseif v.TIME < oldest then oldest = v.TIME; index = k; end end)
 --		CCWatch_AddMessage("Removing old target : "..CCWATCH.LASTTARGETS[index].TARGET);
-		table.remove(CCWATCH.LASTTARGETS, index);
+		tremove(CCWATCH.LASTTARGETS, index)
 	end
-	table.insert( CCWATCH.LASTTARGETS, lt_struct )
--- DEBUG :
---	local targets = "Current targets : "
---	table.foreach(CCWATCH.LASTTARGETS, function(k,v) targets = targets.."'"..v.TARGET.."',"; end);
---	CCWatch_AddMessage(targets);
+	tinsert(CCWATCH.LASTTARGETS, lt_struct)
 end
 
 function CCWatch_AddMessage(msg)
