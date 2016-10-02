@@ -1,101 +1,48 @@
-CCWatchLoaded = false;
+CCWatchLoaded = false
 
-CCWatchObject = nil;
+CCWatchObject = nil
 
-CCWATCH_MAXBARS = 5;
+CCWATCH_MAXBARS = 5
 
-CCW_EWARN_FADED = 1;
-CCW_EWARN_APPLIED = 2;
-CCW_EWARN_BROKEN = 4;
-CCW_EWARN_LOWTIME = 8;
+CCW_EWARN_FADED = 1
+CCW_EWARN_APPLIED = 2
+CCW_EWARN_BROKEN = 4
+CCW_EWARN_LOWTIME = 8
+
+CCWATCH_SCHOOL = {
+	FIRE = { 1, 0, 0 },
+	FROST = { 0, 0, 1 },
+	NATURE = { 0, 1, 0 },
+	SHADOW = { RAID_CLASS_COLORS.WARLOCK.r, RAID_CLASS_COLORS.WARLOCK.g, RAID_CLASS_COLORS.WARLOCK.b },
+	ARCANE = { 1, 1, 1 },
+	HOLY = { 1, 1, 0 },
+	PHYSICAL = { RAID_CLASS_COLORS.DRUID.r, RAID_CLASS_COLORS.DRUID.g, RAID_CLASS_COLORS.DRUID.b },
+	MAGIC = { 0, 1, 1 },
+	NONE = { 1, 1, 1 },
+}
+
+-- CCWATCH_SCHOOL = {
+-- 	NONE = {1, 1, 1},
+-- 	PHYSICAL = {1, 1, 0},
+-- 	HOLY = {1, .9, .5},
+-- 	FIRE = {1, .5, 0},
+-- 	NATURE = {.3, 1, .3},
+-- 	FROST = {.5, 1, 1},
+-- 	SHADOW = {.5, .5, 1},
+-- 	ARCANE = {1, .5, 1},
+-- }
 
 local bars = {}
 
-function create_bar(name)
-
+local function create_bar(name)
 	local bar = {}
 	bars[name] = bar
-	bar.endtime = 0
-	bar.fadetime = 1
-	create_bar_frame(name)
-
-	return bar.frame
-end
-
-function start_bar(name, time, text, icon, color, fireforget)
-	local bar = bars[name]
-
-	text = text or name
-	icon = icon or [[Interface\Icons\INV_Misc_QuestionMark]]
-	color = color or {0, 1, 0}
-
-	bar.name, bar.time, bar.text, bar.icon = name, time, text, icon
-	bar.color = {unpack(color)}
-	bar.color[4] = 1
-	bar.running = nil
-	-- bar.endtime = 0
-	-- bar.fadetime = 1
-	bar.fadeout = true
-	bar.reversed = nil
-
-	local t = GetTime()
-	if bar.paused then
-		local pauseoffset = t - bar.pausetime
-		bar.endtime = bar.endtime + pauseoffset
-		bar.starttime = bar.starttime + pauseoffset
-	else
-		-- bar hasn't elapsed a second.
-		bar.elapsed = 0
-		bar.endtime = t + bar.time
-		bar.starttime = t
-	end
-	bar.fireforget = fireforget
-	bar.running = true
-	bar.paused = nil
-	bar.fading = nil
---	CandyBar:AcquireBarFrame(name) -- this will reset the barframe incase we were fading out when it was restarted
-	bar.frame:Show()
---	if bar.group then
---		CandyBar:UpdateGroup(bar.group) -- update the group
---	end
---	CandyBar.frame:Show()
-end
-
-function stop_bar(name)
-	local bar = bars[name]
-
-	bar.running = nil
-	bar.paused = nil
-
-	if bar.fadeout then
-		bar.frame.spark:Hide()
-		bar.fading = true
-		bar.fadeelapsed = 0
-		local t = GetTime()
-		if bar.endtime > t then
-			bar.endtime = t
-		end
-	else
-		bar.frame:Hide()
-		bar.starttime = nil
-		bar.endtime = 0
---		if bar.fireforget then
---			return CandyBar:Unregister(name)
---		end
-	end
---	if not CandyBar:HasHandlers() then
---		CandyBar.frame:Hide()
---	end
-end
-
-function create_bar_frame(name)
-	local bar = bars[name]
 
 	local color = bar.color or {1, 0, 1}
 	local bgcolor = {0, .5, .5, .5}
 	local icon = bar.icon or nil
 	local iconpos = 'LEFT'
-	local texture = [[Interface\TargetingFrame\UI-StatusBar]]
+	local texture = [[Interface\Addons\CCWatch\Textures\BantoBar]] -- [[Interface\TargetingFrame\UI-StatusBar]]
 	local width = 200
 	local height = 16
 	local point = 'CENTER'
@@ -105,18 +52,18 @@ function create_bar_frame(name)
 	local yoffset = 0
 	local text = bar.text
 	local fontsize = 11
-	local textcolor = {1, 1, 1, 1}
-	local timertextcolor = {1, 1, 1, 1}
+	local textcolor = {1, 1, 1}
+	local timertextcolor = {1, 1, 1}
 	local scale = 1
 
 	local timertextwidth = fontsize * 3.6
 	local font, _, style = GameFontHighlight:GetFont()
 
+	bar.fadetime = 1
 	bar.width = 200
 	bar.bgcolor = bgcolor
 	bar.textcolor = textcolor
 	bar.timertextcolor = timertextcolor
-	bar.gradienttable = {}
 
 	local f = CreateFrame('Button', nil, UIParent)
 
@@ -208,15 +155,14 @@ function create_bar_frame(name)
 		end)
 	end
 
-	bar.frame = f
+	bar.frame = f	
+	return f
 end
 
-function fade_bar(name)
+local function fade_bar(name)
 	local bar = bars[name]
 
 	if bar.fadeelapsed > bar.fadetime then
-		bar.fading = nil
-		bar.starttime = nil
 		bar.frame:Hide()
 		bar.frame:SetAlpha(0)
 	else
@@ -226,41 +172,7 @@ function fade_bar(name)
 	end
 end
 
-function update_bar(name)
-	local bar = bars[name]
-
-	local t = bar.time - bar.elapsed
-
-	local reversed = bar.reversed
-
-	do
-		local timetext
-		local h = floor(t / 3600)
-		local m = t - h * 3600
-		m = floor(m / 60)
-		local s = t - (h * 3600 + m * 60)
-		if h > 0 then
-			timetext = format('%d:%02d', h, m)
-		elseif m > 0 then
-			timetext = format('%d:%02d', m, floor(s))
-		elseif s < 10 then
-			timetext = format('%1.1f', s)
-		else
-			timetext = format('%.0f', floor(s))
-		end
-		bar.frame.timertext:SetText(timetext)
-	end
-
-	local perc = t / bar.time
-
-	bar.frame.statusbar:SetValue(reversed and 1 - perc or perc)
-
-	local sp =  bar.width * perc
-	sp = reversed and -sp or sp
-	bar.frame.spark:SetPoint('CENTER', bar.frame.statusbar, reversed and 'RIGHT' or 'LEFT', sp, 0)
-end
-
-function format_time(t)
+local function format_time(t)
 	local h = floor(t / 3600)
 	local m = floor((t - h * 3600) / 60)
 	local s = t - (h * 3600 + m * 60)
@@ -326,13 +238,13 @@ function CCWatch_OnLoad()
 		end
 	end
 
-	CCWatch_Globals();
-	CCWatch_Config();
+	CCWatch_Globals()
+	CCWatch_Config()
 
 	CCWatchObject = this;
 
-	this:RegisterEvent("UNIT_AURA");
-	this:RegisterEvent("UNIT_COMBAT");
+	this:RegisterEvent("UNIT_AURA")
+	this:RegisterEvent("UNIT_COMBAT")
 
 	if UnitLevel'player' < 60 then
 		this:RegisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
@@ -957,17 +869,17 @@ function CCWatch_QueueEffect(effect)
 		ext = "CC"
 	end
 
-	tinsert( GROUPS[group].EFFECT, 1, effect )
+	tinsert(GROUPS[group].EFFECT, 1, effect)
 
 	local activebarText = bars["CCWatchBar"..ext..group].frame.text
-	activebarText:SetText(effect..": "..CCWATCH.CCS[effect].TARGET);
+	activebarText:SetText(effect..": "..CCWATCH.CCS[effect].TARGET)
 
 	-- if queue was empty show bar
-	if( getn(GROUPS[group].EFFECT) == 1 ) then
-		local activebar = getglobal("CCWatchBar"..ext..group);
+	if getn(GROUPS[group].EFFECT) == 1 then
+		local activebar = getglobal("CCWatchBar"..ext..group)
 		activebar:Show();
 		if CCWATCH.CCS[effect].COLOR then
-			getglobal("CCWatchBar"..ext..group.."StatusBar"):SetStatusBarColor(CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b);
+			getglobal("CCWatchBar"..ext..group.."StatusBar"):SetStatusBarColor(CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b)
 		end
 	end
 end
@@ -1010,15 +922,15 @@ function CCWatch_UnqueueEffect(effect)
 end
 
 function CCWatchBarCC_OnShow(group)
-	CCWatchBar_OnShow(group, CCWATCH.GROUPSCC, "CC");
+	CCWatchBar_OnShow(group, CCWATCH.GROUPSCC, "CC")
 end
 
 function CCWatchBarDebuff_OnShow(group)
-	CCWatchBar_OnShow(group, CCWATCH.GROUPSDEBUFF, "Debuff");
+	CCWatchBar_OnShow(group, CCWATCH.GROUPSDEBUFF, "Debuff")
 end
 
 function CCWatchBarBuff_OnShow(group)
-	CCWatchBar_OnShow(group, CCWATCH.GROUPSBUFF, "Buff");
+	CCWatchBar_OnShow(group, CCWATCH.GROUPSBUFF, "Buff")
 end
 
 function CCWatchBar_OnShow(group, GROUPS, ext)
@@ -1083,7 +995,7 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 
 		local t = GetTime()
 
-		if t <= CCWATCH.CCS[effect].TIMER_END  then
+		if t < CCWATCH.CCS[effect].TIMER_END - .2 then -- TODO why needed
 			local duration = CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START
 			local remaining = CCWATCH.CCS[effect].TIMER_END - t
 			local fraction = remaining / duration
@@ -1102,6 +1014,8 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 			local r, g, b = unpack(CCWATCH.CCS[effect].SCHOOL or {1, 0, 1})
 			frame.statusbar:SetStatusBarColor(f*r + 1-f, f*g, f*b)
 
+			frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[effect].ICON or 'INV_Misc_QuestionMark'))
+
 			if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME) then
 				if CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START > CCWATCH.WARNLOW and CCWATCH.WARNLOW > remaining then
 					if CCWATCH.CCS[effect].WARN == 1 then 
@@ -1112,7 +1026,8 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 					CCWATCH.CCS[effect].WARN = 1
 				end
 			end
-		elseif t > CCWATCH.CCS[effect].TIMER_END then
+		else
+			frame.statusbar:SetValue(0)
 			CCWatch_RemoveEffect(effect, false)
 		end
 	elseif frame:GetAlpha() > 0 then
@@ -1238,7 +1153,7 @@ function CCWatch_LoadVariables()
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].WarnType == nil then
-		CCWatch_Save[CCWATCH.PROFILE].WarnType = "PARTY";
+		CCWatch_Save[CCWATCH.PROFILE].WarnType = "PARTY"
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].WarnLow == nil then
@@ -1250,7 +1165,7 @@ function CCWatch_LoadVariables()
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC == nil then
-		CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC = "";
+		CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC = ""
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].ColorOverTime == nil then
@@ -1270,11 +1185,11 @@ function CCWatch_LoadVariables()
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue == nil then
-		CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue = 1;
+		CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue = 1
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].CoTLowValue == nil then
-		CCWatch_Save[CCWATCH.PROFILE].CoTLowValue = 5;
+		CCWatch_Save[CCWATCH.PROFILE].CoTLowValue = 5
 	end
 
 	CCWATCH.ARCANIST = CCWatch_Save[CCWATCH.PROFILE].arcanist
@@ -1355,30 +1270,30 @@ function CCWatch_UpdateTextures()
 end
 
 function CCWatch_UpdateImpGouge(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 1 );
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 1 )
 	if texture then
 		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED);
+			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
 			CCWATCH.CCS[CCWATCH_GOUGE].LENGTH = 4 + rank * 0.5;
 		end
 	elseif CCWATCH.CCS[CCWATCH_GOUGE].LENGTH == nil then
-		CCWATCH.CCS[CCWATCH_GOUGE].LENGTH = 4;
+		CCWATCH.CCS[CCWATCH_GOUGE].LENGTH = 4
 	end
 end
 
 function CCWatch_UpdateImpGarotte(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 8 );
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 8 )
 	if texture then
 		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED);
+			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_GAROTTE].LENGTH = 18 + rank * 3;
+			CCWATCH.CCS[CCWATCH_GAROTTE].LENGTH = 18 + rank * 3
 		end
 	elseif CCWATCH.CCS[CCWATCH_GAROTTE].LENGTH == nil then
-		CCWATCH.CCS[CCWATCH_GAROTTE].LENGTH = 18;
+		CCWATCH.CCS[CCWATCH_GAROTTE].LENGTH = 18
 	end
 end
 
@@ -1387,20 +1302,20 @@ function CCWatch_UpdateKidneyShot(bPrint)
 	while true do
 		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
 		if not name then
-			if( CCWATCH.CCS[CCWATCH_KS].LENGTH == nil ) then
-				CCWATCH.CCS[CCWATCH_KS].LENGTH = 1;
+			if CCWATCH.CCS[CCWATCH_KS].LENGTH == nil then
+				CCWATCH.CCS[CCWATCH_KS].LENGTH = 1
 			end
 			return
 		end
 
-		if( name == CCWATCH_KS ) then
+		if name == CCWATCH_KS then
 			if bPrint then
-				CCWatch_AddMessage(name.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED);
+				CCWatch_AddMessage(name.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 			end
-			if( string.sub(rank,string.len(rank)) == "1" ) then
-				CCWATCH.CCS[CCWATCH_KS].LENGTH = 0;
+			if string.sub(rank,string.len(rank)) == "1" then
+				CCWATCH.CCS[CCWATCH_KS].LENGTH = 0
 			else
-				CCWATCH.CCS[CCWATCH_KS].LENGTH = 1;
+				CCWATCH.CCS[CCWATCH_KS].LENGTH = 1
 			end
 			return
 		end
@@ -1410,63 +1325,63 @@ function CCWatch_UpdateKidneyShot(bPrint)
 end
 
 function CCWatch_UpdateImpTrap(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 7 );
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 7 )
 	if texture then
 		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED);
+			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
 -- Freezing Trap is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH = CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH * (1 + rank * 0.15);
+			CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH = CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH * (1 + rank * 0.15)
 		end
 	end
 end
 
 function CCWatch_UpdateImpSeduce(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 7 );
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 7 )
 	if texture then
 		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED);
+			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_SEDUCE].LENGTH = 15 * (1 + rank * 0.10);
+			CCWATCH.CCS[CCWATCH_SEDUCE].LENGTH = 15 * (1 + rank * 0.10)
 		end
 	end
 end
 
 function CCWatch_UpdateBrutalImpact(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 4 );
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 4 )
 	if texture then
 		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED);
+			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
 -- Bash is a true multi rank, hence already updated
 			CCWATCH.CCS[CCWATCH_POUNCE].LENGTH = 2 + rank * 0.50;
-			CCWATCH.CCS[CCWATCH_BASH].LENGTH = CCWATCH.CCS[CCWATCH_BASH].LENGTH + rank * 0.50;
+			CCWATCH.CCS[CCWATCH_BASH].LENGTH = CCWATCH.CCS[CCWATCH_BASH].LENGTH + rank * 0.50
 		end
 	end
 end
 
 function CCWatch_UpdatePermafrost(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 2 );
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 2 )
 	if texture then
 		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED);
+			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
 -- Frostbolt is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_CONEOFCOLD].LENGTH = 8 + 0.50 + rank * 0.50;
-			CCWATCH.CCS[CCWATCH_FROSTBOLT].LENGTH = CCWATCH.CCS[CCWATCH_FROSTBOLT].LENGTH + 0.50 + rank * 0.50;
+			CCWATCH.CCS[CCWATCH_CONEOFCOLD].LENGTH = 8 + .50 + rank * .50
+			CCWATCH.CCS[CCWATCH_FROSTBOLT].LENGTH = CCWATCH.CCS[CCWATCH_FROSTBOLT].LENGTH + .50 + rank * .50
 		end
 	end
 end
 
 function CCWatch_UpdateImpShadowWordPain(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 4 );
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo(3, 4)
 	if texture then
 		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED);
+			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
 			CCWATCH.CCS[CCWATCH_SHADOWWORDPAIN].LENGTH = 18 + rank * 3;
@@ -1581,13 +1496,13 @@ function CCWatch_Help()
 end
 
 function CCWatch_SetWidth(width)
-	for _, k in {"CC","Debuff","Buff"} do
+	for _, k in {'CC', 'Debuff', 'Buff'} do
 		for i = 1, CCWATCH_MAXBARS do
-			getglobal("CCWatchBar"..k..i):SetWidth(width + 10)
+			getglobal("CCWatchBar" .. k .. i):SetWidth(width + 10)
 			-- getglobal("CCWatchBar"..k..i.."Text"):SetWidth(width);
 			-- getglobal("CCWatchBar"..k..i.."StatusBar"):SetWidth(width);
 		end
-		getglobal("CCWatch"..k):SetWidth(width + 10)
+		getglobal("CCWatch" .. k):SetWidth(width + 10)
 	end
 end
 

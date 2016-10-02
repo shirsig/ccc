@@ -115,6 +115,8 @@ CCWATCH.CCS[CCWATCH_BLACKOUT] = {
 
 -- Mage - Stun/Root CCs
 CCWATCH.CCS[CCWATCH_POLYMORPH] = {
+	ICON = 'Spell_Nature_Polymorph', -- Spell_Magic_PolymorphPig, TODO Ability_Hunter_Pet_Turtle
+	SCHOOL = CCWATCH_SCHOOL.ARCANE,
 	ETYPE = ETYPE_CC,
 	GROUP = 3,
 	LENGTH = 20, -- 30 40 50
@@ -126,6 +128,8 @@ CCWATCH.CCS[CCWATCH_POLYMORPH] = {
 }
 
 CCWATCH.CCS[CCWATCH_FROSTNOVA] = {
+	ICON = 'Spell_Frost_FreezingBreath',
+	SCHOOL = CCWATCH_SCHOOL.FROST,
 	ETYPE = ETYPE_CC,
 	GROUP = 1,
 	LENGTH = 8,
