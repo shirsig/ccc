@@ -10,15 +10,15 @@ CCW_EWARN_BROKEN = 4
 CCW_EWARN_LOWTIME = 8
 
 CCWATCH_SCHOOL = {
-	FIRE = { 1, 0, 0 },
-	FROST = { 0, 0, 1 },
-	NATURE = { 0, 1, 0 },
-	SHADOW = { RAID_CLASS_COLORS.WARLOCK.r, RAID_CLASS_COLORS.WARLOCK.g, RAID_CLASS_COLORS.WARLOCK.b },
-	ARCANE = { 1, 1, 1 },
-	HOLY = { 1, 1, 0 },
-	PHYSICAL = { RAID_CLASS_COLORS.DRUID.r, RAID_CLASS_COLORS.DRUID.g, RAID_CLASS_COLORS.DRUID.b },
-	MAGIC = { 0, 1, 1 },
-	NONE = { 1, 1, 1 },
+	FIRE = {1, 0, 0},
+	FROST = {0, 0, 1},
+	NATURE = {0, 1, 0},
+	SHADOW = {RAID_CLASS_COLORS.WARLOCK.r, RAID_CLASS_COLORS.WARLOCK.g, RAID_CLASS_COLORS.WARLOCK.b},
+	ARCANE = {1, 1, 1},
+	HOLY = {1, 1, 0},
+	PHYSICAL = {RAID_CLASS_COLORS.DRUID.r, RAID_CLASS_COLORS.DRUID.g, RAID_CLASS_COLORS.DRUID.b},
+	MAGIC = {0, 1, 1},
+	NONE = {1, 1, 1},
 }
 
 -- CCWATCH_SCHOOL = {
@@ -259,8 +259,6 @@ function CCWatch_OnLoad()
 
 	this:RegisterEvent("SPELLCAST_START")
 	this:RegisterEvent("SPELLCAST_STOP")
-	this:RegisterEvent("SPELLCAST_FAILED")
-	this:RegisterEvent("SPELLCAST_INTERRUPTED")
 
 	this:RegisterEvent("PLAYER_TARGET_CHANGED")
 
@@ -496,51 +494,29 @@ do
 		end
 	end
 
-	local effect, applied_effect, old_starttime, old_endtime
+	local effect, target, endtime
 
 	function CCWatch_EventHandler.SPELLCAST_START()
 		effect = arg1
-		applied_effect = nil
+		endtime = arg2/1000 + GetTime() - .3
+		target = UnitName'target'
 	--	duration = arg2;	-- might wanna play with it to deduce the used rank
 	end
 
 	function CCWatch_EventHandler.SPELLCAST_STOP()
-		local target = UnitName'target'
-		if effect and target then
-			if CCWATCH.CCS[effect] then
-				applied_effect = effect
-				old_starttime = CCWATCH.CCS[effect].TIMER_START
-				old_endtime = CCWATCH.CCS[effect].TIMER_END
+		if effect and CCWATCH.CCS[effect] and GetTime() >= endtime then
+			local group = CCWATCH.CCS[effect].GROUP
+			local etype = CCWATCH.CCS[effect].ETYPE
 
-				local group = CCWATCH.CCS[effect].GROUP
-				local etype = CCWATCH.CCS[effect].ETYPE
-
-				if find_effect(effect, group, etype) then
-					-- no UNIT_AURA event if it's already active
-					CCWATCH.UNIT_AURA.TIME = GetTime()
-					CCWATCH.UNIT_AURA.TARGET = target
-					CCWatch_QueueEvent(effect, target, GetTime(), 1)
-					CCWatch_EffectHandler[1]()
-				end
+			if find_effect(effect, group, etype) then
+				-- no UNIT_AURA event if it's already active
+				CCWATCH.UNIT_AURA.TIME = GetTime()
+				CCWATCH.UNIT_AURA.TARGET = target
+				CCWatch_QueueEvent(effect, target, GetTime(), 1)
+				CCWatch_EffectHandler[1]()
 			end
 		end
-		effect = nil
-	end
-
-	function CCWatch_EventHandler.SPELLCAST_FAILED()
-		if applied_effect and CCWATCH.CCS[applied_effect] then
-			CCWATCH.CCS[applied_effect].TIMER_START = old_starttime
-			CCWATCH.CCS[applied_effect].TIMER_END = old_endtime
-		end
-		applied_effect = nil
-	end
-
-	function CCWatch_EventHandler.SPELLCAST_INTERRUPTED()
-		if applied_effect and CCWATCH.CCS[applied_effect] then
-			CCWATCH.CCS[applied_effect].TIMER_START = old_starttime
-			CCWATCH.CCS[applied_effect].TIMER_END = old_endtime
-		end
-		applied_effect = nil
+		effect, endtime = nil
 	end
 end
 
