@@ -568,7 +568,7 @@ end
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
 	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
 		if CCWATCH.STYLE > 1 or CCWatch_CheckRecentTargets(mobname) then
-			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~=0 then
+			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
 				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
 				CCWatch_EffectHandler[1]()
 			end
@@ -642,11 +642,12 @@ end
 
 CCWatch_EffectHandler[1] = function()
 -- applied
-	if CCWATCH.STYLE ~= 0 or math.abs( CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME ) < CCWATCH.THRESHOLD then
+	if true then
+	-- if CCWATCH.STYLE ~= 0 or math.abs(CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME) < CCWATCH.THRESHOLD then TODO what is this even
 		local effect = CCWATCH.EFFECT[1].TYPE
 		local mobname = CCWATCH.EFFECT[1].TARGET
 
-		if GetTime() > ( CCWATCH.CCS[effect].TIMER_END + 15 ) or mobname ~= CCWATCH.CCS[effect].TARGET then
+		if GetTime() > CCWATCH.CCS[effect].TIMER_END + 15 or mobname ~= CCWATCH.CCS[effect].TARGET then
 -- quick & dirty hack for shared DR between Seduce & Fear)
 			if effect == CCWATCH_FEAR or effect == CCWATCH_SEDUCE then
 				CCWATCH.CCS[CCWATCH_FEAR].DIMINISH = 1
@@ -669,8 +670,8 @@ CCWatch_EffectHandler[1] = function()
 		end
 
 		CCWatch_AddEffect(effect)
-
 		CCWatch_UnqueueEvent()
+
 		if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) then
 			CCWatchWarn(CCWATCH_WARN_APPLIED, effect, mobname)
 		end
@@ -684,7 +685,7 @@ CCWatch_EffectHandler[2] = function()
 	local bUnqueueDone = false
 	if target == CCWATCH.EFFECT[1].TARGET then
 	-- target and CC target names match, wait for UNIT_AURA to ensure target match
-		if CCWATCH.STYLE ~= 0 or math.abs( CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME ) < CCWATCH.THRESHOLD then
+		if CCWATCH.STYLE ~= 0 or math.abs(CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME) < CCWATCH.THRESHOLD then
 			-- CCWATCH.CCS[effect].TIMER_END = GetTime()
 			CCWatch_RemoveEffect(effect, false)
 			CCWatch_UnqueueEvent()
@@ -744,12 +745,12 @@ end
 
 
 function CCWatch_QueueEvent(effect, mobname, time, status)
-	local effect_structure = {}
-	effect_structure.TYPE = effect
-	effect_structure.TARGET = mobname
-	effect_structure.TIME = time
-	effect_structure.STATUS = status
-	tinsert(CCWATCH.EFFECT, effect_structure)
+	tinsert(CCWATCH.EFFECT, {
+		TYPE = effect,
+		TARGET = mobname,
+		TIME = time,
+		STATUS = status,
+	})
 end
 
 function CCWatch_UnqueueEvent()
@@ -1094,54 +1095,54 @@ function CCWatch_LoadVariablesOnUpdate(arg1)
 end
 
 function CCWatch_LoadVariables()
-	CCWATCH.PROFILE = UnitName("player").." of "..GetCVar("RealmName");
+	CCWATCH.PROFILE = UnitName'player' .. ' of ' .. GetCVar'RealmName'
 
 	if CCWatch_Save[CCWATCH.PROFILE] == nil then
-		CCWatch_Save[CCWATCH.PROFILE] = {};
+		CCWatch_Save[CCWATCH.PROFILE] = {}
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].SavedCC == nil then
-		CCWatch_Save[CCWATCH.PROFILE].SavedCC = {};
+		CCWatch_Save[CCWATCH.PROFILE].SavedCC = {}
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].ConfCC == nil then
-		CCWatch_Save[CCWATCH.PROFILE].ConfCC = {};
+		CCWatch_Save[CCWATCH.PROFILE].ConfCC = {}
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].status == nil then
-		CCWatch_Save[CCWATCH.PROFILE].status = CCWATCH.STATUS;
+		CCWatch_Save[CCWATCH.PROFILE].status = CCWATCH.STATUS
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].invert == nil then
-		CCWatch_Save[CCWATCH.PROFILE].invert = false;
+		CCWatch_Save[CCWATCH.PROFILE].invert = false
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].growth == nil then
-		CCWatch_Save[CCWATCH.PROFILE].growth = 0;
+		CCWatch_Save[CCWATCH.PROFILE].growth = 0
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].scale == nil then
-		CCWatch_Save[CCWATCH.PROFILE].scale = 1;
+		CCWatch_Save[CCWATCH.PROFILE].scale = 1
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].width == nil then
-		CCWatch_Save[CCWATCH.PROFILE].width = 160;
+		CCWatch_Save[CCWATCH.PROFILE].width = 160
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].alpha == nil then
-		CCWatch_Save[CCWATCH.PROFILE].alpha = 1;
+		CCWatch_Save[CCWATCH.PROFILE].alpha = 1
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].arcanist == nil then
-		CCWatch_Save[CCWATCH.PROFILE].arcanist = false;
+		CCWatch_Save[CCWATCH.PROFILE].arcanist = false
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].timers == nil then
-		CCWatch_Save[CCWATCH.PROFILE].timers = 2;
+		CCWatch_Save[CCWATCH.PROFILE].timers = 2
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].style == nil then
-		CCWatch_Save[CCWATCH.PROFILE].style = 0;
+		CCWatch_Save[CCWATCH.PROFILE].style = 0
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].Monitoring == nil then
@@ -1153,7 +1154,7 @@ function CCWatch_LoadVariables()
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].WarnLow == nil then
-		CCWatch_Save[CCWATCH.PROFILE].WarnLow = 10;
+		CCWatch_Save[CCWATCH.PROFILE].WarnLow = 10
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].WarnMsg == nil then
@@ -1165,7 +1166,7 @@ function CCWatch_LoadVariables()
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].ColorOverTime == nil then
-		CCWatch_Save[CCWATCH.PROFILE].ColorOverTime = false;
+		CCWatch_Save[CCWATCH.PROFILE].ColorOverTime = false
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor == nil then
@@ -1224,7 +1225,7 @@ function CCWatch_LoadVariables()
 		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS")
 	end
 
-	CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style;
+	CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style
 
 	CCWatchCC:SetScale(CCWATCH.SCALE);
 	CCWatchDebuff:SetScale(CCWATCH.SCALE);
