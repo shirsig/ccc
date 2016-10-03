@@ -500,7 +500,7 @@ do
 
 	function CCWatch_EventHandler.SPELLCAST_START()
 		effect = arg1
-		old_endtime = 0
+		applied_effect = nil
 	--	duration = arg2;	-- might wanna play with it to deduce the used rank
 	end
 
