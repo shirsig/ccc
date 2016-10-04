@@ -279,7 +279,7 @@ function CCWatch_BarUnlock()
 			f.statusbar:SetStatusBarColor(1, 0, 0)
 			f.statusbar:SetValue(1)
 			f.icon:SetNormalTexture[[Interface\Icons\INV_Misc_QuestionMark]]
-			f.text:SetText('CCWatch Bar ' .. type .. ' ' .. i)
+			f.text:SetText('CCWatch ' .. type .. ' Bar ' .. i)
 			f.timertext:SetText''
 			f.spark:Hide()
 			-- getglobal(barname.."StatusBarSpark"):SetPoint("CENTER", barname.."StatusBar", "LEFT", 0, 0)
