@@ -271,14 +271,20 @@ end
 
 function CCWatch_BarUnlock()
 	CCWATCH.STATUS = 2
-	CCWatchCC:EnableMouse(1)
-	CCWatchDebuff:EnableMouse(1)
-	CCWatchBuff:EnableMouse(1)
-
-	for i = 1, CCWATCH_MAXBARS do
-		getglobal("CCWatchBarCC"..i):Show()
-		getglobal("CCWatchBarDebuff"..i):Show()
-		getglobal("CCWatchBarBuff"..i):Show()
+	for _, type in {'CC', 'Buff', 'Debuff'} do
+		getglobal('CCWatch' .. type):EnableMouse(1)
+		for i = 1, CCWATCH_MAXBARS do
+			local f = getglobal('CCWatchBar' .. type .. i)
+			f:SetAlpha(CCWATCH.ALPHA)
+			f.statusbar:SetStatusBarColor(1, 0, 0)
+			f.statusbar:SetValue(1)
+			f.icon:SetNormalTexture[[Interface\Icons\INV_Misc_QuestionMark]]
+			f.text:SetText('CCWatch Bar ' .. type .. ' ' .. i)
+			f.timertext:SetText''
+			f.spark:Hide()
+			-- getglobal(barname.."StatusBarSpark"):SetPoint("CENTER", barname.."StatusBar", "LEFT", 0, 0)
+			f:Show()
+		end
 	end
 end
 
@@ -297,7 +303,7 @@ end
 
 function CCWatch_SlashCommandHandler(msg)
 	if msg then
-		local command = string.lower(msg)
+		local command = strlower(msg)
 		if command == "on" then
 			if CCWATCH.STATUS == 0 then
 				CCWATCH.STATUS = 1
@@ -851,6 +857,10 @@ function CCWatch_RemoveEffect(effect, dr)
 end
 
 function CCWatch_QueueEffect(effect)
+	if CCWATCH.STATUS ~= 1 then
+		return
+	end
+
 	local group = CCWATCH.CCS[effect].GROUP
 	local GROUPS
 	local ext = ''
@@ -873,8 +883,7 @@ function CCWatch_QueueEffect(effect)
 
 	-- if queue was empty show bar
 	if getn(GROUPS[group].EFFECT) == 1 then
-		local activebar = getglobal("CCWatchBar"..ext..group)
-		activebar:Show();
+		getglobal("CCWatchBar"..ext..group):Show()
 		if CCWATCH.CCS[effect].COLOR then
 			getglobal("CCWatchBar"..ext..group.."StatusBar"):SetStatusBarColor(CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b)
 		end
@@ -899,7 +908,7 @@ function CCWatch_UnqueueEffect(effect)
 
 	local index
 	-- find the effect in the queue, if it's not there index stays 0
-	table.foreach(GROUPS[group].EFFECT, function(k,v) if( v == effect ) then index = k end end)
+	table.foreach(GROUPS[group].EFFECT, function(k,v) if v == effect then index = k end end)
 	if index then
 --		CCWATCH.CCS[GROUPS[group].EFFECT[index]].TARGET = ""; -- resetting target for mob death removal
 -- commented because of conflict with DR requiring to keep the target name.
@@ -912,9 +921,6 @@ function CCWatch_UnqueueEffect(effect)
 		local activebarText = bars["CCWatchBar" .. ext .. group].frame.text
 		local effect = GROUPS[group].EFFECT[1]
 		activebarText:SetText(CCWATCH.CCS[effect].TARGET .. ' : ' .. effect)
-	else
-		-- local activebarText = bars["CCWatchBar" .. ext .. group].frame.text
-		-- activebarText:SetText("CCWatch " .. ext .. " Bar " .. group)
 	end
 end
 
@@ -933,11 +939,6 @@ end
 function CCWatchBar_OnShow(group, GROUPS, ext)
 	getglobal('CCWatch' .. ext):SetScale(CCWATCH.SCALE)
 	getglobal('CCWatchBar' .. ext .. group):SetAlpha(CCWATCH.ALPHA)
-	-- getglobal(barname.."StatusBar"):SetStatusBarColor(CCWATCH.COTNORMALCOLOR.r, CCWATCH.COTNORMALCOLOR.g, CCWATCH.COTNORMALCOLOR.b)
-	if getn(GROUPS[group].EFFECT) == 0 then
-		bars[barname].frame.text:SetText('CCWatch Bar '..ext..' '..group)
-	end
-	-- getglobal(barname.."StatusBarSpark"):SetPoint("CENTER", barname.."StatusBar", "LEFT", 0, 0)
 end
 
 
@@ -960,7 +961,7 @@ function CCWatchBarBuff4_OnShow() CCWatchBarBuff_OnShow(4) end
 function CCWatchBarBuff5_OnShow() CCWatchBarBuff_OnShow(5) end
 
 function CCWatch_OnUpdate()
-	if CCWATCH.STATUS == 0 then
+	if CCWATCH.STATUS ~= 1 then
 		return
 	end
 	table.foreach(CCWATCH.GROUPSCC, CCWatch_GroupCCUpdate)
@@ -1051,12 +1052,12 @@ end
 local function GetSavedCC(k, v)
 	if v == nil then
 --CCWatch_AddMessage("Removing "..k);
-		CCWATCH.CCS[k] = nil;
-		return;
+		CCWATCH.CCS[k] = nil
+		return
 	end
 	if v.GROUP == nil or v.ETYPE == nil or v.LENGTH == nil or v.DIMINISHES == nil then
-		CCWATCH.CCS[k] = nil;
-		return;
+		CCWATCH.CCS[k] = nil
+		return
 	end
 --CCWatch_AddMessage("Adding "..k.." ("..type(k)..")");
 	CCWATCH.CCS[k] = {
@@ -1089,8 +1090,8 @@ end
 
 function CCWatch_LoadVariablesOnUpdate(arg1)
 	if not CCWATCH.LOADEDVARIABLES then
-		CCWatch_LoadVariables();
-		CCWATCH.LOADEDVARIABLES = true;
+		CCWatch_LoadVariables()
+		CCWATCH.LOADEDVARIABLES = true
 	end
 end
 
@@ -1146,7 +1147,7 @@ function CCWatch_LoadVariables()
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].Monitoring == nil then
-		CCWatch_Save[CCWATCH.PROFILE].Monitoring = bit.bor(ETYPE_CC, ETYPE_DEBUFF, ETYPE_BUFF);
+		CCWatch_Save[CCWATCH.PROFILE].Monitoring = bit.bor(ETYPE_CC, ETYPE_DEBUFF, ETYPE_BUFF)
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].WarnType == nil then
@@ -1158,7 +1159,7 @@ function CCWatch_LoadVariables()
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].WarnMsg == nil then
-		CCWatch_Save[CCWATCH.PROFILE].WarnMsg = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME);
+		CCWatch_Save[CCWATCH.PROFILE].WarnMsg = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME)
 	end
 
 	if CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC == nil then
@@ -1217,20 +1218,20 @@ function CCWatch_LoadVariables()
 	CCWATCH.COTLOWVALUE = CCWatch_Save[CCWATCH.PROFILE].CoTLowValue
 
 	if bit.band(CCWATCH.MONITORING, ETYPE_CC) ~= 0 or bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF) ~= 0 then
-		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE")
-		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE")
+		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE'
+		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE'
 	end
 	if bit.band(CCWATCH.MONITORING, ETYPE_BUFF) ~= 0 then
-		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS")
-		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS")
+		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS'
+		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS'
 	end
 
 	CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style
 
-	CCWatchCC:SetScale(CCWATCH.SCALE);
-	CCWatchDebuff:SetScale(CCWATCH.SCALE);
-	CCWatchBuff:SetScale(CCWATCH.SCALE);
-	CCWatch_SetWidth(CCWATCH.WIDTH);
+	CCWatchCC:SetScale(CCWATCH.SCALE)
+	CCWatchDebuff:SetScale(CCWATCH.SCALE)
+	CCWatchBuff:SetScale(CCWATCH.SCALE)
+	CCWatch_SetWidth(CCWATCH.WIDTH)
 
 	if CCWATCH.STATUS == 2 then
 		CCWatch_BarUnlock()
@@ -1325,11 +1326,11 @@ function CCWatch_UpdateImpTrap(bPrint)
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 7 )
 	if texture then
 		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
+			CCWatch_AddMessage(talentname .. " " .. CCWATCH_RANK .. " " .. rank .. " " .. CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
 -- Freezing Trap is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH = CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH * (1 + rank * 0.15)
+			CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH = CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH * (1 + rank * .15)
 		end
 	end
 end
@@ -1338,10 +1339,10 @@ function CCWatch_UpdateImpSeduce(bPrint)
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 7 )
 	if texture then
 		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
+			CCWatch_AddMessage(talentname .. " " .. CCWATCH_RANK .. " " .. rank .. " " .. CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_SEDUCE].LENGTH = 15 * (1 + rank * 0.10)
+			CCWATCH.CCS[CCWATCH_SEDUCE].LENGTH = 15 * (1 + rank * .10)
 		end
 	end
 end
@@ -1354,8 +1355,8 @@ function CCWatch_UpdateBrutalImpact(bPrint)
 		end
 		if rank ~= 0 then
 -- Bash is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_POUNCE].LENGTH = 2 + rank * 0.50;
-			CCWATCH.CCS[CCWATCH_BASH].LENGTH = CCWATCH.CCS[CCWATCH_BASH].LENGTH + rank * 0.50
+			CCWATCH.CCS[CCWATCH_POUNCE].LENGTH = 2 + rank * .50;
+			CCWATCH.CCS[CCWATCH_BASH].LENGTH = CCWATCH.CCS[CCWATCH_BASH].LENGTH + rank * .50
 		end
 	end
 end
@@ -1397,7 +1398,7 @@ function CCWatch_GetSpellRank(spellname, spelleffect, bPrint)
 		if not name then
 			if not gotone then
 				if bPrint then
-					CCWatch_AddMessage(spellname.." "..CCWATCH_NOTDETECTED)
+					CCWatch_AddMessage(spellname .. " " .. CCWATCH_NOTDETECTED)
 				end
 				if CCWATCH.CCS[spelleffect].LENGTH == nil then
 					CCWATCH.CCS[spelleffect].LENGTH = CCWATCH_SPELLS[spellname].DURATION[maxrank]
