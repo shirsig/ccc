@@ -257,10 +257,11 @@ function CCWatch_OnLoad()
 	this:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER")
 	this:RegisterEvent("CHAT_MSG_SPELL_BREAK_AURA")
 
-	this:RegisterEvent("SPELLCAST_START")
-	this:RegisterEvent("SPELLCAST_STOP")
+	this:RegisterEvent'SPELLCAST_START'
+	this:RegisterEvent'SPELLCAST_DELAYED'
+	this:RegisterEvent'SPELLCAST_STOP'
 
-	this:RegisterEvent("PLAYER_TARGET_CHANGED")
+	this:RegisterEvent'PLAYER_TARGET_CHANGED'
 
 	SLASH_CCWATCH1 = "/ccwatch"
 	SLASH_CCWATCH2 = "/ccw"
@@ -507,6 +508,10 @@ do
 		endtime = arg2/1000 + GetTime() - .3
 		target = UnitName'target'
 	--	duration = arg2;	-- might wanna play with it to deduce the used rank
+	end
+
+	function CCWatch_EventHandler.SPELLCAST_DELAYED()
+		endtime = endtime + arg1/1000
 	end
 
 	function CCWatch_EventHandler.SPELLCAST_STOP()
