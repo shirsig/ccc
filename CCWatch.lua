@@ -9,28 +9,28 @@ CCW_EWARN_APPLIED = 2
 CCW_EWARN_BROKEN = 4
 CCW_EWARN_LOWTIME = 8
 
-CCWATCH_SCHOOL = {
-	FIRE = {1, 0, 0},
-	FROST = {0, 0, 1},
-	NATURE = {0, 1, 0},
-	SHADOW = {RAID_CLASS_COLORS.WARLOCK.r, RAID_CLASS_COLORS.WARLOCK.g, RAID_CLASS_COLORS.WARLOCK.b},
-	ARCANE = {1, 1, 1},
-	HOLY = {1, 1, 0},
-	PHYSICAL = {RAID_CLASS_COLORS.DRUID.r, RAID_CLASS_COLORS.DRUID.g, RAID_CLASS_COLORS.DRUID.b},
-	MAGIC = {0, 1, 1},
-	NONE = {1, 1, 1},
-}
-
 -- CCWATCH_SCHOOL = {
+-- 	FIRE = {1, 0, 0},
+-- 	FROST = {0, 0, 1},
+-- 	NATURE = {0, 1, 0},
+-- 	SHADOW = {RAID_CLASS_COLORS.WARLOCK.r, RAID_CLASS_COLORS.WARLOCK.g, RAID_CLASS_COLORS.WARLOCK.b},
+-- 	ARCANE = {1, 1, 1},
+-- 	HOLY = {1, 1, 0},
+-- 	PHYSICAL = {RAID_CLASS_COLORS.DRUID.r, RAID_CLASS_COLORS.DRUID.g, RAID_CLASS_COLORS.DRUID.b},
+-- 	MAGIC = {0, 1, 1},
 -- 	NONE = {1, 1, 1},
--- 	PHYSICAL = {1, 1, 0},
--- 	HOLY = {1, .9, .5},
--- 	FIRE = {1, .5, 0},
--- 	NATURE = {.3, 1, .3},
--- 	FROST = {.5, 1, 1},
--- 	SHADOW = {.5, .5, 1},
--- 	ARCANE = {1, .5, 1},
 -- }
+
+CCWATCH_SCHOOL = {
+	NONE = {1, 1, 1},
+	PHYSICAL = {1, 1, 0},
+	HOLY = {1, .9, .5},
+	FIRE = {1, .5, 0},
+	NATURE = {.3, 1, .3},
+	FROST = {.5, 1, 1},
+	SHADOW = {.5, .5, 1},
+	ARCANE = {1, .5, 1},
+}
 
 local bars = {}
 
@@ -869,7 +869,7 @@ function CCWatch_QueueEffect(effect)
 	tinsert(GROUPS[group].EFFECT, 1, effect)
 
 	local activebarText = bars["CCWatchBar"..ext..group].frame.text
-	activebarText:SetText(effect..": "..CCWATCH.CCS[effect].TARGET)
+	activebarText:SetText(CCWATCH.CCS[effect].TARGET .. ' : ' .. effect)
 
 	-- if queue was empty show bar
 	if getn(GROUPS[group].EFFECT) == 1 then
@@ -911,7 +911,7 @@ function CCWatch_UnqueueEffect(effect)
 	if getn(GROUPS[group].EFFECT) > 0 then
 		local activebarText = bars["CCWatchBar" .. ext .. group].frame.text
 		local effect = GROUPS[group].EFFECT[1]
-		activebarText:SetText(effect .. ": " .. CCWATCH.CCS[effect].TARGET)
+		activebarText:SetText(CCWATCH.CCS[effect].TARGET .. ' : ' .. effect)
 	else
 		-- local activebarText = bars["CCWatchBar" .. ext .. group].frame.text
 		-- activebarText:SetText("CCWatch " .. ext .. " Bar " .. group)
