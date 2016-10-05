@@ -241,9 +241,8 @@ function CCWatch_OnLoad()
 	CCWatch_Globals()
 	CCWatch_Config()
 
-	CCWatchObject = this;
+	CCWatchObject = this
 
-	this:RegisterEvent("UNIT_AURA")
 	this:RegisterEvent("UNIT_COMBAT")
 
 	if UnitLevel'player' < 60 then
@@ -376,8 +375,8 @@ function CCWatch_SlashCommandHandler(msg)
 			CCWatch_UpdateClassSpells(true)
 		elseif( command == "config" ) then
 			CCWatchOptionsFrame:Show()
-		elseif string.sub(command, 1, 5) == "scale" then
-			local scale = tonumber(string.sub(command, 7))
+		elseif strsub(command, 1, 5) == "scale" then
+			local scale = tonumber(strsub(command, 7))
 			if scale <= 3 and scale >= .25 then
 				CCWatch_Save[CCWATCH.PROFILE].scale = scale
 				CCWATCH.SCALE = scale
@@ -389,8 +388,8 @@ function CCWatch_SlashCommandHandler(msg)
 			else
 				CCWatch_Help()
 			end
-		elseif string.sub(command, 1, 5) == "width" then
-			local width = tonumber(string.sub(command, 7))
+		elseif strsub(command, 1, 5) == "width" then
+			local width = tonumber(strsub(command, 7))
 			if width <= 300 and width >= 50 then
 				CCWatch_Save[CCWATCH.PROFILE].width = width
 				CCWATCH.WIDTH = width
@@ -400,8 +399,8 @@ function CCWatch_SlashCommandHandler(msg)
 			else
 				CCWatch_Help()
 			end
-		elseif string.sub(command, 1, 5) == "alpha" then
-			local alpha = tonumber(string.sub(command, 7))
+		elseif strsub(command, 1, 5) == "alpha" then
+			local alpha = tonumber(strsub(command, 7))
 			if alpha <= 1 and alpha >= 0 then
 				CCWatch_Save[CCWATCH.PROFILE].alpha = alpha
 				CCWATCH.ALPHA = alpha
@@ -446,8 +445,8 @@ function CCWatch_SlashCommandHandler(msg)
 			CCWatch_AddMessage(CCWATCH_SCALE..CCWATCH.SCALE)
 			CCWatch_AddMessage(CCWATCH_WIDTH..CCWATCH.WIDTH)
 			CCWatch_AddMessage(CCWATCH_ALPHA..CCWATCH.ALPHA)
-		elseif string.sub(command, 1, 6) == "warncc" then
-			local cc = string.sub(command, 8);
+		elseif strsub(command, 1, 6) == "warncc" then
+			local cc = strsub(command, 8);
 			if cc ~= "EMOTE" or cc ~= "SAY" or cc ~= "PARTY" or cc ~= "RAID"
 				or cc ~= "YELL" or cc ~= "CHANNEL" then
 				CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC = cc
@@ -520,30 +519,11 @@ do
 			local etype = CCWATCH.CCS[effect].ETYPE
 
 			if find_effect(effect, group, etype) then
-				-- no UNIT_AURA event if it's already active
-				CCWATCH.UNIT_AURA.TIME = GetTime()
-				CCWATCH.UNIT_AURA.TARGET = target
 				CCWatch_QueueEvent(effect, target, GetTime(), 1)
 				CCWatch_EffectHandler[1]()
 			end
 		end
 		effect, endtime = nil
-	end
-end
-
-function CCWatch_EventHandler.UNIT_AURA()
-	if arg1 == 'target' then
-		CCWATCH.UNIT_AURA.TARGET = UnitName'target'
-		CCWATCH.UNIT_AURA.TIME = GetTime()
-
-		-- get rid of any old events so they don't clutter the queue
-		while getn(CCWATCH.EFFECT) > 0 and (CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME) > CCWATCH.THRESHOLD do
-			CCWatch_UnqueueEvent()
-		end
-
-		if getn(CCWATCH.EFFECT) > 0 then
-			CCWatch_EffectHandler[CCWATCH.EFFECT[1].STATUS]()
-		end
 	end
 end
 
@@ -653,39 +633,36 @@ end
 
 CCWatch_EffectHandler[1] = function()
 -- applied
-	if true then
-	-- if CCWATCH.STYLE ~= 0 or math.abs(CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME) < CCWATCH.THRESHOLD then TODO what is this even
-		local effect = CCWATCH.EFFECT[1].TYPE
-		local mobname = CCWATCH.EFFECT[1].TARGET
+	local effect = CCWATCH.EFFECT[1].TYPE
+	local mobname = CCWATCH.EFFECT[1].TARGET
 
-		if GetTime() > CCWATCH.CCS[effect].TIMER_END + 15 or mobname ~= CCWATCH.CCS[effect].TARGET then
+	if GetTime() > CCWATCH.CCS[effect].TIMER_END + 15 or mobname ~= CCWATCH.CCS[effect].TARGET then
 -- quick & dirty hack for shared DR between Seduce & Fear)
-			if effect == CCWATCH_FEAR or effect == CCWATCH_SEDUCE then
-				CCWATCH.CCS[CCWATCH_FEAR].DIMINISH = 1
-				CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH = 1
-			else
-				CCWATCH.CCS[effect].DIMINISH = 1
-			end
-		end
-
-		CCWATCH.CCS[effect].TARGET = mobname
-		CCWATCH.CCS[effect].PLAYER = UnitIsPlayer'target'
-		CCWATCH.CCS[effect].TIMER_START = GetTime()
-		if CCWATCH.CCS[effect].PVPCC and CCWATCH.CCS[effect].PLAYER then
-			CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + (CCWATCH.CCS[effect].PVPCC / CCWATCH.CCS[effect].DIMINISH)
+		if effect == CCWATCH_FEAR or effect == CCWATCH_SEDUCE then
+			CCWATCH.CCS[CCWATCH_FEAR].DIMINISH = 1
+			CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH = 1
 		else
-			CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + (CCWATCH.CCS[effect].LENGTH / CCWATCH.CCS[effect].DIMINISH)
+			CCWATCH.CCS[effect].DIMINISH = 1
 		end
-		if CCWATCH.CCS[effect].COMBO then
-			CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
-		end
+	end
 
-		CCWatch_AddEffect(effect)
-		CCWatch_UnqueueEvent()
+	CCWATCH.CCS[effect].TARGET = mobname
+	CCWATCH.CCS[effect].PLAYER = UnitIsPlayer'target'
+	CCWATCH.CCS[effect].TIMER_START = GetTime()
+	if CCWATCH.CCS[effect].PVPCC and CCWATCH.CCS[effect].PLAYER then
+		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + (CCWATCH.CCS[effect].PVPCC / CCWATCH.CCS[effect].DIMINISH)
+	else
+		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + (CCWATCH.CCS[effect].LENGTH / CCWATCH.CCS[effect].DIMINISH)
+	end
+	if CCWATCH.CCS[effect].COMBO then
+		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
+	end
 
-		if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) then
-			CCWatchWarn(CCWATCH_WARN_APPLIED, effect, mobname)
-		end
+	CCWatch_AddEffect(effect)
+	CCWatch_UnqueueEvent()
+
+	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) then
+		CCWatchWarn(CCWATCH_WARN_APPLIED, effect, mobname)
 	end
 end
 
@@ -693,31 +670,12 @@ CCWatch_EffectHandler[2] = function()
 -- faded
 	local effect = CCWATCH.EFFECT[1].TYPE
 	local target = CCWATCH.CCS[effect].TARGET
-	local bUnqueueDone = false
-	if target == CCWATCH.EFFECT[1].TARGET then
-	-- target and CC target names match, wait for UNIT_AURA to ensure target match
-		if CCWATCH.STYLE ~= 0 or math.abs(CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME) < CCWATCH.THRESHOLD then
-			-- CCWATCH.CCS[effect].TIMER_END = GetTime()
-			CCWatch_RemoveEffect(effect, false)
-			CCWatch_UnqueueEvent()
-			bUnqueueDone = true
-	-- unless the debuff is gone from the target, then no need for UNIT_AURA to confirm it
-		elseif CCWATCH.STYLE == 0 and CCWatch_EffectGone(effect) then
-			-- CCWATCH.CCS[effect].TIMER_END = GetTime()
-			CCWatch_RemoveEffect(effect, false)
-			CCWatch_UnqueueEvent()
-			bUnqueueDone = true
-		end
-	else
-	-- target and CC target names don't match, retargetting has occured, no need to wait for UNIT_AuRA
-		-- CCWATCH.CCS[effect].TIMER_END = GetTime()
-		CCWatch_RemoveEffect(effect, false)
-		CCWatch_UnqueueEvent()
-		bUnqueueDone = true
-	end
+
+	CCWatch_RemoveEffect(effect, false)
+	CCWatch_UnqueueEvent()
 
 	-- another hack, to avoid spamming, because when the effect is broken, SOMETIME, WoW also send a faded message (see combat log)
-	if bUnqueueDone and CCWATCH.CCS[effect].WARN > 0 and CCWATCH.CCS[effect].WARN ~= 3 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED) then
+	if CCWATCH.CCS[effect].WARN > 0 and CCWATCH.CCS[effect].WARN ~= 3 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED) then
 		CCWatchWarn(CCWATCH_WARN_FADED, effect, target)
 	end
 end
@@ -726,29 +684,11 @@ CCWatch_EffectHandler[3] = function()
 -- broken
 	local effect = CCWATCH.EFFECT[1].TYPE
 	local target = CCWATCH.CCS[effect].TARGET
-	local bUnqueueDone = false
-	if target == CCWATCH.EFFECT[1].TARGET then
-	-- target and CC target names match, wait for UNIT_AURA to ensure target match
-		if CCWATCH.STYLE ~= 0 or math.abs(CCWATCH.UNIT_AURA.TIME - CCWATCH.EFFECT[1].TIME) < CCWATCH.THRESHOLD then
-			-- CCWATCH.CCS[effect].TIMER_END = GetTime()
-			CCWatch_RemoveEffect(effect, false)
-			CCWatch_UnqueueEvent()
-			bUnqueueDone = true
-	-- unless the debuff is gone from the target, then no need for UNIT_AURA to confirm it
-		elseif CCWATCH.STYLE == 0 and CCWatch_EffectGone(effect) then
-			-- CCWATCH.CCS[effect].TIMER_END = GetTime()
-			CCWatch_RemoveEffect(effect, false)
-			CCWatch_UnqueueEvent()
-			bUnqueueDone = true
-		end
-	else
-	-- target and CC target names don't match, retargetting has occured, no need to wait for UNIT_AuRA
-		-- CCWATCH.CCS[effect].TIMER_END = GetTime()
-		CCWatch_RemoveEffect(effect, false)
-		CCWatch_UnqueueEvent()
-		bUnqueueDone = true
-	end
-	if bUnqueueDone and CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) then
+
+	CCWatch_RemoveEffect(effect, false)
+	CCWatch_UnqueueEvent()
+
+	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) then
 		CCWatchWarn(CCWATCH_WARN_BROKEN, effect, target)
 		CCWATCH.CCS[effect].WARN = 3
 	end
@@ -766,16 +706,6 @@ end
 
 function CCWatch_UnqueueEvent()
 	tremove(CCWATCH.EFFECT, 1)
-end
-
-function CCWatch_EffectGone(effect)
-	local effectgone = false -- assume effect is gone unless we find it
-	for i = 1, 16 do
-		if UnitDebuff("target", i) == CCWATCH.CCS[effect].TEXTURE then
-			effectgone = true
-		end
-	end
-	return effectgone
 end
 
 function CCWatch_AddEffect(effect)
@@ -1243,15 +1173,7 @@ function CCWatch_LoadVariables()
 	end
 
 	CCWatchOptions_Init()
-
 	CCWatch_BarLock()
-
--- Pure cosmetic for Unlock move
-	for i = 1, CCWATCH_MAXBARS do
-		-- getglobal("CCWatchBarCC"..i.."StatusBarText"):SetText("0.00")
-		-- getglobal("CCWatchBarDebuff"..i.."StatusBarText"):SetText("0.00")
-		-- getglobal("CCWatchBarBuff"..i.."StatusBarText"):SetText("0.00")
-	end
 end
 
 function CCWatch_UpdateTextures()
@@ -1315,7 +1237,7 @@ function CCWatch_UpdateKidneyShot(bPrint)
 			if bPrint then
 				CCWatch_AddMessage(name.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 			end
-			if string.sub(rank,string.len(rank)) == "1" then
+			if strsub(rank,string.len(rank)) == "1" then
 				CCWATCH.CCS[CCWATCH_KS].LENGTH = 0
 			else
 				CCWATCH.CCS[CCWATCH_KS].LENGTH = 1
@@ -1415,7 +1337,7 @@ function CCWatch_GetSpellRank(spellname, spelleffect, bPrint)
 		if name == spellname then
 			local currank = 1
 			while currank <= maxrank do
-				if tonumber(string.sub(rank,string.len(rank))) == currank then
+				if tonumber(strsub(rank,string.len(rank))) == currank then
 					if bPrint then
 						CCWatch_AddMessage(spellname.." "..CCWATCH_RANK.." "..currank.." "..CCWATCH_DETECTED)
 					end
