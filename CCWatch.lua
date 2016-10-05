@@ -1366,6 +1366,7 @@ function CCWatch_UpdateClassSpells(bPrint)
 	elseif eclass == "WARLOCK" then
 		CCWatch_GetSpellRank(CCWATCH_FEAR, CCWATCH_FEAR, bPrint)
 		CCWatch_GetSpellRank(CCWATCH_BANISH, CCWATCH_BANISH, bPrint)
+		CCWatch_GetSpellRank(CCWATCH_CORRUPTION, CCWATCH_CORRUPTION, bPrint)
 		CCWatch_UpdateImpSeduce(bPrint)
 	elseif eclass == "PALADIN" then
 		CCWatch_GetSpellRank(CCWATCH_HOJ, CCWATCH_HOJ, bPrint)
