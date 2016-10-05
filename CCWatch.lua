@@ -91,19 +91,7 @@ local function create_bar(name)
 	f.icon:SetPoint('LEFT', f, iconpos, 0, 0)
 	f.icon:SetNormalTexture[[Interface\Icons\INV_Misc_QuestionMark]]
 	f.icon:GetNormalTexture():SetTexCoord(.08, .92, .08, .92)
-	f.icon:SetAlpha(1)
 	f.icon:Show()
-
-	f.statusbarbg = CreateFrame('StatusBar', nil, f)
-	f.statusbarbg:SetFrameLevel(f.statusbarbg:GetFrameLevel() - 1)
-	f.statusbarbg:ClearAllPoints()
-	f.statusbarbg:SetHeight(height)
-	f.statusbarbg:SetWidth(width)
-	f.statusbarbg:SetPoint('TOPLEFT', f, 'TOPLEFT', height, 0)
-	f.statusbarbg:SetStatusBarTexture(texture)
-	f.statusbarbg:SetStatusBarColor(bgcolor[1], bgcolor[2], bgcolor[3], bgcolor[4])
-	f.statusbarbg:SetMinMaxValues(0, 100)
-	f.statusbarbg:SetValue(100)
 
 	f.statusbar = CreateFrame('StatusBar', nil, f)
 	f.statusbar:ClearAllPoints()
@@ -114,6 +102,8 @@ local function create_bar(name)
 	f.statusbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
 	f.statusbar:SetMinMaxValues(0, 1)
 	f.statusbar:SetValue(1)
+	f.statusbar:SetBackdrop{ bgFile=texture }
+	f.statusbar:SetBackdropColor(bgcolor[1], bgcolor[2], bgcolor[3], bgcolor[4])
 
 	f.spark = f.statusbar:CreateTexture(nil, 'OVERLAY')
 	f.spark:SetTexture[[Interface\CastingBar\UI-CastingBar-Spark]]
