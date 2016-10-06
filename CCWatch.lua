@@ -500,7 +500,7 @@ do
 	end
 
 	function CCWatch_EventHandler.SPELLCAST_DELAYED()
-		endtime = endtime + arg1/1000
+		endtime = endtime and endtime + arg1/1000
 	end
 
 	function CCWatch_EventHandler.SPELLCAST_STOP()
