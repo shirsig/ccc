@@ -437,7 +437,6 @@ function CCWatch_SlashCommandHandler(msg)
 			CCWatch_AddMessage(CCWATCH_ALPHA..CCWATCH.ALPHA)
 		elseif strsub(command, 1, 6) == "warncc" then
 			local cc = strupper(strsub(command, 8))
-			p(cc)
 			if cc ~= "EMOTE" and cc ~= "SAY" and cc ~= "PARTY" and cc ~= "RAID"
 				and cc ~= "YELL" and cc ~= "CHANNEL" then
 				CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC = cc
@@ -652,7 +651,6 @@ CCWatch_EffectHandler[1] = function()
 	CCWatch_AddEffect(effect)
 	CCWatch_UnqueueEvent()
 
-	p(CCWATCH.CCS[effect].WARN, bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) ~= 0)
 	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) ~= 0 then
 		CCWatchWarn(CCWATCH_WARN_APPLIED, effect, mobname)
 	end
