@@ -179,7 +179,7 @@ end
 
 function CCWatchWarn(msg, effect, target, time)
 	local ncc = 0;
-	local cc = CCWATCH.WARNTYPE;
+	local cc = CCWATCH.WARNTYPE
 	-- Emote, Say, Party, Raid, Yell, Custom:<ccname>
 	if cc == "RAID" and UnitInRaid'player' == nil then
 		cc = "PARTY";
@@ -436,26 +436,27 @@ function CCWatch_SlashCommandHandler(msg)
 			CCWatch_AddMessage(CCWATCH_WIDTH..CCWATCH.WIDTH)
 			CCWatch_AddMessage(CCWATCH_ALPHA..CCWATCH.ALPHA)
 		elseif strsub(command, 1, 6) == "warncc" then
-			local cc = strsub(command, 8);
-			if cc ~= "EMOTE" or cc ~= "SAY" or cc ~= "PARTY" or cc ~= "RAID"
-				or cc ~= "YELL" or cc ~= "CHANNEL" then
+			local cc = strupper(strsub(command, 8))
+			p(cc)
+			if cc ~= "EMOTE" and cc ~= "SAY" and cc ~= "PARTY" and cc ~= "RAID"
+				and cc ~= "YELL" and cc ~= "CHANNEL" then
 				CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC = cc
-				CCWATCH.WARNCUSTOMCC = cc;
+				CCWATCH.WARNCUSTOMCC = cc
 				CCWatch_Save[CCWATCH.PROFILE].WarnType = "CHANNEL"
-				CCWatch_AddMessage(CCWATCH_WARNCC_CUSTOM..cc)
+				CCWatch_AddMessage(CCWATCH_WARNCC_CUSTOM .. cc)
 			else
 				CCWatch_Save[CCWATCH.PROFILE].WarnType = cc
-				CCWatch_AddMessage(CCWATCH_WARNCC_SETTO..cc)
+				CCWatch_AddMessage(CCWATCH_WARNCC_SETTO .. cc)
 			end
 			CCWATCH.WARNTYPE = CCWatch_Save[CCWATCH.PROFILE].WarnType
 		elseif command == "warn" then
-			if CCWATCH.WARNMSG then
+			if CCWATCH.WARNMSG ~= 0 then
 				CCWATCH.WARNMSG = 0
 				CCWatch_AddMessage(CCWATCH_WARN_DISABLED)
 			else
 				CCWATCH.WARNMSG = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME)
 				CCWatch_AddMessage(CCWATCH_WARN_ENABLED)
-				UpdateWarnUIPage()
+				-- UpdateWarnUIPage()
 			end
 			CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
 		else
@@ -651,7 +652,8 @@ CCWatch_EffectHandler[1] = function()
 	CCWatch_AddEffect(effect)
 	CCWatch_UnqueueEvent()
 
-	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) then
+	p(CCWATCH.CCS[effect].WARN, bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) ~= 0)
+	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) ~= 0 then
 		CCWatchWarn(CCWATCH_WARN_APPLIED, effect, mobname)
 	end
 end
@@ -665,7 +667,7 @@ CCWatch_EffectHandler[2] = function()
 	CCWatch_UnqueueEvent()
 
 	-- another hack, to avoid spamming, because when the effect is broken, SOMETIME, WoW also send a faded message (see combat log)
-	if CCWATCH.CCS[effect].WARN > 0 and CCWATCH.CCS[effect].WARN ~= 3 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED) then
+	if CCWATCH.CCS[effect].WARN > 0 and CCWATCH.CCS[effect].WARN ~= 3 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED) ~= 0 then
 		CCWatchWarn(CCWATCH_WARN_FADED, effect, target)
 	end
 end
@@ -678,7 +680,7 @@ CCWatch_EffectHandler[3] = function()
 	CCWatch_RemoveEffect(effect, false)
 	CCWatch_UnqueueEvent()
 
-	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) then
+	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) ~= 0 then
 		CCWatchWarn(CCWATCH_WARN_BROKEN, effect, target)
 		CCWATCH.CCS[effect].WARN = 3
 	end
@@ -806,12 +808,11 @@ function CCWatch_QueueEffect(effect)
 	local activebarText = bars["CCWatchBar"..ext..group].frame.text
 	activebarText:SetText(CCWATCH.CCS[effect].TARGET .. ' : ' .. effect)
 
-	-- if queue was empty show bar
 	if getn(GROUPS[group].EFFECT) == 1 then
 		getglobal("CCWatchBar"..ext..group):Show()
-		if CCWATCH.CCS[effect].COLOR then
-			getglobal("CCWatchBar"..ext..group.."StatusBar"):SetStatusBarColor(CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b)
-		end
+		-- if CCWATCH.CCS[effect].COLOR then
+		-- 	getglobal("CCWatchBar"..ext..group.."StatusBar"):SetStatusBarColor(CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b)
+		-- end
 	end
 end
 
@@ -935,11 +936,17 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 
 			local f = fraction > 1/3 and 1 or fraction / (1/3)
 			local r, g, b = unpack(CCWATCH.CCS[effect].SCHOOL or {1, 0, 1})
+			-- local r, g, b
+			-- if CCWATCH.CCS[effect].COLOR then
+			-- 	r, g, b = CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b
+			-- else
+			-- 	r, g, b = 1, 1, 1
+			-- end
 			frame.statusbar:SetStatusBarColor(f*r + 1-f, f*g, f*b)
 
 			frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[effect].ICON or 'INV_Misc_QuestionMark'))
 
-			if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME) then
+			if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME) ~= 0 then
 				if CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START > CCWATCH.WARNLOW and CCWATCH.WARNLOW > remaining then
 					if CCWATCH.CCS[effect].WARN == 1 then 
 						CCWatchWarn(CCWATCH_WARN_LOWTIME, effect, CCWATCH.CCS[effect].TARGET, CCWATCH.WARNLOW)
