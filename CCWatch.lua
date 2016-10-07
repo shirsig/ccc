@@ -1358,6 +1358,8 @@ function CCWatch_UpdateClassSpells(bPrint)
 		if CCWatch_ConfigBuff ~= nil then
 			CCWatch_UpdateImpGarotte(bPrint)
 		end
+	elseif eclass == "WARRIOR" then
+		CCWatch_GetSpellRank(CCWATCH_REND, CCWATCH_REND, bPrint)
 	elseif eclass == "WARLOCK" then
 		CCWatch_GetSpellRank(CCWATCH_FEAR, CCWATCH_FEAR, bPrint)
 		CCWatch_GetSpellRank(CCWATCH_BANISH, CCWATCH_BANISH, bPrint)
