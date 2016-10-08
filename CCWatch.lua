@@ -9,18 +9,6 @@ CCW_EWARN_APPLIED = 2
 CCW_EWARN_BROKEN = 4
 CCW_EWARN_LOWTIME = 8
 
--- CCWATCH_SCHOOL = {
--- 	FIRE = {1, 0, 0},
--- 	FROST = {0, 0, 1},
--- 	NATURE = {0, 1, 0},
--- 	SHADOW = {RAID_CLASS_COLORS.WARLOCK.r, RAID_CLASS_COLORS.WARLOCK.g, RAID_CLASS_COLORS.WARLOCK.b},
--- 	ARCANE = {1, 1, 1},
--- 	HOLY = {1, 1, 0},
--- 	PHYSICAL = {RAID_CLASS_COLORS.DRUID.r, RAID_CLASS_COLORS.DRUID.g, RAID_CLASS_COLORS.DRUID.b},
--- 	MAGIC = {0, 1, 1},
--- 	NONE = {1, 1, 1},
--- }
-
 CCWATCH_SCHOOL = {
 	NONE = {1, 1, 1},
 	PHYSICAL = {1, 1, 0},
@@ -42,7 +30,7 @@ local function create_bar(name)
 	local bgcolor = {0, .5, .5, .5}
 	local icon = bar.icon or nil
 	local iconpos = 'LEFT'
-	local texture = [[Interface\Addons\CCWatch\Textures\BantoBar]] -- [[Interface\TargetingFrame\UI-StatusBar]]
+	local texture = [[Interface\Addons\CCWatch\Textures\BantoBar]]
 	local width = 200
 	local height = 16
 	local point = 'CENTER'
@@ -233,18 +221,18 @@ function CCWatch_OnLoad()
 
 	CCWatchObject = this
 
-	this:RegisterEvent("UNIT_COMBAT")
+	this:RegisterEvent'UNIT_COMBAT'
 
 	if UnitLevel'player' < 60 then
-		this:RegisterEvent("CHAT_MSG_COMBAT_XP_GAIN")
+		this:RegisterEvent'CHAT_MSG_COMBAT_XP_GAIN'
 -- TODO : add this
 --		this:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN");
  	end
 -- register this also for < 60 (pvp)
-	this:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH")
+	this:RegisterEvent'CHAT_MSG_COMBAT_HOSTILE_DEATH'
 
-	this:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER")
-	this:RegisterEvent("CHAT_MSG_SPELL_BREAK_AURA")
+	this:RegisterEvent'CHAT_MSG_SPELL_AURA_GONE_OTHER'
+	this:RegisterEvent'CHAT_MSG_SPELL_BREAK_AURA'
 
 	this:RegisterEvent'SPELLCAST_START'
 	this:RegisterEvent'SPELLCAST_DELAYED'
@@ -256,7 +244,7 @@ function CCWatch_OnLoad()
 	SLASH_CCWATCH2 = "/ccw"
 	SlashCmdList.CCWATCH = CCWatch_SlashCommandHandler
 
-	CCWatch_AddMessage(CCWATCH_FULLVERSION..CCWATCH_LOADED)
+	CCWatch_AddMessage(CCWATCH_FULLVERSION .. CCWATCH_LOADED)
 end
 
 function CCWatch_BarUnlock()
@@ -373,7 +361,7 @@ function CCWatch_SlashCommandHandler(msg)
 				CCWatchCC:SetScale(CCWATCH.SCALE)
 				CCWatchDebuff:SetScale(CCWATCH.SCALE)
 				CCWatchBuff:SetScale(CCWATCH.SCALE)
-				CCWatch_AddMessage(CCWATCH_SCALE..scale)
+				CCWatch_AddMessage(CCWATCH_SCALE .. scale)
 				CCWatchSliderScale:SetValue(CCWATCH.SCALE)
 			else
 				CCWatch_Help()
@@ -384,7 +372,7 @@ function CCWatch_SlashCommandHandler(msg)
 				CCWatch_Save[CCWATCH.PROFILE].width = width
 				CCWATCH.WIDTH = width
 				CCWatch_SetWidth(CCWATCH.WIDTH)
-				CCWatch_AddMessage(CCWATCH_WIDTH..width)
+				CCWatch_AddMessage(CCWATCH_WIDTH .. width)
 				CCWatchSliderWidth:SetValue(CCWATCH.WIDTH)
 			else
 				CCWatch_Help()
@@ -409,16 +397,16 @@ function CCWatch_SlashCommandHandler(msg)
 				CCWatch_AddMessage(CCWATCH_ENABLED)
 			end
 			if CCWATCH.INVERT then
-				CCWatch_AddMessage(CCWATCH_INVERSION_ON);
+				CCWatch_AddMessage(CCWATCH_INVERSION_ON)
 			else
-				CCWatch_AddMessage(CCWATCH_INVERSION_OFF);
+				CCWatch_AddMessage(CCWATCH_INVERSION_OFF)
 			end
 			if CCWATCH.TIMERS == 0 then
-				CCWatch_AddMessage(CCWATCH_TIMERS_OFF);
+				CCWatch_AddMessage(CCWATCH_TIMERS_OFF)
 			elseif CCWATCH.TIMERS == 1 then
-				CCWatch_AddMessage(CCWATCH_TIMERS_ON);
+				CCWatch_AddMessage(CCWATCH_TIMERS_ON)
 			else
-				CCWatch_AddMessage(CCWATCH_TIMERS_REVERSE);
+				CCWatch_AddMessage(CCWATCH_TIMERS_REVERSE)
 			end
 			if CCWATCH.GROWTH == 0 then
 				CCWatch_AddMessage(CCWATCH_GROW_OFF)
@@ -1180,9 +1168,9 @@ function CCWatch_UpdateTextures()
 			CCWATCH.CCS[name].TEXTURE = GetSpellTexture(i, BOOKTYPE_SPELL)
 		elseif CCWATCH_SPELLS[name] then
 			if CCWATCH_SPELLS[name].EFFECTNAME then
-				CCWATCH.CCS[CCWATCH_SPELLS[name].EFFECTNAME].TEXTURE = GetSpellTexture(i, BOOKTYPE_SPELL);
+				CCWATCH.CCS[CCWATCH_SPELLS[name].EFFECTNAME].TEXTURE = GetSpellTexture(i, BOOKTYPE_SPELL)
 			else
-				CCWatch_AddMessage("Warning : ranked spell '"..name.."' has a different name from its effect, but no effect name in its definition.");
+				CCWatch_AddMessage("Warning : ranked spell '"..name.."' has a different name from its effect, but no effect name in its definition.")
 			end
 		end
 		i = i + 1
@@ -1196,7 +1184,7 @@ function CCWatch_UpdateImpGouge(bPrint)
 			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_GOUGE].LENGTH = 4 + rank * 0.5;
+			CCWATCH.CCS[CCWATCH_GOUGE].LENGTH = 4 + rank * .5
 		end
 	elseif CCWATCH.CCS[CCWATCH_GOUGE].LENGTH == nil then
 		CCWATCH.CCS[CCWATCH_GOUGE].LENGTH = 4
@@ -1245,7 +1233,7 @@ function CCWatch_UpdateKidneyShot(bPrint)
 end
 
 function CCWatch_UpdateImpTrap(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 7 )
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo(3, 7)
 	if texture then
 		if bPrint then
 			CCWatch_AddMessage(talentname .. " " .. CCWATCH_RANK .. " " .. rank .. " " .. CCWATCH_DETECTED)
@@ -1258,7 +1246,7 @@ function CCWatch_UpdateImpTrap(bPrint)
 end
 
 function CCWatch_UpdateImpSeduce(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 7 )
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo(2, 7)
 	if texture then
 		if bPrint then
 			CCWatch_AddMessage(talentname .. " " .. CCWATCH_RANK .. " " .. rank .. " " .. CCWATCH_DETECTED)
@@ -1270,21 +1258,21 @@ function CCWatch_UpdateImpSeduce(bPrint)
 end
 
 function CCWatch_UpdateBrutalImpact(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 4 )
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo(2, 4)
 	if texture then
 		if bPrint then
 			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
 -- Bash is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_POUNCE].LENGTH = 2 + rank * .50;
+			CCWATCH.CCS[CCWATCH_POUNCE].LENGTH = 2 + rank * .50
 			CCWATCH.CCS[CCWATCH_BASH].LENGTH = CCWATCH.CCS[CCWATCH_BASH].LENGTH + rank * .50
 		end
 	end
 end
 
 function CCWatch_UpdatePermafrost(bPrint)
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 2 )
+	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo(3, 2)
 	if texture then
 		if bPrint then
 			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
@@ -1304,7 +1292,7 @@ function CCWatch_UpdateImpShadowWordPain(bPrint)
 			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
 		end
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_SHADOWWORDPAIN].LENGTH = 18 + rank * 3;
+			CCWATCH.CCS[CCWATCH_SHADOWWORDPAIN].LENGTH = 18 + rank * 3
 		end
 	end
 end
