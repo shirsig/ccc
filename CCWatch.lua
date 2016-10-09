@@ -341,6 +341,12 @@ function CCWatch_SlashCommandHandler(msg)
 			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
 			CCWatch_AddMessage(CCWATCH_GROW_DOWN)
 			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN)
+		elseif command == "customcolor on" then
+			CCWatch_Save[CCWATCH.PROFILE].customcolor = true
+			CCWatch_AddMessage('School color enabled.')
+		elseif command == "customcolor off" then
+			CCWatch_Save[CCWATCH.PROFILE].customcolor = false
+			CCWatch_AddMessage('School color disabled.')
 		elseif command == "clear" then
 			CCWatch_Save[CCWATCH.PROFILE] = nil
 			CCWatch_Globals()
@@ -351,7 +357,7 @@ function CCWatch_SlashCommandHandler(msg)
 			CCWatch_LoadConfCCs()
 			CCWatch_LoadCustomCCs()
 			CCWatch_UpdateClassSpells(true)
-		elseif( command == "config" ) then
+		elseif command == "config" then
 			CCWatchOptionsFrame:Show()
 		elseif strsub(command, 1, 5) == "scale" then
 			local scale = tonumber(strsub(command, 7))
@@ -418,7 +424,7 @@ function CCWatch_SlashCommandHandler(msg)
 			CCWatch_Config()
 			CCWatch_LoadConfCCs()
 			CCWatch_LoadCustomCCs()
-			CCWatch_UpdateClassSpells(true) -- Update at the same time
+			CCWatch_UpdateClassSpells(true)
 
 			CCWatch_AddMessage(CCWATCH_SCALE..CCWATCH.SCALE)
 			CCWatch_AddMessage(CCWATCH_WIDTH..CCWATCH.WIDTH)
@@ -921,13 +927,16 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 			frame.timertext:SetText(format_time(remaining))
 
 			local f = fraction > 1/3 and 1 or fraction / (1/3)
-			local r, g, b = unpack(CCWATCH.CCS[effect].SCHOOL or {1, 0, 1})
-			-- local r, g, b
-			-- if CCWATCH.CCS[effect].COLOR then
-			-- 	r, g, b = CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b
-			-- else
-			-- 	r, g, b = 1, 1, 1
-			-- end
+			local r, g, b
+			if CCWatch_Save[CCWATCH.PROFILE].customcolor then
+				if CCWATCH.CCS[effect].COLOR then
+					r, g, b = CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b
+				else
+					r, g, b = 1, 1, 1
+				end
+			else
+				r, g, b = unpack(CCWATCH.CCS[effect].SCHOOL or {1, 0, 1})
+			end
 			frame.statusbar:SetStatusBarColor(f*r + 1-f, f*g, f*b)
 
 			frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[effect].ICON or 'INV_Misc_QuestionMark'))
@@ -998,12 +1007,12 @@ end
 
 function CCWatch_LoadConfCCs()
 -- update array with CC conf
-	table.foreach(CCWatch_Save[CCWATCH.PROFILE].ConfCC, GetConfCC);
+	table.foreach(CCWatch_Save[CCWATCH.PROFILE].ConfCC, GetConfCC)
 end
 
 function CCWatch_LoadCustomCCs()
 -- update array with saved CCs
-	table.foreach(CCWatch_Save[CCWATCH.PROFILE].SavedCC, GetSavedCC);
+	table.foreach(CCWatch_Save[CCWATCH.PROFILE].SavedCC, GetSavedCC)
 end
 
 function CCWatch_LoadVariablesOnUpdate(arg1)
@@ -1014,98 +1023,40 @@ function CCWatch_LoadVariablesOnUpdate(arg1)
 end
 
 function CCWatch_LoadVariables()
-	CCWATCH.PROFILE = UnitName'player' .. ' of ' .. GetCVar'RealmName'
+	local default_settings = {
+		SavedCC = {},
+		ConfCC = {},
+		status = CCWATCH.STATUS,
+		invert = false,
+		growth = 0,
+		customcolor = false,
+		scale = 1,
+		width = 160,
+		alpha = 1,
+		arcanist = false,
+		timers = 2,
+		style = 0,
+		Monitoring = bit.bor(ETYPE_CC, ETYPE_DEBUFF, ETYPE_BUFF),
+		WarnType = 'PARTY',
+		WarnLow = 10,
+		WarnMsg = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME),
+		WarnCustomCC = '',
+		ColorOverTime = false,
+		CoTUrgeColor = { r=1, g=0, b=0 },
+		CoTLowColor = { r=1, g=.5, b=0 },
+		CoTNormalColor = { r=1, g=1, b=0 },
+		CoTUrgeValue = 1,
+		CoTLowValue = 5,
+	}
 
-	if CCWatch_Save[CCWATCH.PROFILE] == nil then
-		CCWatch_Save[CCWATCH.PROFILE] = {}
-	end
+	CCWATCH.PROFILE = UnitName'player' .. '|' .. GetCVar'RealmName'
 
-	if CCWatch_Save[CCWATCH.PROFILE].SavedCC == nil then
-		CCWatch_Save[CCWATCH.PROFILE].SavedCC = {}
-	end
+	CCWatch_Save[CCWATCH.PROFILE] = CCWatch_Save[CCWATCH.PROFILE] or {}
 
-	if CCWatch_Save[CCWATCH.PROFILE].ConfCC == nil then
-		CCWatch_Save[CCWATCH.PROFILE].ConfCC = {}
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].status == nil then
-		CCWatch_Save[CCWATCH.PROFILE].status = CCWATCH.STATUS
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].invert == nil then
-		CCWatch_Save[CCWATCH.PROFILE].invert = false
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].growth == nil then
-		CCWatch_Save[CCWATCH.PROFILE].growth = 0
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].scale == nil then
-		CCWatch_Save[CCWATCH.PROFILE].scale = 1
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].width == nil then
-		CCWatch_Save[CCWATCH.PROFILE].width = 160
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].alpha == nil then
-		CCWatch_Save[CCWATCH.PROFILE].alpha = 1
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].arcanist == nil then
-		CCWatch_Save[CCWATCH.PROFILE].arcanist = false
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].timers == nil then
-		CCWatch_Save[CCWATCH.PROFILE].timers = 2
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].style == nil then
-		CCWatch_Save[CCWATCH.PROFILE].style = 0
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].Monitoring == nil then
-		CCWatch_Save[CCWATCH.PROFILE].Monitoring = bit.bor(ETYPE_CC, ETYPE_DEBUFF, ETYPE_BUFF)
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].WarnType == nil then
-		CCWatch_Save[CCWATCH.PROFILE].WarnType = "PARTY"
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].WarnLow == nil then
-		CCWatch_Save[CCWATCH.PROFILE].WarnLow = 10
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].WarnMsg == nil then
-		CCWatch_Save[CCWATCH.PROFILE].WarnMsg = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME)
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC == nil then
-		CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC = ""
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].ColorOverTime == nil then
-		CCWatch_Save[CCWATCH.PROFILE].ColorOverTime = false
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor == nil then
-		CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor = { r=1, g=0, b=0 }
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].CoTLowColor == nil then
-		CCWatch_Save[CCWATCH.PROFILE].CoTLowColor = { r=1, g=0.5, b=0 }
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor == nil then
-		CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor = { r=1, g=1, b=0 }
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue == nil then
-		CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue = 1
-	end
-
-	if CCWatch_Save[CCWATCH.PROFILE].CoTLowValue == nil then
-		CCWatch_Save[CCWATCH.PROFILE].CoTLowValue = 5
+	for k, v in default_settings do
+		if CCWatch_Save[CCWATCH.PROFILE][k] == nil then
+			CCWatch_Save[CCWATCH.PROFILE][k] = v
+		end
 	end
 
 	CCWATCH.ARCANIST = CCWatch_Save[CCWATCH.PROFILE].arcanist

@@ -671,25 +671,24 @@ function CCWatchOptionsLearnModify_OnClick()
 		if CCWatch_Save[CCWATCH.PROFILE].SavedCC[effect] ~= nil then
 			if effect ~= CCWatchEffectSelection then -- skillname change...
 				-- remove old effect
-				CCWATCH.CCS[CCWatchEffectSelection] = nil;
 				CCWatch_Save[CCWATCH.PROFILE].ConfCC[CCWatchEffectSelection] = nil;
 				CCWatch_Save[CCWATCH.PROFILE].SavedCC[CCWatchEffectSelection] = nil;
 			end
 			-- add/update effect
-			CCWatchAddEffect(false, effect, group, etype, duration, edr, monitor, warn, color);
+			CCWatchAddEffect(false, effect, group, etype, duration, edr, monitor, warn, color)
 		else -- if not we are modifying a builtin effect
 			if effect ~= CCWatchEffectSelection then -- skillname change...
-				message("WARNING : adding an effect require to select the NEW button");
+				message("WARNING : adding an effect requires pressing the NEW button")
 			end
-			CCWatchAddEffect(true, effect, group, etype, duration, edr, monitor, warn, color);
+			CCWatchAddEffect(true, effect, group, etype, duration, edr, monitor, warn, color)
 		end
 	else
 -- add
 		if CCWATCH.CCS[effect] ~= nil then
-			message("Effect '"..effect.."' already exist.\nPlease select Edit to modify it");
+			message("Effect '"..effect.."' already exist.\nPlease select Edit to modify it")
 			return;
 		else
-			CCWatchAddEffect(false, effect, group, etype, duration, edr, monitor, warn, color);
+			CCWatchAddEffect(false, effect, group, etype, duration, edr, monitor, warn, color)
 		end
 	end
 	UpdateSortTable();	
@@ -702,34 +701,30 @@ end
 --------------------------------------------------------------------------------
 
 function CCWatchAddEffect(builtin, effect, group, etype, duration, diminishes, monitor, warn, color)
-	local iWarn;
-	if warn then
-		iWarn = 1;
-	else
-		iWarn = 0;
-	end
-	CCWATCH.CCS[effect] = {
-		GROUP = tonumber(group),
-		ETYPE = etype,
-		LENGTH = duration,
-		DIMINISHES = diminishes,
-		MONITOR = monitor,
-		WARN = iWarn,
-		COLOR = color,
+	local iWarn = warn and 1 or 0
 
-		TARGET = "",
-		PLAYER = nil,
-		TIMER_START = 0,
-		TIMER_END = 0,
-		DIMINISH = 1
-	};
+	CCWATCH.CCS[effect] = CCWATCH.CCS[effect] or {}
+
+	CCWATCH.CCS[effect].GROUP = tonumber(group)
+	CCWATCH.CCS[effect].ETYPE = etype
+	CCWATCH.CCS[effect].LENGTH = duration
+	CCWATCH.CCS[effect].DIMINISHES = diminishes
+	CCWATCH.CCS[effect].MONITOR = monitor
+	CCWATCH.CCS[effect].WARN = iWarn
+	CCWATCH.CCS[effect].COLOR = color
+
+	CCWATCH.CCS[effect].TARGET = ''
+	CCWATCH.CCS[effect].PLAYER = nil
+	CCWATCH.CCS[effect].TIMER_START = 0
+	CCWATCH.CCS[effect].TIMER_END = 0
+	CCWATCH.CCS[effect].DIMINISH = 1
 
 	if builtin then
 		CCWatch_Save[CCWATCH.PROFILE].ConfCC[effect] = {
 			MONITOR = monitor,
 			WARN = iWarn,
-			COLOR = color
-		};
+			COLOR = color,
+		}
 	else
 		CCWatch_Save[CCWATCH.PROFILE].SavedCC[effect] = {
 			GROUP = tonumber(group),
@@ -738,40 +733,40 @@ function CCWatchAddEffect(builtin, effect, group, etype, duration, diminishes, m
 			DIMINISHES = diminishes,
 			MONITOR = monitor,
 			WARN = iWarn,
-			COLOR = color
-		};
+			COLOR = color,
+		}
 	end
 end
 
 function CCWatch_SetColorCallback(id)
-	local iRed, iGreen, iBlue = ColorPickerFrame:GetColorRGB();
-	local swatch, button, border;
+	local iRed, iGreen, iBlue = ColorPickerFrame:GetColorRGB()
+	local swatch, button, border
 
-	button = getglobal("CCWatchOptionsBarColor" .. id);
-	swatch = getglobal("CCWatchOptionsBarColor" .. id .. "_SwatchTexture");
-	border = getglobal("CCWatchOptionsBarColor" .. id .. "_BorderTexture");
+	button = getglobal("CCWatchOptionsBarColor" .. id)
+	swatch = getglobal("CCWatchOptionsBarColor" .. id .. "_SwatchTexture")
+	border = getglobal("CCWatchOptionsBarColor" .. id .. "_BorderTexture")
 
-	swatch:SetVertexColor(iRed, iGreen, iBlue);
-	border:SetVertexColor(iRed, iGreen, iBlue);
-	button.r = iRed;
-	button.g = iGreen;
-	button.b = iBlue;
+	swatch:SetVertexColor(iRed, iGreen, iBlue)
+	border:SetVertexColor(iRed, iGreen, iBlue)
+	button.r = iRed
+	button.g = iGreen
+	button.b = iBlue
 
 	if id == "Urge" then
-		CCWATCH.COTURGECOLOR.r = iRed;
-		CCWATCH.COTURGECOLOR.g = iGreen;
-		CCWATCH.COTURGECOLOR.b = iBlue;
-		CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor = CCWATCH.COTURGECOLOR;
+		CCWATCH.COTURGECOLOR.r = iRed
+		CCWATCH.COTURGECOLOR.g = iGreen
+		CCWATCH.COTURGECOLOR.b = iBlue
+		CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor = CCWATCH.COTURGECOLOR
 	elseif id == "Low" then
-		CCWATCH.COTLOWCOLOR.r = iRed;
-		CCWATCH.COTLOWCOLOR.g = iGreen;
-		CCWATCH.COTLOWCOLOR.b = iBlue;
-		CCWatch_Save[CCWATCH.PROFILE].CoTLowColor = CCWATCH.COTLOWCOLOR;
+		CCWATCH.COTLOWCOLOR.r = iRed
+		CCWATCH.COTLOWCOLOR.g = iGreen
+		CCWATCH.COTLOWCOLOR.b = iBlue
+		CCWatch_Save[CCWATCH.PROFILE].CoTLowColor = CCWATCH.COTLOWCOLOR
 	elseif id == "Normal" then
-		CCWATCH.COTNORMALCOLOR.r = iRed;
-		CCWATCH.COTNORMALCOLOR.g = iGreen;
-		CCWATCH.COTNORMALCOLOR.b = iBlue;
-		CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor = CCWATCH.COTNORMALCOLOR;
+		CCWATCH.COTNORMALCOLOR.r = iRed
+		CCWATCH.COTNORMALCOLOR.g = iGreen
+		CCWATCH.COTNORMALCOLOR.b = iBlue
+		CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor = CCWATCH.COTNORMALCOLOR
 	end
 end
 
@@ -854,7 +849,7 @@ function CCWatchOptionsLearnFillFields()
 	end
 
 	bModify = true;
-	CCWatchOptionsLearnModify:SetText("Modify");
+	CCWatchOptionsLearnModify:SetText'Modify'
 end
 
 function CCWatch_DeleteLearntEffect()
