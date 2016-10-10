@@ -47,7 +47,7 @@ local function create_bar(name)
 	local timertextwidth = fontsize * 3.6
 	local font, _, style = GameFontHighlight:GetFont()
 
-	bar.fadetime = 1
+	bar.fadetime = .5
 	bar.width = 200
 	bar.bgcolor = bgcolor
 	bar.textcolor = textcolor
@@ -254,7 +254,7 @@ function CCWatch_BarUnlock()
 		for i = 1, CCWATCH_MAXBARS do
 			local f = getglobal('CCWatchBar' .. type .. i)
 			f:SetAlpha(CCWATCH.ALPHA)
-			f.statusbar:SetStatusBarColor(1, 0, 0)
+			f.statusbar:SetStatusBarColor(1, 1, 1)
 			f.statusbar:SetValue(1)
 			f.icon:SetNormalTexture[[Interface\Icons\INV_Misc_QuestionMark]]
 			f.text:SetText('CCWatch ' .. type .. ' Bar ' .. i)
@@ -926,7 +926,6 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 
 			frame.timertext:SetText(format_time(remaining))
 
-			local f = fraction > 1/3 and 1 or fraction / (1/3)
 			local r, g, b
 			if CCWatch_Save[CCWATCH.PROFILE].customcolor then
 				if CCWATCH.CCS[effect].COLOR then
@@ -937,7 +936,8 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 			else
 				r, g, b = unpack(CCWATCH.CCS[effect].SCHOOL or {1, 0, 1})
 			end
-			frame.statusbar:SetStatusBarColor(f*r + 1-f, f*g, f*b)
+			frame.statusbar:SetStatusBarColor(r, g, b)
+			-- frame.statusbar:SetBackdropColor(r, g, b, .5)
 
 			frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[effect].ICON or 'INV_Misc_QuestionMark'))
 
@@ -957,7 +957,6 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 		end
 	elseif frame:GetAlpha() > 0 then
 		-- frame.statusbar:SetValue(0)
-		frame.statusbar:SetStatusBarColor(1, 0, 0)
 		frame.spark:Hide()
 		bar.stopped = bar.stopped or GetTime()
 		bar.fadeelapsed = GetTime() - bar.stopped
