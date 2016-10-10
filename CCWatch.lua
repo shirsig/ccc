@@ -937,7 +937,7 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 				r, g, b = unpack(CCWATCH.CCS[effect].SCHOOL or {1, 0, 1})
 			end
 			frame.statusbar:SetStatusBarColor(r, g, b)
-			-- frame.statusbar:SetBackdropColor(r, g, b, .5)
+			frame.statusbar:SetBackdropColor(r, g, b, .3)
 
 			frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[effect].ICON or 'INV_Misc_QuestionMark'))
 
