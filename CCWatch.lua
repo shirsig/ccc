@@ -678,26 +678,26 @@ CCWatch_EffectHandler[3] = function()
 	end
 end
 
-do
-	CreateFrame('GameTooltip', 'CCWatch_Tooltip', nil, 'GameTooltipTemplate')
-	local orig = UseAction
-	function UseAction(slot, clicked, onself)
-		if HasAction(slot) and not GetActionText(slot) then
-			CCWatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-			CCWatch_Tooltip:SetAction(slot)
-			local effect = CCWatch_TooltipTextLeft1:GetText()
-			if CCWATCH.CCS[effect] then
-				local group = CCWATCH.CCS[effect].GROUP
-				local etype = CCWATCH.CCS[effect].ETYPE
-				if CCWatch_FindEffect(effect, group, etype) then
-					CCWatch_QueueEvent(effect, UnitName'target', GetTime(), 1)
-					CCWatch_EffectHandler[1]()
-				end
-			end
-		end
-		return orig(slot, clicked, onself)
-	end
-end
+-- do
+-- 	CreateFrame('GameTooltip', 'CCWatch_Tooltip', nil, 'GameTooltipTemplate')
+-- 	local orig = UseAction
+-- 	function UseAction(slot, clicked, onself)
+-- 		if HasAction(slot) and not GetActionText(slot) then
+-- 			CCWatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+-- 			CCWatch_Tooltip:SetAction(slot)
+-- 			local effect = CCWatch_TooltipTextLeft1:GetText()
+-- 			if CCWATCH.CCS[effect] then
+-- 				local group = CCWATCH.CCS[effect].GROUP
+-- 				local etype = CCWATCH.CCS[effect].ETYPE
+-- 				if CCWatch_FindEffect(effect, group, etype) then
+-- 					CCWatch_QueueEvent(effect, UnitName'target', GetTime(), 1)
+-- 					CCWatch_EffectHandler[1]()
+-- 				end
+-- 			end
+-- 		end
+-- 		return orig(slot, clicked, onself)
+-- 	end
+-- end
 
 -- do
 -- 	local orig = CastSpell
