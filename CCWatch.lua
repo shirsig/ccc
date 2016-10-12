@@ -234,9 +234,9 @@ function CCWatch_OnLoad()
 	this:RegisterEvent'CHAT_MSG_SPELL_AURA_GONE_OTHER'
 	this:RegisterEvent'CHAT_MSG_SPELL_BREAK_AURA'
 
-	this:RegisterEvent'SPELLCAST_START'
-	this:RegisterEvent'SPELLCAST_DELAYED'
 	this:RegisterEvent'SPELLCAST_STOP'
+	this:RegisterEvent'SPELLCAST_INTERRUPTED'
+	this:RegisterEvent'CHAT_MSG_SPELL_SELF_DAMAGE'
 	this:RegisterEvent'CHAT_MSG_SPELL_FAILED_LOCALPLAYER'
 
 	this:RegisterEvent'PLAYER_TARGET_CHANGED'
@@ -468,7 +468,10 @@ end
 
 CCWatch_EventHandler = {}
 
-function CCWatch_FindEffect(effect, group, etype)
+function CCWatch_FindEffect(effect)
+	if not CCWATCH.CCS[effect] then return end
+	local group = CCWATCH.CCS[effect].GROUP
+	local etype = CCWATCH.CCS[effect].ETYPE
 	if etype == ETYPE_BUFF then
 		for i, v in CCWATCH.GROUPSBUFF[group].EFFECT do
 			if v == effect then return i end
@@ -485,13 +488,60 @@ function CCWatch_FindEffect(effect, group, etype)
 end
 
 do
-	local effect, target, endtime
+	local casting = {}
+	local last_cast
+	local pending = {}
 
-	function CCWatch_EventHandler:CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
-		for failed_effect in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
-			if failed_effect == effect then
-				effect = nil
+
+	function CCWatch_AbortRefresh(target)
+		for k, v in casting do
+			if v == target then
+				casting[k] = nil
 			end
+		end
+		for k, v in pending do
+			if v.target == target then
+				pending[k] = nil
+			end
+		end
+	end
+
+	function CCWatch_EventHandler.CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
+		for effect in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
+			casting[effect] = nil
+		end
+	end
+
+	function CCWatch_EventHandler.SPELLCAST_INTERRUPTED()
+		if last_cast then
+			pending[last_cast] = nil
+		end
+	end
+
+	function CCWatch_EventHandler.CHAT_MSG_SPELL_SELF_DAMAGE()
+		for effect in string.gfind(arg1, 'is immune to your (.*)%.') do
+			pending[effect] = nil
+		end
+		for effect in string.gfind(arg1, 'resists your (.*)%.') do
+			pending[effect] = nil
+		end
+		for effect in string.gfind(arg1, 'Your (.*) was evaded') do
+			pending[effect] = nil
+		end
+		for effect in string.gfind(arg1, 'Your (.*) is reflected') do
+			pending[effect] = nil
+		end
+		for effect in string.gfind(arg1, 'Your (.*) was deflected') do
+			pending[effect] = nil
+		end
+		for effect in string.gfind(arg1, 'Your (.*) was dodged') do
+			pending[effect] = nil
+		end
+		for effect in string.gfind(arg1, 'Your (.*) missed') do
+			pending[effect] = nil
+		end
+		for effect in string.gfind(arg1, 'Your (.*) is parried') do
+			pending[effect] = nil
 		end
 	end
 
@@ -502,9 +552,7 @@ do
 			if HasAction(slot) and not GetActionText(slot) then
 				CCWatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 				CCWatch_Tooltip:SetAction(slot)
-				effect = CCWatch_TooltipTextLeft1:GetText()
-				endtime = GetTime()
-				target = UnitName'target'
+				casting[CCWatch_TooltipTextLeft1:GetText()] = UnitName'target'
 			end
 			return orig(slot, clicked, onself)
 		end
@@ -539,29 +587,27 @@ do
 -- 	end
 -- end
 
-	function CCWatch_EventHandler.SPELLCAST_START()
-		effect = arg1
-		endtime = arg2/1000 + GetTime() - .3
-		target = UnitName'target'
-	--	duration = arg2;	-- might wanna play with it to deduce the used rank
-	end
-
-	function CCWatch_EventHandler.SPELLCAST_DELAYED()
-		endtime = endtime and endtime + arg1/1000
-	end
-
 	function CCWatch_EventHandler.SPELLCAST_STOP()
-		if effect and CCWATCH.CCS[effect] and GetTime() >= endtime then
-			local group = CCWATCH.CCS[effect].GROUP
-			local etype = CCWATCH.CCS[effect].ETYPE
-
-			if CCWatch_FindEffect(effect, group, etype) then
-				CCWatch_QueueEvent(effect, target, GetTime(), 1)
-				CCWatch_EffectHandler[1]()
+		for effect, target in casting do
+			if CCWatch_FindEffect(effect) then
+				pending[effect] = { target=target, time=GetTime() + .5 }
+				last_cast = effect
 			end
 		end
-		effect = nil
+		casting = {}
 	end
+
+	CreateFrame'Frame':SetScript('OnUpdate', function()
+		for effect, info in pending do
+			if GetTime() >= info.time then
+				local group = CCWATCH.CCS[effect].GROUP
+				local etype = CCWATCH.CCS[effect].ETYPE
+				CCWatch_QueueEvent(effect, info.target, GetTime() - .5, 1)
+				CCWatch_EffectHandler[1]()
+				pending[effect] = nil
+			end
+		end
+	end)
 end
 
 function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
@@ -638,6 +684,7 @@ do
 				CCWatch_RemoveEffect(k, false)
 			end
 		end
+		CCWatch_AbortRefresh(DeadMob)
 	end
 
 	function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
