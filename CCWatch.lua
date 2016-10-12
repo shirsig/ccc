@@ -512,7 +512,7 @@ do
 		end
 	end
 
-	function CCWatch_EventHandler.SPELLCAST_INTERRUPTED()
+	function CCWatch_EventHandler.SPELLCAST_INTERRUPTED() -- TODO fix bug when casting and stopping while pending
 		if last_cast then
 			pending[last_cast] = nil
 		end
