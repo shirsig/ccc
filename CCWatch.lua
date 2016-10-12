@@ -511,7 +511,7 @@ do
 		end
 	end
 
-	function CCWatch_EventHandler.SPELLCAST_INTERRUPTED() -- TODO fix bug when casting and stopping while pending
+	function CCWatch_EventHandler.SPELLCAST_INTERRUPTED()
 		if last_cast then
 			pending[last_cast] = nil
 		end
@@ -578,8 +578,12 @@ do
 	function CCWatch_EventHandler.SPELLCAST_STOP()
 		for effect, target in casting do
 			if CCWatch_FindEffect(effect) then
-				pending[effect] = { target=target, time=GetTime() + .5 }
-				last_cast = effect
+				if pending[effect] then
+					last_cast = nil
+				else
+					pending[effect] = {target=target, time=GetTime() + .5}
+					last_cast = effect
+				end
 			end
 		end
 		casting = {}
