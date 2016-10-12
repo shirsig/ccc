@@ -237,6 +237,7 @@ function CCWatch_OnLoad()
 	this:RegisterEvent'SPELLCAST_START'
 	this:RegisterEvent'SPELLCAST_DELAYED'
 	this:RegisterEvent'SPELLCAST_STOP'
+	this:RegisterEvent'CHAT_MSG_SPELL_FAILED_LOCALPLAYER'
 
 	this:RegisterEvent'PLAYER_TARGET_CHANGED'
 
@@ -486,6 +487,58 @@ end
 do
 	local effect, target, endtime
 
+	function CCWatch_EventHandler:CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
+		for failed_effect in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
+			if failed_effect == effect then
+				effect = nil
+			end
+		end
+	end
+
+	do
+		CreateFrame('GameTooltip', 'CCWatch_Tooltip', nil, 'GameTooltipTemplate')
+		local orig = UseAction
+		function UseAction(slot, clicked, onself)
+			if HasAction(slot) and not GetActionText(slot) then
+				CCWatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+				CCWatch_Tooltip:SetAction(slot)
+				effect = CCWatch_TooltipTextLeft1:GetText()
+				endtime = GetTime()
+				target = UnitName'target'
+			end
+			return orig(slot, clicked, onself)
+		end
+	end
+
+-- do
+-- 	local orig = CastSpell
+-- 	function CastSpell(index, booktype)
+-- 		local name, rank = GetSpellName(index, booktype)
+-- 		local timer = self.timers[Chronometer.SPELL][name]
+-- 		if timer then
+-- 			if not rank or rank == "" then
+-- 				rank = 0
+-- 			else
+-- 				rank = self.spellcache:GetRankNumber(rank)
+-- 			end
+-- 			self:CatchSpellcast(timer, name, rank)
+-- 		end
+-- 		return self.hooks["CastSpell"](index, booktype)
+-- 	end
+-- end
+
+-- do
+-- 	local orig = CastSpellByName
+-- 	function CastSpellByName(text, onself)
+-- 		local name, _, _, _, rank = self.spellcache:GetSpellData(text, nil)
+-- 		local timer = self.timers[Chronometer.SPELL][name]
+-- 		if timer then
+-- 			self:CatchSpellcast(timer, name, rank, oneself)
+-- 		end
+-- 		return self.hooks["CastSpellByName"](text, onself)
+-- 	end
+-- end
+
 	function CCWatch_EventHandler.SPELLCAST_START()
 		effect = arg1
 		endtime = arg2/1000 + GetTime() - .3
@@ -507,7 +560,7 @@ do
 				CCWatch_EffectHandler[1]()
 			end
 		end
-		effect, endtime = nil
+		effect = nil
 	end
 end
 
@@ -677,56 +730,6 @@ CCWatch_EffectHandler[3] = function()
 		CCWATCH.CCS[effect].WARN = 3
 	end
 end
-
--- do
--- 	CreateFrame('GameTooltip', 'CCWatch_Tooltip', nil, 'GameTooltipTemplate')
--- 	local orig = UseAction
--- 	function UseAction(slot, clicked, onself)
--- 		if HasAction(slot) and not GetActionText(slot) then
--- 			CCWatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
--- 			CCWatch_Tooltip:SetAction(slot)
--- 			local effect = CCWatch_TooltipTextLeft1:GetText()
--- 			if CCWATCH.CCS[effect] then
--- 				local group = CCWATCH.CCS[effect].GROUP
--- 				local etype = CCWATCH.CCS[effect].ETYPE
--- 				if CCWatch_FindEffect(effect, group, etype) then
--- 					CCWatch_QueueEvent(effect, UnitName'target', GetTime(), 1)
--- 					CCWatch_EffectHandler[1]()
--- 				end
--- 			end
--- 		end
--- 		return orig(slot, clicked, onself)
--- 	end
--- end
-
--- do
--- 	local orig = CastSpell
--- 	function CastSpell(index, booktype)
--- 		local name, rank = GetSpellName(index, booktype)
--- 		local timer = self.timers[Chronometer.SPELL][name]
--- 		if timer then
--- 			if not rank or rank == "" then
--- 				rank = 0
--- 			else
--- 				rank = self.spellcache:GetRankNumber(rank)
--- 			end
--- 			self:CatchSpellcast(timer, name, rank)
--- 		end
--- 		return self.hooks["CastSpell"](index, booktype)
--- 	end
--- end
-
--- do
--- 	local orig = CastSpellByName
--- 	function CastSpellByName(text, onself)
--- 		local name, _, _, _, rank = self.spellcache:GetSpellData(text, nil)
--- 		local timer = self.timers[Chronometer.SPELL][name]
--- 		if timer then
--- 			self:CatchSpellcast(timer, name, rank, oneself)
--- 		end
--- 		return self.hooks["CastSpellByName"](text, onself)
--- 	end
--- end
 
 function CCWatch_QueueEvent(effect, mobname, time, status)
 	tinsert(CCWATCH.EFFECT, {
