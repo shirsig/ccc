@@ -20,6 +20,69 @@ CCWATCH_SCHOOL = {
 	ARCANE = {1, .5, 1},
 }
 
+do
+	local DR_CLASS = {
+		["Bash"] = 1,
+		["Hammer of Justice"] = 1,
+		["Cheap Shot"] = 1,
+		["Charge Stun"] = 1,
+		["Intercept Stun"] = 1,
+		["Concussion Blow"] = 1,
+
+		["Fear"] = 2,
+		["Howl of Terror"] = 2,
+		["Seduction"] = 2,
+		["Intimidating Shout"] = 2,
+		["Psychic Scream"] = 2,
+
+		["Polymorph"] = 3,
+		["Sap"] = 3,
+		["Gouge"] = 3,
+
+		["Entangling Roots"] = 4,
+		["Frost Nova"] = 4,
+
+		["Freezing Trap"] = 5,
+		["Wyvern String"] = 5,
+
+		["Blind"] = 6,
+
+		["Hibernate"] = 7,
+
+		["Mind Control"] = 8,
+
+		["Kidney Shot"] = 9,
+
+		["Death Coil"] = 10,
+
+		["Frost Shock"] = 11,
+	}
+
+	local dr = {}
+
+	local function diminish(key, seconds)
+		return 1 / 2^(dr[key].level - 1) * seconds
+	end
+
+	function CCWatch_DiminishedDuration(target, effect, full_duration)
+		local class = DR_CLASS[effect]
+		if class then
+			local key = target..'|'..class
+			if not dr[key] or dr[key].timeout < GetTime() then
+				dr[key] = {level=1, timeout=GetTime() + full_duration + 15}
+			elseif dr[key].level < 3 then
+				dr[key].level = dr[key].level + 1
+				dr[key].timeout = GetTime() + diminish(key, full_duration) + 15
+			else
+				return 0
+			end
+			return diminish(key, full_duration)
+		else
+			return full_duration
+		end
+	end
+end
+
 local bars = {}
 
 local function create_bar(name)
@@ -712,23 +775,14 @@ CCWatch_EffectHandler[1] = function()
 	local effect = CCWATCH.EFFECT[1].TYPE
 	local mobname = CCWATCH.EFFECT[1].TARGET
 
-	if GetTime() > CCWATCH.CCS[effect].TIMER_END + 15 or mobname ~= CCWATCH.CCS[effect].TARGET then
--- quick & dirty hack for shared DR between Seduce & Fear)
-		if effect == CCWATCH_FEAR or effect == CCWATCH_SEDUCE then
-			CCWATCH.CCS[CCWATCH_FEAR].DIMINISH = 1
-			CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH = 1
-		else
-			CCWATCH.CCS[effect].DIMINISH = 1
-		end
-	end
-
 	CCWATCH.CCS[effect].TARGET = mobname
 	CCWATCH.CCS[effect].PLAYER = UnitIsPlayer'target'
 	CCWATCH.CCS[effect].TIMER_START = GetTime()
+
 	if CCWATCH.CCS[effect].PVPCC and CCWATCH.CCS[effect].PLAYER then
-		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + (CCWATCH.CCS[effect].PVPCC / CCWATCH.CCS[effect].DIMINISH)
+		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + CCWatch_DiminishedDuration(mobname, effect, CCWATCH.CCS[effect].PVPCC)
 	else
-		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + (CCWATCH.CCS[effect].LENGTH / CCWATCH.CCS[effect].DIMINISH)
+		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + CCWatch_DiminishedDuration(mobname, effect, CCWATCH.CCS[effect].LENGTH)
 	end
 	if CCWATCH.CCS[effect].COMBO then
 		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
@@ -786,9 +840,10 @@ end
 function CCWatch_AddEffect(effect)
 	-- first remove any old copies of this effect, to avoid nasty overlap and properly set diminishing returns for multi-CC
 	local group = CCWATCH.CCS[effect].group
-	local GROUPS
+
 	CCWatch_RemoveEffect(effect, true)
 
+	local GROUPS
 	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
 		GROUPS = CCWATCH.GROUPSBUFF
 	elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
@@ -829,34 +884,23 @@ function CCWatch_RemoveEffect(effect, dr)
 		GROUPS = CCWATCH.GROUPSCC
 	end
 
-	if CCWATCH.GROWTH == 1 then
-		while group < CCWATCH_MAXBARS and getn(GROUPS[group].EFFECT) == 0 and getn(GROUPS[group+1].EFFECT) > 0 do
-			local move_effect = GROUPS[group+1].EFFECT[1]
-			CCWatch_UnqueueEffect(move_effect)
-			CCWATCH.CCS[move_effect].GROUP = group
-			CCWatch_QueueEffect(move_effect)
-			group = group + 1
-		end
-	elseif CCWATCH.GROWTH == 2 then
-		while group > 1 and getn(GROUPS[group].EFFECT) == 0 and getn(GROUPS[group-1].EFFECT) > 0 do
-			local move_effect = GROUPS[group-1].EFFECT[1]
-			CCWatch_UnqueueEffect(move_effect)
-			CCWATCH.CCS[move_effect].GROUP = group
-			CCWatch_QueueEffect(move_effect)
-			group = group - 1
-		end
-	end
-
-	-- set diminishing returns based on CCS[effect].DIMINISHES (documented in CCWatch_ConfigXX.lua)
-	if dr and ((CCWATCH.CCS[effect].PLAYER and CCWATCH.CCS[effect].DIMINISHES > 0) or CCWATCH.CCS[effect].DIMINISHES == 1) then
--- quick & dirty hack for shared DR between Seduce & Fear)
-		if effect == CCWATCH_FEAR or effect == CCWATCH_SEDUCE then
-			CCWATCH.CCS[CCWATCH_FEAR].DIMINISH = 2 * CCWATCH.CCS[CCWATCH_FEAR].DIMINISH
-			CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH = 2 * CCWATCH.CCS[CCWATCH_SEDUCE].DIMINISH
-		else
-			CCWATCH.CCS[effect].DIMINISH = 2 * CCWATCH.CCS[effect].DIMINISH
-		end
-	end
+	-- if CCWATCH.GROWTH == 1 then
+	-- 	while group < CCWATCH_MAXBARS and getn(GROUPS[group].EFFECT) == 0 and getn(GROUPS[group+1].EFFECT) > 0 do
+	-- 		local move_effect = GROUPS[group+1].EFFECT[1]
+	-- 		CCWatch_UnqueueEffect(move_effect)
+	-- 		CCWATCH.CCS[move_effect].GROUP = group
+	-- 		CCWatch_QueueEffect(move_effect)
+	-- 		group = group + 1
+	-- 	end
+	-- elseif CCWATCH.GROWTH == 2 then
+	-- 	while group > 1 and getn(GROUPS[group].EFFECT) == 0 and getn(GROUPS[group-1].EFFECT) > 0 do
+	-- 		local move_effect = GROUPS[group-1].EFFECT[1]
+	-- 		CCWatch_UnqueueEffect(move_effect)
+	-- 		CCWATCH.CCS[move_effect].GROUP = group
+	-- 		CCWatch_QueueEffect(move_effect)
+	-- 		group = group - 1
+	-- 	end
+	-- end
 
 	-- ensure if warnable, that WARN is set back to 1
 	-- 2 = warn at low time already sent
@@ -872,27 +916,26 @@ function CCWatch_QueueEffect(effect)
 	end
 
 	local group = CCWATCH.CCS[effect].GROUP
-	local GROUPS
-	local ext = ''
 
+	local GROUPS, ext
 	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
 		GROUPS = CCWATCH.GROUPSBUFF
-		ext = "Buff"
+		ext = 'Buff'
 	elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
 		GROUPS = CCWATCH.GROUPSDEBUFF
-		ext = "Debuff"
+		ext = 'Debuff'
 	else
 		GROUPS = CCWATCH.GROUPSCC
-		ext = "CC"
+		ext = 'CC'
 	end
 
 	tinsert(GROUPS[group].EFFECT, 1, effect)
 
-	local activebarText = bars["CCWatchBar"..ext..group].frame.text
-	activebarText:SetText(CCWATCH.CCS[effect].TARGET .. ' : ' .. effect)
+	local activebarText = bars['CCWatchBar'..ext..group].frame.text
+	activebarText:SetText(CCWATCH.CCS[effect].TARGET..' : '..effect)
 
 	if getn(GROUPS[group].EFFECT) == 1 then
-		getglobal("CCWatchBar"..ext..group):Show()
+		getglobal('CCWatchBar'..ext..group):Show()
 		-- if CCWATCH.CCS[effect].COLOR then
 		-- 	getglobal("CCWatchBar"..ext..group.."StatusBar"):SetStatusBarColor(CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b)
 		-- end
@@ -902,7 +945,7 @@ end
 function CCWatch_UnqueueEffect(effect)
 	local group = CCWATCH.CCS[effect].GROUP
 	local GROUPS
-	local ext = ""
+	local ext = ''
 
 	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
 		GROUPS = CCWATCH.GROUPSBUFF
