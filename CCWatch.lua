@@ -693,30 +693,15 @@ function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
 	end
 end
 
-do
-	local DeadMob = ''
-	local function CCWHandleTargetDeath(k, v)
-		-- if v then
-		-- 	if v.TARGET == DeadMob then
-		-- 		CCWATCH.CCS[k].TIMER_END = GetTime()
-		-- 		CCWatch_RemoveEffect(k)
-		-- 	end
-		-- end
-		-- CCWatch_AbortRefresh(DeadMob)
+function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
+	for mobname in string.gfind(arg1, CCWATCH_TEXT_DIE) do
+		CCWatch_HandleDeath(mobname)
 	end
+end
 
-	function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
-		for mobname in string.gfind(arg1, CCWATCH_TEXT_DIE) do
-			DeadMob = mobname
-			table.foreach(CCWATCH.CCS, CCWHandleTargetDeath)
-		end
-	end
-
-	function CCWatch_EventHandler.CHAT_MSG_COMBAT_XP_GAIN()
-		for mobname in string.gfind(arg1, CCWATCH_TEXT_DIEXP) do
-			DeadMob = mobname
-			table.foreach(CCWATCH.CCS, CCWHandleTargetDeath)
-		end
+function CCWatch_EventHandler.CHAT_MSG_COMBAT_XP_GAIN()
+	for mobname in string.gfind(arg1, CCWATCH_TEXT_DIEXP) do
+		CCWatch_HandleDeath(mobname)
 	end
 end
 
@@ -784,6 +769,14 @@ end
 
 do
 	local active_effects = {}
+
+	function CCWatch_HandleDeath(target)
+		for i = getn(active_effects), 1, -1 do
+			if active_effects[i].TARGET == target then
+				CCWatch_RemoveEffect(active_effects[i].NAME, target)
+			end
+		end
+	end
 
 	function CCWatch_EffectActive(name, target)
 		for i, v in active_effects do
