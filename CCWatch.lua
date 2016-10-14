@@ -799,8 +799,6 @@ do
 			return
 		end
 
-		CCWatch_RemoveEffect(name, target)
-
 		local effect = {
 			NAME = name,
 			TARGET = target,
