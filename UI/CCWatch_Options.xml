@@ -422,24 +422,6 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="CCWatchOptionsFrameLeading" inherits="OptionsCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="300" y="-150"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_LEADINGTIMER);
-							</OnLoad>
-							<OnClick>
-								CCWatchOptions_LeadingToggle();
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-
 					<Frame name="CCWatchTimersDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
 						<Size>
 							<AbsDimension x="108" y="16"/>
@@ -839,7 +821,6 @@
 											</Anchors>
 										</FontString>
 									</Layer>
-
 									<Layer>
 										<FontString name="CCWatchOptionsEffectNameStatic" inherits="GameFontNormal" text="">
 											<Anchors>
@@ -852,8 +833,6 @@
 										</FontString>
 									</Layer>
 
-
-
 									<Layer>
 										<FontString inherits="GameFontNormalSmall" text="CCWATCH_DURATION">
 											<Anchors>
@@ -865,7 +844,6 @@
 											</Anchors>
 										</FontString>
 									</Layer>
-
 									<Layer>
 										<FontString name="CCWatchOptionsEffectDurationStatic" inherits="GameFontNormal" text="">
 											<Anchors>
@@ -891,11 +869,11 @@
 										</FontString>
 									</Layer>
 									<Layer>
-										<FontString inherits="GameFontNormalSmall" text="CCWATCH_GROUP">
+										<FontString name="CCWatchOptionsEffectType" inherits="GameFontNormal" text="">
 											<Anchors>
 												<Anchor point="TOPLEFT">
 													<Offset>
-														<AbsDimension x="-90" y="-100"/>
+														<AbsDimension x="-5" y="-70"/>
 													</Offset>
 												</Anchor>
 											</Anchors>
@@ -907,7 +885,18 @@
 											<Anchors>
 												<Anchor point="TOPLEFT">
 													<Offset>
-														<AbsDimension x="-90" y="-130"/>
+														<AbsDimension x="-90" y="-100"/>
+													</Offset>
+												</Anchor>
+											</Anchors>
+										</FontString>
+									</Layer>
+									<Layer>
+										<FontString name="CCWatchOptionsEffectDR" inherits="GameFontNormal" text="">
+											<Anchors>
+												<Anchor point="TOPLEFT">
+													<Offset>
+														<AbsDimension x="-5" y="-100"/>
 													</Offset>
 												</Anchor>
 											</Anchors>
@@ -918,109 +907,6 @@
 									<OnLoad>
 										this:SetBackdropBorderColor(0.4, 0.4, 0.4);
 										this:SetBackdropColor(0.15, 0.15, 0.15);
-									</OnLoad>
-								</Scripts>
-							</Frame>
-
-							<EditBox name="CCWatchOptionsEffectNameEdit" historyLines="1" letters="32">
-								<Size>
-									<AbsDimension x="220" y="18"/>
-								</Size>
-								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectFrame" relativePoint="TOPLEFT">
-										<Offset>
-											<AbsDimension x="110" y="-15"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
-									<EdgeSize>
-										<AbsValue val="8"/>
-									</EdgeSize>
-									<TileSize>
-										<AbsValue val="8"/>
-									</TileSize>
-									<BackgroundInsets>
-										<AbsInset left="2" right="2" top="2" bottom="2"/>
-									</BackgroundInsets>
-								</Backdrop>
-								<FontString inherits="ChatFontNormal"/>
-								<Scripts>
-									<OnLoad>
-										this:SetAutoFocus(false)
-										this:SetTextInsets(4,0,0,0);
-										this:SetBackdropBorderColor(0.4, 0.4, 0.4);
-										this:SetBackdropColor(0.15, 0.15, 0.15);
-									</OnLoad>
-									<OnTabPressed>
-										CCWatchOptionsEffectDurationEdit:SetFocus();
-									</OnTabPressed>
-									<OnEnterPressed>
-										CCWatchOptionsEffectDurationEdit:SetFocus();
-									</OnEnterPressed>
-									<OnEscapePressed>
-										CCWatchOptions_Toggle();
-									</OnEscapePressed>
-								</Scripts>
-							</EditBox>
-
-							<EditBox name="CCWatchOptionsEffectDurationEdit" historyLines="1" letters="32">
-								<Size>
-									<AbsDimension x="220" y="18"/>
-								</Size>
-								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectFrame" relativePoint="TOPLEFT">
-										<Offset>
-											<AbsDimension x="110" y="-45"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
-									<EdgeSize>
-										<AbsValue val="8"/>
-									</EdgeSize>
-									<TileSize>
-										<AbsValue val="8"/>
-									</TileSize>
-									<BackgroundInsets>
-										<AbsInset left="2" right="2" top="2" bottom="2"/>
-									</BackgroundInsets>
-								</Backdrop>
-								<FontString inherits="ChatFontNormal"/>
-								<Scripts>
-									<OnLoad>
-										this:SetAutoFocus(false)
-										this:SetTextInsets(4,0,0,0);
-										this:SetBackdropBorderColor(0.4, 0.4, 0.4);
-										this:SetBackdropColor(0.15, 0.15, 0.15);
-									</OnLoad>
-									<OnTabPressed>
-										CCWatchOptionsEffectNameEdit:SetFocus();
-									</OnTabPressed>
-									<OnEnterPressed>
-										CCWatchOptionsEffectNameEdit:SetFocus();
-									</OnEnterPressed>
-									<OnEscapePressed>
-										CCWatchOptions_Toggle();
-									</OnEscapePressed>
-								</Scripts>
-							</EditBox>
-
-							<Frame name="CCWatchOptionsEffectTypeDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
-								<Size>
-									<AbsDimension x="80" y="10"/>
-								</Size>
-								<Anchors>
-									<Anchor point="TOPLEFT">
-										<Offset>
-											<AbsDimension x="90" y="-71"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										UIDropDownMenu_Initialize(this, CCWatchOptionsEffectTypeDropDown_OnInit);
-										UIDropDownMenu_SetWidth(80);
 									</OnLoad>
 								</Scripts>
 							</Frame>
@@ -1041,25 +927,6 @@
 									</OnClick>
 								</Scripts>
 							</CheckButton>
-
-							<Frame name="CCWatchOptionsEffectGroupDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
-								<Size>
-									<AbsDimension x="40" y="10"/>
-								</Size>
-								<Anchors>
-									<Anchor point="TOPLEFT">
-										<Offset>
-											<AbsDimension x="90" y="-101"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										UIDropDownMenu_Initialize(this, CCWatchOptionsEffectGroupDropDown_OnInit);
-										UIDropDownMenu_SetWidth(40);
-									</OnLoad>
-								</Scripts>
-							</Frame>
 							<CheckButton name="CCWatchOptionsEffectWarn" inherits="OptionsCheckButtonTemplate">
 								<Anchors>
 									<Anchor point="TOPLEFT">
@@ -1078,24 +945,6 @@
 								</Scripts>
 							</CheckButton>
 
-							<CheckButton name="CCWatchOptionsEffectUseColor" inherits="OptionsCheckButtonTemplate">
-								<Anchors>
-									<Anchor point="TOPLEFT">
-										<Offset>
-											<AbsDimension x="220" y="-131"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_USECOLOR);
-									</OnLoad>
-									<OnClick>
-										CCWatchOptions_UseColorToggle();
-									</OnClick>
-								</Scripts>
-							</CheckButton>
-
 							<Button name="CCWatchOptionsBarColorEffect" inherits="CCWatchColorButtonTemplate">
 								<Anchors>
 									<Anchor point="TOPLEFT">
@@ -1106,44 +955,7 @@
 								</Anchors>
 							</Button>
 
-							<Frame name="CCWatchOptionsEffectDRDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
-								<Size>
-									<AbsDimension x="80" y="10"/>
-								</Size>
-								<Anchors>
-									<Anchor point="TOPLEFT">
-										<Offset>
-											<AbsDimension x="90" y="-131"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										UIDropDownMenu_Initialize(this, CCWatchOptionsEffectDRDropDown_OnInit);
-										UIDropDownMenu_SetWidth(80);
-									</OnLoad>
-								</Scripts>
-							</Frame>
-
-							<Button name="CCWatchOptionsLearnClear" inherits="GameMenuButtonTemplate" text="CCWATCH_RESET">
-								<Size>
-									<AbsDimension x="100" y="21"/>
-								</Size>
-								<Anchors>
-									<Anchor point="BOTTOMLEFT">
-										<Offset>
-											<AbsDimension x="10" y="10"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnClick>
-										CCWatchOptionsLearnClear_OnClick();
-									</OnClick>
-								</Scripts>
-							</Button>
-
-							<Button name="CCWatchOptionsLearnModify" inherits="GameMenuButtonTemplate" text="CCWATCH_ADD">
+							<Button name="CCWatchOptionsLearnModify" inherits="GameMenuButtonTemplate" text="Modify">
 								<Size>
 									<AbsDimension x="100" y="21"/>
 								</Size>
@@ -1160,19 +972,17 @@
 									</OnClick>
 								</Scripts>
 							</Button>
-
-
 						</Frames>
 					</Frame>
 
 					<ScrollFrame name="CCWatchOptionsEffectsListScrollFrame" inherits="FauxScrollFrameTemplate">
 						<Size>
-							<AbsDimension x="245" y="176"/>
+							<AbsDimension x="350" y="176"/>
 						</Size>
 						<Anchors>
-							<Anchor point="TOPRIGHT" relativeTo="CCWatchOptionsLearnDelete" relativePoint="TOPLEFT"> 
+							<Anchor point="TOPLEFT"> 
 								<Offset>
-									<AbsDimension x="-25" y="-2"/>
+									<AbsDimension x="10" y="-10"/>
 								</Offset>
 							</Anchor>
 						</Anchors>

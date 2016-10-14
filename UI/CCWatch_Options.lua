@@ -1,78 +1,53 @@
-CCWatchEffectSelection = "";
-local STATUS_COLOR = "|c000066FF";
-local bModify = false;
-local AR_DiagOpen = false;
+CCWatchEffectSelection = ""
+local STATUS_COLOR = "|c000066FF"
+local AR_DiagOpen = false
 
 local DisplayTable = {}
 
-CCWatchConfig_SwatchFunc_SetColor =
-{
+CCWatchConfig_SwatchFunc_SetColor = {
 	 ["Urge"]	= function(x) CCWatch_SetColorCallback("Urge") end,
 	 ["Low"]	= function(x) CCWatch_SetColorCallback("Low") end,
 	 ["Normal"]	= function(x) CCWatch_SetColorCallback("Normal") end,
 	 ["Effect"]	= function(x) CCWatch_SetColorCallback("Effect") end,
 }
 
-CCWatchConfig_SwatchFunc_CancelColor =
-{
+CCWatchConfig_SwatchFunc_CancelColor = {
 	 ["Urge"]	= function(x) CCWatch_CancelColorCallback("Urge", x) end,
 	 ["Low"]	= function(x) CCWatch_CancelColorCallback("Low", x) end,
 	 ["Normal"]	= function(x) CCWatch_CancelColorCallback("Normal", x) end,
 	 ["Effect"]	= function(x) CCWatch_CancelColorCallback("Effect", x) end,
 }
 
-
---[[
-function POBJI(k, v)
-	local str = k.." : ";
-	if type(v) ~= "table" and type(v) ~= "userdata" and type(v) ~= "function" and type(v) ~= "nil" then
-		CCWatch_AddMessage(str..v);
-	else
-		str = str.."type = "..type(v);
-		if type(v) == "table" then
-			CCWatch_AddMessage(str.." -> ");
-			POBJ(v);
-		else
-			CCWatch_AddMessage(str);
-		end
-	end
-end
-
-function POBJ(obj)
-	table.foreach(obj, POBJI);
-end
---]]
-
 local function SetButtonPickerColor(button, color)
-	getglobal(button.."_SwatchTexture"):SetVertexColor(color.r, color.g, color.b);
-	getglobal(button.."_BorderTexture"):SetVertexColor(color.r, color.g, color.b);
-	getglobal(button).r = color.r;
-	getglobal(button).g = color.g;
-	getglobal(button).b = color.b;
+	getglobal(button .. "_SwatchTexture"):SetVertexColor(color.r, color.g, color.b)
+	getglobal(button .. "_BorderTexture"):SetVertexColor(color.r, color.g, color.b)
+	getglobal(button).r = color.r
+	getglobal(button).g = color.g
+	getglobal(button).b = color.b
 end
 
 function CCWatch_DisableDropDown(dropDown)
-	getglobal(dropDown:GetName().."Text"):SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
-	getglobal(dropDown:GetName().."Button"):Disable();
+	getglobal(dropDown:GetName() .. "Text"):SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
+	getglobal(dropDown:GetName() .. "Button"):Disable()
 end
 
 function CCWatch_EnableDropDown(dropDown)
-	getglobal(dropDown:GetName().."Text"):SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b);
-	getglobal(dropDown:GetName().."Button"):Enable();
+	getglobal(dropDown:GetName() .. "Text"):SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+	getglobal(dropDown:GetName() .. "Button"):Enable()
 end
 
 
 function UpdateSortTable()
 	DisplayTable = {}
-	table.foreach(CCWATCH.CCS, function (k, v) table.insert(DisplayTable, k) end);
-	table.sort(DisplayTable);
+	table.foreach(CCWATCH.CCS, function (k, v) table.insert(DisplayTable, k) end)
+	sort(DisplayTable)
 end
 
 function CCWatchOptions_Toggle()
 	if(CCWatchOptionsFrame:IsVisible()) then
-		CCWatchOptionsFrame:Hide();
+		CCWatchOptionsFrame:Hide()
 	else
-		CCWatchOptionsFrame:Show();
+		CCWatchOptionsFrame:Show()
 	end
 end
 
@@ -82,11 +57,11 @@ end
 --------------------------------------------------------------------------------
 
 function CCWatchOptionsBarsTab_OnClick()
-	CCWatchOptionsBarsFrame:Show();
-	CCWatchOptionsEffectsFrame:Hide();
-	CCWatchOptionsLearnFrame:Hide();
+	CCWatchOptionsBarsFrame:Show()
+	CCWatchOptionsEffectsFrame:Hide()
+	CCWatchOptionsLearnFrame:Hide()
 
-	PlaySound("igMainMenuOptionCheckBoxOn");
+	PlaySound"igMainMenuOptionCheckBoxOn"
 end
 
 function CCWatchOptionsEffectsTab_OnClick()
@@ -94,7 +69,7 @@ function CCWatchOptionsEffectsTab_OnClick()
 	CCWatchOptionsEffectsFrame:Show();
 	CCWatchOptionsLearnFrame:Hide();
 
-	PlaySound("igMainMenuOptionCheckBoxOn");
+	PlaySound"igMainMenuOptionCheckBoxOn"
 end
 
 function CCWatchOptionsLearnTab_OnClick()
@@ -102,37 +77,37 @@ function CCWatchOptionsLearnTab_OnClick()
 	CCWatchOptionsEffectsFrame:Hide();
 	CCWatchOptionsLearnFrame:Show();
 
-	PlaySound("igMainMenuOptionCheckBoxOn");
+	PlaySound"igMainMenuOptionCheckBoxOn"
 end
 
 function CCWatchOptionsBarsFrame_OnShow()
-	CCWatchOptionsBarsTabTexture:Show();
-	CCWatchOptionsBarsTab:SetBackdropBorderColor(1, 1, 1, 1);
+	CCWatchOptionsBarsTabTexture:Show()
+	CCWatchOptionsBarsTab:SetBackdropBorderColor(1, 1, 1, 1)
 end
 
 function CCWatchOptionsEffectsFrame_OnShow()
-	CCWatchOptionsEffectsTabTexture:Show();
-	CCWatchOptionsEffectsTab:SetBackdropBorderColor(1, 1, 1, 1);
+	CCWatchOptionsEffectsTabTexture:Show()
+	CCWatchOptionsEffectsTab:SetBackdropBorderColor(1, 1, 1, 1)
 end
 
 function CCWatchOptionsLearnFrame_OnShow()
-	CCWatchOptionsLearnTabTexture:Show();
-	CCWatchOptionsLearnTab:SetBackdropBorderColor(1, 1, 1, 1);
+	CCWatchOptionsLearnTabTexture:Show()
+	CCWatchOptionsLearnTab:SetBackdropBorderColor(1, 1, 1, 1)
 end
 
 function CCWatchOptionsBarsFrame_OnHide()
-	CCWatchOptionsBarsTabTexture:Hide();
-	CCWatchOptionsBarsTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0);
+	CCWatchOptionsBarsTabTexture:Hide()
+	CCWatchOptionsBarsTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0)
 end
 
 function CCWatchOptionsEffectsFrame_OnHide()
-	CCWatchOptionsEffectsTabTexture:Hide();
-	CCWatchOptionsEffectsTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0);
+	CCWatchOptionsEffectsTabTexture:Hide()
+	CCWatchOptionsEffectsTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0)
 end
 
 function CCWatchOptionsLearnFrame_OnHide()
-	CCWatchOptionsLearnTabTexture:Hide();
-	CCWatchOptionsLearnTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0);
+	CCWatchOptionsLearnTabTexture:Hide()
+	CCWatchOptionsLearnTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0)
 end
 
 --------------------------------------------------------------------------------
@@ -156,18 +131,6 @@ function CCWatchOptions_InvertToggle()
 		CCWatch_AddMessage(CCWATCH_INVERSION_ON);
 	else
 		CCWatch_AddMessage(CCWATCH_INVERSION_OFF);
-	end
-end
-
-function CCWatchOptions_LeadingToggle()
-	CCWATCH.LEADINGTIMER = not CCWATCH.LEADINGTIMER;
-	CCWatch_Save[CCWATCH.PROFILE].LeadingTimer = CCWATCH.LEADINGTIMER;
-	if CCWATCH.LEADINGTIMER then
-		CCWatch_SetLeadingTimer(true);
-		CCWatch_AddMessage(CCWATCH_LEADINGTIMER_ON);
-	else
-		CCWatch_SetLeadingTimer(false);
-		CCWatch_AddMessage(CCWATCH_LEADINGTIMER_OFF);
 	end
 end
 
@@ -280,108 +243,108 @@ end
 --------------------------------------------------------------------------------
 
 function CCWatchOptions_MonitorCCToggle()
-	CCWATCH.MONITORING = bit.bxor(CCWATCH.MONITORING, ETYPE_CC);
-	CCWatch_Save[CCWATCH.PROFILE].Monitoring = CCWATCH.MONITORING;
+	CCWATCH.MONITORING = bit.bxor(CCWATCH.MONITORING, ETYPE_CC)
+	CCWatch_Save[CCWATCH.PROFILE].Monitoring = CCWATCH.MONITORING
 	if bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF) == 0 then
 		if bit.band(CCWATCH.MONITORING, ETYPE_CC) ~= 0 then
-			CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE");
-			CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE");
+			CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		else
-			CCWatchObject:UnregisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE");
-			CCWatchObject:UnregisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE");
+			CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		end
 	end
 end
 
 function CCWatchOptions_MonitorDebuffToggle()
-	CCWATCH.MONITORING = bit.bxor(CCWATCH.MONITORING, ETYPE_DEBUFF);
-	CCWatch_Save[CCWATCH.PROFILE].Monitoring = CCWATCH.MONITORING;
+	CCWATCH.MONITORING = bit.bxor(CCWATCH.MONITORING, ETYPE_DEBUFF)
+	CCWatch_Save[CCWATCH.PROFILE].Monitoring = CCWATCH.MONITORING
 	if bit.band(CCWATCH.MONITORING, ETYPE_CC) == 0 then
 		if bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF) ~= 0 then
-			CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE");
-			CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE");
+			CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		else
-			CCWatchObject:UnregisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE");
-			CCWatchObject:UnregisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE");
+			CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		end
 	end
 end
 
 function CCWatchOptions_MonitorBuffToggle()
-	CCWATCH.MONITORING = bit.bxor(CCWATCH.MONITORING, ETYPE_BUFF);
-	CCWatch_Save[CCWATCH.PROFILE].Monitoring = CCWATCH.MONITORING;
+	CCWATCH.MONITORING = bit.bxor(CCWATCH.MONITORING, ETYPE_BUFF)
+	CCWatch_Save[CCWATCH.PROFILE].Monitoring = CCWATCH.MONITORING
 	if bit.band(CCWATCH.MONITORING, ETYPE_BUFF) ~= 0 then
-		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS");
-		CCWatchObject:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS");
+		CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"
+		CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"
 	else
-		CCWatchObject:UnregisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS");
-		CCWatchObject:UnregisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS");
+		CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"
+		CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"
 	end
 end
 
 function CCWatchOptions_ArcanistToggle()
-	CCWATCH.ARCANIST = not CCWATCH.ARCANIST;
-	CCWatch_Save[CCWATCH.PROFILE].arcanist = CCWATCH.ARCANIST;
+	CCWATCH.ARCANIST = not CCWATCH.ARCANIST
+	CCWatch_Save[CCWATCH.PROFILE].arcanist = CCWATCH.ARCANIST
 	if CCWATCH.ARCANIST then
-		CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH = CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH + 15;
-		CCWatch_AddMessage(CCWATCH_ARCANIST_ON);
+		CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH = CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH + 15
+		CCWatch_AddMessage(CCWATCH_ARCANIST_ON)
 	else
-		CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH = CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH - 15;
-		CCWatch_AddMessage(CCWATCH_ARCANIST_OFF);
+		CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH = CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH - 15
+		CCWatch_AddMessage(CCWATCH_ARCANIST_OFF)
 	end
-	CCWatchOptionsFrameArcanist:SetChecked(CCWATCH.ARCANIST);
+	CCWatchOptionsFrameArcanist:SetChecked(CCWATCH.ARCANIST)
 end
 
 function CCWatchOptions_WarnAppliedToggle()
-	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_APPLIED);
-	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG;
-	CCWatchOptionsFrameWarnApplied:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED));
+	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_APPLIED)
+	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
+	CCWatchOptionsFrameWarnApplied:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED))
 end
 
 function CCWatchOptions_WarnFadedToggle()
-	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_FADED);
-	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG;
-	CCWatchOptionsFrameWarnFaded:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED));
+	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_FADED)
+	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
+	CCWatchOptionsFrameWarnFaded:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED))
 end
 
 function CCWatchOptions_WarnBrokenToggle()
-	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_BROKEN);
-	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG;
-	CCWatchOptionsFrameWarnBroken:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN));
+	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_BROKEN)
+	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
+	CCWatchOptionsFrameWarnBroken:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN))
 end
 
 function CCWatchOptions_WarnLowTimeToggle()
-	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME);
-	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG;
-	CCWatchOptionsFrameWarnLowTime:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME));
+	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME)
+	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
+	CCWatchOptionsFrameWarnLowTime:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME))
 end
 
 function CCWatchOptions_SetWarnLow()
-	CCWatch_Save[CCWATCH.PROFILE].WarnLow = CCWatchOptionsFrameWarnLowEdit:GetNumber();
-	CCWATCH.WARNLOW = CCWatch_Save[CCWATCH.PROFILE].WarnLow;
+	CCWatch_Save[CCWATCH.PROFILE].WarnLow = CCWatchOptionsFrameWarnLowEdit:GetNumber()
+	CCWATCH.WARNLOW = CCWatch_Save[CCWATCH.PROFILE].WarnLow
 end
 
 function CCWatchOptionsStyleDropDown_OnInit()
-	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsStyleDropDown";
-	local info = { };
+	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsStyleDropDown"
+	local info = { }
 
-	info.text = CCWATCH_OPTION_STYLE_CURRENT;
-	info.value = "normal";
-	info.owner = this;
-	info.func = CCWatchOptionsStyleDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = CCWATCH_OPTION_STYLE_CURRENT
+	info.value = "normal"
+	info.owner = this
+	info.func = CCWatchOptionsStyleDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 
-	info.text = CCWATCH_OPTION_STYLE_RECENT;
-	info.value = "recent";
-	info.owner = this;
-	info.func = CCWatchOptionsStyleDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = CCWATCH_OPTION_STYLE_RECENT
+	info.value = "recent"
+	info.owner = this
+	info.func = CCWatchOptionsStyleDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 	
-	info.text = CCWATCH_OPTION_STYLE_ALL;
-	info.value = "all";
-	info.owner = this;
-	info.func = CCWatchOptionsStyleDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = CCWATCH_OPTION_STYLE_ALL
+	info.value = "all"
+	info.owner = this
+	info.func = CCWatchOptionsStyleDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 end
 
 function CCWatchOptionsStyleDropDown_OnClick()
@@ -475,261 +438,29 @@ end
 function CCWatchOptions_WarnToggle()
 end
 
-function CCWatchOptions_UseColorToggle()
-	if CCWatchOptionsEffectUseColor:GetChecked() then
-		CCWatchOptionsBarColorEffect:Enable();
-	else
-		CCWatchOptionsBarColorEffect:Disable();
-	end
-end
-
-function CCWatchOptionsEffectTypeDropDown_OnInit()
-	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsEffectTypeDropDown";
-	local info = { };
-
-	info.text = "CC";
-	info.value = "cc";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectTypeDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-
-	info.text = "DEBUFF";
-	info.value = "debuff";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectTypeDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-	
-	info.text = "BUFF";
-	info.value = "buff";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectTypeDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-end
-
-function CCWatchOptionsEffectGroupDropDown_OnInit()
-	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsEffectGroupDropDown";
-	local info = { };
-
-	info.text = "1";
-	info.value = "1";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectGroupDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-
-	info.text = "2";
-	info.value = "2";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectGroupDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-
-	info.text = "3";
-	info.value = "3";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectGroupDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-
-	info.text = "4";
-	info.value = "4";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectGroupDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-
-	info.text = "5";
-	info.value = "5";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectGroupDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-end
-
-function CCWatchOptionsEffectDRDropDown_OnInit()
-	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsEffectDRDropDown";
-	local info = { };
-
-	info.text = CCWATCH_OPTION_DR_NEVER;
-	info.value = "0";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectDRDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-
-	info.text = CCWATCH_OPTION_DR_MOBPLAYERS;
-	info.value = "1";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectDRDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-
-	info.text = CCWATCH_OPTION_DR_PLAYERS;
-	info.value = "2";
-	info.owner = this;
-	info.func = CCWatchOptionsEffectDRDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-end
-
-function CCWatchOptionsEffectTypeDropDown_OnClick()
-	if (this.value == "cc") then
-		CCWatchOptionsEffectTypeDropDownText:SetText("CC");
-	elseif( this.value == "debuff" ) then
-		CCWatchOptionsEffectTypeDropDownText:SetText("DEBUFF");
-	elseif( this.value == "buff" ) then
-		CCWatchOptionsEffectTypeDropDownText:SetText("BUFF");
-	end
-end
-
-function CCWatchOptionsEffectDRDropDown_OnClick()
-	if (this.value == "0") then
-		CCWatchOptionsEffectDRDropDownText:SetText(CCWATCH_OPTION_DR_NEVER);
-	elseif( this.value == "1") then
-		CCWatchOptionsEffectDRDropDownText:SetText(CCWATCH_OPTION_DR_MOBPLAYERS);
-	else
-		CCWatchOptionsEffectDRDropDownText:SetText(CCWATCH_OPTION_DR_PLAYERS);
-	end
-end
-
-function CCWatchOptionsEffectGroupDropDown_OnClick()
-	CCWatchOptionsEffectGroupDropDownText:SetText(this.value);
-end
-
-function CCWatchOptionsLearnClear_OnClick()
-	CCWatchOptionsEffectNameEdit:SetText("");
-	CCWatchOptionsEffectNameStatic:SetText("");
-	CCWatchOptionsEffectDurationEdit:SetText("");
-	CCWatchOptionsEffectDurationStatic:SetText("");
-
-	CCWatchOptionsEffectTypeDropDownText:SetText("CC");
-	CCWatchOptionsEffectGroupDropDownText:SetText("1");
-	CCWatchOptionsEffectDRDropDownText:SetText(CCWATCH_OPTION_DR_NEVER);
-	CCWatchOptionsEffectMonitor:SetChecked(true);
-	CCWatchOptionsEffectWarn:SetChecked(false);
-	CCWatchOptionsEffectUseColor:SetChecked(false);
-	CCWatchOptionsBarColorEffect:Disable();
-	SetButtonPickerColor("CCWatchOptionsBarColorEffect", {r=0,g=0,b=0});
-
-	CCWatchOptionsLearnModify:SetText("Add");
-	bModify = false;
-
-	CCWatch_EnableDropDown(CCWatchOptionsEffectTypeDropDown);
-	CCWatch_EnableDropDown(CCWatchOptionsEffectGroupDropDown);
-	CCWatch_EnableDropDown(CCWatchOptionsEffectDRDropDown);
-	CCWatchOptionsEffectNameEdit:Show();
-	CCWatchOptionsEffectDurationEdit:Show();
-end
-
 function CCWatchOptionsLearnModify_OnClick()
-	local effect = CCWatchOptionsEffectNameEdit:GetText();
-	local duration = CCWatchOptionsEffectDurationEdit:GetNumber();
-	local group = CCWatchOptionsEffectGroupDropDownText:GetText();
-	local stype = CCWatchOptionsEffectTypeDropDownText:GetText();
-	local sdr = CCWatchOptionsEffectDRDropDownText:GetText();
-	local monitor = CCWatchOptionsEffectMonitor:GetChecked();
-	local warn = CCWatchOptionsEffectWarn:GetChecked();
-
-	local color = {r=0, g=0, b=0};
-
-	local etype;
-	local edr;
-	if stype == "BUFF" then
-		etype = ETYPE_BUFF;
-	elseif stype == "DEBUFF" then
-		etype = ETYPE_DEBUFF;
-	else
-		etype = ETYPE_CC;
-	end
-
-	if dr == CCWATCH_OPTION_DR_NEVER then
-		edr = 0;
-	elseif sdr == CCWATCH_OPTION_DR_MOBPLAYERS then
-		edr = 1;
-	else
-		edr = 2;
-	end
-
-	if effect == "" then
-		message("Invalid Effect name");
-		return;
-	end
-	if duration <= 0 then
-		message("Invalid duration.");
-		return;
-	end
-
-	if CCWatchOptionsEffectUseColor:GetChecked() then
-		color.r = CCWatchOptionsBarColorEffect.r;
-		color.g = CCWatchOptionsBarColorEffect.g;
-		color.b = CCWatchOptionsBarColorEffect.b;
-	else
-		color = nil;
-	end
-
-	if bModify then
--- modifying
-		-- check if existing custom effect
-		if CCWatch_Save[CCWATCH.PROFILE].SavedCC[effect] ~= nil then
-			if effect ~= CCWatchEffectSelection then -- skillname change...
-				-- remove old effect
-				CCWatch_Save[CCWATCH.PROFILE].ConfCC[CCWatchEffectSelection] = nil;
-				CCWatch_Save[CCWATCH.PROFILE].SavedCC[CCWatchEffectSelection] = nil;
-			end
-			-- add/update effect
-			CCWatchAddEffect(false, effect, group, etype, duration, edr, monitor, warn, color)
-		else -- if not we are modifying a builtin effect
-			if effect ~= CCWatchEffectSelection then -- skillname change...
-				message("WARNING : adding an effect requires pressing the NEW button")
-			end
-			CCWatchAddEffect(true, effect, group, etype, duration, edr, monitor, warn, color)
-		end
-	else
--- add
-		if CCWATCH.CCS[effect] ~= nil then
-			message("Effect '"..effect.."' already exist.\nPlease select Edit to modify it")
-			return;
-		else
-			CCWatchAddEffect(false, effect, group, etype, duration, edr, monitor, warn, color)
-		end
-	end
-	UpdateSortTable();	
-	CCWatchOptionsEffects_Update();
-	CCWatch_AddMessage(CCWATCH_EFFECT.." "..effect..CCWATCH_ADDEDMODIFIED);
+	local monitor = CCWatchOptionsEffectMonitor:GetChecked()
+	local warn = CCWatchOptionsEffectWarn:GetChecked()
+	local color = {
+		r = CCWatchOptionsBarColorEffect.r,
+		g = CCWatchOptionsBarColorEffect.g,
+		b = CCWatchOptionsBarColorEffect.b,
+	}
+	CCWatch_ModifyEffect(CCWatchEffectSelection, monitor, warn, color)
 end
 
 --------------------------------------------------------------------------------
 -- Custom effect management
 --------------------------------------------------------------------------------
 
-function CCWatchAddEffect(builtin, effect, group, etype, duration, diminishes, monitor, warn, color)
+function CCWatch_ModifyEffect(effect, monitor, warn, color)
 	local iWarn = warn and 1 or 0
 
-	CCWATCH.CCS[effect] = CCWATCH.CCS[effect] or {}
-
-	CCWATCH.CCS[effect].GROUP = tonumber(group)
-	CCWATCH.CCS[effect].ETYPE = etype
-	CCWATCH.CCS[effect].LENGTH = duration
-	CCWATCH.CCS[effect].DIMINISHES = diminishes
-	CCWATCH.CCS[effect].MONITOR = monitor
-	CCWATCH.CCS[effect].WARN = iWarn
-	CCWATCH.CCS[effect].COLOR = color
-
-	CCWATCH.CCS[effect].TARGET = ''
-	CCWATCH.CCS[effect].PLAYER = nil
-	CCWATCH.CCS[effect].TIMER_START = 0
-	CCWATCH.CCS[effect].TIMER_END = 0
-	CCWATCH.CCS[effect].DIMINISH = 1
-
-	if builtin then
-		CCWatch_Save[CCWATCH.PROFILE].ConfCC[effect] = {
-			MONITOR = monitor,
-			WARN = iWarn,
-			COLOR = color,
-		}
-	else
-		CCWatch_Save[CCWATCH.PROFILE].SavedCC[effect] = {
-			GROUP = tonumber(group),
-			ETYPE = etype,
-			LENGTH = duration,
-			DIMINISHES = diminishes,
-			MONITOR = monitor,
-			WARN = iWarn,
-			COLOR = color,
-		}
-	end
+	CCWatch_Save[CCWATCH.PROFILE].ConfCC[effect] = {
+		MONITOR = monitor,
+		WARN = iWarn,
+		COLOR = color,
+	}
 end
 
 function CCWatch_SetColorCallback(id)
@@ -765,15 +496,15 @@ function CCWatch_SetColorCallback(id)
 end
 
 function CCWatch_CancelColorCallback(id, prev)
-	local iRed = prev.r;
-	local iGreen = prev.g;
-	local iBlue = prev.b;
+	local iRed = prev.r
+	local iGreen = prev.g
+	local iBlue = prev.b
 
-	local swatch, button, border;
+	local swatch, button, border
 
-	button = getglobal("CCWatchOptionsBarColor" .. id);
-	swatch = getglobal("CCWatchOptionsBarColor" .. id .. "_SwatchTexture");
-	border = getglobal("CCWatchOptionsBarColor" .. id .. "_BorderTexture");
+	button = getglobal("CCWatchOptionsBarColor" .. id)
+	swatch = getglobal("CCWatchOptionsBarColor" .. id .. "_SwatchTexture")
+	border = getglobal("CCWatchOptionsBarColor" .. id .. "_BorderTexture")
 	
 	swatch:SetVertexColor(iRed, iGreen, iBlue);
 	border:SetVertexColor(iRed, iGreen, iBlue);
@@ -786,255 +517,203 @@ end
 
 function CCWatchOptionsLearnFillFields()
 	if CCWatchEffectSelection == nil then
-		return;
+		return
 	end
 
-	-- check if builtin effect to disable editing
-	if CCWatch_Save[CCWATCH.PROFILE].SavedCC[CCWatchEffectSelection] == nil then
-		CCWatch_DisableDropDown(CCWatchOptionsEffectTypeDropDown);
-		CCWatch_DisableDropDown(CCWatchOptionsEffectGroupDropDown);
-		CCWatch_DisableDropDown(CCWatchOptionsEffectDRDropDown);
-		-- hack because I have no other idea
-		CCWatchOptionsEffectNameEdit:Hide();
-		CCWatchOptionsEffectDurationEdit:Hide();
-		CCWatchOptionsEffectNameStatic:SetText(CCWatchEffectSelection);
-		CCWatchOptionsEffectDurationStatic:SetText(CCWATCH.CCS[CCWatchEffectSelection].LENGTH);
-	else
-		CCWatch_EnableDropDown(CCWatchOptionsEffectTypeDropDown);
-		CCWatch_EnableDropDown(CCWatchOptionsEffectGroupDropDown);
-		CCWatch_EnableDropDown(CCWatchOptionsEffectDRDropDown);
-		CCWatchOptionsEffectNameEdit:Show();
-		CCWatchOptionsEffectDurationEdit:Show();
-		CCWatchOptionsEffectNameStatic:SetText("");
-		CCWatchOptionsEffectDurationStatic:SetText("");
-	end
-	CCWatchOptionsEffectNameEdit:SetText(CCWatchEffectSelection);
-	CCWatchOptionsEffectDurationEdit:SetText(CCWATCH.CCS[CCWatchEffectSelection].LENGTH);
+	CCWatchOptionsEffectNameStatic:SetText(CCWatchEffectSelection)
+	CCWatchOptionsEffectDurationStatic:SetText(CCWATCH.CCS[CCWatchEffectSelection].LENGTH)
 
 	if CCWATCH.CCS[CCWatchEffectSelection].ETYPE == ETYPE_BUFF then
-		CCWatchOptionsEffectTypeDropDownText:SetText("BUFF");
+		CCWatchOptionsEffectType:SetText"BUFF"
 	elseif CCWATCH.CCS[CCWatchEffectSelection].ETYPE == ETYPE_DEBUFF then
-		CCWatchOptionsEffectTypeDropDownText:SetText("DEBUFF");
+		CCWatchOptionsEffectType:SetText"DEBUFF"
 	else
-		CCWatchOptionsEffectTypeDropDownText:SetText("CC");
+		CCWatchOptionsEffectType:SetText"CC"
 	end
-	CCWatchOptionsEffectGroupDropDownText:SetText(CCWATCH.CCS[CCWatchEffectSelection].GROUP);
 
 	if CCWATCH.CCS[CCWatchEffectSelection].DIMINISHES == 0 then
-		CCWatchOptionsEffectDRDropDownText:SetText(CCWATCH_OPTION_DR_NEVER);
+		CCWatchOptionsEffectDR:SetText(CCWATCH_OPTION_DR_NEVER)
 	elseif CCWATCH.CCS[CCWatchEffectSelection].DIMINISHES == 1 then
-		CCWatchOptionsEffectDRDropDownText:SetText(CCWATCH_OPTION_DR_MOBPLAYERS);
+		CCWatchOptionsEffectDR:SetText(CCWATCH_OPTION_DR_MOBPLAYERS)
 	else
-		CCWatchOptionsEffectDRDropDownText:SetText(CCWATCH_OPTION_DR_PLAYERS);
+		CCWatchOptionsEffectDR:SetText(CCWATCH_OPTION_DR_PLAYERS)
 	end
 
-	CCWatchOptionsEffectMonitor:SetChecked(CCWATCH.CCS[CCWatchEffectSelection].MONITOR);
-	local bFlag = CCWATCH.CCS[CCWatchEffectSelection].WARN > 0;
-	CCWatchOptionsEffectWarn:SetChecked(bFlag);
+	CCWatchOptionsEffectMonitor:SetChecked(CCWATCH.CCS[CCWatchEffectSelection].MONITOR)
+	local bFlag = CCWATCH.CCS[CCWatchEffectSelection].WARN > 0
+	CCWatchOptionsEffectWarn:SetChecked(bFlag)
 
 	if CCWATCH.CCS[CCWatchEffectSelection].COLOR ~= nil then
-		CCWatchOptionsEffectUseColor:SetChecked(true);
-		CCWatchOptionsBarColorEffect:Enable();
-		SetButtonPickerColor("CCWatchOptionsBarColorEffect", CCWATCH.CCS[CCWatchEffectSelection].COLOR);
+		CCWatchOptionsBarColorEffect:Enable()
+		SetButtonPickerColor("CCWatchOptionsBarColorEffect", CCWATCH.CCS[CCWatchEffectSelection].COLOR)
 	else
-		CCWatchOptionsEffectUseColor:SetChecked(false);
-		CCWatchOptionsBarColorEffect:Disable();
-		SetButtonPickerColor("CCWatchOptionsBarColorEffect", {r=1,g=1,b=1});
+		CCWatchOptionsBarColorEffect:Disable()
+		SetButtonPickerColor("CCWatchOptionsBarColorEffect", { r=1, g=1, b=1 })
 	end
-
-	bModify = true;
-	CCWatchOptionsLearnModify:SetText'Modify'
 end
-
-function CCWatch_DeleteLearntEffect()
-	CCWATCH.CCS[CCWatchEffectSelection] = nil;
---	CCWatch_Save[CCWATCH.PROFILE].SavedCC[CCWatchEffectSelection] = nil;
-	CCWatch_Save[CCWATCH.PROFILE].SavedCC[CCWatchEffectSelection] = {}
-
-	UpdateSortTable();
-	CCWatchOptionsEffects_Update();
-	CCWatch_OpenDiagToggle();
-
-	CCWatch_AddMessage(CCWATCH_REMOVED_NOTICE..CCWatchEffectSelection..".");
-	CCWatchEffectSelection = "";
-end
-
 
 function CCWatchOptions_OnLoad()
-	UIPanelWindows['CCWatchOptionsFrame'] = {area = 'center', pushable = 1};
+	UIPanelWindows.CCWatchOptionsFrame = { area='center', pushable=1 }
 end
 
 --------------------------------------------------------------------------------
 -- Init
 --------------------------------------------------------------------------------
 function CCWatchOptions_Init()
-	CCWatchSliderAlpha:SetValue(CCWATCH.ALPHA);
-	CCWatchSliderScale:SetValue(CCWATCH.SCALE);
-	CCWatchSliderWidth:SetValue(CCWATCH.WIDTH);
+	CCWatchSliderAlpha:SetValue(CCWATCH.ALPHA)
+	CCWatchSliderScale:SetValue(CCWATCH.SCALE)
+	CCWatchSliderWidth:SetValue(CCWATCH.WIDTH)
 
-	CCWatchOptionsFrameMonitorCC:SetChecked(bit.band(CCWATCH.MONITORING, ETYPE_CC));
-	CCWatchOptionsFrameMonitorDebuff:SetChecked(bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF));
-	CCWatchOptionsFrameMonitorBuff:SetChecked(bit.band(CCWATCH.MONITORING, ETYPE_BUFF));
+	CCWatchOptionsFrameMonitorCC:SetChecked(bit.band(CCWATCH.MONITORING, ETYPE_CC))
+	CCWatchOptionsFrameMonitorDebuff:SetChecked(bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF))
+	CCWatchOptionsFrameMonitorBuff:SetChecked(bit.band(CCWATCH.MONITORING, ETYPE_BUFF))
 
-	CCWatchOptionsFrameUnlock:SetChecked(CCWATCH.STATUS == 2);
-	CCWatchOptionsFrameInvert:SetChecked(CCWATCH.INVERT);
-	CCWatchOptionsFrameArcanist:SetChecked(CCWATCH.ARCANIST);
-	CCWatchOptionsWarnCCDropDownText:SetText(CCWATCH.WARNTYPE);
-	CCWatchOptionsFrameCustomCCEdit:SetText(CCWATCH.WARNCUSTOMCC);
+	CCWatchOptionsFrameUnlock:SetChecked(CCWATCH.STATUS == 2)
+	CCWatchOptionsFrameInvert:SetChecked(CCWATCH.INVERT)
+	CCWatchOptionsFrameArcanist:SetChecked(CCWATCH.ARCANIST)
+	CCWatchOptionsWarnCCDropDownText:SetText(CCWATCH.WARNTYPE)
+	CCWatchOptionsFrameCustomCCEdit:SetText(CCWATCH.WARNCUSTOMCC)
 	if CCWATCH.WARNTYPE == "CHANNEL" then
-		CCWatchOptionsFrameCustomCCEdit:Show();
+		CCWatchOptionsFrameCustomCCEdit:Show()
 	else
-		CCWatchOptionsFrameCustomCCEdit:Hide();
+		CCWatchOptionsFrameCustomCCEdit:Hide()
 	end
 
-	CCWatchOptionsEffectTypeDropDownText:SetText("CC");
-	CCWatchOptionsEffectGroupDropDownText:SetText("1");
-	CCWatchOptionsEffectDRDropDownText:SetText(CCWATCH_OPTION_DR_NEVER);
-	CCWatchOptionsEffectMonitor:SetChecked(true);
-	CCWatchOptionsEffectWarn:SetChecked(false);
+	CCWatchOptionsEffectMonitor:Disable()
+	CCWatchOptionsEffectWarn:Disable()
 
 	if CCWATCH.GROWTH == 0 then
-		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_OFF);
+		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_OFF)
 	elseif CCWATCH.GROWTH == 1 then
-		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_UP);
+		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_UP)
 	else
-		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN);
+		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN)
 	end
 
 	if CCWATCH.TIMERS == 0 then
-		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_OFF);
+		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_OFF)
 	elseif CCWATCH.TIMERS == 1 then
-		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_ON);
+		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_ON)
 	else
-		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_REVERSE);
+		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_REVERSE)
 	end
 
 	if CCWATCH.STYLE == 0 then
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_CURRENT);
+		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_CURRENT)
 	elseif CCWATCH.STYLE == 1 then
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_RECENT);
+		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_RECENT)
 	else
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_ALL);
+		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_ALL)
 	end
 
-	UpdateSortTable();
-	CCWatchOptionsEffects_Update();
+	UpdateSortTable()
+	CCWatchOptionsEffects_Update()
 
-	CCWatchOptionsBarColorEffect.swatchFunc = CCWatchConfig_SwatchFunc_SetColor["Effect"];
-	CCWatchOptionsBarColorEffect.cancelFunc = CCWatchConfig_SwatchFunc_CancelColor["Effect"];
-	CCWatchOptionsBarColorEffect:Disable();
+	CCWatchOptionsBarColorEffect.swatchFunc = CCWatchConfig_SwatchFunc_SetColor.Effect
+	CCWatchOptionsBarColorEffect.cancelFunc = CCWatchConfig_SwatchFunc_CancelColor.Effect
 
-	CCWatchOptionsFrameWarnApplied:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED));
-	CCWatchOptionsFrameWarnFaded:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED));
-	CCWatchOptionsFrameWarnBroken:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN));
-	CCWatchOptionsFrameWarnLowTime:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME));
+	CCWatchOptionsFrameWarnApplied:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED))
+	CCWatchOptionsFrameWarnFaded:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED))
+	CCWatchOptionsFrameWarnBroken:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN))
+	CCWatchOptionsFrameWarnLowTime:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME))
 
-	CCWatchOptionsFrameLeading:SetChecked(CCWATCH.LEADINGTIMER);
-
-	CCWatchOptionsBarsFrame:Show();
-	CCWatchOptionsEffectsTabTexture:Hide();
-	CCWatchOptionsEffectsTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0);
-	CCWatchOptionsLearnTabTexture:Hide();
-	CCWatchOptionsLearnTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0);
+	CCWatchOptionsBarsFrame:Show()
+	CCWatchOptionsEffectsTabTexture:Hide()
+	CCWatchOptionsEffectsTab:SetBackdropBorderColor(.25, .25, .25, 1)
+	CCWatchOptionsLearnTabTexture:Hide()
+	CCWatchOptionsLearnTab:SetBackdropBorderColor(.25, .25, .25, 1)
 end
 
 --------------------------------------------------------------------------------
 -- Scroll Frame functions
 --------------------------------------------------------------------------------
 
-local item;
-local CCcount;
-local curoffset;
+local item
+local CCcount
+local curoffset
 
 local function EffectsUpdate(k, v)
-	item = item + 1;
+	item = item + 1
 	if (curoffset > item) or ((item - curoffset) >= 11) then
-		return;
+		return
 	end
 
-	local itemSlot = getglobal("CCWatchOptionsEffectsItem"..(item-curoffset+1));
-	local name = v;
-	if (name == CCWatchEffectSelection) then
-		itemSlot:SetTextColor(1, 1, 0);
+	local itemSlot = getglobal("CCWatchOptionsEffectsItem" .. (item - curoffset + 1))
+	if v == CCWatchEffectSelection then
+		itemSlot:SetTextColor(1, 1, 0)
 	else
-		itemSlot:SetTextColor(1, 1, 1);
+		itemSlot:SetTextColor(1, 1, 1)
 	end
-	itemSlot:SetText(name);
-	itemSlot:Show();
+	itemSlot:SetText(v)
+	itemSlot:Show()
 end
 
 function CCWatchOptionsEffects_Update()
---	CCWatch_AddMessage("CCWatchOptionsEffects_Update");
+	CCcount = 0
 
-	CCcount = 0;
+	CCcount = getn(DisplayTable)
 
-	CCcount = table.getn(DisplayTable);
+	FauxScrollFrame_Update(CCWatchOptionsEffectsListScrollFrame, CCcount, 11, 16)
 
-	FauxScrollFrame_Update(CCWatchOptionsEffectsListScrollFrame, CCcount, 11, 16);
+	item = -1
+	curoffset = FauxScrollFrame_GetOffset(CCWatchOptionsEffectsListScrollFrame)
 
-	item = -1;
-	curoffset = FauxScrollFrame_GetOffset(CCWatchOptionsEffectsListScrollFrame);
---	CCWatch_AddMessage("We're at "..curoffset);
-
-	table.foreach(DisplayTable, EffectsUpdate);
+	table.foreach(DisplayTable, EffectsUpdate)
 end
 
 -- Tooltip Window
 
 function CCWatchOptionsEffects_OnEnter()
---	CCWatch_AddMessage("CCWatchOptionsEffects_OnEnter");
-	
-	GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+	GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
 
-	local spellname = this:GetText();
+	local spellname = this:GetText()
 	if spellname == nil then
-		return;
+		return
 	end
 
 	if CCWATCH.CCS[spellname] == nil then
-		CCWatch_AddMessage("Error : '"..spellname.."' not found in effect array.");
-		return;
+		CCWatch_AddMessage("Error : '" .. spellname .. "' not found in effect array.")
+		return
 	end
-	local str = spellname.."\nDuration: "..CCWATCH.CCS[spellname].LENGTH.."\nType: ";
+	local str = spellname .. "\nDuration: " .. CCWATCH.CCS[spellname].LENGTH .. "\nType: "
 	if CCWATCH.CCS[spellname].ETYPE == ETYPE_BUFF then
-		str = str.."Buff";
+		str = str .. "Buff"
 	elseif CCWATCH.CCS[spellname].ETYPE == ETYPE_DEBUFF then
-		str = str.."DeBuff";
+		str = str .. "DeBuff"
 	else
-		str = str.."CC";
+		str = str .. "CC"
 	end
-	str = str.."\nDR: ";
+	str = str .. "\nDR: "
 	if CCWATCH.CCS[spellname].DIMINISHES == 0 then
-		str = str..CCWATCH_OPTION_DR_NEVER;
+		str = str .. CCWATCH_OPTION_DR_NEVER;
 	elseif CCWATCH.CCS[spellname].DIMINISHES == 1 then
-		str = str..CCWATCH_OPTION_DR_MOBPLAYERS;
+		str = str .. CCWATCH_OPTION_DR_MOBPLAYERS
 	else
-		str = str..CCWATCH_OPTION_DR_PLAYERS;
+		str = str .. CCWATCH_OPTION_DR_PLAYERS
 	end
-	str = str.."\nMonitor: ";
+	str = str .. "\nMonitor: "
 	if CCWATCH.CCS[spellname].MONITOR then
-		str = str.."on";
+		str = str .. "on"
 	else
-		str = str.."off";
+		str = str .. "off"
 	end
-	str = str.."\nWarn: ";
+	str = str .. "\nWarn: "
 	if CCWATCH.CCS[spellname].WARN > 0 then
-		str = str.."on";
+		str = str .. "on"
 	else
-		str = str.."off";
+		str = str .. "off"
 	end
 
-	GameTooltip:SetText(str, 1, 1, 1);
+	GameTooltip:SetText(str, 1, 1, 1)
 end
-
 
 -- Confirm dialog frame
 
 function CCWatch_OpenDiagToggle()
 	if (CCWatch_DiagOpen) then
-		CCWatch_DiagOpen = false;
+		CCWatch_DiagOpen = false
 	else
-		CCWatch_DiagOpen = true;
+		CCWatch_DiagOpen = true
 	end
 end
 

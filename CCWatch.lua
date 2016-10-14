@@ -675,10 +675,8 @@ CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE = CCWatch_Even
 function CCWatch_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, mobname in string.gfind(arg1, CCWATCH_TEXT_OFF) do
 		if CCWATCH.CCS[effect] then
-			if CCWATCH.CCS[effect].TARGET == mobname then
-				CCWatch_QueueEvent(effect, mobname, GetTime(), 2)
-				CCWatch_EffectHandler[2]()
-			end
+			CCWatch_QueueEvent(effect, mobname, GetTime(), 2)
+			CCWatch_EffectHandler[2]()
 		end
 	end
 end
@@ -686,10 +684,8 @@ end
 function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
 	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_BREAK) do
 		if CCWATCH.CCS[effect] then
-			if CCWATCH.CCS[effect].TARGET == mobname then
-				CCWatch_QueueEvent(effect, mobname, GetTime(), 3)
-				CCWatch_EffectHandler[3]()
-			end
+			CCWatch_QueueEvent(effect, mobname, GetTime(), 3)
+			CCWatch_EffectHandler[3]()
 		end
 	end
 end
