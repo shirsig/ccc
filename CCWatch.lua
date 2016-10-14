@@ -67,7 +67,7 @@ do
 	function CCWatch_DiminishedDuration(target, effect, full_duration)
 		local class = DR_CLASS[effect]
 		if class then
-			local key = target..'|'..class
+			local key = target .. '|' .. class
 			if not dr[key] or dr[key].timeout < GetTime() then
 				dr[key] = {level=1, timeout=GetTime() + full_duration + 15}
 			elseif dr[key].level < 3 then
@@ -258,13 +258,6 @@ function CCWatch_Config()
 	CCWatch_ConfigCC()
 	CCWatch_ConfigDebuff()
 	CCWatch_ConfigBuff()
-
-	for _, cc in CCWATCH.CCS do
-		cc.TARGET = ''
-		cc.PLAYER = nil
-		cc.TIMER_START = 0
-		cc.TIMER_END = 0
-	end
 end
 
 function CCWatch_OnLoad()
@@ -337,9 +330,9 @@ function CCWatch_BarLock()
 	CCWatchBuff:EnableMouse(0)
 
 	for i = 1, CCWATCH_MAXBARS do
-		getglobal("CCWatchBarCC"..i):Hide()
-		getglobal("CCWatchBarDebuff"..i):Hide()
-		getglobal("CCWatchBarBuff"..i):Hide()
+		getglobal("CCWatchBarCC" .. i):Hide()
+		getglobal("CCWatchBarDebuff" .. i):Hide()
+		getglobal("CCWatchBarBuff" .. i):Hide()
 	end
 end
 
@@ -390,11 +383,6 @@ function CCWatch_SlashCommandHandler(msg)
 			CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers
 			CCWatch_AddMessage(CCWATCH_TIMERS_REVERSE)
 			CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_REVERSE)
-		elseif command == "grow off" then
-			CCWatch_Save[CCWATCH.PROFILE].growth = 0
-			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
-			CCWatch_AddMessage(CCWATCH_GROW_OFF)
-			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_OFF)
 		elseif command == "grow up" then
 			CCWatch_Save[CCWATCH.PROFILE].growth = 1
 			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
@@ -419,7 +407,6 @@ function CCWatch_SlashCommandHandler(msg)
 		elseif command == "u" then
 			CCWatch_Config()
 			CCWatch_LoadConfCCs()
-			CCWatch_LoadCustomCCs()
 			CCWatch_UpdateClassSpells(true)
 		elseif command == "config" then
 			CCWatchOptionsFrame:Show()
@@ -478,16 +465,13 @@ function CCWatch_SlashCommandHandler(msg)
 			else
 				CCWatch_AddMessage(CCWATCH_TIMERS_REVERSE)
 			end
-			if CCWATCH.GROWTH == 0 then
-				CCWatch_AddMessage(CCWATCH_GROW_OFF)
-			elseif CCWATCH.GROWTH == 1 then
+			if CCWATCH.GROWTH == 1 then
 				CCWatch_AddMessage(CCWATCH_GROW_UP)
 			else
 				CCWatch_AddMessage(CCWATCH_GROW_DOWN)
 			end
 			CCWatch_Config()
 			CCWatch_LoadConfCCs()
-			CCWatch_LoadCustomCCs()
 			CCWatch_UpdateClassSpells(true)
 
 			CCWatch_AddMessage(CCWATCH_SCALE..CCWATCH.SCALE)
@@ -530,25 +514,6 @@ function CCWatch_OnEvent(event)
 end
 
 CCWatch_EventHandler = {}
-
-function CCWatch_FindEffect(effect)
-	if not CCWATCH.CCS[effect] then return end
-	local group = CCWATCH.CCS[effect].GROUP
-	local etype = CCWATCH.CCS[effect].ETYPE
-	if etype == ETYPE_BUFF then
-		for i, v in CCWATCH.GROUPSBUFF[group].EFFECT do
-			if v == effect then return i end
-		end
-	elseif etype == ETYPE_DEBUFF then
-		for i, v in CCWATCH.GROUPSDEBUFF[group].EFFECT do
-			if v == effect then return i end
-		end
-	else
-		for i, v in CCWATCH.GROUPSCC[group].EFFECT do
-			if v == effect then return i end
-		end
-	end
-end
 
 do
 	local casting = {}
@@ -640,7 +605,7 @@ do
 
 	function CCWatch_EventHandler.SPELLCAST_STOP()
 		for effect, target in casting do
-			if CCWatch_FindEffect(effect) then
+			if CCWatch_EffectActive(effect, target) then
 				if pending[effect] then
 					last_cast = nil
 				else
@@ -655,8 +620,6 @@ do
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for effect, info in pending do
 			if GetTime() >= info.time then
-				local group = CCWATCH.CCS[effect].GROUP
-				local etype = CCWATCH.CCS[effect].ETYPE
 				CCWatch_QueueEvent(effect, info.target, GetTime() - .5, 1)
 				CCWatch_EffectHandler[1]()
 				pending[effect] = nil
@@ -733,13 +696,13 @@ end
 do
 	local DeadMob = ''
 	local function CCWHandleTargetDeath(k, v)
-		if v then
-			if v.TARGET == DeadMob then
-				CCWATCH.CCS[k].TIMER_END = GetTime()
-				CCWatch_RemoveEffect(k, false)
-			end
-		end
-		CCWatch_AbortRefresh(DeadMob)
+		-- if v then
+		-- 	if v.TARGET == DeadMob then
+		-- 		CCWATCH.CCS[k].TIMER_END = GetTime()
+		-- 		CCWatch_RemoveEffect(k)
+		-- 	end
+		-- end
+		-- CCWatch_AbortRefresh(DeadMob)
 	end
 
 	function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
@@ -765,43 +728,25 @@ end
 
 CCWatch_EffectHandler = {}
 
-CCWatch_EffectHandler[0] = function()
--- no effect
-
-end
-
 CCWatch_EffectHandler[1] = function()
 -- applied
 	local effect = CCWATCH.EFFECT[1].TYPE
-	local mobname = CCWATCH.EFFECT[1].TARGET
+	local target = CCWATCH.EFFECT[1].TARGET
 
-	CCWATCH.CCS[effect].TARGET = mobname
-	CCWATCH.CCS[effect].PLAYER = UnitIsPlayer'target'
-	CCWATCH.CCS[effect].TIMER_START = GetTime()
-
-	if CCWATCH.CCS[effect].PVPCC and CCWATCH.CCS[effect].PLAYER then
-		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + CCWatch_DiminishedDuration(mobname, effect, CCWATCH.CCS[effect].PVPCC)
-	else
-		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + CCWATCH.CCS[effect].LENGTH -- TODO some stuns have pve DRs
-	end
-	if CCWATCH.CCS[effect].COMBO then
-		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
-	end
-
-	CCWatch_AddEffect(effect)
+	CCWatch_AddEffect(effect, target)
 	CCWatch_UnqueueEvent()
 
 	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) ~= 0 then
-		CCWatchWarn(CCWATCH_WARN_APPLIED, effect, mobname)
+		CCWatchWarn(CCWATCH_WARN_APPLIED, effect, target)
 	end
 end
 
 CCWatch_EffectHandler[2] = function()
 -- faded
 	local effect = CCWATCH.EFFECT[1].TYPE
-	local target = CCWATCH.CCS[effect].TARGET
+	local target = CCWATCH.EFFECT[1].TARGET
 
-	CCWatch_RemoveEffect(effect, false)
+	CCWatch_RemoveEffect(effect, target)
 	CCWatch_UnqueueEvent()
 
 	-- another hack, to avoid spamming, because when the effect is broken, SOMETIME, WoW also send a faded message (see combat log)
@@ -813,9 +758,9 @@ end
 CCWatch_EffectHandler[3] = function()
 -- broken
 	local effect = CCWATCH.EFFECT[1].TYPE
-	local target = CCWATCH.CCS[effect].TARGET
+	local target = CCWATCH.EFFECT[1].TARGET
 
-	CCWatch_RemoveEffect(effect, false)
+	CCWatch_RemoveEffect(effect, target)
 	CCWatch_UnqueueEvent()
 
 	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) ~= 0 then
@@ -824,10 +769,10 @@ CCWatch_EffectHandler[3] = function()
 	end
 end
 
-function CCWatch_QueueEvent(effect, mobname, time, status)
+function CCWatch_QueueEvent(effect, target, time, status)
 	tinsert(CCWATCH.EFFECT, {
 		TYPE = effect,
-		TARGET = mobname,
+		TARGET = target,
 		TIME = time,
 		STATUS = status,
 	})
@@ -837,142 +782,106 @@ function CCWatch_UnqueueEvent()
 	tremove(CCWATCH.EFFECT, 1)
 end
 
-function CCWatch_AddEffect(effect)
-	-- first remove any old copies of this effect, to avoid nasty overlap and properly set diminishing returns for multi-CC
-	local group = CCWATCH.CCS[effect].group
+do
+	local active_effects = {}
 
-	CCWatch_RemoveEffect(effect, true)
-
-	local GROUPS
-	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
-		GROUPS = CCWATCH.GROUPSBUFF
-	elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
-		GROUPS = CCWATCH.GROUPSDEBUFF
-	else
-		GROUPS = CCWATCH.GROUPSCC
-	end
-	if CCWATCH.GROWTH == 1 then
-		group = 1
-		-- start at the bottom and find the first available bar, otherwise queue to #CCWATCH_MAXBARS
-		while group < CCWATCH_MAXBARS and getn(GROUPS[group].EFFECT) > 0 do
-			group = group + 1
+	function CCWatch_EffectActive(name, target)
+		for i, v in active_effects do
+			if v.NAME == name and v.TARGET == target then
+				return true
+			end
 		end
-		CCWATCH.CCS[effect].GROUP = group
-	elseif CCWATCH.GROWTH == 2 then
-		group = CCWATCH_MAXBARS
-		-- start at the top and find the first available bar, otherwise queue to #1
-		while group > 1 and getn(GROUPS[group].EFFECT) > 0 do
-			group = group - 1
+		return false
+	end
+
+	function CCWatch_AddEffect(name, target)
+		CCWatch_RemoveEffect(name, target)
+
+		local effect = {
+			NAME = name,
+			TARGET = target,
+			PLAYER = UnitIsPlayer'target',
+			TIMER_START = GetTime(),
+		}
+		tinsert(active_effects, effect)
+
+		if CCWATCH.CCS[name].PVPCC and effect.PLAYER then
+			effect.TIMER_END = effect.TIMER_START + CCWatch_DiminishedDuration(mobname, name, CCWATCH.CCS[name].PVPCC)
+		else
+			effect.TIMER_END = effect.TIMER_START + CCWATCH.CCS[name].LENGTH -- TODO some stuns have pve DRs
 		end
-		CCWATCH.CCS[effect].GROUP = group
+		if CCWATCH.CCS[name].COMBO then
+			effect.TIMER_END = effect.TIMER_END + CCWATCH.CCS[name].A * CCWATCH.COMBO
+		end
+
+		local GROUPS, ext
+		if CCWATCH.CCS[name].ETYPE == ETYPE_BUFF then
+			GROUPS = CCWATCH.GROUPSBUFF
+			ext = 'Buff'
+		elseif CCWATCH.CCS[name].ETYPE == ETYPE_DEBUFF then
+			GROUPS = CCWATCH.GROUPSDEBUFF
+			ext = 'Debuff'
+		else
+			GROUPS = CCWATCH.GROUPSCC
+			ext = 'CC'
+		end
+
+		local group
+		if CCWATCH.GROWTH == 1 then
+			group = 1
+			while group < CCWATCH_MAXBARS and GROUPS[group].EFFECT do
+				group = group + 1
+			end
+		else
+			group = CCWATCH_MAXBARS
+			while group > 1 and GROUPS[group].EFFECT do
+				group = group - 1
+			end
+		end
+
+		GROUPS[group].EFFECT = effect
+
+		if CCWATCH.STATUS ~= 1 then
+			return
+		end
+
+		local activebarText = bars['CCWatchBar' .. ext .. group].frame.text
+		activebarText:SetText(effect.TARGET .. ' : ' .. effect.NAME)
+
+		getglobal('CCWatchBar' .. ext .. group):Show()
 	end
 
-	-- new effect goes at the head of the queue... always displaying newest effect
-	CCWatch_QueueEffect(effect)
-end
+	function CCWatch_RemoveEffect(name, target)
+		local effect
+		for i, v in active_effects do
+			if v.NAME == name and v.TARGET == target then
+				effect = v
+				tremove(active_effects, i)
+				break
+			end
+		end
 
-function CCWatch_RemoveEffect(effect, dr)
-	local group = CCWATCH.CCS[effect].GROUP
-	local GROUPS
-	CCWatch_UnqueueEffect(effect)
+		-- ensure if warnable, that WARN is set back to 1
+		-- 2 = warn at low time already sent
+		-- 3 = broken message seen so no faded message to send if any received
+		if CCWATCH.CCS[name].WARN > 0 then
+			CCWATCH.CCS[name].WARN = 1
+		end
 
-	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
-		GROUPS = CCWATCH.GROUPSBUFF
-	elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
-		GROUPS = CCWATCH.GROUPSDEBUFF
-	else
-		GROUPS = CCWATCH.GROUPSCC
-	end
+		local GROUPS
+		if CCWATCH.CCS[name].ETYPE == ETYPE_BUFF then
+			GROUPS = CCWATCH.GROUPSBUFF
+		elseif CCWATCH.CCS[name].ETYPE == ETYPE_DEBUFF then
+			GROUPS = CCWATCH.GROUPSDEBUFF
+		else
+			GROUPS = CCWATCH.GROUPSCC
+		end
 
-	-- if CCWATCH.GROWTH == 1 then
-	-- 	while group < CCWATCH_MAXBARS and getn(GROUPS[group].EFFECT) == 0 and getn(GROUPS[group+1].EFFECT) > 0 do
-	-- 		local move_effect = GROUPS[group+1].EFFECT[1]
-	-- 		CCWatch_UnqueueEffect(move_effect)
-	-- 		CCWATCH.CCS[move_effect].GROUP = group
-	-- 		CCWatch_QueueEffect(move_effect)
-	-- 		group = group + 1
-	-- 	end
-	-- elseif CCWATCH.GROWTH == 2 then
-	-- 	while group > 1 and getn(GROUPS[group].EFFECT) == 0 and getn(GROUPS[group-1].EFFECT) > 0 do
-	-- 		local move_effect = GROUPS[group-1].EFFECT[1]
-	-- 		CCWatch_UnqueueEffect(move_effect)
-	-- 		CCWATCH.CCS[move_effect].GROUP = group
-	-- 		CCWatch_QueueEffect(move_effect)
-	-- 		group = group - 1
-	-- 	end
-	-- end
-
-	-- ensure if warnable, that WARN is set back to 1
-	-- 2 = warn at low time already sent
-	-- 3 = broken message seen so no faded message to send if any received
-	if CCWATCH.CCS[effect].WARN > 0 then
-		CCWATCH.CCS[effect].WARN = 1
-	end
-end
-
-function CCWatch_QueueEffect(effect)
-	if CCWATCH.STATUS ~= 1 then
-		return
-	end
-
-	local group = CCWATCH.CCS[effect].GROUP
-
-	local GROUPS, ext
-	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
-		GROUPS = CCWATCH.GROUPSBUFF
-		ext = 'Buff'
-	elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
-		GROUPS = CCWATCH.GROUPSDEBUFF
-		ext = 'Debuff'
-	else
-		GROUPS = CCWATCH.GROUPSCC
-		ext = 'CC'
-	end
-
-	tinsert(GROUPS[group].EFFECT, 1, effect)
-
-	local activebarText = bars['CCWatchBar'..ext..group].frame.text
-	activebarText:SetText(CCWATCH.CCS[effect].TARGET..' : '..effect)
-
-	if getn(GROUPS[group].EFFECT) == 1 then
-		getglobal('CCWatchBar'..ext..group):Show()
-		-- if CCWATCH.CCS[effect].COLOR then
-		-- 	getglobal("CCWatchBar"..ext..group.."StatusBar"):SetStatusBarColor(CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b)
-		-- end
-	end
-end
-
-function CCWatch_UnqueueEffect(effect)
-	local group = CCWATCH.CCS[effect].GROUP
-	local GROUPS
-	local ext = ''
-
-	if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
-		GROUPS = CCWATCH.GROUPSBUFF
-		ext = "Buff"
-	elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
-		GROUPS = CCWATCH.GROUPSDEBUFF
-		ext = "Debuff"
-	else
-		GROUPS = CCWATCH.GROUPSCC
-		ext = "CC"
-	end
-
-	local index
-	-- find the effect in the queue, if it's not there index stays 0
-	table.foreach(GROUPS[group].EFFECT, function(k,v) if v == effect then index = k end end)
-	if index then
---		CCWATCH.CCS[GROUPS[group].EFFECT[index]].TARGET = ""; -- resetting target for mob death removal
--- commented because of conflict with DR requiring to keep the target name.
--- the name resetting was an unneeded attempt to avoid extra unqueue
-		tremove(GROUPS[group].EFFECT, index)
-	end
-
-	-- if queue isn't empty set new name
-	if getn(GROUPS[group].EFFECT) > 0 then
-		local activebarText = bars["CCWatchBar" .. ext .. group].frame.text
-		local effect = GROUPS[group].EFFECT[1]
-		activebarText:SetText(CCWATCH.CCS[effect].TARGET .. ' : ' .. effect)
+		for k, v in GROUPS do
+			if v.EFFECT == effect then
+				v.EFFECT = nil
+			end
+		end
 	end
 end
 
@@ -1037,20 +946,17 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 	local bar = bars['CCWatchBar' .. type .. group]
 	local frame = bar.frame
 
-	if getn(GROUPS[group].EFFECT) > 0 then
+	local effect = GROUPS[group].EFFECT
+	if effect then
 		bar.stopped = nil
-		local effect = GROUPS[group].EFFECT[1]
-
+		
 		frame:SetAlpha(CCWATCH.ALPHA)
 
 		local t = GetTime()
-
-		if t < CCWATCH.CCS[effect].TIMER_END then -- TODO why needed
-			local duration = CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START
-			local remaining = CCWATCH.CCS[effect].TIMER_END - t
+		if t < effect.TIMER_END then
+			local duration = effect.TIMER_END - effect.TIMER_START
+			local remaining = effect.TIMER_END - t
 			local fraction = remaining / duration
-
-			local frame = bars['CCWatchBar' .. type .. group].frame
 
 			frame.statusbar:SetValue(CCWATCH.INVERT and 1 - fraction or fraction)
 
@@ -1062,32 +968,32 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 
 			local r, g, b
 			if CCWatch_Save[CCWATCH.PROFILE].customcolor then
-				if CCWATCH.CCS[effect].COLOR then
-					r, g, b = CCWATCH.CCS[effect].COLOR.r, CCWATCH.CCS[effect].COLOR.g, CCWATCH.CCS[effect].COLOR.b
+				if CCWATCH.CCS[effect.NAME].COLOR then
+					r, g, b = CCWATCH.CCS[effect.NAME].COLOR.r, CCWATCH.CCS[effect.NAME].COLOR.g, CCWATCH.CCS[effect.NAME].COLOR.b
 				else
 					r, g, b = 1, 1, 1
 				end
 			else
-				r, g, b = unpack(CCWATCH.CCS[effect].SCHOOL or {1, 0, 1})
+				r, g, b = unpack(CCWATCH.CCS[effect.NAME].SCHOOL or {1, 0, 1})
 			end
 			frame.statusbar:SetStatusBarColor(r, g, b)
 			frame.statusbar:SetBackdropColor(r, g, b, .3)
 
-			frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[effect].ICON or 'INV_Misc_QuestionMark'))
+			frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[effect.NAME].ICON or 'INV_Misc_QuestionMark'))
 
-			if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME) ~= 0 then
-				if CCWATCH.CCS[effect].TIMER_END - CCWATCH.CCS[effect].TIMER_START > CCWATCH.WARNLOW and CCWATCH.WARNLOW > remaining then
-					if CCWATCH.CCS[effect].WARN == 1 then 
-						CCWatchWarn(CCWATCH_WARN_LOWTIME, effect, CCWATCH.CCS[effect].TARGET, CCWATCH.WARNLOW)
-						CCWATCH.CCS[effect].WARN = 2
+			if CCWATCH.CCS[effect.NAME].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME) ~= 0 then
+				if effect.TIMER_END - effect.TIMER_START > CCWATCH.WARNLOW and CCWATCH.WARNLOW > remaining then
+					if CCWATCH.CCS[effect.NAME].WARN == 1 then 
+						CCWatchWarn(CCWATCH_WARN_LOWTIME, effect.NAME, effect.TARGET, CCWATCH.WARNLOW)
+						CCWATCH.CCS[effect.NAME].WARN = 2
 					end
-				elseif CCWATCH.CCS[effect].WARN == 2 then -- reset if ever disconnected while fighting
-					CCWATCH.CCS[effect].WARN = 1
+				elseif CCWATCH.CCS[effect.NAME].WARN == 2 then -- reset if ever disconnected while fighting
+					CCWATCH.CCS[effect.NAME].WARN = 1
 				end
 			end
 		else
 			frame.statusbar:SetValue(0)
-			CCWatch_RemoveEffect(effect, false)
+			CCWatch_RemoveEffect(effect.NAME, effect.TARGET)
 		end
 	elseif frame:GetAlpha() > 0 then
 		-- frame.statusbar:SetValue(0)
@@ -1109,43 +1015,9 @@ local function GetConfCC(k, v)
 	end
 end
 
-local function GetSavedCC(k, v)
-	if v == nil then
---CCWatch_AddMessage("Removing "..k);
-		CCWATCH.CCS[k] = nil
-		return
-	end
-	if v.GROUP == nil or v.ETYPE == nil or v.LENGTH == nil or v.DIMINISHES == nil then
-		CCWATCH.CCS[k] = nil
-		return
-	end
---CCWatch_AddMessage("Adding "..k.." ("..type(k)..")");
-	CCWATCH.CCS[k] = {
-		GROUP = v.GROUP,
-		ETYPE = v.ETYPE,
-		LENGTH = v.LENGTH,
-		DIMINISHES = v.DIMINISHES,
-		WARN = v.WARN,
-		COLOR = v.COLOR,
-
-		TARGET = "",
-		PLAYER = nil,
-		TIMER_START = 0,
-		TIMER_END = 0,
-		DIMINISH = 1,
-		MONITOR = true
-	}
-end
-
-
 function CCWatch_LoadConfCCs()
 -- update array with CC conf
 	table.foreach(CCWatch_Save[CCWATCH.PROFILE].ConfCC, GetConfCC)
-end
-
-function CCWatch_LoadCustomCCs()
--- update array with saved CCs
-	table.foreach(CCWatch_Save[CCWATCH.PROFILE].SavedCC, GetSavedCC)
 end
 
 function CCWatch_LoadVariablesOnUpdate(arg1)
@@ -1161,7 +1033,7 @@ function CCWatch_LoadVariables()
 		ConfCC = {},
 		status = CCWATCH.STATUS,
 		invert = false,
-		growth = 0,
+		growth = 1,
 		customcolor = false,
 		scale = 1,
 		width = 160,
@@ -1182,7 +1054,7 @@ function CCWatch_LoadVariables()
 		CoTLowValue = 5,
 	}
 
-	CCWATCH.PROFILE = UnitName'player' .. '|' .. GetCVar'RealmName'
+	CCWATCH.PROFILE = UnitName'player' .. '@' .. GetCVar'RealmName'
 
 	CCWatch_Save[CCWATCH.PROFILE] = CCWatch_Save[CCWATCH.PROFILE] or {}
 
@@ -1195,8 +1067,6 @@ function CCWatch_LoadVariables()
 	CCWATCH.ARCANIST = CCWatch_Save[CCWATCH.PROFILE].arcanist
 
 	CCWatch_LoadConfCCs()
-	CCWatch_LoadCustomCCs()
-	CCWatch_UpdateTextures()
 	CCWatch_UpdateClassSpells(false)
 
 	CCWATCH.STATUS = CCWatch_Save[CCWATCH.PROFILE].status
@@ -1241,24 +1111,6 @@ function CCWatch_LoadVariables()
 
 	CCWatchOptions_Init()
 	CCWatch_BarLock()
-end
-
-function CCWatch_UpdateTextures()
-	local i = 1
-	while true do
-		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
-		if not name then return end
-		if CCWATCH.CCS[name] then
-			CCWATCH.CCS[name].TEXTURE = GetSpellTexture(i, BOOKTYPE_SPELL)
-		elseif CCWATCH_SPELLS[name] then
-			if CCWATCH_SPELLS[name].EFFECTNAME then
-				CCWATCH.CCS[CCWATCH_SPELLS[name].EFFECTNAME].TEXTURE = GetSpellTexture(i, BOOKTYPE_SPELL)
-			else
-				CCWatch_AddMessage("Warning : ranked spell '"..name.."' has a different name from its effect, but no effect name in its definition.")
-			end
-		end
-		i = i + 1
-	end
 end
 
 function CCWatch_UpdateImpGouge(bPrint)

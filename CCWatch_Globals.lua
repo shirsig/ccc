@@ -1,13 +1,13 @@
-ETYPE_CC = 1;
-ETYPE_DEBUFF = 2;
-ETYPE_BUFF = 4;
+ETYPE_CC = 1
+ETYPE_DEBUFF = 2
+ETYPE_BUFF = 4
 
 function QuickLocalize(str)
 -- just remove $1 & $2 args because we *know that the order is not changed*.
 -- not fail proof if ever it occurs (should be a more clever function, and return found arguments order)
-	str = string.gsub(str, ".%$", "");
-	str = string.gsub(str, "%%s", "\(.+\)");
-	return str;
+	str = string.gsub(str, ".%$", "")
+	str = string.gsub(str, "%%s", "\(.+\)")
+	return str
 end
 
 function CCWatch_Globals()
@@ -46,51 +46,36 @@ CCWATCH.EFFECT.STATUS = 0  -- 0 = no effect, 1 = applied, 2 = broken, 3 = faded
 -- effect groups for each bar
 CCWATCH.GROUPSCC = {}
 CCWATCH.GROUPSCC[1] = {}
-CCWATCH.GROUPSCC[1].EFFECT = {}
 
 CCWATCH.GROUPSCC[2] = {}
-CCWATCH.GROUPSCC[2].EFFECT = {}
 
 CCWATCH.GROUPSCC[3] = {}
-CCWATCH.GROUPSCC[3].EFFECT = {}
 
 CCWATCH.GROUPSCC[4] = {}
-CCWATCH.GROUPSCC[4].EFFECT = {}
 
 CCWATCH.GROUPSCC[5] = {}
-CCWATCH.GROUPSCC[5].EFFECT = {}
 
 CCWATCH.GROUPSDEBUFF = {}
 CCWATCH.GROUPSDEBUFF[1] = {}
-CCWATCH.GROUPSDEBUFF[1].EFFECT = {}
 
 CCWATCH.GROUPSDEBUFF[2] = {}
-CCWATCH.GROUPSDEBUFF[2].EFFECT = {}
 
 CCWATCH.GROUPSDEBUFF[3] = {}
-CCWATCH.GROUPSDEBUFF[3].EFFECT = {}
 
 CCWATCH.GROUPSDEBUFF[4] = {}
-CCWATCH.GROUPSDEBUFF[4].EFFECT = {}
 
 CCWATCH.GROUPSDEBUFF[5] = {}
-CCWATCH.GROUPSDEBUFF[5].EFFECT = {}
 
 CCWATCH.GROUPSBUFF = {}
 CCWATCH.GROUPSBUFF[1] = {}
-CCWATCH.GROUPSBUFF[1].EFFECT = {}
 
 CCWATCH.GROUPSBUFF[2] = {}
-CCWATCH.GROUPSBUFF[2].EFFECT = {}
 
 CCWATCH.GROUPSBUFF[3] = {}
-CCWATCH.GROUPSBUFF[3].EFFECT = {}
 
 CCWATCH.GROUPSBUFF[4] = {}
-CCWATCH.GROUPSBUFF[4].EFFECT = {}
 
 CCWATCH.GROUPSBUFF[5] = {}
-CCWATCH.GROUPSBUFF[5].EFFECT = {}
 
 -- CC Durations according to rank
 -- WARNING : in case of difference between skill and effect, separate strings have to be used.
@@ -198,11 +183,11 @@ CCWATCH_SPELLS[CCWATCH_SAP] = {
 
 CCWATCH.LASTTARGETS = {}
 
-CCWATCH_TEXT_ON = QuickLocalize(AURAADDEDOTHERHARMFUL);
-CCWATCH_TEXT_BREAK = QuickLocalize(AURADISPELOTHER);
-CCWATCH_TEXT_OFF = QuickLocalize(AURAREMOVEDOTHER);
+CCWATCH_TEXT_ON = QuickLocalize(AURAADDEDOTHERHARMFUL)
+CCWATCH_TEXT_BREAK = QuickLocalize(AURADISPELOTHER)
+CCWATCH_TEXT_OFF = QuickLocalize(AURAREMOVEDOTHER)
 
-CCWATCH_TEXT_BUFF_ON = QuickLocalize(AURAADDEDOTHERHELPFUL);
-CCWATCH_TEXT_DIE = QuickLocalize(UNITDIESOTHER);
-CCWATCH_TEXT_DIEXP = strsub(CCWATCH_TEXT_DIE, 1, -2)..".+";
+CCWATCH_TEXT_BUFF_ON = QuickLocalize(AURAADDEDOTHERHELPFUL)
+CCWATCH_TEXT_DIE = QuickLocalize(UNITDIESOTHER)
+CCWATCH_TEXT_DIEXP = strsub(CCWATCH_TEXT_DIE, 1, -2) .. ".+"
 end
