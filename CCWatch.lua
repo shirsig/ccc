@@ -630,7 +630,7 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
 	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
-		if CCWATCH.STYLE > 1 or CCWatch_CheckRecentTargets(mobname) then
+		if CCWATCH.STYLE == 2 or CCWatch_TrackedTarget(mobname) then
 			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
 				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
 				CCWatch_EffectHandler[1]()
@@ -641,7 +641,7 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
 	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
-		if CCWATCH.STYLE > 1 or CCWatch_CheckRecentTargets(mobname) then
+		if CCWATCH.STYLE == 2 or CCWatch_TrackedTarget(mobname) then
 			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
 				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
 				CCWatch_EffectHandler[1]()
@@ -1283,20 +1283,23 @@ function CCWatch_SetWidth(width)
 	end
 end
 
-function CCWatch_CheckRecentTargets(mobname)
-	local target = UnitName'target'
--- Simple compare if using current target monitoring
-	if CCWATCH.STYLE == 0 then
-		return mobname == target
-	end
-	local index = 0
--- Check mobname against the list
-	table.foreach(CCWATCH.LASTTARGETS, function(k,v) if v.TARGET == mobname then index = k end end)
-	if index ~= 0 then
+function CCWatch_TrackedTarget(mobname)
+	if CCWATCH.STYLE == 2 then
 		return true
 	end
 
--- return false if target not found
+	local target = UnitName'target'
+
+	if CCWATCH.STYLE == 0 then
+		return mobname == target
+	end
+
+	for k, v in CCWATCH.LASTTARGETS do
+		if v.TARGET == mobname then
+			return true
+		end
+	end
+
 	return false
 end
 
@@ -1305,15 +1308,13 @@ function CCWatch_AddLastTarget(mobname, time)
 	lt_struct.TARGET = mobname
 	lt_struct.TIME = time
 
---	CCWatch_AddMessage("Adding "..mobname);
-
--- if the array is full
 	if getn(CCWATCH.LASTTARGETS) >= 5 then
--- remove the oldest target
+	-- remove the oldest target
 		local oldest = 0
 		local index = 0
-		table.foreach(CCWATCH.LASTTARGETS, function(k,v) if oldest == 0 then oldest = v.TIME; index = k; elseif v.TIME < oldest then oldest = v.TIME; index = k; end end)
---		CCWatch_AddMessage("Removing old target : "..CCWATCH.LASTTARGETS[index].TARGET);
+		for k, v in CCWATCH.LASTTARGETS do
+			if oldest == 0 then oldest = v.TIME; index = k; elseif v.TIME < oldest then oldest = v.TIME; index = k; end
+		end
 		tremove(CCWATCH.LASTTARGETS, index)
 	end
 	tinsert(CCWATCH.LASTTARGETS, lt_struct)
