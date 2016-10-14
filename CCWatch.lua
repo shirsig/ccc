@@ -1278,8 +1278,6 @@ function CCWatch_SetWidth(width)
 	for _, k in {'CC', 'Debuff', 'Buff'} do
 		for i = 1, CCWATCH_MAXBARS do
 			getglobal("CCWatchBar" .. k .. i):SetWidth(width + 10)
-			-- getglobal("CCWatchBar"..k..i.."Text"):SetWidth(width);
-			-- getglobal("CCWatchBar"..k..i.."StatusBar"):SetWidth(width);
 		end
 		getglobal("CCWatch" .. k):SetWidth(width + 10)
 	end
