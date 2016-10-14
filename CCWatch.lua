@@ -229,7 +229,7 @@ local function format_time(t)
 end
 
 function CCWatchWarn(msg, effect, target, time)
-	local ncc = 0;
+	local ncc = 0
 	local cc = CCWATCH.WARNTYPE
 	-- Emote, Say, Party, Raid, Yell, Custom:<ccname>
 	if cc == "RAID" and UnitInRaid'player' == nil then
@@ -245,6 +245,11 @@ function CCWatchWarn(msg, effect, target, time)
 		msg = format(msg, target, effect, time)
 	else
 		msg = format(msg, target, effect)
+	end
+	if CCWatch_Save[CCWATCH.PROFILE].WarnSelf then
+		local info = ChatTypeInfo.RAID_WARNING
+		RaidWarningFrame:AddMessage(msg, info.r, info.g, info.b, 1)
+		PlaySound'RaidWarning'
 	end
 	if cc == "EMOTE" then
 		msg = CCWATCH_WARN_EMOTE .. msg
@@ -1019,6 +1024,7 @@ function CCWatch_LoadVariables()
 		style = 0,
 		Monitoring = bit.bor(ETYPE_CC, ETYPE_DEBUFF, ETYPE_BUFF),
 		WarnType = 'PARTY',
+		WarnSelf = false,
 		WarnLow = 10,
 		WarnMsg = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME),
 		WarnCustomCC = '',
