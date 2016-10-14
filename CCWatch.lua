@@ -784,7 +784,7 @@ do
 		}
 
 		if CCWATCH.CCS[name].PVPCC and effect.PLAYER then
-			effect.TIMER_END = effect.TIMER_START + CCWatch_DiminishedDuration(mobname, name, CCWATCH.CCS[name].PVPCC)
+			effect.TIMER_END = effect.TIMER_START + CCWatch_DiminishedDuration(target, name, CCWATCH.CCS[name].PVPCC)
 		else
 			effect.TIMER_END = effect.TIMER_START + CCWATCH.CCS[name].LENGTH -- TODO some stuns have pve DRs
 		end
