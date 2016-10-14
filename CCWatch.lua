@@ -782,7 +782,7 @@ CCWatch_EffectHandler[1] = function()
 	if CCWATCH.CCS[effect].PVPCC and CCWATCH.CCS[effect].PLAYER then
 		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + CCWatch_DiminishedDuration(mobname, effect, CCWATCH.CCS[effect].PVPCC)
 	else
-		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + CCWatch_DiminishedDuration(mobname, effect, CCWATCH.CCS[effect].LENGTH)
+		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_START + CCWATCH.CCS[effect].LENGTH -- TODO some stuns have pve DRs
 	end
 	if CCWATCH.CCS[effect].COMBO then
 		CCWATCH.CCS[effect].TIMER_END = CCWATCH.CCS[effect].TIMER_END + CCWATCH.CCS[effect].A * CCWATCH.COMBO

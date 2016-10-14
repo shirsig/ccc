@@ -588,12 +588,6 @@ function CCWatchOptionsEffectGroupDropDown_OnClick()
 	CCWatchOptionsEffectGroupDropDownText:SetText(this.value);
 end
 
-function CCWatchOptionsLearnDelete_OnClick()
--- Pop alert to confirm deletion
-	CCWatch_ShowDeletePrompt();
-end
-
-
 function CCWatchOptionsLearnClear_OnClick()
 	CCWatchOptionsEffectNameEdit:SetText("");
 	CCWatchOptionsEffectNameStatic:SetText("");
@@ -926,22 +920,9 @@ function CCWatchOptions_Init()
 	UpdateSortTable();
 	CCWatchOptionsEffects_Update();
 
-	CCWatchOptionsUseColorOverTime:SetChecked(CCWATCH.COLOROVERTIME);
-
-	CCWatchOptionsBarColorUrge.swatchFunc = CCWatchConfig_SwatchFunc_SetColor["Urge"];
-	CCWatchOptionsBarColorUrge.cancelFunc = CCWatchConfig_SwatchFunc_CancelColor["Urge"];
-	CCWatchOptionsBarColorLow.swatchFunc = CCWatchConfig_SwatchFunc_SetColor["Low"];
-	CCWatchOptionsBarColorLow.cancelFunc = CCWatchConfig_SwatchFunc_CancelColor["Low"];
-	CCWatchOptionsBarColorNormal.swatchFunc = CCWatchConfig_SwatchFunc_SetColor["Normal"];
-	CCWatchOptionsBarColorNormal.cancelFunc = CCWatchConfig_SwatchFunc_CancelColor["Normal"];
-
 	CCWatchOptionsBarColorEffect.swatchFunc = CCWatchConfig_SwatchFunc_SetColor["Effect"];
 	CCWatchOptionsBarColorEffect.cancelFunc = CCWatchConfig_SwatchFunc_CancelColor["Effect"];
 	CCWatchOptionsBarColorEffect:Disable();
-
-	SetButtonPickerColor("CCWatchOptionsBarColorUrge", CCWATCH.COTURGECOLOR);
-	SetButtonPickerColor("CCWatchOptionsBarColorLow", CCWATCH.COTLOWCOLOR);
-	SetButtonPickerColor("CCWatchOptionsBarColorNormal", CCWATCH.COTNORMALCOLOR);
 
 	CCWatchOptionsFrameWarnApplied:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED));
 	CCWatchOptionsFrameWarnFaded:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED));
@@ -955,10 +936,6 @@ function CCWatchOptions_Init()
 	CCWatchOptionsEffectsTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0);
 	CCWatchOptionsLearnTabTexture:Hide();
 	CCWatchOptionsLearnTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0);
-
-	CCWatchOptionsBarColorUrgeEdit:SetText(CCWATCH.COTURGEVALUE);
-	CCWatchOptionsBarColorLowEdit:SetText(CCWATCH.COTLOWVALUE);
-	CCWatchOptionsFrameWarnLowEdit:SetText(CCWATCH.WARNLOW);
 end
 
 --------------------------------------------------------------------------------
@@ -1059,29 +1036,5 @@ function CCWatch_OpenDiagToggle()
 	else
 		CCWatch_DiagOpen = true;
 	end
-end
-
-function CCWatch_ShowDeletePrompt(cost) 
-	StaticPopupDialogs["CCWATCH_DELETE_EFFECT"] = {
-		text = TEXT(STATUS_COLOR..CCWATCH_FULLVERSION.." (Elwen)\n\n\n"..CCWATCH_LEARN_DELETE_PROMPT.."'"..CCWatchEffectSelection.."' ?"),
-		button1 = TEXT(OKAY),
-		button2 = TEXT(CANCEL),
-		OnAccept = function()
-			CCWatch_DeleteLearntEffect();
-		end,
-		OnShow = function()
-			CCWatch_OpenDiagToggle();
-		end,
-		OnHide = function()
-			CCWatch_OpenDiagToggle();
-		end,
-		showAlert = 1,
-		timeout = 0,
-		exclusive = 0,
-		whileDead = 1,
-		interruptCinematic = 1
-	};
-	PlaySound("QUESTADDED");
-	StaticPopup_Show("CCWATCH_DELETE_EFFECT");
 end
 

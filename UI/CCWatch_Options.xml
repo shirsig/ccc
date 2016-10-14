@@ -477,123 +477,6 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-
-					<CheckButton name="CCWatchOptionsUseColorOverTime" inherits="OptionsCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="20" y="-200"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_COLOROVERTIME);
-							</OnLoad>
-							<OnClick>
-								CCWatchOptions_ColorOverTimeToggle();
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-
-					<Button name="CCWatchOptionsBarColorUrge" inherits="CCWatchColorButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="20" y="-230"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<EditBox name="CCWatchOptionsBarColorUrgeEdit" historyLines="1" letters="32">
-						<Size>
-							<AbsDimension x="50" y="18"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="80" y="-230"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
-							<EdgeSize>
-								<AbsValue val="8"/>
-							</EdgeSize>
-							<TileSize>
-								<AbsValue val="8"/>
-							</TileSize>
-							<BackgroundInsets>
-								<AbsInset left="2" right="2" top="2" bottom="2"/>
-							</BackgroundInsets>
-						</Backdrop>
-						<FontString inherits="ChatFontNormal"/>
-						<Scripts>
-							<OnLoad>
-								this:SetTextInsets(4,0,0,0);
-								this:SetBackdropBorderColor(0.4, 0.4, 0.4);
-								this:SetBackdropColor(0.15, 0.15, 0.15);
-							</OnLoad>
-							<OnEnterPressed>
-								CCWatchOptions_SetBarColorUrge();
-							</OnEnterPressed>
-						</Scripts>
-					</EditBox>
-
-					<Button name="CCWatchOptionsBarColorLow" inherits="CCWatchColorButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="20" y="-250"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<EditBox name="CCWatchOptionsBarColorLowEdit" historyLines="1" letters="32">
-						<Size>
-							<AbsDimension x="50" y="18"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="80" y="-250"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
-							<EdgeSize>
-								<AbsValue val="8"/>
-							</EdgeSize>
-							<TileSize>
-								<AbsValue val="8"/>
-							</TileSize>
-							<BackgroundInsets>
-								<AbsInset left="2" right="2" top="2" bottom="2"/>
-							</BackgroundInsets>
-						</Backdrop>
-						<FontString inherits="ChatFontNormal"/>
-						<Scripts>
-							<OnLoad>
-								this:SetTextInsets(4,0,0,0);
-								this:SetBackdropBorderColor(0.4, 0.4, 0.4);
-								this:SetBackdropColor(0.15, 0.15, 0.15);
-							</OnLoad>
-							<OnEnterPressed>
-								CCWatchOptions_SetBarColorLow();
-							</OnEnterPressed>
-						</Scripts>
-					</EditBox>
-
-					<Button name="CCWatchOptionsBarColorNormal" inherits="CCWatchColorButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="20" y="-270"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-
 				</Frames>
 				<Scripts>
 					<OnShow>
@@ -744,9 +627,10 @@
 						<FontString inherits="ChatFontNormal"/>
 						<Scripts>
 							<OnLoad>
-								this:SetTextInsets(4,0,0,0);
-								this:SetBackdropBorderColor(0.4, 0.4, 0.4);
-								this:SetBackdropColor(0.15, 0.15, 0.15);
+								this:SetAutoFocus(false)
+								this:SetTextInsets(4,0,0,0)
+								this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+								this:SetBackdropColor(0.15, 0.15, 0.15)
 							</OnLoad>
 							<OnEnterPressed>
 								CCWatchOptions_SetCustomCC();
@@ -781,6 +665,7 @@
 						<FontString inherits="ChatFontNormal"/>
 						<Scripts>
 							<OnLoad>
+								this:SetAutoFocus(false)
 								this:SetTextInsets(4,0,0,0);
 								this:SetBackdropBorderColor(0.4, 0.4, 0.4);
 								this:SetBackdropColor(0.15, 0.15, 0.15);
@@ -1062,6 +947,7 @@
 								<FontString inherits="ChatFontNormal"/>
 								<Scripts>
 									<OnLoad>
+										this:SetAutoFocus(false)
 										this:SetTextInsets(4,0,0,0);
 										this:SetBackdropBorderColor(0.4, 0.4, 0.4);
 										this:SetBackdropColor(0.15, 0.15, 0.15);
@@ -1103,6 +989,7 @@
 								<FontString inherits="ChatFontNormal"/>
 								<Scripts>
 									<OnLoad>
+										this:SetAutoFocus(false)
 										this:SetTextInsets(4,0,0,0);
 										this:SetBackdropBorderColor(0.4, 0.4, 0.4);
 										this:SetBackdropColor(0.15, 0.15, 0.15);
@@ -1278,30 +1165,9 @@
 						</Frames>
 					</Frame>
 
-
-					<Button name="CCWatchOptionsLearnDelete" inherits="GameMenuButtonTemplate" text="CCWATCH_DELETE">
-						<Size>
-							<AbsDimension x="90" y="21"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOPRIGHT">
-								<Offset>
-									<AbsDimension x="0" y="-10"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnClick>
-								CCWatchOptionsLearnDelete_OnClick();
-							</OnClick>
-						</Scripts>
-					</Button>
-
-
-
 					<ScrollFrame name="CCWatchOptionsEffectsListScrollFrame" inherits="FauxScrollFrameTemplate">
 						<Size>
-							<AbsDimension x="5" y="176"/>
+							<AbsDimension x="245" y="176"/>
 						</Size>
 						<Anchors>
 							<Anchor point="TOPRIGHT" relativeTo="CCWatchOptionsLearnDelete" relativePoint="TOPLEFT"> 
@@ -1319,7 +1185,7 @@
 
 					<Button name="CCWatchOptionsEffectsItem1" inherits="CCWatchOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPRIGHT" relativeTo="CCWatchOptionsEffectsListScrollFrame" relativePoint="TOPLEFT">
+							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsListScrollFrame" relativePoint="TOPLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
