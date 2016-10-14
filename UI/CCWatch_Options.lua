@@ -156,48 +156,19 @@ end
 
 function CCWatchGrowthDropDown_OnInit()
 	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsMenuGrowthDropDown";
-	local info = { };
+	local info = {}
 
-	info.text = CCWATCH_OPTION_GROWTH_OFF;
-	info.value = "off";
-	info.owner = this;
-	info.func = CCWatchGrowthDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-
-	info.text = CCWATCH_OPTION_GROWTH_UP;
-	info.value = "up";
-	info.owner = this;
-	info.func = CCWatchGrowthDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = CCWATCH_OPTION_GROWTH_UP
+	info.value = "up"
+	info.owner = this
+	info.func = CCWatchGrowthDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 	
-	info.text = CCWATCH_OPTION_GROWTH_DOWN;
-	info.value = "down";
-	info.owner = this;
-	info.func = CCWatchGrowthDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-end
-
-function CCWatchTimersDropDown_OnInit()
-	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsMenuTimersDropDown";
-	local info = { };
-
-	info.text = CCWATCH_OPTION_TIMERS_OFF;
-	info.value = "off";
-	info.owner = this;
-	info.func = CCWatchTimersDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-
-	info.text = CCWATCH_OPTION_TIMERS_ON;
-	info.value = "on";
-	info.owner = this;
-	info.func = CCWatchTimersDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
-	
-	info.text = CCWATCH_OPTION_TIMERS_REVERSE;
-	info.value = "reverse";
-	info.owner = this;
-	info.func = CCWatchTimersDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = CCWATCH_OPTION_GROWTH_DOWN
+	info.value = "down"
+	info.owner = this
+	info.func = CCWatchGrowthDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 end
 
 function CCWatchGrowthDropDown_OnClick()
@@ -216,25 +187,6 @@ function CCWatchGrowthDropDown_OnClick()
 		CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth;
 		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN);
 		CCWatch_AddMessage(CCWATCH_GROW_DOWN);
-	end
-end
-
-function CCWatchTimersDropDown_OnClick()
-	if (this.value == "off") then
-		CCWatch_Save[CCWATCH.PROFILE].timers = 0;
-		CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers;
-		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_OFF);
-		CCWatch_AddMessage(CCWATCH_TIMERS_OFF);
-	elseif( this.value == "on" ) then
-		CCWatch_Save[CCWATCH.PROFILE].timers = 1;
-		CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers;
-		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_ON);
-		CCWatch_AddMessage(CCWATCH_TIMERS_ON);
-	elseif( this.value == "reverse" ) then
-		CCWatch_Save[CCWATCH.PROFILE].timers = 2;
-		CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers;
-		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_REVERSE);
-		CCWatch_AddMessage(CCWATCH_TIMERS_REVERSE);
 	end
 end
 
@@ -539,17 +491,19 @@ function CCWatchOptionsLearnFillFields()
 		CCWatchOptionsEffectDR:SetText(CCWATCH_OPTION_DR_PLAYERS)
 	end
 
-	CCWatchOptionsEffectMonitor:SetChecked(CCWATCH.CCS[CCWatchEffectSelection].MONITOR)
-	local bFlag = CCWATCH.CCS[CCWatchEffectSelection].WARN > 0
-	CCWatchOptionsEffectWarn:SetChecked(bFlag)
-
+	CCWatchOptionsBarColorEffect:Enable()
 	if CCWATCH.CCS[CCWatchEffectSelection].COLOR ~= nil then
-		CCWatchOptionsBarColorEffect:Enable()
 		SetButtonPickerColor("CCWatchOptionsBarColorEffect", CCWATCH.CCS[CCWatchEffectSelection].COLOR)
 	else
-		CCWatchOptionsBarColorEffect:Disable()
 		SetButtonPickerColor("CCWatchOptionsBarColorEffect", { r=1, g=1, b=1 })
 	end
+
+	CCWatchOptionsEffectMonitor:SetChecked(CCWATCH.CCS[CCWatchEffectSelection].MONITOR)
+	CCWatchOptionsEffectMonitor:Enable()
+
+	local bFlag = CCWATCH.CCS[CCWatchEffectSelection].WARN > 0
+	CCWatchOptionsEffectWarn:SetChecked(bFlag)
+	CCWatchOptionsEffectWarn:Enable()
 end
 
 function CCWatchOptions_OnLoad()
@@ -579,23 +533,14 @@ function CCWatchOptions_Init()
 		CCWatchOptionsFrameCustomCCEdit:Hide()
 	end
 
+	CCWatchOptionsBarColorEffect:Disable()
 	CCWatchOptionsEffectMonitor:Disable()
 	CCWatchOptionsEffectWarn:Disable()
 
-	if CCWATCH.GROWTH == 0 then
-		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_OFF)
-	elseif CCWATCH.GROWTH == 1 then
+	if CCWATCH.GROWTH == 1 then
 		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_UP)
 	else
 		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN)
-	end
-
-	if CCWATCH.TIMERS == 0 then
-		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_OFF)
-	elseif CCWATCH.TIMERS == 1 then
-		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_ON)
-	else
-		CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_REVERSE)
 	end
 
 	if CCWATCH.STYLE == 0 then

@@ -8,8 +8,6 @@
 	<Script file="Interface\AddOns\CCWatch\Config\CCWatch_ConfigDebuff.lua"/>
 	<Script file="Interface\AddOns\CCWatch\Config\CCWatch_ConfigBuff.lua"/>
 	<Script file="localization.lua"/>
-	<Script file="localization.fr.lua"/>
-	<Script file="localization.de.lua"/>
 
 	<Frame name="CCWatchMovableTemplate" virtual="true">
 		<Size>

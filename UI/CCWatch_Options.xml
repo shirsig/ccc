@@ -422,25 +422,6 @@
 						</Scripts>
 					</CheckButton>
 
-					<Frame name="CCWatchTimersDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
-						<Size>
-							<AbsDimension x="108" y="16"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="6" y="-180"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								UIDropDownMenu_Initialize(this, CCWatchTimersDropDown_OnInit);
-								UIDropDownMenu_SetWidth(110);
-							</OnLoad>
-						</Scripts>
-					</Frame>
-
 					<Frame name="CCWatchGrowthDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
 						<Size>
 							<AbsDimension x="118" y="16"/>
@@ -905,11 +886,20 @@
 								</Layers>
 								<Scripts>
 									<OnLoad>
-										this:SetBackdropBorderColor(0.4, 0.4, 0.4);
-										this:SetBackdropColor(0.15, 0.15, 0.15);
+										this:SetBackdropBorderColor(.4, .4, .4)
+										this:SetBackdropColor(.15, .15, .15)
 									</OnLoad>
 								</Scripts>
 							</Frame>
+							<Button name="CCWatchOptionsBarColorEffect" inherits="CCWatchColorButtonTemplate">
+								<Anchors>
+									<Anchor point="TOPLEFT">
+										<Offset>
+											<AbsDimension x="225" y="-41"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+							</Button>
 							<CheckButton name="CCWatchOptionsEffectMonitor" inherits="OptionsCheckButtonTemplate">
 								<Anchors>
 									<Anchor point="TOPLEFT">
@@ -944,16 +934,6 @@
 									</OnClick>
 								</Scripts>
 							</CheckButton>
-
-							<Button name="CCWatchOptionsBarColorEffect" inherits="CCWatchColorButtonTemplate">
-								<Anchors>
-									<Anchor point="TOPLEFT">
-										<Offset>
-											<AbsDimension x="350" y="-138"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-							</Button>
 
 							<Button name="CCWatchOptionsLearnModify" inherits="GameMenuButtonTemplate" text="Modify">
 								<Size>

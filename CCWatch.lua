@@ -233,23 +233,23 @@ function CCWatchWarn(msg, effect, target, time)
 	local cc = CCWATCH.WARNTYPE
 	-- Emote, Say, Party, Raid, Yell, Custom:<ccname>
 	if cc == "RAID" and UnitInRaid'player' == nil then
-		cc = "PARTY";
+		cc = "PARTY"
 	end
 	if cc == "PARTY" and GetNumPartyMembers() == 0 then
-		return;
+		return
 	end
 	if cc == "CHANNEL" then
-		ncc = GetChannelName(CCWATCH.WARNCUSTOMCC);
+		ncc = GetChannelName(CCWATCH.WARNCUSTOMCC)
 	end
 	if time ~= nil then
-		msg = format(msg, target, effect, time);
+		msg = format(msg, target, effect, time)
 	else
-		msg = format(msg, target, effect);
+		msg = format(msg, target, effect)
 	end
 	if cc == "EMOTE" then
-		msg = CCWATCH_WARN_EMOTE..msg;
+		msg = CCWATCH_WARN_EMOTE .. msg
 	end
-	SendChatMessage(msg, cc, nil, ncc);
+	SendChatMessage(msg, cc, nil, ncc)
 end
 
 function CCWatch_Config()
@@ -277,7 +277,7 @@ function CCWatch_OnLoad()
 
 	CCWatchObject = this
 
-this:RegisterEvent'UNIT_AURA'
+	this:RegisterEvent'UNIT_AURA'
 	this:RegisterEvent'UNIT_COMBAT'
 
 	if UnitLevel'player' < 60 then
@@ -369,21 +369,6 @@ function CCWatch_SlashCommandHandler(msg)
 				CCWatch_AddMessage(CCWATCH_INVERSION_OFF)
 			end
 			CCWatchOptionsFrameInvert:SetChecked(CCWATCH.INVERT)
-		elseif command == "timers off" then
-			CCWatch_Save[CCWATCH.PROFILE].timers = 0
-			CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers
-			CCWatch_AddMessage(CCWATCH_TIMERS_OFF)
-			CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_OFF)
-		elseif command == "timers on" then
-			CCWatch_Save[CCWATCH.PROFILE].timers = 1
-			CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers
-			CCWatch_AddMessage(CCWATCH_TIMERS_ON)
-			CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_ON)
-		elseif command == "timers rev" then
-			CCWatch_Save[CCWATCH.PROFILE].timers = 2
-			CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers
-			CCWatch_AddMessage(CCWATCH_TIMERS_REVERSE)
-			CCWatchTimersDropDownText:SetText(CCWATCH_OPTION_TIMERS_REVERSE)
 		elseif command == "grow up" then
 			CCWatch_Save[CCWATCH.PROFILE].growth = 1
 			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
@@ -458,13 +443,6 @@ function CCWatch_SlashCommandHandler(msg)
 				CCWatch_AddMessage(CCWATCH_INVERSION_ON)
 			else
 				CCWatch_AddMessage(CCWATCH_INVERSION_OFF)
-			end
-			if CCWATCH.TIMERS == 0 then
-				CCWatch_AddMessage(CCWATCH_TIMERS_OFF)
-			elseif CCWATCH.TIMERS == 1 then
-				CCWatch_AddMessage(CCWATCH_TIMERS_ON)
-			else
-				CCWatch_AddMessage(CCWATCH_TIMERS_REVERSE)
 			end
 			if CCWATCH.GROWTH == 1 then
 				CCWatch_AddMessage(CCWATCH_GROW_UP)
@@ -1035,19 +1013,12 @@ function CCWatch_LoadVariables()
 		width = 160,
 		alpha = 1,
 		arcanist = false,
-		timers = 2,
 		style = 0,
 		Monitoring = bit.bor(ETYPE_CC, ETYPE_DEBUFF, ETYPE_BUFF),
 		WarnType = 'PARTY',
 		WarnLow = 10,
 		WarnMsg = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME),
 		WarnCustomCC = '',
-		ColorOverTime = false,
-		CoTUrgeColor = { r=1, g=0, b=0 },
-		CoTLowColor = { r=1, g=.5, b=0 },
-		CoTNormalColor = { r=1, g=1, b=0 },
-		CoTUrgeValue = 1,
-		CoTLowValue = 5,
 	}
 
 	CCWATCH.PROFILE = UnitName'player' .. '@' .. GetCVar'RealmName'
@@ -1067,7 +1038,6 @@ function CCWatch_LoadVariables()
 
 	CCWATCH.STATUS = CCWatch_Save[CCWATCH.PROFILE].status
 	CCWATCH.INVERT = CCWatch_Save[CCWATCH.PROFILE].invert
-	CCWATCH.TIMERS = CCWatch_Save[CCWATCH.PROFILE].timers
 	CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
 	CCWATCH.SCALE = CCWatch_Save[CCWATCH.PROFILE].scale
 	CCWATCH.WIDTH = CCWatch_Save[CCWATCH.PROFILE].width
@@ -1078,12 +1048,6 @@ function CCWatch_LoadVariables()
 	CCWATCH.WARNLOW = CCWatch_Save[CCWATCH.PROFILE].WarnLow
 	CCWATCH.WARNMSG = CCWatch_Save[CCWATCH.PROFILE].WarnMsg
 	CCWATCH.WARNCUSTOMCC = CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC
-	CCWATCH.COLOROVERTIME = CCWatch_Save[CCWATCH.PROFILE].ColorOverTime
-	CCWATCH.COTURGECOLOR = CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor
-	CCWATCH.COTLOWCOLOR = CCWatch_Save[CCWATCH.PROFILE].CoTLowColor
-	CCWATCH.COTNORMALCOLOR = CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor
-	CCWATCH.COTURGEVALUE = CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue
-	CCWATCH.COTLOWVALUE = CCWatch_Save[CCWATCH.PROFILE].CoTLowValue
 
 	if bit.band(CCWATCH.MONITORING, ETYPE_CC) ~= 0 or bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF) ~= 0 then
 		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE'
@@ -1110,7 +1074,7 @@ function CCWatch_LoadVariables()
 end
 
 function CCWatch_UpdateImpGouge()
-	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 1 )
+	local talentname, texture, _, _, rank = GetTalentInfo( 2, 1 )
 	if texture then
 		if rank ~= 0 then
 			CCWATCH.CCS[CCWATCH_GOUGE].LENGTH = 4 + rank * .5
