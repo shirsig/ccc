@@ -277,6 +277,7 @@ function CCWatch_OnLoad()
 
 	CCWatchObject = this
 
+this:RegisterEvent'UNIT_AURA'
 	this:RegisterEvent'UNIT_COMBAT'
 
 	if UnitLevel'player' < 60 then
@@ -717,9 +718,9 @@ CCWatch_EffectHandler[1] = function()
 -- applied
 	local effect = CCWATCH.EFFECT[1].TYPE
 	local target = CCWATCH.EFFECT[1].TARGET
+	CCWatch_UnqueueEvent()
 
 	CCWatch_AddEffect(effect, target)
-	CCWatch_UnqueueEvent()
 
 	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) ~= 0 then
 		CCWatchWarn(CCWATCH_WARN_APPLIED, effect, target)
@@ -730,9 +731,9 @@ CCWatch_EffectHandler[2] = function()
 -- faded
 	local effect = CCWATCH.EFFECT[1].TYPE
 	local target = CCWATCH.EFFECT[1].TARGET
+	CCWatch_UnqueueEvent()
 
 	CCWatch_RemoveEffect(effect, target)
-	CCWatch_UnqueueEvent()
 
 	-- another hack, to avoid spamming, because when the effect is broken, SOMETIME, WoW also send a faded message (see combat log)
 	if CCWATCH.CCS[effect].WARN > 0 and CCWATCH.CCS[effect].WARN ~= 3 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED) ~= 0 then
@@ -744,9 +745,9 @@ CCWatch_EffectHandler[3] = function()
 -- broken
 	local effect = CCWATCH.EFFECT[1].TYPE
 	local target = CCWATCH.EFFECT[1].TARGET
+	CCWatch_UnqueueEvent()
 
 	CCWatch_RemoveEffect(effect, target)
-	CCWatch_UnqueueEvent()
 
 	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) ~= 0 then
 		CCWatchWarn(CCWATCH_WARN_BROKEN, effect, target)
@@ -768,6 +769,21 @@ function CCWatch_UnqueueEvent()
 end
 
 do
+	local unconfirmed = {'', '', 0}
+
+	function CCWatch_EventHandler.UNIT_AURA()
+		local operation, name, target, time = unpack(unconfirmed)
+		if arg1 == 'target' and target == UnitName'target' and GetTime() - time < .5 then
+			if operation == 'ADD' then
+				CCWatch_AddEffect(name, target, true)
+			elseif operation == 'REMOVE' then
+				CCWatch_RemoveEffect(name, target, true)
+			elseif operation == 'REMOVE_ALL' then
+				CCWatch_RemoveEffects(target, true)
+			end
+		end
+	end
+
 	function CCWatch_EffectActive(name, target)
 		for _, group in {CCWATCH.GROUPSBUFF, CCWATCH.GROUPSDEBUFF, CCWATCH.GROUPSCC} do
 			for _, bar in group do
@@ -779,7 +795,12 @@ do
 		return false
 	end
 
-	function CCWatch_AddEffect(name, target)
+	function CCWatch_AddEffect(name, target, confirmed)
+		if CCWATCH.STYLE == 0 and not CCWatch_EffectActive(name, target) and not confirmed then
+			unconfirmed = {'ADD', name, target, GetTime()}
+			return
+		end
+
 		CCWatch_RemoveEffect(name, target)
 
 		local effect = {
@@ -813,12 +834,12 @@ do
 		local index
 		if CCWATCH.GROWTH == 1 then
 			index = 1
-			while index < CCWATCH_MAXBARS and group[index].EFFECT do
+			while index < CCWATCH_MAXBARS and group[index].EFFECT and (name ~= group[index].EFFECT.NAME or target ~= group[index].EFFECT.TARGET) do
 				index = index + 1
 			end
 		else
 			index = CCWATCH_MAXBARS
-			while index > 1 and group[index].EFFECT do
+			while index > 1 and group[index].EFFECT and (name ~= group[index].EFFECT.NAME or target ~= group[index].EFFECT.TARGET) do
 				index = index - 1
 			end
 		end
@@ -835,7 +856,12 @@ do
 		getglobal('CCWatchBar' .. ext .. index):Show()
 	end
 
-	function CCWatch_RemoveEffect(name, target)
+	function CCWatch_RemoveEffect(name, target, confirmed)
+		if CCWATCH.STYLE == 0 and UnitName'target' == target and not confirmed then
+			unconfirmed = {'REMOVE', name, target, GetTime()}
+			return
+		end
+
 		-- ensure if warnable, that WARN is set back to 1
 		-- 2 = warn at low time already sent
 		-- 3 = broken message seen so no faded message to send if any received
@@ -853,6 +879,11 @@ do
 	end
 
 	function CCWatch_RemoveEffects(target)
+		if CCWATCH.STYLE == 0 and UnitName'target' == target and not confirmed then
+			unconfirmed = {'REMOVE_ALL', '', target, GetTime()}
+			return
+		end
+
 		for _, group in {CCWATCH.GROUPSBUFF, CCWATCH.GROUPSDEBUFF, CCWATCH.GROUPSCC} do
 			for _, bar in group do
 				if bar.EFFECT and bar.EFFECT.TARGET == target then
