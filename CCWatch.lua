@@ -695,13 +695,13 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
 	for mobname in string.gfind(arg1, CCWATCH_TEXT_DIE) do
-		CCWatch_HandleDeath(mobname)
+		CCWatch_RemoveEffects(mobname)
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_XP_GAIN()
 	for mobname in string.gfind(arg1, CCWATCH_TEXT_DIEXP) do
-		CCWatch_HandleDeath(mobname)
+		CCWatch_RemoveEffects(mobname)
 	end
 end
 
@@ -768,20 +768,12 @@ function CCWatch_UnqueueEvent()
 end
 
 do
-	local active_effects = {}
-
-	function CCWatch_HandleDeath(target)
-		for i = getn(active_effects), 1, -1 do
-			if active_effects[i].TARGET == target then
-				CCWatch_RemoveEffect(active_effects[i].NAME, target)
-			end
-		end
-	end
-
 	function CCWatch_EffectActive(name, target)
-		for i, v in active_effects do
-			if v.NAME == name and v.TARGET == target then
-				return true
+		for _, group in {CCWATCH.GROUPSBUFF, CCWATCH.GROUPSDEBUFF, CCWATCH.GROUPSCC} do
+			for _, bar in group do
+				if bar.EFFECT and bar.EFFECT.NAME == name and bar.EFFECT.TARGET == target then
+					return true
+				end
 			end
 		end
 		return false
@@ -796,7 +788,6 @@ do
 			PLAYER = UnitIsPlayer'target',
 			TIMER_START = GetTime(),
 		}
-		tinsert(active_effects, effect)
 
 		if CCWATCH.CCS[name].PVPCC and effect.PLAYER then
 			effect.TIMER_END = effect.TIMER_START + CCWatch_DiminishedDuration(mobname, name, CCWATCH.CCS[name].PVPCC)
@@ -807,53 +798,44 @@ do
 			effect.TIMER_END = effect.TIMER_END + CCWATCH.CCS[name].A * CCWATCH.COMBO
 		end
 
-		local GROUPS, ext
+		local group, ext
 		if CCWATCH.CCS[name].ETYPE == ETYPE_BUFF then
-			GROUPS = CCWATCH.GROUPSBUFF
+			group = CCWATCH.GROUPSBUFF
 			ext = 'Buff'
 		elseif CCWATCH.CCS[name].ETYPE == ETYPE_DEBUFF then
-			GROUPS = CCWATCH.GROUPSDEBUFF
+			group = CCWATCH.GROUPSDEBUFF
 			ext = 'Debuff'
 		else
-			GROUPS = CCWATCH.GROUPSCC
+			group = CCWATCH.GROUPSCC
 			ext = 'CC'
 		end
 
-		local group
+		local index
 		if CCWATCH.GROWTH == 1 then
-			group = 1
-			while group < CCWATCH_MAXBARS and GROUPS[group].EFFECT do
-				group = group + 1
+			index = 1
+			while index < CCWATCH_MAXBARS and group[index].EFFECT do
+				index = index + 1
 			end
 		else
-			group = CCWATCH_MAXBARS
-			while group > 1 and GROUPS[group].EFFECT do
-				group = group - 1
+			index = CCWATCH_MAXBARS
+			while index > 1 and group[index].EFFECT do
+				index = index - 1
 			end
 		end
 
-		GROUPS[group].EFFECT = effect
+		group[index].EFFECT = effect
 
 		if CCWATCH.STATUS ~= 1 then
 			return
 		end
 
-		local activebarText = bars['CCWatchBar' .. ext .. group].frame.text
+		local activebarText = bars['CCWatchBar' .. ext .. index].frame.text
 		activebarText:SetText(effect.TARGET .. ' : ' .. effect.NAME)
 
-		getglobal('CCWatchBar' .. ext .. group):Show()
+		getglobal('CCWatchBar' .. ext .. index):Show()
 	end
 
 	function CCWatch_RemoveEffect(name, target)
-		local effect
-		for i, v in active_effects do
-			if v.NAME == name and v.TARGET == target then
-				effect = v
-				tremove(active_effects, i)
-				break
-			end
-		end
-
 		-- ensure if warnable, that WARN is set back to 1
 		-- 2 = warn at low time already sent
 		-- 3 = broken message seen so no faded message to send if any received
@@ -861,18 +843,21 @@ do
 			CCWATCH.CCS[name].WARN = 1
 		end
 
-		local GROUPS
-		if CCWATCH.CCS[name].ETYPE == ETYPE_BUFF then
-			GROUPS = CCWATCH.GROUPSBUFF
-		elseif CCWATCH.CCS[name].ETYPE == ETYPE_DEBUFF then
-			GROUPS = CCWATCH.GROUPSDEBUFF
-		else
-			GROUPS = CCWATCH.GROUPSCC
+		for _, group in {CCWATCH.GROUPSBUFF, CCWATCH.GROUPSDEBUFF, CCWATCH.GROUPSCC} do
+			for _, bar in group do
+				if bar.EFFECT and bar.EFFECT.NAME == name and bar.EFFECT.TARGET == target then
+					bar.EFFECT = nil
+				end
+			end
 		end
+	end
 
-		for k, v in GROUPS do
-			if v.EFFECT == effect then
-				v.EFFECT = nil
+	function CCWatch_RemoveEffects(target)
+		for _, group in {CCWATCH.GROUPSBUFF, CCWATCH.GROUPSDEBUFF, CCWATCH.GROUPSCC} do
+			for _, bar in group do
+				if bar.EFFECT and bar.EFFECT.TARGET == target then
+					bar.EFFECT = nil
+				end
 			end
 		end
 	end
@@ -1000,11 +985,11 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 end
 
 local function GetConfCC(k, v)
---CCWatch_AddMessage("Updating conf for : "..k);
+--CCWatch_AddMessage("Updating conf for : "..k)
 	if CCWATCH.CCS[k] then
-		CCWATCH.CCS[k].MONITOR = v.MONITOR;
-		CCWATCH.CCS[k].WARN = v.WARN;
-		CCWATCH.CCS[k].COLOR = v.COLOR;
+		CCWATCH.CCS[k].MONITOR = v.MONITOR
+		CCWATCH.CCS[k].WARN = v.WARN
+		CCWATCH.CCS[k].COLOR = v.COLOR
 	end
 end
 
@@ -1106,12 +1091,9 @@ function CCWatch_LoadVariables()
 	CCWatch_BarLock()
 end
 
-function CCWatch_UpdateImpGouge(bPrint)
+function CCWatch_UpdateImpGouge()
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 2, 1 )
 	if texture then
-		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
-		end
 		if rank ~= 0 then
 			CCWATCH.CCS[CCWATCH_GOUGE].LENGTH = 4 + rank * .5
 		end
@@ -1120,12 +1102,9 @@ function CCWatch_UpdateImpGouge(bPrint)
 	end
 end
 
-function CCWatch_UpdateImpGarotte(bPrint)
+function CCWatch_UpdateImpGarotte()
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo( 3, 8 )
 	if texture then
-		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
-		end
 		if rank ~= 0 then
 			CCWATCH.CCS[CCWATCH_GAROTTE].LENGTH = 18 + rank * 3
 		end
@@ -1134,7 +1113,7 @@ function CCWatch_UpdateImpGarotte(bPrint)
 	end
 end
 
-function CCWatch_UpdateKidneyShot(bPrint)
+function CCWatch_UpdateKidneyShot()
 	local i = 1
 	while true do
 		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
@@ -1146,9 +1125,6 @@ function CCWatch_UpdateKidneyShot(bPrint)
 		end
 
 		if name == CCWATCH_KS then
-			if bPrint then
-				CCWatch_AddMessage(name.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
-			end
 			if strsub(rank,string.len(rank)) == "1" then
 				CCWATCH.CCS[CCWATCH_KS].LENGTH = 0
 			else
@@ -1161,12 +1137,9 @@ function CCWatch_UpdateKidneyShot(bPrint)
 	end
 end
 
-function CCWatch_UpdateImpTrap(bPrint)
+function CCWatch_UpdateImpTrap()
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo(3, 7)
 	if texture then
-		if bPrint then
-			CCWatch_AddMessage(talentname .. " " .. CCWATCH_RANK .. " " .. rank .. " " .. CCWATCH_DETECTED)
-		end
 		if rank ~= 0 then
 -- Freezing Trap is a true multi rank, hence already updated
 			CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH = CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH * (1 + rank * .15)
@@ -1174,24 +1147,18 @@ function CCWatch_UpdateImpTrap(bPrint)
 	end
 end
 
-function CCWatch_UpdateImpSeduce(bPrint)
+function CCWatch_UpdateImpSeduce()
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo(2, 7)
 	if texture then
-		if bPrint then
-			CCWatch_AddMessage(talentname .. " " .. CCWATCH_RANK .. " " .. rank .. " " .. CCWATCH_DETECTED)
-		end
 		if rank ~= 0 then
 			CCWATCH.CCS[CCWATCH_SEDUCE].LENGTH = 15 * (1 + rank * .10)
 		end
 	end
 end
 
-function CCWatch_UpdateBrutalImpact(bPrint)
+function CCWatch_UpdateBrutalImpact()
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo(2, 4)
 	if texture then
-		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
-		end
 		if rank ~= 0 then
 -- Bash is a true multi rank, hence already updated
 			CCWATCH.CCS[CCWATCH_POUNCE].LENGTH = 2 + rank * .50
@@ -1200,12 +1167,9 @@ function CCWatch_UpdateBrutalImpact(bPrint)
 	end
 end
 
-function CCWatch_UpdatePermafrost(bPrint)
+function CCWatch_UpdatePermafrost()
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo(3, 2)
 	if texture then
-		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
-		end
 		if rank ~= 0 then
 -- Frostbolt is a true multi rank, hence already updated
 			CCWATCH.CCS[CCWATCH_CONEOFCOLD].LENGTH = 8 + .50 + rank * .50
@@ -1214,19 +1178,16 @@ function CCWatch_UpdatePermafrost(bPrint)
 	end
 end
 
-function CCWatch_UpdateImpShadowWordPain(bPrint)
+function CCWatch_UpdateImpShadowWordPain()
 	local talentname, texture, _, _, rank, _, _, _ = GetTalentInfo(3, 4)
 	if texture then
-		if bPrint then
-			CCWatch_AddMessage(talentname.." "..CCWATCH_RANK.." "..rank.." "..CCWATCH_DETECTED)
-		end
 		if rank ~= 0 then
 			CCWATCH.CCS[CCWATCH_SHADOWWORDPAIN].LENGTH = 18 + rank * 3
 		end
 	end
 end
 
-function CCWatch_GetSpellRank(spellname, spelleffect, bPrint)
+function CCWatch_GetSpellRank(spellname, spelleffect)
 	local i = 1
 	local gotone = false
 	local maxrank = CCWATCH_SPELLS[spellname].RANKS
@@ -1236,9 +1197,6 @@ function CCWatch_GetSpellRank(spellname, spelleffect, bPrint)
 
 		if not name then
 			if not gotone then
-				if bPrint then
-					CCWatch_AddMessage(spellname .. " " .. CCWATCH_NOTDETECTED)
-				end
 				if CCWATCH.CCS[spelleffect].LENGTH == nil then
 					CCWATCH.CCS[spelleffect].LENGTH = CCWATCH_SPELLS[spellname].DURATION[maxrank]
 				end
@@ -1250,10 +1208,6 @@ function CCWatch_GetSpellRank(spellname, spelleffect, bPrint)
 			local currank = 1
 			while currank <= maxrank do
 				if tonumber(strsub(rank,string.len(rank))) == currank then
-					if bPrint then
-						CCWatch_AddMessage(spellname.." "..CCWATCH_RANK.." "..currank.." "..CCWATCH_DETECTED)
-					end
-
 					CCWATCH.CCS[spelleffect].LENGTH = CCWATCH_SPELLS[spellname].DURATION[currank]
 					gotone = true
 				end
@@ -1265,53 +1219,53 @@ function CCWatch_GetSpellRank(spellname, spelleffect, bPrint)
 	end
 end
 
-function CCWatch_UpdateClassSpells(bPrint)
+function CCWatch_UpdateClassSpells()
 	local _, eclass = UnitClass'player'
 	CCWatchOptionsFrameArcanist:Hide()
 	if eclass == "ROGUE" then
-		CCWatch_GetSpellRank(CCWATCH_SAP, CCWATCH_SAP, bPrint)
-		CCWatch_UpdateImpGouge(bPrint)
-		CCWatch_UpdateKidneyShot(bPrint)
+		CCWatch_GetSpellRank(CCWATCH_SAP, CCWATCH_SAP)
+		CCWatch_UpdateImpGouge()
+		CCWatch_UpdateKidneyShot()
 		if CCWatch_ConfigBuff ~= nil then
-			CCWatch_UpdateImpGarotte(bPrint)
+			CCWatch_UpdateImpGarotte()
 		end
 	elseif eclass == "WARRIOR" then
-		CCWatch_GetSpellRank(CCWATCH_REND, CCWATCH_REND, bPrint)
+		CCWatch_GetSpellRank(CCWATCH_REND, CCWATCH_REND)
 	elseif eclass == "WARLOCK" then
-		CCWatch_GetSpellRank(CCWATCH_FEAR, CCWATCH_FEAR, bPrint)
-		CCWatch_GetSpellRank(CCWATCH_BANISH, CCWATCH_BANISH, bPrint)
-		CCWatch_GetSpellRank(CCWATCH_CORRUPTION, CCWATCH_CORRUPTION, bPrint)
-		CCWatch_UpdateImpSeduce(bPrint)
+		CCWatch_GetSpellRank(CCWATCH_FEAR, CCWATCH_FEAR)
+		CCWatch_GetSpellRank(CCWATCH_BANISH, CCWATCH_BANISH)
+		CCWatch_GetSpellRank(CCWATCH_CORRUPTION, CCWATCH_CORRUPTION)
+		CCWatch_UpdateImpSeduce()
 	elseif eclass == "PALADIN" then
-		CCWatch_GetSpellRank(CCWATCH_HOJ, CCWATCH_HOJ, bPrint)
+		CCWatch_GetSpellRank(CCWATCH_HOJ, CCWATCH_HOJ)
 		if CCWatch_ConfigBuff ~= nil then
-			CCWatch_GetSpellRank(CCWATCH_DIVINESHIELD, CCWATCH_DIVINESHIELD, bPrint)
+			CCWatch_GetSpellRank(CCWATCH_DIVINESHIELD, CCWATCH_DIVINESHIELD)
 		end
 	elseif eclass == "HUNTER" then
-		CCWatch_GetSpellRank(CCWATCH_FREEZINGTRAP_SPELL, CCWATCH_FREEZINGTRAP, bPrint)
-		CCWatch_GetSpellRank(CCWATCH_SCAREBEAST, CCWATCH_SCAREBEAST, bPrint)
-		CCWatch_UpdateImpTrap(bPrint)
+		CCWatch_GetSpellRank(CCWATCH_FREEZINGTRAP_SPELL, CCWATCH_FREEZINGTRAP)
+		CCWatch_GetSpellRank(CCWATCH_SCAREBEAST, CCWATCH_SCAREBEAST)
+		CCWatch_UpdateImpTrap()
 	elseif eclass == "PRIEST" then
-		CCWatch_GetSpellRank(CCWATCH_SHACKLE, CCWATCH_SHACKLE, bPrint)
+		CCWatch_GetSpellRank(CCWATCH_SHACKLE, CCWATCH_SHACKLE)
 		if CCWatch_ConfigDebuff ~= nil then
-			CCWatch_UpdateImpShadowWordPain(bPrint)
+			CCWatch_UpdateImpShadowWordPain()
 		end
 	elseif eclass == "MAGE" then
-		CCWatch_GetSpellRank(CCWATCH_POLYMORPH, CCWATCH_POLYMORPH, bPrint)
+		CCWatch_GetSpellRank(CCWATCH_POLYMORPH, CCWATCH_POLYMORPH)
 		if CCWatch_ConfigDebuff ~= nil then
-			CCWatch_GetSpellRank(CCWATCH_FROSTBOLT, CCWATCH_FROSTBOLT, bPrint)
-			CCWatch_GetSpellRank(CCWATCH_FIREBALL, CCWATCH_FIREBALL, bPrint)
-			CCWatch_UpdatePermafrost(bPrint)
+			CCWatch_GetSpellRank(CCWATCH_FROSTBOLT, CCWATCH_FROSTBOLT)
+			CCWatch_GetSpellRank(CCWATCH_FIREBALL, CCWATCH_FIREBALL)
+			CCWatch_UpdatePermafrost()
 		end
 		CCWatchOptionsFrameArcanist:Show()
 		if CCWATCH.ARCANIST then
 			CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH = CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH + 15
 		end
 	elseif eclass == "DRUID" then
-		CCWatch_GetSpellRank(CCWATCH_ROOTS, CCWATCH_ROOTS, bPrint)
-		CCWatch_GetSpellRank(CCWATCH_HIBERNATE, CCWATCH_HIBERNATE, bPrint)
-		CCWatch_GetSpellRank(CCWATCH_BASH, CCWATCH_BASH, bPrint)
-		CCWatch_UpdateBrutalImpact(bPrint)
+		CCWatch_GetSpellRank(CCWATCH_ROOTS, CCWATCH_ROOTS)
+		CCWatch_GetSpellRank(CCWATCH_HIBERNATE, CCWATCH_HIBERNATE)
+		CCWatch_GetSpellRank(CCWATCH_BASH, CCWATCH_BASH)
+		CCWatch_UpdateBrutalImpact()
 	end
 end
 
