@@ -696,13 +696,13 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
 	for mobname in string.gfind(arg1, CCWATCH_TEXT_DIE) do
-		CCWatch_RemoveEffects(mobname)
+		CCWatch_RemoveTarget(mobname)
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_XP_GAIN()
 	for mobname in string.gfind(arg1, CCWATCH_TEXT_DIEXP) do
-		CCWatch_RemoveEffects(mobname)
+		CCWatch_RemoveTarget(mobname)
 	end
 end
 
@@ -778,8 +778,6 @@ do
 				CCWatch_AddEffect(name, target, true)
 			elseif operation == 'REMOVE' then
 				CCWatch_RemoveEffect(name, target, true)
-			elseif operation == 'REMOVE_ALL' then
-				CCWatch_RemoveEffects(target, true)
 			end
 		end
 	end
@@ -878,12 +876,7 @@ do
 		end
 	end
 
-	function CCWatch_RemoveEffects(target)
-		if CCWATCH.STYLE == 0 and UnitName'target' == target and not confirmed then
-			unconfirmed = {'REMOVE_ALL', '', target, GetTime()}
-			return
-		end
-
+	function CCWatch_RemoveTarget(target)
 		for _, group in {CCWATCH.GROUPSBUFF, CCWATCH.GROUPSDEBUFF, CCWATCH.GROUPSCC} do
 			for _, bar in group do
 				if bar.EFFECT and bar.EFFECT.TARGET == target then
