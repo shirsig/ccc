@@ -489,7 +489,7 @@ function CCWatch_OnEvent(event)
 	if CCWATCH.STATUS == 0 then
 		return
 	end
-	CCWatch_EventHandler[event](arg1, arg2, arg3, arg4, arg5)
+	CCWatch_EventHandler[event]()
 end
 
 CCWatch_EventHandler = {}
@@ -942,6 +942,7 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 
 			local r, g, b
 			if CCWatch_Save[CCWATCH.PROFILE].customcolor then
+				-- r, g, b = 1 - fraction, fraction, 0
 				if CCWATCH.CCS[effect.NAME].COLOR then
 					r, g, b = CCWATCH.CCS[effect.NAME].COLOR.r, CCWATCH.CCS[effect.NAME].COLOR.g, CCWATCH.CCS[effect.NAME].COLOR.b
 				else
@@ -981,7 +982,6 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 end
 
 local function GetConfCC(k, v)
---CCWatch_AddMessage("Updating conf for : "..k)
 	if CCWATCH.CCS[k] then
 		CCWATCH.CCS[k].MONITOR = v.MONITOR
 		CCWATCH.CCS[k].WARN = v.WARN
@@ -990,7 +990,6 @@ local function GetConfCC(k, v)
 end
 
 function CCWatch_LoadConfCCs()
--- update array with CC conf
 	table.foreach(CCWatch_Save[CCWATCH.PROFILE].ConfCC, GetConfCC)
 end
 

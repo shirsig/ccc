@@ -407,12 +407,12 @@ end
 
 function CCWatch_ModifyEffect(effect, monitor, warn, color)
 	local iWarn = warn and 1 or 0
-
 	CCWatch_Save[CCWATCH.PROFILE].ConfCC[effect] = {
 		MONITOR = monitor,
 		WARN = iWarn,
 		COLOR = color,
 	}
+	CCWatch_LoadConfCCs()
 end
 
 function CCWatch_SetColorCallback(id)
