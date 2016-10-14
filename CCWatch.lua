@@ -379,12 +379,15 @@ function CCWatch_SlashCommandHandler(msg)
 			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
 			CCWatch_AddMessage(CCWATCH_GROW_DOWN)
 			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN)
-		elseif command == "customcolor on" then
-			CCWatch_Save[CCWATCH.PROFILE].customcolor = true
-			CCWatch_AddMessage('School color enabled.')
-		elseif command == "customcolor off" then
-			CCWatch_Save[CCWATCH.PROFILE].customcolor = false
-			CCWatch_AddMessage('School color disabled.')
+		elseif command == "color school" then
+			CCWatch_Save[CCWATCH.PROFILE].color = CTYPE_SCHOOL
+			CCWatch_AddMessage'School color enabled.'
+		elseif command == "color progress" then
+			CCWatch_Save[CCWATCH.PROFILE].color = CTYPE_PROGRESS
+			CCWatch_AddMessage'Progress color enabled.'
+		elseif command == "color custom" then
+			CCWatch_Save[CCWATCH.PROFILE].color = CTYPE_CUSTOM
+			CCWatch_AddMessage'Custom color enabled.'
 		elseif command == "clear" then
 			CCWatch_Save[CCWATCH.PROFILE] = nil
 			CCWatch_Globals()
@@ -941,15 +944,16 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 			frame.timertext:SetText(format_time(remaining))
 
 			local r, g, b
-			if CCWatch_Save[CCWATCH.PROFILE].customcolor then
-				-- r, g, b = 1 - fraction, fraction, 0
+			if CCWatch_Save[CCWATCH.PROFILE].color == CTYPE_SCHOOL then
+				r, g, b = unpack(CCWATCH.CCS[effect.NAME].SCHOOL or {1, 0, 1})
+			elseif CCWatch_Save[CCWATCH.PROFILE].color == CTYPE_PROGRESS then
+				r, g, b = 1 - fraction, fraction, 0
+			elseif CCWatch_Save[CCWATCH.PROFILE].color == CTYPE_CUSTOM then
 				if CCWATCH.CCS[effect.NAME].COLOR then
 					r, g, b = CCWATCH.CCS[effect.NAME].COLOR.r, CCWATCH.CCS[effect.NAME].COLOR.g, CCWATCH.CCS[effect.NAME].COLOR.b
 				else
 					r, g, b = 1, 1, 1
 				end
-			else
-				r, g, b = unpack(CCWATCH.CCS[effect.NAME].SCHOOL or {1, 0, 1})
 			end
 			frame.statusbar:SetStatusBarColor(r, g, b)
 			frame.statusbar:SetBackdropColor(r, g, b, .3)
@@ -1007,7 +1011,7 @@ function CCWatch_LoadVariables()
 		status = CCWATCH.STATUS,
 		invert = false,
 		growth = 1,
-		customcolor = false,
+		color = CTYPE_SCHOOL,
 		scale = 1,
 		width = 160,
 		alpha = 1,

@@ -2,6 +2,10 @@ ETYPE_CC = 1
 ETYPE_DEBUFF = 2
 ETYPE_BUFF = 4
 
+CTYPE_SCHOOL = 1
+CTYPE_PROGRESS = 2
+CTYPE_CUSTOM = 3
+
 function QuickLocalize(str)
 -- just remove $1 & $2 args because we *know that the order is not changed*.
 -- not fail proof if ever it occurs (should be a more clever function, and return found arguments order)
