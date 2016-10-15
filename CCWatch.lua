@@ -957,7 +957,7 @@ function CCWatch_GroupUpdate(group, GROUPS, type)
 			end
 		else
 			frame.statusbar:SetValue(0)
-			CCWatch_RemoveEffect(effect.NAME, effect.TARGET)
+			CCWatch_RemoveEffect(effect.NAME, effect.TARGET, true)
 		end
 	elseif frame:GetAlpha() > 0 then
 		-- frame.statusbar:SetValue(0)
