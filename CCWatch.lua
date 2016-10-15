@@ -607,8 +607,7 @@ do
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for effect, info in pending do
 			if GetTime() >= info.time then
-				CCWatch_QueueEvent(effect, info.target, GetTime() - .5, 1)
-				CCWatch_EffectHandler[1]()
+				CCWatch_EffectApplied(effect, info.target, GetTime() - .5)
 				pending[effect] = nil
 			end
 		end
@@ -637,8 +636,7 @@ function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
 	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
 		if CCWatch_TrackedTarget(mobname) then
 			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
-				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
-				CCWatch_EffectHandler[1]()
+				CCWatch_EffectApplied(effect, mobname, GetTime())
 			end
 		end
 	end
@@ -648,8 +646,7 @@ function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
 	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
 		if CCWatch_TrackedTarget(mobname) then
 			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
-				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
-				CCWatch_EffectHandler[1]()
+				CCWatch_EffectApplied(effect, mobname, GetTime())
 			end
 		end
 	end
@@ -661,8 +658,11 @@ CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE = CCWatch_Even
 function CCWatch_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, mobname in string.gfind(arg1, CCWATCH_TEXT_OFF) do
 		if CCWATCH.CCS[effect] then
-			CCWatch_QueueEvent(effect, mobname, GetTime(), 2)
-			CCWatch_EffectHandler[2]()
+			-- another hack, to avoid spamming, because when the effect is broken, SOMETIME, WoW also send a faded message (see combat log)
+			if CCWATCH.CCS[effect].WARN > 0 and CCWATCH.CCS[effect].WARN ~= 3 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED) ~= 0 then
+				CCWatchWarn(CCWATCH_WARN_FADED, effect, mobname)
+			end
+			CCWatch_RemoveEffect(effect, mobname)
 		end
 	end
 end
@@ -670,8 +670,11 @@ end
 function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
 	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_BREAK) do
 		if CCWATCH.CCS[effect] then
-			CCWatch_QueueEvent(effect, mobname, GetTime(), 3)
-			CCWatch_EffectHandler[3]()
+			if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) ~= 0 then
+				CCWatchWarn(CCWATCH_WARN_BROKEN, effect, mobname)
+				CCWATCH.CCS[effect].WARN = 3
+			end
+			CCWatch_RemoveEffect(effect, mobname)
 		end
 	end
 end
@@ -694,46 +697,11 @@ function CCWatch_EventHandler.UNIT_COMBAT()
 	end
 end
 
-CCWatch_EffectHandler = {}
-
-CCWatch_EffectHandler[1] = function()
--- applied
-	local effect = CCWATCH.EFFECT[1].TYPE
-	local target = CCWATCH.EFFECT[1].TARGET
-	CCWatch_UnqueueEvent()
-
-	CCWatch_AddEffect(effect, target)
+function CCWatch_EffectApplied(effect, target, time)
+	CCWatch_AddEffect(effect, target, time)
 
 	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) ~= 0 then
 		CCWatchWarn(CCWATCH_WARN_APPLIED, effect, target)
-	end
-end
-
-CCWatch_EffectHandler[2] = function()
--- faded
-	local effect = CCWATCH.EFFECT[1].TYPE
-	local target = CCWATCH.EFFECT[1].TARGET
-	CCWatch_UnqueueEvent()
-
-	CCWatch_RemoveEffect(effect, target)
-
-	-- another hack, to avoid spamming, because when the effect is broken, SOMETIME, WoW also send a faded message (see combat log)
-	if CCWATCH.CCS[effect].WARN > 0 and CCWATCH.CCS[effect].WARN ~= 3 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED) ~= 0 then
-		CCWatchWarn(CCWATCH_WARN_FADED, effect, target)
-	end
-end
-
-CCWatch_EffectHandler[3] = function()
--- broken
-	local effect = CCWATCH.EFFECT[1].TYPE
-	local target = CCWATCH.EFFECT[1].TARGET
-	CCWatch_UnqueueEvent()
-
-	CCWatch_RemoveEffect(effect, target)
-
-	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) ~= 0 then
-		CCWatchWarn(CCWATCH_WARN_BROKEN, effect, target)
-		CCWATCH.CCS[effect].WARN = 3
 	end
 end
 
@@ -746,10 +714,6 @@ function CCWatch_QueueEvent(effect, target, time, status)
 	})
 end
 
-function CCWatch_UnqueueEvent()
-	tremove(CCWATCH.EFFECT, 1)
-end
-
 do
 	local unconfirmed = {'', '', 0}
 
@@ -757,7 +721,7 @@ do
 		local operation, name, target, time = unpack(unconfirmed)
 		if arg1 == 'target' and target == UnitName'target' and GetTime() - time < .5 then
 			if operation == 'ADD' then
-				CCWatch_AddEffect(name, target, true)
+				CCWatch_AddEffect(name, target, GetTime(), true)
 			elseif operation == 'REMOVE' then
 				CCWatch_RemoveEffect(name, target, true)
 			end
@@ -775,7 +739,7 @@ do
 		return false
 	end
 
-	function CCWatch_AddEffect(name, target, confirmed)
+	function CCWatch_AddEffect(name, target, time, confirmed)
 		if CCWATCH.STYLE == 0 and not CCWatch_EffectActive(name, target) and not confirmed then
 			unconfirmed = {'ADD', name, target, GetTime()}
 			return
@@ -785,7 +749,7 @@ do
 			NAME = name,
 			TARGET = target,
 			PLAYER = UnitIsPlayer'target',
-			TIMER_START = GetTime(),
+			TIMER_START = time,
 		}
 
 		if CCWATCH.CCS[name].PVPCC and effect.PLAYER then
