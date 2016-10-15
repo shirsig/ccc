@@ -32,54 +32,10 @@ CCWATCH.ALPHA = 1
 CCWATCH.VARIABLES_LOADED = false
 CCWATCH.VARIABLE_TIMER = 0
 
--- time threshold before an event is trashed, may need to be raised in high lag situations
-CCWATCH.THRESHOLD = 0.25
-
--- most recent unit aura seen
-CCWATCH.UNIT_AURA = {}
-CCWATCH.UNIT_AURA.TARGET = ""
-CCWATCH.UNIT_AURA.TIME = 0
-
--- most recent effect seen
-CCWATCH.EFFECT = {}
-CCWATCH.EFFECT.TYPE = ""
-CCWATCH.EFFECT.TARGET = ""
-CCWATCH.EFFECT.TIME = 0
-CCWATCH.EFFECT.STATUS = 0  -- 0 = no effect, 1 = applied, 2 = broken, 3 = faded
-
 -- effect groups for each bar
 CCWATCH.GROUPSCC = {}
-CCWATCH.GROUPSCC[1] = {}
-
-CCWATCH.GROUPSCC[2] = {}
-
-CCWATCH.GROUPSCC[3] = {}
-
-CCWATCH.GROUPSCC[4] = {}
-
-CCWATCH.GROUPSCC[5] = {}
-
 CCWATCH.GROUPSDEBUFF = {}
-CCWATCH.GROUPSDEBUFF[1] = {}
-
-CCWATCH.GROUPSDEBUFF[2] = {}
-
-CCWATCH.GROUPSDEBUFF[3] = {}
-
-CCWATCH.GROUPSDEBUFF[4] = {}
-
-CCWATCH.GROUPSDEBUFF[5] = {}
-
 CCWATCH.GROUPSBUFF = {}
-CCWATCH.GROUPSBUFF[1] = {}
-
-CCWATCH.GROUPSBUFF[2] = {}
-
-CCWATCH.GROUPSBUFF[3] = {}
-
-CCWATCH.GROUPSBUFF[4] = {}
-
-CCWATCH.GROUPSBUFF[5] = {}
 
 -- CC Durations according to rank
 -- WARNING : in case of difference between skill and effect, separate strings have to be used.
@@ -184,8 +140,6 @@ CCWATCH_SPELLS[CCWATCH_SAP] = {
 	RANKS = 3,
 	DURATION = {25, 35, 45}
 }
-
-CCWATCH.LASTTARGETS = {}
 
 CCWATCH_TEXT_ON = QuickLocalize(AURAADDEDOTHERHARMFUL)
 CCWATCH_TEXT_BREAK = QuickLocalize(AURADISPELOTHER)
