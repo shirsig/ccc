@@ -2,7 +2,7 @@ CCWatchLoaded = false
 
 CCWatchObject = nil
 
-CCWATCH_MAXBARS = 5
+CCWATCH_MAXBARS = 8
 
 CCW_EWARN_FADED = 1
 CCW_EWARN_APPLIED = 2
