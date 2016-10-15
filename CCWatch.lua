@@ -616,26 +616,26 @@ do
 end
 
 function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
-	if not UnitCanAttack("player", "target") then
+	if not UnitCanAttack('player', 'target') then
 		return
 	end
 	local index = 0
 	local target = UnitName'target'
--- 1. Check if current target is present in the list
-	table.foreach(CCWATCH.LASTTARGETS, function(k,v) if v.TARGET == target then index = k end end)
-	local ltime = GetTime()
-	if index == 0 then
--- 2. add it
-		CCWatch_AddLastTarget(target, ltime)
-	else
--- or update target time effect
-		CCWATCH.LASTTARGETS[index].TIME = ltime
+
+	local t = GetTime()
+
+	CCWATCH.LASTTARGETS[target] = t
+
+	for k, v in CCWATCH.LASTTARGETS do
+		if t - v > 30 then
+			CCWATCH.LASTTARGETS[k] = nil
+		end
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
 	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
-		if CCWATCH.STYLE == 2 or CCWatch_TrackedTarget(mobname) then
+		if CCWatch_TrackedTarget(mobname) then
 			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
 				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
 				CCWatch_EffectHandler[1]()
@@ -646,7 +646,7 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
 	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
-		if CCWATCH.STYLE == 2 or CCWatch_TrackedTarget(mobname) then
+		if CCWatch_TrackedTarget(mobname) then
 			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
 				CCWatch_QueueEvent(effect, mobname, GetTime(), 1)
 				CCWatch_EffectHandler[1]()
@@ -1300,30 +1300,7 @@ function CCWatch_TrackedTarget(mobname)
 		return mobname == target
 	end
 
-	for k, v in CCWATCH.LASTTARGETS do
-		if v.TARGET == mobname then
-			return true
-		end
-	end
-
-	return false
-end
-
-function CCWatch_AddLastTarget(mobname, time)
-	local lt_struct = {}
-	lt_struct.TARGET = mobname
-	lt_struct.TIME = time
-
-	if getn(CCWATCH.LASTTARGETS) >= 5 then
-	-- remove the oldest target
-		local oldest = 0
-		local index = 0
-		for k, v in CCWATCH.LASTTARGETS do
-			if oldest == 0 then oldest = v.TIME; index = k; elseif v.TIME < oldest then oldest = v.TIME; index = k; end
-		end
-		tremove(CCWATCH.LASTTARGETS, index)
-	end
-	tinsert(CCWATCH.LASTTARGETS, lt_struct)
+	return CCWATCH.LASTTARGETS[mobname] and GetTime() - CCWATCH.LASTTARGETS[mobname] <= 30
 end
 
 function CCWatch_AddMessage(msg)
