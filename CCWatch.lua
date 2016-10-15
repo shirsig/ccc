@@ -810,18 +810,34 @@ do
 		end
 
 		local index
-		if CCWATCH.GROWTH == 1 then
-			index = 1
-			while index < CCWATCH_MAXBARS and group[index].EFFECT and (name ~= group[index].EFFECT.NAME or target ~= group[index].EFFECT.TARGET) do
-				index = index + 1
+		for i, bar in group do
+			if bar.EFFECT and name == bar.EFFECT.NAME and target == bar.EFFECT.TARGET then
+				index = i
+				break
 			end
-		else
-			index = CCWATCH_MAXBARS
-			while index > 1 and group[index].EFFECT and (name ~= group[index].EFFECT.NAME or target ~= group[index].EFFECT.TARGET) do
-				index = index - 1
+		end
+		if not index then
+			if CCWATCH.GROWTH == 1 then
+				for i = 1, CCWATCH_MAXBARS do
+					if not group[i].EFFECT then
+						index = i
+						break
+					end
+				end
+			else
+				for i = CCWATCH_MAXBARS, 1, -1 do
+					if not group[i].EFFECT then
+						index = i
+						break
+					end
+				end
 			end
 		end
 
+		if not index then
+			return
+		end
+		
 		group[index].EFFECT = effect
 
 		if CCWATCH.STATUS ~= 1 then
