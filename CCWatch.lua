@@ -301,6 +301,8 @@ function CCWatch_OnLoad()
 	this:RegisterEvent'CHAT_MSG_SPELL_FAILED_LOCALPLAYER'
 
 	this:RegisterEvent'PLAYER_TARGET_CHANGED'
+	this:RegisterEvent'UPDATE_MOUSEOVER_UNIT'
+	this:RegisterEvent'UPDATE_BATTLEFIELD_SCORE'
 
 	SLASH_CCWATCH1 = "/ccwatch"
 	SLASH_CCWATCH2 = "/ccw"
@@ -799,18 +801,18 @@ do
 	do
 		local recent_targets, players = {}, {}
 
-		function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
-			if not UnitCanAttack('player', 'target') then
+		local function touched(unitID)
+			if not UnitCanAttack('player', unitID) then
 				return
 			end
 
-			local target = UnitName'target'
+			local unit = UnitName(unitID)
 
-			players[target] = UnitIsPlayer'target'
+			players[unit] = UnitIsPlayer(unitID)
 
 			local t = GetTime()
 
-			recent_targets[target] = t
+			recent_targets[unit] = t
 
 			for k, v in recent_targets do
 				if t - v > 30 then
@@ -819,11 +821,25 @@ do
 			end
 
 			for _, timer in timers do
-				if timer.UNIT == target then
+				if timer.UNIT == unit then
 					timer.shown = true
 				end
 			end
 			place_timers()
+		end
+
+		function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
+			touched'target'
+		end
+		
+		function CCWatch_EventHandler.UPDATE_MOUSEOVER_UNIT()
+			touched'mouseover'
+		end
+
+		function CCWatch_EventHandler.UPDATE_BATTLEFIELD_SCORE()
+			for i = 1, GetNumBattlefieldScores() do
+				players[GetBattlefieldScore(i)] = true
+			end
 		end
 
 		function CCWatch_IsShown(unit)
@@ -844,6 +860,7 @@ do
 end
 
 function CCWatch_OnUpdate()
+	RequestBattlefieldScoreData()
 	if CCWATCH.STATUS == 0 then
 		return
 	end
