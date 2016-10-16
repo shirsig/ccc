@@ -64,10 +64,10 @@ do
 		return 1 / 2^(dr[key].level - 1) * seconds
 	end
 
-	function CCWatch_DiminishedDuration(target, effect, full_duration)
+	function CCWatch_DiminishedDuration(unit, effect, full_duration)
 		local class = DR_CLASS[effect]
 		if class then
-			local key = target .. '|' .. class
+			local key = unit .. '|' .. class
 			if not dr[key] or dr[key].timeout < GetTime() then
 				dr[key] = {level=1, timeout=GetTime() + full_duration + 15}
 			elseif dr[key].level < 3 then
@@ -224,7 +224,7 @@ local function format_time(t)
 	end
 end
 
-function CCWatchWarn(msg, effect, target, time)
+function CCWatchWarn(msg, effect, unit, time)
 	local ncc = 0
 	local cc = CCWATCH.WARNTYPE
 	-- Emote, Say, Party, Raid, Yell, Custom:<ccname>
@@ -238,9 +238,9 @@ function CCWatchWarn(msg, effect, target, time)
 		ncc = GetChannelName(CCWATCH.WARNCUSTOMCC)
 	end
 	if time ~= nil then
-		msg = format(msg, target, effect, time)
+		msg = format(msg, unit, effect, time)
 	else
-		msg = format(msg, target, effect)
+		msg = format(msg, unit, effect)
 	end
 	if CCWatch_Save[CCWATCH.PROFILE].WarnSelf then
 		local info = ChatTypeInfo.RAID_WARNING
@@ -282,7 +282,6 @@ function CCWatch_OnLoad()
 
 	CCWatchObject = this
 
-	this:RegisterEvent'UNIT_AURA'
 	this:RegisterEvent'UNIT_COMBAT'
 
 	if UnitLevel'player' < 60 then
@@ -606,7 +605,7 @@ do
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for effect, info in pending do
 			if GetTime() >= info.time then
-				CCWatch_EffectApplied(effect, info.target, GetTime() - .5)
+				CCWatch_StartTimer(effect, info.target, GetTime() - .5)
 				pending[effect] = nil
 			end
 		end
@@ -614,21 +613,17 @@ do
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
-	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
-		if CCWatch_TrackedTarget(mobname) then
-			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
-				CCWatch_EffectApplied(effect, mobname, GetTime())
-			end
+	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
+		if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
+			CCWatch_StartTimer(effect, unit, GetTime())
 		end
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
-	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
-		if CCWatch_TrackedTarget(mobname) then
-			if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
-				CCWatch_EffectApplied(effect, mobname, GetTime())
-			end
+	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
+		if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
+			CCWatch_StartTimer(effect, unit, GetTime())
 		end
 	end
 end
@@ -637,38 +632,38 @@ CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS = CCWatch_Event
 CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE = CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
-	for effect, mobname in string.gfind(arg1, CCWATCH_TEXT_OFF) do
+	for effect, unit in string.gfind(arg1, CCWATCH_TEXT_OFF) do
 		if CCWATCH.CCS[effect] then
 			-- another hack, to avoid spamming, because when the effect is broken, SOMETIME, WoW also send a faded message (see combat log)
 			if CCWATCH.CCS[effect].WARN > 0 and CCWATCH.CCS[effect].WARN ~= 3 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED) ~= 0 then
-				CCWatchWarn(CCWATCH_WARN_FADED, effect, mobname)
+				CCWatchWarn(CCWATCH_WARN_FADED, effect, unit)
 			end
-			CCWatch_StopTimer(effect, mobname)
+			CCWatch_StopTimer(effect, unit)
 		end
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
-	for mobname, effect in string.gfind(arg1, CCWATCH_TEXT_BREAK) do
+	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BREAK) do
 		if CCWATCH.CCS[effect] then
 			if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) ~= 0 then
-				CCWatchWarn(CCWATCH_WARN_BROKEN, effect, mobname)
+				CCWatchWarn(CCWATCH_WARN_BROKEN, effect, unit)
 				CCWATCH.CCS[effect].WARN = 3
 			end
-			CCWatch_StopTimer(effect, mobname)
+			CCWatch_StopTimer(effect, unit)
 		end
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
-	for mobname in string.gfind(arg1, CCWATCH_TEXT_DIE) do
-		CCWatch_StopUnitTimers(mobname)
+	for unit in string.gfind(arg1, CCWATCH_TEXT_DIE) do
+		CCWatch_StopUnitTimers(unit)
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_XP_GAIN()
-	for mobname in string.gfind(arg1, CCWATCH_TEXT_DIEXP) do
-		CCWatch_StopUnitTimers(mobname)
+	for unit in string.gfind(arg1, CCWATCH_TEXT_DIEXP) do
+		CCWatch_StopUnitTimers(unit)
 	end
 end
 
@@ -678,21 +673,12 @@ function CCWatch_EventHandler.UNIT_COMBAT()
 	end
 end
 
-function CCWatch_EffectApplied(effect, target, time)
-	CCWatch_StartTimer(effect, target, time)
-
-	if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) ~= 0 then
-		CCWatchWarn(CCWATCH_WARN_APPLIED, effect, target)
-	end
-end
-
 do
 	local timers = {}
-	local unconfirmed = {'', '', 0}
 
 	local function place_timers()
 		for _, timer in timers do
-			if not timer.shown then
+			if timer.shown and not timer.visible then
 				local group
 				if CCWATCH.CCS[timer.EFFECT].ETYPE == ETYPE_BUFF then
 					group = CCWATCH.GROUPSBUFF
@@ -705,7 +691,7 @@ do
 					for i = 1, CCWATCH_MAXBARS do
 						if group[i].TIMER.stopped then
 							group[i].TIMER = timer
-							timer.shown = true
+							timer.visible = true
 							break
 						end
 					end
@@ -713,22 +699,11 @@ do
 					for i = CCWATCH_MAXBARS, 1, -1 do
 						if group[i].TIMER.stopped then
 							group[i].TIMER = timer
-							timer.shown = true
+							timer.visible = true
 							break
 						end
 					end
 				end
-			end
-		end
-	end
-
-	function CCWatch_EventHandler.UNIT_AURA()
-		local operation, effect, target, time = unpack(unconfirmed)
-		if arg1 == 'target' and target == UnitName'target' and GetTime() - time < .2 then
-			if operation == 'ADD' then
-				CCWatch_StartTimer(effect, target, GetTime(), true)
-			elseif operation == 'REMOVE' then
-				CCWatch_StopTimer(effect, target, true)
 			end
 		end
 	end
@@ -738,68 +713,62 @@ do
 		for _, timer in timers do
 			if t > timer.END then
 				timer.stopped = t
-				CCWatch_StopTimer(timer.EFFECT, timer.TARGET, true)
+				CCWatch_StopTimer(timer.EFFECT, timer.UNIT, true)
 			end
 		end
 	end
 
-	function CCWatch_EffectActive(effect, target)
-		return timers[effect .. '@' .. target] and true or false
+	function CCWatch_EffectActive(effect, unit)
+		return timers[effect .. '@' .. unit] and true or false
 	end
 
-	function CCWatch_StartTimer(effect, target, time, confirmed)
-		if CCWATCH.STYLE == 0 and not CCWatch_EffectActive(effect, target) and not confirmed then
-			unconfirmed = {'ADD', effect, target, GetTime()}
-			return
+	function CCWatch_StartTimer(effect, unit, start)
+		if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) ~= 0 then
+			CCWatchWarn(CCWATCH_WARN_APPLIED, effect, unit)
 		end
 
 		local timer = {
 			EFFECT = effect,
-			TARGET = target,
-			START = time,
+			UNIT = unit,
+			START = start,
 		}
 
-		if CCWATCH.CCS[effect].PVPCC and UnitIsPlayer'target' then -- TODO this check must happen earlier
-			timer.END = timer.START + CCWatch_DiminishedDuration(target, effect, CCWATCH.CCS[effect].PVPCC)
-		else
-			timer.END = timer.START + CCWATCH.CCS[effect].LENGTH -- TODO some stuns have pve DRs
-		end
+		timer.END = timer.START + CCWatch_DiminishedDuration(unit, effect, CCWATCH.CCS[effect].PVPCC or CCWATCH.CCS[effect].LENGTH)
+
 		if CCWATCH.CCS[effect].COMBO then
 			timer.END = timer.END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
 		end
 
-		timers[effect .. '@' .. target] = timer
+		timers[effect .. '@' .. unit] = timer
 
-		local group
-		if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
-			group = CCWATCH.GROUPSBUFF
-		elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
-			group = CCWATCH.GROUPSDEBUFF
-		else
-			group = CCWATCH.GROUPSCC
-		end
-
-		local index
-		for i, bar in group do
-			if effect == bar.TIMER.EFFECT and target == bar.TIMER.TARGET then
-				index = i
-				break
-			end
-		end
-		if index then
-			group[index].TIMER = timer
+		if CCWatch_TrackedUnit(unit) then
 			timer.shown = true
-		else
-			place_timers()
+			local group
+			if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
+				group = CCWATCH.GROUPSBUFF
+			elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
+				group = CCWATCH.GROUPSDEBUFF
+			else
+				group = CCWATCH.GROUPSCC
+			end
+
+			local index
+			for i, bar in group do
+				if effect == bar.TIMER.EFFECT and unit == bar.TIMER.UNIT then
+					index = i
+					break
+				end
+			end
+			if index then
+				group[index].TIMER = timer
+				timer.visible = true
+			else
+				place_timers()
+			end
 		end
 	end
 
-	function CCWatch_StopTimer(effect, target, confirmed)
-		if CCWATCH.STYLE == 0 and UnitName'target' == target and not confirmed then
-			unconfirmed = {'REMOVE', effect, target, GetTime()}
-			return
-		end
-
+	function CCWatch_StopTimer(effect, unit)
 		-- ensure if warnable, that WARN is set back to 1
 		-- 2 = warn at low time already sent
 		-- 3 = broken message seen so no faded message to send if any received
@@ -807,7 +776,7 @@ do
 			CCWATCH.CCS[effect].WARN = 1
 		end
 
-		local key = effect .. '@' .. target
+		local key = effect .. '@' .. unit
 		if timers[key] then
 			timers[key].stopped = GetTime()
 			timers[key] = nil
@@ -817,11 +786,51 @@ do
 
 	function CCWatch_StopUnitTimers(unit)
 		for k, timer in timers do
-			if timer.TARGET == unit then
+			if timer.UNIT == unit then
 				CCWatch_StopTimer(timer.EFFECT, unit, true)
 			end
 		end
 		place_timers()
+	end
+
+	do
+		local recent_targets = {}
+
+		function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
+			if not UnitCanAttack('player', 'target') then
+				return
+			end
+
+			local target = UnitName'target'
+
+			local t = GetTime()
+
+			recent_targets[target] = t
+
+			for k, v in recent_targets do
+				if t - v > 30 then
+					recent_targets[k] = nil
+				end
+			end
+
+			for _, timer in timers do
+				if timer.UNIT == target then
+					timer.shown = true
+				end
+			end
+			place_timers()
+		end
+
+		function CCWatch_TrackedUnit(unit)
+			if CCWATCH.STYLE == 2 then
+				return true
+			end
+			return recent_targets[unit] and GetTime() - recent_targets[unit] <= 30
+		end
+
+		function CCWatch_AddMessage(msg)
+			DEFAULT_CHAT_FRAME:AddMessage('<CCWatch> ' .. msg)
+		end
 	end
 end
 
@@ -890,12 +899,12 @@ function CCWatch_UpdateBar(bar)
 		frame.statusbar:SetBackdropColor(r, g, b, .3)
 
 		frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
-		frame.text:SetText(timer.TARGET .. ' : ' .. timer.EFFECT)
+		frame.text:SetText(timer.UNIT .. ' : ' .. timer.EFFECT)
 
 		if CCWATCH.CCS[timer.EFFECT].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME) ~= 0 then
 			if timer.END - timer.START > CCWATCH.WARNLOW and CCWATCH.WARNLOW > remaining then
 				if CCWATCH.CCS[timer.EFFECT].WARN == 1 then 
-					CCWatchWarn(CCWATCH_WARN_LOWTIME, timer.EFFECT, timer.TARGET, CCWATCH.WARNLOW)
+					CCWatchWarn(CCWATCH_WARN_LOWTIME, timer.EFFECT, timer.UNIT, CCWATCH.WARNLOW)
 					CCWATCH.CCS[timer.EFFECT].WARN = 2
 				end
 			elseif CCWATCH.CCS[timer.EFFECT].WARN == 2 then -- reset if ever disconnected while fighting
@@ -1201,45 +1210,5 @@ function CCWatch_SetWidth(width)
 			getglobal("CCWatchBar" .. k .. i):SetWidth(width + 10)
 		end
 		getglobal("CCWatch" .. k):SetWidth(width + 10)
-	end
-end
-
-do
-	local recent_targets = {}
-
-	function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
-		if not UnitCanAttack('player', 'target') then
-			return
-		end
-		local index = 0
-		local target = UnitName'target'
-
-		local t = GetTime()
-
-		recent_targets[target] = t
-
-		for k, v in recent_targets do
-			if t - v > 30 then
-				recent_targets[k] = nil
-			end
-		end
-	end
-
-	function CCWatch_TrackedTarget(mobname)
-		if CCWATCH.STYLE == 2 then
-			return true
-		end
-
-		local target = UnitName'target'
-
-		if CCWATCH.STYLE == 0 then
-			return mobname == target
-		end
-
-		return recent_targets[mobname] and GetTime() - recent_targets[mobname] <= 30
-	end
-
-	function CCWatch_AddMessage(msg)
-		DEFAULT_CHAT_FRAME:AddMessage('<CCWatch> ' .. msg)
 	end
 end
