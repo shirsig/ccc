@@ -505,14 +505,14 @@ do
 	local last_cast
 	local pending = {}
 
-	function CCWatch_AbortRefresh(target)
+	function CCWatch_AbortRefresh(effect, unit)
 		for k, v in casting do
-			if v == target then
+			if k == effect and v == unit then
 				casting[k] = nil
 			end
 		end
 		for k, v in pending do
-			if v.target == target then
+			if k == effect and v.target == unit then
 				pending[k] = nil
 			end
 		end
@@ -769,6 +769,7 @@ do
 	end
 
 	function CCWatch_StopTimer(effect, unit)
+		CCWatch_AbortRefresh(effect, unit)
 		-- ensure if warnable, that WARN is set back to 1
 		-- 2 = warn at low time already sent
 		-- 3 = broken message seen so no faded message to send if any received
