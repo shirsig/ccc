@@ -821,7 +821,7 @@ do
 			if CCWATCH.STYLE == 2 then
 				return true
 			end
-			return recent_targets[unit] and GetTime() - recent_targets[unit] <= 30
+			return UnitName'target' == unit or recent_targets[unit] and GetTime() - recent_targets[unit] <= 30
 		end
 
 		function CCWatch_AddMessage(msg)
