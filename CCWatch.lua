@@ -733,6 +733,7 @@ do
 			timer.END = timer.END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
 		end
 
+		CCWatch_StopTimer(effect, unit)
 		timers[effect .. '@' .. unit] = timer
 
 		if CCWatch_TrackedUnit(unit) then
