@@ -472,14 +472,6 @@ function CCWatchOptionsLearnFillFields()
 		CCWatchOptionsEffectType:SetText"CC"
 	end
 
-	if CCWATCH.CCS[CCWatchEffectSelection].DIMINISHES == 0 then
-		CCWatchOptionsEffectDR:SetText(CCWATCH_OPTION_DR_NEVER)
-	elseif CCWATCH.CCS[CCWatchEffectSelection].DIMINISHES == 1 then
-		CCWatchOptionsEffectDR:SetText(CCWATCH_OPTION_DR_MOBPLAYERS)
-	else
-		CCWatchOptionsEffectDR:SetText(CCWATCH_OPTION_DR_PLAYERS)
-	end
-
 	CCWatchOptionsBarColorEffect:Enable()
 	if CCWATCH.CCS[CCWatchEffectSelection].COLOR ~= nil then
 		SetButtonPickerColor("CCWatchOptionsBarColorEffect", CCWATCH.CCS[CCWatchEffectSelection].COLOR)
@@ -614,14 +606,6 @@ function CCWatchOptionsEffects_OnEnter()
 		str = str .. "DeBuff"
 	else
 		str = str .. "CC"
-	end
-	str = str .. "\nDR: "
-	if CCWATCH.CCS[spellname].DIMINISHES == 0 then
-		str = str .. CCWATCH_OPTION_DR_NEVER;
-	elseif CCWATCH.CCS[spellname].DIMINISHES == 1 then
-		str = str .. CCWATCH_OPTION_DR_MOBPLAYERS
-	else
-		str = str .. CCWATCH_OPTION_DR_PLAYERS
 	end
 	str = str .. "\nMonitor: "
 	if CCWATCH.CCS[spellname].MONITOR then
