@@ -707,8 +707,7 @@ do
 		local t = GetTime()
 		for _, timer in timers do
 			if t > timer.END then
-				timer.stopped = t
-				CCWatch_StopTimer(timer.EFFECT, timer.UNIT, true)
+				CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
 			end
 		end
 	end
@@ -783,7 +782,7 @@ do
 	function CCWatch_StopUnitTimers(unit)
 		for k, timer in timers do
 			if timer.UNIT == unit then
-				CCWatch_StopTimer(timer.EFFECT, unit, true)
+				CCWatch_StopTimer(timer.EFFECT, unit)
 			end
 		end
 		place_timers()
