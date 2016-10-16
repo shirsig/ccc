@@ -238,10 +238,10 @@ function CCWatchOptions_ArcanistToggle()
 	CCWATCH.ARCANIST = not CCWATCH.ARCANIST
 	CCWatch_Save[CCWATCH.PROFILE].arcanist = CCWATCH.ARCANIST
 	if CCWATCH.ARCANIST then
-		CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH = CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH + 15
+		CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION = CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION + 15
 		CCWatch_AddMessage(CCWATCH_ARCANIST_ON)
 	else
-		CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH = CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH - 15
+		CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION = CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION - 15
 		CCWatch_AddMessage(CCWATCH_ARCANIST_OFF)
 	end
 	CCWatchOptionsFrameArcanist:SetChecked(CCWATCH.ARCANIST)
@@ -278,7 +278,7 @@ end
 
 function CCWatchOptionsStyleDropDown_OnInit()
 	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsStyleDropDown"
-	local info = { }
+	local info = {}
 
 	info.text = CCWATCH_OPTION_STYLE_RECENT
 	info.value = "recent"
@@ -294,59 +294,59 @@ function CCWatchOptionsStyleDropDown_OnInit()
 end
 
 function CCWatchOptionsStyleDropDown_OnClick()
-	if( this.value == "recent" ) then
-		CCWatch_Save[CCWATCH.PROFILE].style = 1;
-		CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style;
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_RECENT);
-		CCWatch_AddMessage(CCWATCH_STYLE_RECENT);
-	elseif( this.value == "all" ) then
-		CCWatch_Save[CCWATCH.PROFILE].style = 2;
-		CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style;
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_ALL);
-		CCWatch_AddMessage(CCWATCH_STYLE_ALL);
+	if this.value == "recent" then
+		CCWatch_Save[CCWATCH.PROFILE].style = 1
+		CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style
+		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_RECENT)
+		CCWatch_AddMessage(CCWATCH_STYLE_RECENT)
+	elseif this.value == "all" then
+		CCWatch_Save[CCWATCH.PROFILE].style = 2
+		CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style
+		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_ALL)
+		CCWatch_AddMessage(CCWATCH_STYLE_ALL)
 	end
 end
 
 
 function CCWatchOptionsWarnCCDropDown_OnInit()
-	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsWarnCCDropDown";
-	local info = { };
+	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsWarnCCDropDown"
+	local info = {}
 
-	info.text = "EMOTE";
-	info.value = "EMOTE";
-	info.owner = this;
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = "EMOTE"
+	info.value = "EMOTE"
+	info.owner = this
+	info.func = CCWatchOptionsWarnCCDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 
-	info.text = "SAY";
-	info.value = "SAY";
-	info.owner = this;
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = "SAY"
+	info.value = "SAY"
+	info.owner = this
+	info.func = CCWatchOptionsWarnCCDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 	
-	info.text = "PARTY";
-	info.value = "PARTY";
-	info.owner = this;
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = "PARTY"
+	info.value = "PARTY"
+	info.owner = this
+	info.func = CCWatchOptionsWarnCCDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 
-	info.text = "RAID";
-	info.value = "RAID";
-	info.owner = this;
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = "RAID"
+	info.value = "RAID"
+	info.owner = this
+	info.func = CCWatchOptionsWarnCCDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 
-	info.text = "YELL";
-	info.value = "YELL";
-	info.owner = this;
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = "YELL"
+	info.value = "YELL"
+	info.owner = this
+	info.func = CCWatchOptionsWarnCCDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 
-	info.text = "CHANNEL";
-	info.value = "CHANNEL";
-	info.owner = this;
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick;
-	UIDropDownMenu_AddButton(info);
+	info.text = "CHANNEL"
+	info.value = "CHANNEL"
+	info.owner = this
+	info.func = CCWatchOptionsWarnCCDropDown_OnClick
+	UIDropDownMenu_AddButton(info)
 end
 
 function CCWatchOptionsWarnCCDropDown_OnClick()
@@ -462,7 +462,7 @@ function CCWatchOptionsLearnFillFields()
 	end
 
 	CCWatchOptionsEffectNameStatic:SetText(CCWatchEffectSelection)
-	CCWatchOptionsEffectDurationStatic:SetText(CCWATCH.CCS[CCWatchEffectSelection].LENGTH)
+	CCWatchOptionsEffectDurationStatic:SetText(CCWATCH.CCS[CCWatchEffectSelection].DURATION)
 
 	if CCWATCH.CCS[CCWatchEffectSelection].ETYPE == ETYPE_BUFF then
 		CCWatchOptionsEffectType:SetText"BUFF"
@@ -607,7 +607,7 @@ function CCWatchOptionsEffects_OnEnter()
 		CCWatch_AddMessage("Error : '" .. spellname .. "' not found in effect array.")
 		return
 	end
-	local str = spellname .. "\nDuration: " .. CCWATCH.CCS[spellname].LENGTH .. "\nType: "
+	local str = spellname .. "\nDuration: " .. CCWATCH.CCS[spellname].DURATION .. "\nType: "
 	if CCWATCH.CCS[spellname].ETYPE == ETYPE_BUFF then
 		str = str .. "Buff"
 	elseif CCWATCH.CCS[spellname].ETYPE == ETYPE_DEBUFF then

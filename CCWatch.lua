@@ -733,7 +733,7 @@ do
 			START = start,
 		}
 
-		timer.END = timer.START + CCWatch_DiminishedDuration(unit, effect, CCWATCH.CCS[effect].PVPCC or CCWATCH.CCS[effect].LENGTH)
+		timer.END = timer.START + CCWatch_DiminishedDuration(unit, effect, CCWATCH.CCS[effect].DURATION)
 
 		if CCWATCH.CCS[effect].COMBO then
 			timer.END = timer.END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
@@ -1010,10 +1010,10 @@ function CCWatch_UpdateImpGouge()
 	local talentname, texture, _, _, rank = GetTalentInfo(2, 1)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_GOUGE].LENGTH = 4 + rank * .5
+			CCWATCH.CCS[CCWATCH_GOUGE].DURATION = 4 + rank * .5
 		end
-	elseif CCWATCH.CCS[CCWATCH_GOUGE].LENGTH == nil then
-		CCWATCH.CCS[CCWATCH_GOUGE].LENGTH = 4
+	elseif CCWATCH.CCS[CCWATCH_GOUGE].DURATION == nil then
+		CCWATCH.CCS[CCWATCH_GOUGE].DURATION = 4
 	end
 end
 
@@ -1021,10 +1021,10 @@ function CCWatch_UpdateImpGarotte()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 8)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_GAROTTE].LENGTH = 18 + rank * 3
+			CCWATCH.CCS[CCWATCH_GAROTTE].DURATION = 18 + rank * 3
 		end
-	elseif CCWATCH.CCS[CCWATCH_GAROTTE].LENGTH == nil then
-		CCWATCH.CCS[CCWATCH_GAROTTE].LENGTH = 18
+	elseif CCWATCH.CCS[CCWATCH_GAROTTE].DURATION == nil then
+		CCWATCH.CCS[CCWATCH_GAROTTE].DURATION = 18
 	end
 end
 
@@ -1033,17 +1033,17 @@ function CCWatch_UpdateKidneyShot()
 	while true do
 		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
 		if not name then
-			if CCWATCH.CCS[CCWATCH_KS].LENGTH == nil then
-				CCWATCH.CCS[CCWATCH_KS].LENGTH = 1
+			if CCWATCH.CCS[CCWATCH_KS].DURATION == nil then
+				CCWATCH.CCS[CCWATCH_KS].DURATION = 1
 			end
 			return
 		end
 
 		if name == CCWATCH_KS then
 			if strsub(rank,string.len(rank)) == "1" then
-				CCWATCH.CCS[CCWATCH_KS].LENGTH = 0
+				CCWATCH.CCS[CCWATCH_KS].DURATION = 0
 			else
-				CCWATCH.CCS[CCWATCH_KS].LENGTH = 1
+				CCWATCH.CCS[CCWATCH_KS].DURATION = 1
 			end
 			return
 		end
@@ -1057,7 +1057,7 @@ function CCWatch_UpdateImpTrap()
 	if texture then
 		if rank ~= 0 then
 -- Freezing Trap is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH = CCWATCH.CCS[CCWATCH_FREEZINGTRAP].LENGTH * (1 + rank * .15)
+			CCWATCH.CCS[CCWATCH_FREEZINGTRAP].DURATION = CCWATCH.CCS[CCWATCH_FREEZINGTRAP].DURATION * (1 + rank * .15)
 		end
 	end
 end
@@ -1066,7 +1066,7 @@ function CCWatch_UpdateImpSeduce()
 	local talentname, texture, _, _, rank = GetTalentInfo(2, 7)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_SEDUCE].LENGTH = 15 * (1 + rank * .10)
+			CCWATCH.CCS[CCWATCH_SEDUCE].DURATION = 15 * (1 + rank * .10)
 		end
 	end
 end
@@ -1076,8 +1076,8 @@ function CCWatch_UpdateBrutalImpact()
 	if texture then
 		if rank ~= 0 then
 -- Bash is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_POUNCE].LENGTH = 2 + rank * .50
-			CCWATCH.CCS[CCWATCH_BASH].LENGTH = CCWATCH.CCS[CCWATCH_BASH].LENGTH + rank * .50
+			CCWATCH.CCS[CCWATCH_POUNCE].DURATION = 2 + rank * .50
+			CCWATCH.CCS[CCWATCH_BASH].DURATION = CCWATCH.CCS[CCWATCH_BASH].DURATION + rank * .50
 		end
 	end
 end
@@ -1087,8 +1087,8 @@ function CCWatch_UpdatePermafrost()
 	if texture then
 		if rank ~= 0 then
 -- Frostbolt is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_CONEOFCOLD].LENGTH = 8 + .50 + rank * .50
-			CCWATCH.CCS[CCWATCH_FROSTBOLT].LENGTH = CCWATCH.CCS[CCWATCH_FROSTBOLT].LENGTH + .50 + rank * .50
+			CCWATCH.CCS[CCWATCH_CONEOFCOLD].DURATION = 8 + .50 + rank * .50
+			CCWATCH.CCS[CCWATCH_FROSTBOLT].DURATION = CCWATCH.CCS[CCWATCH_FROSTBOLT].DURATION + .50 + rank * .50
 		end
 	end
 end
@@ -1097,7 +1097,7 @@ function CCWatch_UpdateImpShadowWordPain()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 4)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_SHADOWWORDPAIN].LENGTH = 18 + rank * 3
+			CCWATCH.CCS[CCWATCH_SHADOWWORDPAIN].DURATION = 18 + rank * 3
 		end
 	end
 end
@@ -1112,8 +1112,8 @@ function CCWatch_GetSpellRank(spellname, spelleffect)
 
 		if not name then
 			if not gotone then
-				if CCWATCH.CCS[spelleffect].LENGTH == nil then
-					CCWATCH.CCS[spelleffect].LENGTH = CCWATCH_SPELLS[spellname].DURATION[maxrank]
+				if CCWATCH.CCS[spelleffect].DURATION == nil then
+					CCWATCH.CCS[spelleffect].DURATION = CCWATCH_SPELLS[spellname].DURATION[maxrank]
 				end
 			end
 			return
@@ -1123,7 +1123,7 @@ function CCWatch_GetSpellRank(spellname, spelleffect)
 			local currank = 1
 			while currank <= maxrank do
 				if tonumber(strsub(rank,string.len(rank))) == currank then
-					CCWATCH.CCS[spelleffect].LENGTH = CCWATCH_SPELLS[spellname].DURATION[currank]
+					CCWATCH.CCS[spelleffect].DURATION = CCWATCH_SPELLS[spellname].DURATION[currank]
 					gotone = true
 				end
 				currank = currank + 1
@@ -1175,7 +1175,7 @@ function CCWatch_UpdateClassSpells()
 		end
 		CCWatchOptionsFrameArcanist:Show()
 		if CCWATCH.ARCANIST then
-			CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH = CCWATCH.CCS[CCWATCH_POLYMORPH].LENGTH + 15
+			CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION = CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION + 15
 		end
 	elseif eclass == "DRUID" then
 		CCWatch_GetSpellRank(CCWATCH_ROOTS, CCWATCH_ROOTS)
