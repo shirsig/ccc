@@ -899,7 +899,7 @@ function CCWatch_UpdateBar(bar)
 		frame.statusbar:SetBackdropColor(r, g, b, .3)
 
 		frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
-		frame.text:SetText(timer.UNIT .. ' : ' .. timer.EFFECT)
+		frame.text:SetText(timer.UNIT)
 
 		if CCWATCH.CCS[timer.EFFECT].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME) ~= 0 then
 			if timer.END - timer.START > CCWATCH.WARNLOW and CCWATCH.WARNLOW > remaining then
