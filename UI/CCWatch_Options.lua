@@ -280,12 +280,6 @@ function CCWatchOptionsStyleDropDown_OnInit()
 	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsStyleDropDown"
 	local info = { }
 
-	info.text = CCWATCH_OPTION_STYLE_CURRENT
-	info.value = "normal"
-	info.owner = this
-	info.func = CCWatchOptionsStyleDropDown_OnClick
-	UIDropDownMenu_AddButton(info)
-
 	info.text = CCWATCH_OPTION_STYLE_RECENT
 	info.value = "recent"
 	info.owner = this
@@ -300,12 +294,7 @@ function CCWatchOptionsStyleDropDown_OnInit()
 end
 
 function CCWatchOptionsStyleDropDown_OnClick()
-	if (this.value == "normal") then
-		CCWatch_Save[CCWATCH.PROFILE].style = 0;
-		CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style;
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_CURRENT);
-		CCWatch_AddMessage(CCWATCH_STYLE_CURRENT);
-	elseif( this.value == "recent" ) then
+	if( this.value == "recent" ) then
 		CCWatch_Save[CCWATCH.PROFILE].style = 1;
 		CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style;
 		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_RECENT);
@@ -543,9 +532,7 @@ function CCWatchOptions_Init()
 		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN)
 	end
 
-	if CCWATCH.STYLE == 0 then
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_CURRENT)
-	elseif CCWATCH.STYLE == 1 then
+	if CCWATCH.STYLE == 1 then
 		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_RECENT)
 	else
 		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_ALL)

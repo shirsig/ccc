@@ -945,7 +945,7 @@ function CCWatch_LoadVariables()
 		width = 160,
 		alpha = 1,
 		arcanist = false,
-		style = 0,
+		style = 1,
 		Monitoring = bit.bor(ETYPE_CC, ETYPE_DEBUFF, ETYPE_BUFF),
 		WarnType = 'PARTY',
 		WarnSelf = false,
