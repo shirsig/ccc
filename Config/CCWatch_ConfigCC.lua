@@ -36,7 +36,8 @@ CCWATCH.CCS[CCWATCH_SAP] = {
 	ICON = 'Ability_Sap',
 	SCHOOL = CCWATCH_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_CC,
-	DURATION = 15,
+	DURATION = 45,
+	PVP_DURATION = 15,
 	MONITOR = true,
 	WARN = 0,
 }
@@ -97,7 +98,8 @@ CCWATCH.CCS[CCWATCH_POLYMORPH] = {
 	ICON = 'Spell_Nature_Polymorph', -- Spell_Magic_PolymorphPig, TODO Ability_Hunter_Pet_Turtle
 	SCHOOL = CCWATCH_SCHOOL.ARCANE,
 	ETYPE = ETYPE_CC,
-	DURATION = 15,
+	DURATION = 20,
+	PVP_DURATION = 15,
 	MONITOR = true,
 	WARN = 0,
 }

@@ -727,7 +727,14 @@ do
 			START = start,
 		}
 
-		timer.END = timer.START + CCWatch_DiminishedDuration(unit, effect, CCWATCH.CCS[effect].DURATION)
+
+		timer.END = timer.START
+
+		if CCWatch_IsPlayer() then
+			timer.END = timer.END + CCWatch_DiminishedDuration(unit, effect, CCWATCH.CCS[effect].PVP_DURATION or CCWATCH.CCS[effect].DURATION)
+		else
+			timer.END = timer.END + CCWATCH.CCS[effect].DURATION
+		end
 
 		if CCWATCH.CCS[effect].COMBO then
 			timer.END = timer.END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
@@ -736,7 +743,7 @@ do
 		CCWatch_StopTimer(effect, unit)
 		timers[effect .. '@' .. unit] = timer
 
-		if CCWatch_TrackedUnit(unit) then
+		if CCWatch_IsShown(unit) then
 			timer.shown = true
 			local group
 			if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
@@ -790,7 +797,7 @@ do
 	end
 
 	do
-		local recent_targets = {}
+		local recent_targets, players = {}, {}
 
 		function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
 			if not UnitCanAttack('player', 'target') then
@@ -798,6 +805,8 @@ do
 			end
 
 			local target = UnitName'target'
+
+			players[target] = UnitIsPlayer'target'
 
 			local t = GetTime()
 
@@ -817,11 +826,15 @@ do
 			place_timers()
 		end
 
-		function CCWatch_TrackedUnit(unit)
+		function CCWatch_IsShown(unit)
 			if CCWATCH.STYLE == 2 then
 				return true
 			end
 			return UnitName'target' == unit or recent_targets[unit] and GetTime() - recent_targets[unit] <= 30
+		end
+
+		function CCWatch_IsPlayer(unit)
+			return players[unit]
 		end
 
 		function CCWatch_AddMessage(msg)
@@ -1164,6 +1177,7 @@ function CCWatch_UpdateClassSpells()
 		end
 	elseif eclass == "MAGE" then
 		if CCWatch_ConfigDebuff ~= nil then
+			CCWatch_GetSpellRank(CCWATCH_POLYMORPH, CCWATCH_POLYMORPH)
 			CCWatch_GetSpellRank(CCWATCH_FROSTBOLT, CCWATCH_FROSTBOLT)
 			CCWatch_GetSpellRank(CCWATCH_FIREBALL, CCWATCH_FIREBALL)
 			CCWatch_UpdatePermafrost()
