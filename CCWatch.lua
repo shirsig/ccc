@@ -1148,6 +1148,7 @@ function CCWatch_UpdateClassSpells()
 		CCWatch_GetSpellRank(CCWATCH_REND, CCWATCH_REND)
 	elseif eclass == "WARLOCK" then
 		CCWatch_GetSpellRank(CCWATCH_FEAR, CCWATCH_FEAR)
+		CCWatch_GetSpellRank(CCWATCH_HOWLOFTERROR, CCWATCH_HOWLOFTERROR)
 		CCWatch_GetSpellRank(CCWATCH_BANISH, CCWATCH_BANISH)
 		CCWatch_GetSpellRank(CCWATCH_CORRUPTION, CCWATCH_CORRUPTION)
 		CCWatch_UpdateImpSeduce()
