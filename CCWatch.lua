@@ -506,11 +506,6 @@ do
 	local pending = {}
 
 	function CCWatch_AbortRefresh(effect, unit)
-		for k, v in casting do
-			if k == effect and v == unit then
-				casting[k] = nil
-			end
-		end
 		for k, v in pending do
 			if k == effect and v.target == unit then
 				pending[k] = nil
