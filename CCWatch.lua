@@ -1167,7 +1167,6 @@ function CCWatch_UpdateClassSpells()
 			CCWatch_UpdateImpShadowWordPain()
 		end
 	elseif eclass == "MAGE" then
-		CCWatch_GetSpellRank(CCWATCH_POLYMORPH, CCWATCH_POLYMORPH)
 		if CCWatch_ConfigDebuff ~= nil then
 			CCWatch_GetSpellRank(CCWATCH_FROSTBOLT, CCWATCH_FROSTBOLT)
 			CCWatch_GetSpellRank(CCWATCH_FIREBALL, CCWATCH_FIREBALL)
