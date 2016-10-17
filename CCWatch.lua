@@ -554,12 +554,11 @@ do
 
 	function CCWatch_EventHandler.SPELLCAST_STOP()
 		for effect, info in casting do
-			if CCWatch_EffectActive(effect, info.target) and CCWATCH.CCS[effect].ETYPE ~= ETYPE_BUFF then
+			if (CCWatch_EffectActive(effect, info.target) or only_own_spells and CCWATCH.CCS[effect]) and CCWATCH.CCS[effect].ETYPE ~= ETYPE_BUFF then
 				if pending[effect] then
 					last_cast = nil
 				else
-					info.time = GetTime() + .5
-					pending[effect] = info
+					pending[effect] = {target=only_own_spells and info.exact_target or info.target, time=GetTime() + .5}
 					last_cast = effect
 				end
 			end
@@ -614,6 +613,7 @@ do
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
+	if only_own_spells then return end
 	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
 		if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
 			CCWatch_StartTimer(effect, unit, GetTime())
@@ -622,6 +622,7 @@ function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
+	if only_own_spells then return end
 	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
 		if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
 			CCWatch_StartTimer(effect, unit, GetTime())
@@ -635,10 +636,6 @@ CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE = CCWatch_Even
 function CCWatch_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, unit in string.gfind(arg1, CCWATCH_TEXT_OFF) do
 		if CCWATCH.CCS[effect] then
-			-- another hack, to avoid spamming, because when the effect is broken, SOMETIME, WoW also send a faded message (see combat log)
-			if CCWATCH.CCS[effect].WARN > 0 and CCWATCH.CCS[effect].WARN ~= 3 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED) ~= 0 then
-				CCWatchWarn(CCWATCH_WARN_FADED, effect, unit)
-			end
 			CCWatch_StopTimer(effect, unit)
 		end
 	end
@@ -647,10 +644,6 @@ end
 function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
 	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BREAK) do
 		if CCWATCH.CCS[effect] then
-			if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN) ~= 0 then
-				CCWatchWarn(CCWATCH_WARN_BROKEN, effect, unit)
-				CCWATCH.CCS[effect].WARN = 3
-			end
 			CCWatch_StopTimer(effect, unit)
 		end
 	end
@@ -730,10 +723,6 @@ do
 	end
 
 	function CCWatch_StartTimer(effect, unit, start)
-		if CCWATCH.CCS[effect].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED) ~= 0 then
-			CCWatchWarn(CCWATCH_WARN_APPLIED, effect, unit)
-		end
-
 		local timer = {
 			EFFECT = effect,
 			UNIT = unit,
@@ -766,12 +755,6 @@ do
 
 	function CCWatch_StopTimer(effect, unit)
 		CCWatch_AbortRefresh(effect, unit)
-		-- ensure if warnable, that WARN is set back to 1
-		-- 2 = warn at low time already sent
-		-- 3 = broken message seen so no faded message to send if any received
-		if CCWATCH.CCS[effect].WARN > 0 then
-			CCWATCH.CCS[effect].WARN = 1
-		end
 
 		local key = effect .. '@' .. unit
 		if timers[key] then
@@ -838,7 +821,7 @@ do
 		end
 
 		function CCWatch_IsShown(unit)
-			if CCWATCH.STYLE == 2 then
+			if CCWATCH.STYLE == 2 or only_own_spells then
 				return true
 			end
 			local t = GetTime()
@@ -922,17 +905,6 @@ function CCWatch_UpdateBar(bar)
 
 		frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 		frame.text:SetText(timer.UNIT)
-
-		if CCWATCH.CCS[timer.EFFECT].WARN > 0 and bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME) ~= 0 then
-			if timer.END - timer.START > CCWATCH.WARNLOW and CCWATCH.WARNLOW > remaining then
-				if CCWATCH.CCS[timer.EFFECT].WARN == 1 then 
-					CCWatchWarn(CCWATCH_WARN_LOWTIME, timer.EFFECT, timer.UNIT, CCWATCH.WARNLOW)
-					CCWATCH.CCS[timer.EFFECT].WARN = 2
-				end
-			elseif CCWATCH.CCS[timer.EFFECT].WARN == 2 then -- reset if ever disconnected while fighting
-				CCWATCH.CCS[timer.EFFECT].WARN = 1
-			end
-		end
 	end
 end
 
