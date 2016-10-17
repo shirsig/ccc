@@ -106,6 +106,25 @@ CCWATCH.CCS[CCWATCH_HOLYFIRE] = {
 }
 
 -- Mage - Debuffs
+
+CCWATCH.CCS['Pyroclasm'] = {
+	ICON = 'Spell_Fire_Volcano',
+	SCHOOL = CCWATCH_SCHOOL.FIRE,
+	ETYPE = ETYPE_DEBUFF,
+	DURATION = 3,
+	MONITOR = true,
+	WARN = 0,
+}
+
+CCWATCH.CCS['Aftermath'] = {
+	ICON = 'Spell_Fire_Fire',
+	SCHOOL = CCWATCH_SCHOOL.FIRE,
+	ETYPE = ETYPE_DEBUFF,
+	DURATION = 5,
+	MONITOR = true,
+	WARN = 0,
+}
+
 CCWATCH.CCS[CCWATCH_DETECTMAGIC] = {
 	ICON = 'Spell_Holy_Dizzy',
 	SCHOOL = CCWATCH_SCHOOL.ARCANE,
@@ -243,6 +262,25 @@ CCWATCH.CCS[CCWATCH_VIPERSTING] = {
 -- Paladin - Debuffs
 
 -- Warlock - Debuffs
+
+CCWATCH.CCS['Shadowburn'] = {
+	ICON = 'Spell_Shadow_ScourgeBuild',
+	SCHOOL = CCWATCH_SCHOOL.SHADOW,
+	ETYPE = ETYPE_DEBUFF,
+	DURATION = 5,
+	MONITOR = true,
+	WARN = 0,
+}
+
+CCWATCH.CCS['Shadow Vulnerability'] = {
+	ICON = 'spell_shadow_blackplague',
+	SCHOOL = CCWATCH_SCHOOL.SHADOW,
+	ETYPE = ETYPE_DEBUFF,
+	DURATION = 15,
+	MONITOR = true,
+	WARN = 0,
+}
+
 CCWATCH.CCS[CCWATCH_IMMOLATE] = {
 	ICON = 'Spell_Fire_Immolation',
 	SCHOOL = CCWATCH_SCHOOL.FIRE,
