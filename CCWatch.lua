@@ -286,10 +286,8 @@ function CCWatch_OnLoad()
 
 	if UnitLevel'player' < 60 then
 		this:RegisterEvent'CHAT_MSG_COMBAT_XP_GAIN'
--- TODO : add this
---		this:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN");
  	end
--- register this also for < 60 (pvp)
+ 	this:RegisterEvent'CHAT_MSG_COMBAT_HONOR_GAIN'
 	this:RegisterEvent'CHAT_MSG_COMBAT_HOSTILE_DEATH'
 
 	this:RegisterEvent'CHAT_MSG_SPELL_AURA_GONE_OTHER'
@@ -660,6 +658,13 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_XP_GAIN()
 	for unit in string.gfind(arg1, CCWATCH_TEXT_DIEXP) do
+		CCWatch_StopUnitTimers(unit)
+	end
+end
+
+function CCWatch_EventHandler.CHAT_MSG_COMBAT_HONOR_GAIN()
+	for unit in string.gfind(arg1, '(.+) dies') do
+		p(unit)
 		CCWatch_StopUnitTimers(unit)
 	end
 end
