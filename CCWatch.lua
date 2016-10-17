@@ -2,7 +2,7 @@ CCWatchLoaded = false
 
 CCWatchObject = nil
 
-CCWATCH_MAXBARS = 8
+CCWATCH_MAXBARS = 10
 
 CCW_EWARN_FADED = 1
 CCW_EWARN_APPLIED = 2
@@ -659,6 +659,7 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_HONOR_GAIN()
 	for unit in string.gfind(arg1, '(.+) dies') do
+		p(unit)
 		CCWatch_StopUnitTimers(unit)
 	end
 end
@@ -798,24 +799,27 @@ do
 	end
 
 	do
-		local recent_targets, players = {}, {}
+		local player, current, recent = {}, {}, { target={}, mouseover={} }
 
-		local function touched(unitID)
+		local function update_unit(unitID)
 			if not UnitCanAttack('player', unitID) then
 				return
 			end
 
 			local unit = UnitName(unitID)
 
-			players[unit] = UnitIsPlayer(unitID)
+			player[unit] = UnitIsPlayer(unitID)
 
 			local t = GetTime()
 
-			recent_targets[unit] = t
+			if current[unitID] then
+				recent[unitID][unit] = t
+			end
+			current[unitID] = unit
 
-			for k, v in recent_targets do
+			for k, v in recent[unitID] do
 				if t - v > 30 then
-					recent_targets[k] = nil
+					recent[unitID][k] = nil
 				end
 			end
 
@@ -828,16 +832,16 @@ do
 		end
 
 		function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
-			touched'target'
+			update_unit'target'
 		end
 		
 		function CCWatch_EventHandler.UPDATE_MOUSEOVER_UNIT()
-			touched'mouseover'
+			update_unit'mouseover'
 		end
 
 		function CCWatch_EventHandler.UPDATE_BATTLEFIELD_SCORE()
 			for i = 1, GetNumBattlefieldScores() do
-				players[GetBattlefieldScore(i)] = true
+				player[GetBattlefieldScore(i)] = true
 			end
 		end
 
@@ -845,11 +849,12 @@ do
 			if CCWATCH.STYLE == 2 then
 				return true
 			end
-			return UnitName'target' == unit or recent_targets[unit] and GetTime() - recent_targets[unit] <= 30
+			local t = GetTime()
+			return UnitName'target' == unit or UnitName'mouseover' == unit or recent.target[unit] and t - recent.target[unit] <= 30 or recent.mouseover[unit] and t - recent.mouseover[unit] <= 30
 		end
 
 		function CCWatch_IsPlayer(unit)
-			return players[unit]
+			return player[unit]
 		end
 
 		function CCWatch_AddMessage(msg)
