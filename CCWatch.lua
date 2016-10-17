@@ -727,8 +727,8 @@ do
 			EFFECT = effect,
 			UNIT = unit,
 			START = start,
+			shown = CCWatch_IsShown(unit),
 		}
-
 
 		timer.END = timer.START
 
@@ -742,33 +742,14 @@ do
 			timer.END = timer.END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
 		end
 
-		CCWatch_StopTimer(effect, unit)
-		timers[effect .. '@' .. unit] = timer
-
-		if CCWatch_IsShown(unit) then
-			timer.shown = true
-			local group
-			if CCWATCH.CCS[effect].ETYPE == ETYPE_BUFF then
-				group = CCWATCH.GROUPSBUFF
-			elseif CCWATCH.CCS[effect].ETYPE == ETYPE_DEBUFF then
-				group = CCWATCH.GROUPSDEBUFF
-			else
-				group = CCWATCH.GROUPSCC
-			end
-
-			local index
-			for i, bar in group do
-				if effect == bar.TIMER.EFFECT and unit == bar.TIMER.UNIT then
-					index = i
-					break
-				end
-			end
-			if index then
-				group[index].TIMER = timer
-				timer.visible = true
-			else
-				place_timers()
-			end
+		local old_timer = timers[effect .. '@' .. unit]
+		if old_timer and not old_timer.stopped then
+			old_timer.START = timer.START
+			old_timer.STOP = timer.STOP
+			old_timer.shown = old_timer.shown or timer.shown
+		else
+			timers[effect .. '@' .. unit] = timer
+			place_timers()
 		end
 	end
 
