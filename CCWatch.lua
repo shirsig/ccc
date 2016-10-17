@@ -525,30 +525,25 @@ do
 		end
 	end
 
-	function CCWatch_EventHandler.CHAT_MSG_SPELL_SELF_DAMAGE()
-		for effect in string.gfind(arg1, 'is immune to your (.*)%.') do
-			pending[effect] = nil
-		end
-		for effect in string.gfind(arg1, 'resists your (.*)%.') do
-			pending[effect] = nil
-		end
-		for effect in string.gfind(arg1, 'Your (.*) was evaded') do
-			pending[effect] = nil
-		end
-		for effect in string.gfind(arg1, 'Your (.*) is reflected') do
-			pending[effect] = nil
-		end
-		for effect in string.gfind(arg1, 'Your (.*) was deflected') do
-			pending[effect] = nil
-		end
-		for effect in string.gfind(arg1, 'Your (.*) was dodged') do
-			pending[effect] = nil
-		end
-		for effect in string.gfind(arg1, 'Your (.*) missed') do
-			pending[effect] = nil
-		end
-		for effect in string.gfind(arg1, 'Your (.*) is parried') do
-			pending[effect] = nil
+	do
+		local patterns = {
+			'is immune to your (.*)%.',
+			'resists your (.*)%.',
+			'Your (.*) missed',
+			'Your (.*) was evaded',
+			'Your (.*) was dodged',
+			'Your (.*) was deflected',
+			'Your (.*) is reflected',
+			'Your (.*) is parried'
+		}
+		function CCWatch_EventHandler.CHAT_MSG_SPELL_SELF_DAMAGE()
+			for _, pattern in patterns do
+				local _, _, effect = strfind(arg1, pattern)
+				if effect then
+					pending[effect] = nil
+					return
+				end
+			end
 		end
 	end
 
