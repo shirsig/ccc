@@ -2,6 +2,8 @@ CCWatchLoaded = false
 
 CCWatchObject = nil
 
+local only_own_spells = true
+
 CCWATCH_MAXBARS = 10
 
 CCW_EWARN_FADED = 1
@@ -501,21 +503,84 @@ end
 CCWatch_EventHandler = {}
 
 do
+	local function target_info()
+		local target = UnitName'target'
+		return target and {
+			target = target,
+			exact_target = target .. '|' .. UnitLevel'target' .. '|' .. (UnitRace'target' or '') .. '|' .. (UnitCreatureType'target' or '') .. '|' .. (UnitCreatureFamily'target' or '') .. '|' .. (UnitSex'target' or '')
+		}
+	end
+
 	local casting = {}
 	local last_cast
 	local pending = {}
 
-	function CCWatch_AbortRefresh(effect, unit)
-		for k, v in pending do
-			if k == effect and v.target == unit then
-				pending[k] = nil
+	do
+		CreateFrame('GameTooltip', 'CCWatch_Tooltip', nil, 'GameTooltipTemplate')
+		local orig = UseAction
+		function UseAction(slot, clicked, onself)
+			if HasAction(slot) and not GetActionText(slot) and not onself then
+				CCWatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+				CCWatch_Tooltip:SetAction(slot)
+				casting[CCWatch_TooltipTextLeft1:GetText()] = target_info()
 			end
+			return orig(slot, clicked, onself)
+		end
+	end
+
+	do
+		local orig = CastSpell
+		function CastSpell(index, booktype)
+			casting[GetSpellName(index, booktype)] = target_info()
+			return orig(index, booktype)
+		end
+	end
+
+	do
+		local orig = CastSpellByName
+		function CastSpellByName(text, onself)
+			if not onself then
+				casting[text] = target_info()
+			end
+			return orig(text, onself)
 		end
 	end
 
 	function CCWatch_EventHandler.CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
 		for effect in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
 			casting[effect] = nil
+		end
+	end
+
+	function CCWatch_EventHandler.SPELLCAST_STOP()
+		for effect, info in casting do
+			if CCWatch_EffectActive(effect, info.target) and CCWATCH.CCS[effect].ETYPE ~= ETYPE_BUFF then
+				if pending[effect] then
+					last_cast = nil
+				else
+					info.time = GetTime() + .5
+					pending[effect] = info
+					last_cast = effect
+				end
+			end
+		end
+		casting = {}
+	end
+
+	CreateFrame'Frame':SetScript('OnUpdate', function()
+		for effect, info in pending do
+			if GetTime() >= info.time then
+				CCWatch_StartTimer(effect, info.target, GetTime() - .5)
+				pending[effect] = nil
+			end
+		end
+	end)
+
+	function CCWatch_AbortRefresh(effect, unit)
+		for k, v in pending do
+			if k == effect and v.target == unit then
+				pending[k] = nil
+			end
 		end
 	end
 
@@ -546,60 +611,6 @@ do
 			end
 		end
 	end
-
-	do
-		CreateFrame('GameTooltip', 'CCWatch_Tooltip', nil, 'GameTooltipTemplate')
-		local orig = UseAction
-		function UseAction(slot, clicked, onself)
-			if HasAction(slot) and not GetActionText(slot) and not onself then
-				CCWatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-				CCWatch_Tooltip:SetAction(slot)
-				casting[CCWatch_TooltipTextLeft1:GetText()] = UnitName'target'
-			end
-			return orig(slot, clicked, onself)
-		end
-	end
-
-	do
-		local orig = CastSpell
-		function CastSpell(index, booktype)
-			casting[GetSpellName(index, booktype)] = UnitName'target'
-			return orig(index, booktype)
-		end
-	end
-
-	do
-		local orig = CastSpellByName
-		function CastSpellByName(text, onself)
-			if not onself then
-				casting[text] = UnitName'target'
-			end
-			return orig(text, onself)
-		end
-	end
-
-	function CCWatch_EventHandler.SPELLCAST_STOP()
-		for effect, target in casting do
-			if CCWatch_EffectActive(effect, target) and CCWATCH.CCS[effect].ETYPE ~= ETYPE_BUFF then
-				if pending[effect] then
-					last_cast = nil
-				else
-					pending[effect] = {target=target, time=GetTime() + .5}
-					last_cast = effect
-				end
-			end
-		end
-		casting = {}
-	end
-
-	CreateFrame'Frame':SetScript('OnUpdate', function()
-		for effect, info in pending do
-			if GetTime() >= info.time then
-				CCWatch_StartTimer(effect, info.target, GetTime() - .5)
-				pending[effect] = nil
-			end
-		end
-	end)
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
