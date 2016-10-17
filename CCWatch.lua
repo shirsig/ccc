@@ -659,7 +659,6 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_HONOR_GAIN()
 	for unit in string.gfind(arg1, '(.+) dies') do
-		p(unit)
 		CCWatch_StopUnitTimers(unit)
 	end
 end
