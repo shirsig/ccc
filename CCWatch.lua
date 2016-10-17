@@ -580,7 +580,7 @@ do
 
 	function CCWatch_EventHandler.SPELLCAST_STOP()
 		for effect, target in casting do
-			if CCWatch_EffectActive(effect, target) then
+			if CCWatch_EffectActive(effect, target) and CCWATCH.CCS[effect].ETYPE ~= ETYPE_BUFF then
 				if pending[effect] then
 					last_cast = nil
 				else

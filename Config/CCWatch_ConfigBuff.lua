@@ -91,6 +91,16 @@ CCWATCH.CCS[CCWATCH_EVOCATION] = {
 	MONITOR = true,
 	WARN = 0,
 }
+
+CCWATCH.CCS[CCWATCH_ICEBLOCK] = {
+	ICON = 'Spell_Frost_Frost',
+	SCHOOL = CCWATCH_SCHOOL.FROST,
+	ETYPE = ETYPE_BUFF,
+	DURATION = 10,
+	MONITOR = true,
+	WARN = 0,
+}
+
 -- Druid - Buffs
 CCWATCH.CCS[CCWATCH_NATURESGRASP] = {
 	ICON = 'Spell_Nature_NaturesWrath',

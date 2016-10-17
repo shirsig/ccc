@@ -122,16 +122,6 @@ CCWATCH.CCS[CCWATCH_FROSTBITE] = {
 	WARN = 0,
 }
 
-CCWATCH.CCS[CCWATCH_ICEBLOCK] = {
-	ICON = 'Spell_Frost_Frost',
-	SCHOOL = CCWATCH_SCHOOL.FROST,
-	ETYPE = ETYPE_CC,
-	DURATION = 10,
-	MONITOR = true,
-	WARN = 0,
-}
-
-
 -- Druid - Stun/Root CCs
 CCWATCH.CCS[CCWATCH_ROOTS] = {
 	ICON = 'Spell_Nature_StrangleVines',
