@@ -254,7 +254,7 @@ function CCWatchWarn(msg, effect, unit, time)
 end
 
 function CCWatch_Config()
-	CCWATCH.CCS = {}
+	CCWATCH.EFFECTS = {}
 
 	CCWatch_ConfigCC()
 	CCWatch_ConfigDebuff()
@@ -293,6 +293,7 @@ function CCWatch_OnLoad()
 
 	this:RegisterEvent'CHAT_MSG_SPELL_AURA_GONE_OTHER'
 	this:RegisterEvent'CHAT_MSG_SPELL_BREAK_AURA'
+	this:RegisterEvent'UNIT_AURA'
 
 	this:RegisterEvent'SPELLCAST_STOP'
 	this:RegisterEvent'SPELLCAST_INTERRUPTED'
@@ -502,11 +503,6 @@ end
 CCWatch_EventHandler = {}
 
 do
-	local function target_type()
-		local race = UnitRace'target'
-		return UnitCreatureFamily'target' or UnitRace'target' or UnitCreatureType'target'
-	end
-
 	local function target_sex()
 		local code = UnitSex'target'
 		if code == 2 then
@@ -521,7 +517,7 @@ do
 	function CCWatch_TargetID()
 		local name = UnitName'target'
 		if name then
-			return UnitIsPlayer'target' and name or '[' .. target_type() .. ' ' .. UnitLevel'target' .. target_sex() .. '] ' .. name
+			return UnitIsPlayer'target' and name or '[' .. (UnitRace'target' and  UnitRace'target' .. ' ' or '') .. UnitLevel'target' .. target_sex() .. '] ' .. name
 		end
 	end
 end
@@ -570,7 +566,7 @@ do
 
 	function CCWatch_EventHandler.SPELLCAST_STOP()
 		for effect, target in casting do
-			if (CCWatch_EffectActive(effect, target) or not CCWatch_IsPlayer(target) and CCWATCH.CCS[effect]) and CCWATCH.CCS[effect].ETYPE ~= ETYPE_BUFF then
+			if (CCWatch_EffectActive(effect, target) or not CCWatch_IsPlayer(target) and CCWATCH.EFFECTS[effect]) and CCWATCH.EFFECTS[effect].ETYPE ~= ETYPE_BUFF then
 				if pending[effect] then
 					last_cast = nil
 				else
@@ -638,7 +634,7 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
 	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
-		if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 and CCWatch_IsPlayer(unit) then
+		if CCWATCH.EFFECTS[effect] and CCWATCH.EFFECTS[effect].MONITOR and bit.band(CCWATCH.EFFECTS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 and CCWatch_IsPlayer(unit) then
 			CCWatch_StartTimer(effect, unit, GetTime())
 		end
 	end
@@ -646,18 +642,15 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
 	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
-		if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 and CCWatch_IsPlayer(unit) then
+		if CCWATCH.EFFECTS[effect] and CCWATCH.EFFECTS[effect].MONITOR and bit.band(CCWATCH.EFFECTS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 and CCWatch_IsPlayer(unit) then
 			CCWatch_StartTimer(effect, unit, GetTime())
 		end
 	end
 end
 
-CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS = CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS
-CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE = CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE
-
 function CCWatch_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, unit in string.gfind(arg1, CCWATCH_TEXT_OFF) do
-		if CCWATCH.CCS[effect] then
+		if CCWATCH.EFFECTS[effect] then
 			CCWatch_StopTimer(effect, unit)
 		end
 	end
@@ -665,10 +658,54 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
 	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BREAK) do
-		if CCWATCH.CCS[effect] then
+		if CCWATCH.EFFECTS[effect] then
 			CCWatch_StopTimer(effect, unit)
 		end
 	end
+end
+
+function CCWatch_EventHandler.UNIT_AURA()
+--	if arg1 == 'target' then end
+--	for index, value in {"target","pettarget"} do
+--		local target,sex,level
+--		target = UnitName(value)
+--		sex = UnitSex(value)
+--		level = UnitLevel(value)
+--		local found = DoTimer_ReturnTargetTable(target,sex,level)
+--		if found then
+--			local debuffs = DoTimer_ListDebuffs(value)
+--			for i = table.getn(casted[found]),1,-1 do
+--				local spellname = casted[found][i].spell
+--				local english = casted[found][i].english
+--				if GetTime() >= casted[found][i].time + .5 then
+--					local ontarget
+--					if english == "Spell Lock" then ontarget = 1 end --we will not delete spell lock
+--					for ind,val in ipairs(debuffs) do
+--						if spellname == val then ontarget = 1 end --a debuff found on the mob matches the query
+--					end
+--					if not DoTimer_TimerIsAppreciated(found,i) then ontarget = 1 end --we only want to deal with appreciated timers
+--					if not ontarget then
+--						local wrongreason -- if a new curse or a refresh, the timer will disappear before the other code adds it.  in this case we want to delete, not depreciate
+--						local tables = {SpellSystem_IncomingSpell, SpellSystem_SentSpell, finalspell}
+--						for index,value in ipairs(tables) do
+--							for id = table.getn(value),1,-1 do
+--								if (value[id].target == target and value[id].targetsex == sex and value[id].targetlevel == level) and ((value[id].spell == spellname) or string.sub(english,1,5) == "Curse" and string.sub(DoTimer_ReturnEnglish(value[id].spell),1,5) == "Curse") then wrongreason = 1 end
+--							end
+--						end
+--						if not wrongreason then
+--							local time = GetTime()
+--							DoTimer_Debug(casted[found][i].spell.." not found on "..UnitName(value).."; depreciating if mob, deleting if not")
+--							if casted[found].type == "mob" then DoTimer_DepreciateTimer(found,i) else DoTimer_RemoveTimer(found,i,1) end --player timers are removed because they cannot be depreciated
+--						else
+--							DoTimer_Debug(casted[found][i].spell.." not found on "..UnitName(value)..", but we expected that")
+--							DoTimer_RemoveTimer(found,i)
+--						end
+--					end
+--				end
+--			end
+--		end
+--	end
+	-- TODO remove on target
 end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
@@ -700,9 +737,9 @@ do
 		for _, timer in timers do
 			if timer.shown and not timer.visible then
 				local group
-				if CCWATCH.CCS[timer.EFFECT].ETYPE == ETYPE_BUFF then
+				if CCWATCH.EFFECTS[timer.EFFECT].ETYPE == ETYPE_BUFF then
 					group = CCWATCH.GROUPSBUFF
-				elseif CCWATCH.CCS[timer.EFFECT].ETYPE == ETYPE_DEBUFF then
+				elseif CCWATCH.EFFECTS[timer.EFFECT].ETYPE == ETYPE_DEBUFF then
 					group = CCWATCH.GROUPSDEBUFF
 				else
 					group = CCWATCH.GROUPSCC
@@ -752,13 +789,13 @@ do
 		timer.END = timer.START
 
 		if CCWatch_IsPlayer(unit) then
-			timer.END = timer.END + CCWatch_DiminishedDuration(unit, effect, CCWATCH.CCS[effect].PVP_DURATION or CCWATCH.CCS[effect].DURATION)
+			timer.END = timer.END + CCWatch_DiminishedDuration(unit, effect, CCWATCH.EFFECTS[effect].PVP_DURATION or CCWATCH.EFFECTS[effect].DURATION)
 		else
-			timer.END = timer.END + CCWATCH.CCS[effect].DURATION
+			timer.END = timer.END + CCWATCH.EFFECTS[effect].DURATION
 		end
 
-		if CCWATCH.CCS[effect].COMBO then
-			timer.END = timer.END + CCWATCH.CCS[effect].A * CCWATCH.COMBO
+		if CCWATCH.EFFECTS[effect].COMBO then
+			timer.END = timer.END + CCWATCH.EFFECTS[effect].A * CCWATCH.COMBO
 		end
 
 		local old_timer = timers[effect .. '@' .. unit]
@@ -803,27 +840,22 @@ do
 	end
 
 	do
-		local player, current, recent = {}, {}, { target={}, mouseover={} }
+		local f = CreateFrame'Frame'
+		local player, current, recent = {}, {}, {}
 
-		local function update_unit(unitID)
-			if not UnitCanAttack('player', unitID) then
-				return
-			end
+		local function hostile_player(msg)
+			local _, _, name = strfind(arg1, "^([^%s']*)")
+			return name
+		end
 
-			local unit = UnitName(unitID)
-
-			player[unit] = UnitIsPlayer(unitID)
-
+		local function add_recent(unit)
 			local t = GetTime()
 
-			if current[unitID] then
-				recent[unitID][unit] = t
-			end
-			current[unitID] = unit
+			recent[unit] = t
 
-			for k, v in recent[unitID] do
+			for k, v in recent do
 				if t - v > 30 then
-					recent[unitID][k] = nil
+					recent[k] = nil
 				end
 			end
 
@@ -835,12 +867,59 @@ do
 			place_timers()
 		end
 
+		local function unit_changed(unitID)
+			if not UnitCanAttack('player', unitID) then
+				return
+			end
+
+			local unit = UnitName(unitID)
+
+			player[unit] = UnitIsPlayer(unitID)
+
+			if player[unit] then
+				add_recent(unit)
+			end
+			if player[current[unitID]] and current[unitID] then
+				add_recent(current[unitID])
+			end
+			current[unitID] = unit
+		end
+
+		for _, event in {
+			'CHAT_MSG_COMBAT_HOSTILEPLAYER_HITS',
+			'CHAT_MSG_COMBAT_HOSTILEPLAYER_MISSES',
+			'CHAT_MSG_SPELL_HOSTILEPLAYER_DAMAGE',
+			'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
+			'CHAT_MSG_SPELL_HOSTILEPLAYER_BUFF',
+			'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
+		} do f:RegisterEvent(event) end
+
+		f:SetScript('OnEvent', function()
+			if strfind(arg1, '. You ') or strfind(arg1, ' you') then
+				add_recent(hostile_player(arg1))
+			end
+		end)
+
+		f:SetScript('OnUpdate', function()
+			RequestBattlefieldScoreData()
+		end)
+
+		function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
+			player[hostile_player(arg1)] = true
+			CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
+		end
+
+		function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
+			player[hostile_player(arg1)] = true
+			CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
+		end
+
 		function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
-			update_unit'target'
+			unit_changed'target'
 		end
 		
 		function CCWatch_EventHandler.UPDATE_MOUSEOVER_UNIT()
-			update_unit'mouseover'
+			unit_changed'mouseover'
 		end
 
 		function CCWatch_EventHandler.UPDATE_BATTLEFIELD_SCORE()
@@ -850,11 +929,10 @@ do
 		end
 
 		function CCWatch_IsShown(unit)
-			if CCWATCH.STYLE == 2 or not CCWatch_IsPlayer(unit) then
+			if not player[unit] or CCWATCH.STYLE == 2 then
 				return true
 			end
-			local t = GetTime()
-			return UnitName'target' == unit or UnitName'mouseover' == unit or recent.target[unit] and t - recent.target[unit] <= 30 or recent.mouseover[unit] and t - recent.mouseover[unit] <= 30
+			return UnitName'target' == unit or UnitName'mouseover' == unit or recent[unit] and GetTime() - recent[unit] <= 30
 		end
 
 		function CCWatch_IsPlayer(unit)
@@ -868,7 +946,6 @@ do
 end
 
 function CCWatch_OnUpdate()
-	RequestBattlefieldScoreData()
 	if CCWATCH.STATUS == 0 then
 		return
 	end
@@ -919,12 +996,12 @@ function CCWatch_UpdateBar(bar)
 
 		local r, g, b
 		if CCWatch_Save[CCWATCH.PROFILE].color == CTYPE_SCHOOL then
-			r, g, b = unpack(CCWATCH.CCS[timer.EFFECT].SCHOOL or {1, 0, 1})
+			r, g, b = unpack(CCWATCH.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
 		elseif CCWatch_Save[CCWATCH.PROFILE].color == CTYPE_PROGRESS then
 			r, g, b = 1 - fraction, fraction, 0
 		elseif CCWatch_Save[CCWATCH.PROFILE].color == CTYPE_CUSTOM then
-			if CCWATCH.CCS[timer.EFFECT].COLOR then
-				r, g, b = CCWATCH.CCS[timer.EFFECT].COLOR.r, CCWATCH.CCS[timer.EFFECT].COLOR.g, CCWATCH.CCS[timer.EFFECT].COLOR.b
+			if CCWATCH.EFFECTS[timer.EFFECT].COLOR then
+				r, g, b = CCWATCH.EFFECTS[timer.EFFECT].COLOR.r, CCWATCH.EFFECTS[timer.EFFECT].COLOR.g, CCWATCH.EFFECTS[timer.EFFECT].COLOR.b
 			else
 				r, g, b = 1, 1, 1
 			end
@@ -932,16 +1009,16 @@ function CCWatch_UpdateBar(bar)
 		frame.statusbar:SetStatusBarColor(r, g, b)
 		frame.statusbar:SetBackdropColor(r, g, b, .3)
 
-		frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.CCS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
+		frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 		frame.text:SetText(timer.UNIT)
 	end
 end
 
 local function GetConfCC(k, v)
-	if CCWATCH.CCS[k] then
-		CCWATCH.CCS[k].MONITOR = v.MONITOR
-		CCWATCH.CCS[k].WARN = v.WARN
-		CCWATCH.CCS[k].COLOR = v.COLOR
+	if CCWATCH.EFFECTS[k] then
+		CCWATCH.EFFECTS[k].MONITOR = v.MONITOR
+		CCWATCH.EFFECTS[k].WARN = v.WARN
+		CCWATCH.EFFECTS[k].COLOR = v.COLOR
 	end
 end
 
@@ -1033,10 +1110,10 @@ function CCWatch_UpdateImpGouge()
 	local talentname, texture, _, _, rank = GetTalentInfo(2, 1)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_GOUGE].DURATION = 4 + rank * .5
+			CCWATCH.EFFECTS[CCWATCH_GOUGE].DURATION = 4 + rank * .5
 		end
-	elseif CCWATCH.CCS[CCWATCH_GOUGE].DURATION == nil then
-		CCWATCH.CCS[CCWATCH_GOUGE].DURATION = 4
+	elseif CCWATCH.EFFECTS[CCWATCH_GOUGE].DURATION == nil then
+		CCWATCH.EFFECTS[CCWATCH_GOUGE].DURATION = 4
 	end
 end
 
@@ -1044,10 +1121,10 @@ function CCWatch_UpdateImpGarotte()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 8)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_GAROTTE].DURATION = 18 + rank * 3
+			CCWATCH.EFFECTS[CCWATCH_GAROTTE].DURATION = 18 + rank * 3
 		end
-	elseif CCWATCH.CCS[CCWATCH_GAROTTE].DURATION == nil then
-		CCWATCH.CCS[CCWATCH_GAROTTE].DURATION = 18
+	elseif CCWATCH.EFFECTS[CCWATCH_GAROTTE].DURATION == nil then
+		CCWATCH.EFFECTS[CCWATCH_GAROTTE].DURATION = 18
 	end
 end
 
@@ -1056,17 +1133,17 @@ function CCWatch_UpdateKidneyShot()
 	while true do
 		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
 		if not name then
-			if CCWATCH.CCS[CCWATCH_KS].DURATION == nil then
-				CCWATCH.CCS[CCWATCH_KS].DURATION = 1
+			if CCWATCH.EFFECTS[CCWATCH_KS].DURATION == nil then
+				CCWATCH.EFFECTS[CCWATCH_KS].DURATION = 1
 			end
 			return
 		end
 
 		if name == CCWATCH_KS then
 			if strsub(rank,string.len(rank)) == "1" then
-				CCWATCH.CCS[CCWATCH_KS].DURATION = 0
+				CCWATCH.EFFECTS[CCWATCH_KS].DURATION = 0
 			else
-				CCWATCH.CCS[CCWATCH_KS].DURATION = 1
+				CCWATCH.EFFECTS[CCWATCH_KS].DURATION = 1
 			end
 			return
 		end
@@ -1080,7 +1157,7 @@ function CCWatch_UpdateImpTrap()
 	if texture then
 		if rank ~= 0 then
 -- Freezing Trap is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_FREEZINGTRAP].DURATION = CCWATCH.CCS[CCWATCH_FREEZINGTRAP].DURATION * (1 + rank * .15)
+			CCWATCH.EFFECTS[CCWATCH_FREEZINGTRAP].DURATION = CCWATCH.EFFECTS[CCWATCH_FREEZINGTRAP].DURATION * (1 + rank * .15)
 		end
 	end
 end
@@ -1089,7 +1166,7 @@ function CCWatch_UpdateImpSeduce()
 	local talentname, texture, _, _, rank = GetTalentInfo(2, 7)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_SEDUCE].DURATION = 15 * (1 + rank * .10)
+			CCWATCH.EFFECTS[CCWATCH_SEDUCE].DURATION = 15 * (1 + rank * .10)
 		end
 	end
 end
@@ -1099,8 +1176,8 @@ function CCWatch_UpdateBrutalImpact()
 	if texture then
 		if rank ~= 0 then
 -- Bash is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_POUNCE].DURATION = 2 + rank * .50
-			CCWATCH.CCS[CCWATCH_BASH].DURATION = CCWATCH.CCS[CCWATCH_BASH].DURATION + rank * .50
+			CCWATCH.EFFECTS[CCWATCH_POUNCE].DURATION = 2 + rank * .50
+			CCWATCH.EFFECTS[CCWATCH_BASH].DURATION = CCWATCH.EFFECTS[CCWATCH_BASH].DURATION + rank * .50
 		end
 	end
 end
@@ -1110,8 +1187,8 @@ function CCWatch_UpdatePermafrost()
 	if texture then
 		if rank ~= 0 then
 -- Frostbolt is a true multi rank, hence already updated
-			CCWATCH.CCS[CCWATCH_CONEOFCOLD].DURATION = 8 + .50 + rank * .50
-			CCWATCH.CCS[CCWATCH_FROSTBOLT].DURATION = CCWATCH.CCS[CCWATCH_FROSTBOLT].DURATION + .50 + rank * .50
+			CCWATCH.EFFECTS[CCWATCH_CONEOFCOLD].DURATION = 8 + .50 + rank * .50
+			CCWATCH.EFFECTS[CCWATCH_FROSTBOLT].DURATION = CCWATCH.EFFECTS[CCWATCH_FROSTBOLT].DURATION + .50 + rank * .50
 		end
 	end
 end
@@ -1120,7 +1197,7 @@ function CCWatch_UpdateImpShadowWordPain()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 4)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.CCS[CCWATCH_SHADOWWORDPAIN].DURATION = 18 + rank * 3
+			CCWATCH.EFFECTS[CCWATCH_SHADOWWORDPAIN].DURATION = 18 + rank * 3
 		end
 	end
 end
@@ -1135,8 +1212,8 @@ function CCWatch_GetSpellRank(spellname, spelleffect)
 
 		if not name then
 			if not gotone then
-				if CCWATCH.CCS[spelleffect].DURATION == nil then
-					CCWATCH.CCS[spelleffect].DURATION = CCWATCH_SPELLS[spellname].DURATION[maxrank]
+				if CCWATCH.EFFECTS[spelleffect].DURATION == nil then
+					CCWATCH.EFFECTS[spelleffect].DURATION = CCWATCH_SPELLS[spellname].DURATION[maxrank]
 				end
 			end
 			return
@@ -1146,7 +1223,7 @@ function CCWatch_GetSpellRank(spellname, spelleffect)
 			local currank = 1
 			while currank <= maxrank do
 				if tonumber(strsub(rank,string.len(rank))) == currank then
-					CCWATCH.CCS[spelleffect].DURATION = CCWATCH_SPELLS[spellname].DURATION[currank]
+					CCWATCH.EFFECTS[spelleffect].DURATION = CCWATCH_SPELLS[spellname].DURATION[currank]
 					gotone = true
 				end
 				currank = currank + 1
@@ -1198,7 +1275,7 @@ function CCWatch_UpdateClassSpells()
 		end
 		CCWatchOptionsFrameArcanist:Show()
 		if CCWATCH.ARCANIST then
-			CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION = CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION + 15
+			CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION = CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION + 15
 		end
 	elseif eclass == "DRUID" then
 		CCWatch_GetSpellRank(CCWATCH_ROOTS, CCWATCH_ROOTS)

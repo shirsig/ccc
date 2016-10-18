@@ -39,7 +39,7 @@ end
 
 function UpdateSortTable()
 	DisplayTable = {}
-	table.foreach(CCWATCH.CCS, function (k, v) table.insert(DisplayTable, k) end)
+	table.foreach(CCWATCH.EFFECTS, function (k, v) table.insert(DisplayTable, k) end)
 	sort(DisplayTable)
 end
 
@@ -238,10 +238,10 @@ function CCWatchOptions_ArcanistToggle()
 	CCWATCH.ARCANIST = not CCWATCH.ARCANIST
 	CCWatch_Save[CCWATCH.PROFILE].arcanist = CCWATCH.ARCANIST
 	if CCWATCH.ARCANIST then
-		CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION = CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION + 15
+		CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION = CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION + 15
 		CCWatch_AddMessage(CCWATCH_ARCANIST_ON)
 	else
-		CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION = CCWATCH.CCS[CCWATCH_POLYMORPH].DURATION - 15
+		CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION = CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION - 15
 		CCWatch_AddMessage(CCWATCH_ARCANIST_OFF)
 	end
 	CCWatchOptionsFrameArcanist:SetChecked(CCWATCH.ARCANIST)
@@ -462,27 +462,27 @@ function CCWatchOptionsLearnFillFields()
 	end
 
 	CCWatchOptionsEffectNameStatic:SetText(CCWatchEffectSelection)
-	CCWatchOptionsEffectDurationStatic:SetText(CCWATCH.CCS[CCWatchEffectSelection].DURATION)
+	CCWatchOptionsEffectDurationStatic:SetText(CCWATCH.EFFECTS[CCWatchEffectSelection].DURATION)
 
-	if CCWATCH.CCS[CCWatchEffectSelection].ETYPE == ETYPE_BUFF then
+	if CCWATCH.EFFECTS[CCWatchEffectSelection].ETYPE == ETYPE_BUFF then
 		CCWatchOptionsEffectType:SetText"BUFF"
-	elseif CCWATCH.CCS[CCWatchEffectSelection].ETYPE == ETYPE_DEBUFF then
+	elseif CCWATCH.EFFECTS[CCWatchEffectSelection].ETYPE == ETYPE_DEBUFF then
 		CCWatchOptionsEffectType:SetText"DEBUFF"
 	else
 		CCWatchOptionsEffectType:SetText"CC"
 	end
 
 	CCWatchOptionsBarColorEffect:Enable()
-	if CCWATCH.CCS[CCWatchEffectSelection].COLOR ~= nil then
-		SetButtonPickerColor("CCWatchOptionsBarColorEffect", CCWATCH.CCS[CCWatchEffectSelection].COLOR)
+	if CCWATCH.EFFECTS[CCWatchEffectSelection].COLOR ~= nil then
+		SetButtonPickerColor("CCWatchOptionsBarColorEffect", CCWATCH.EFFECTS[CCWatchEffectSelection].COLOR)
 	else
 		SetButtonPickerColor("CCWatchOptionsBarColorEffect", { r=1, g=1, b=1 })
 	end
 
-	CCWatchOptionsEffectMonitor:SetChecked(CCWATCH.CCS[CCWatchEffectSelection].MONITOR)
+	CCWatchOptionsEffectMonitor:SetChecked(CCWATCH.EFFECTS[CCWatchEffectSelection].MONITOR)
 	CCWatchOptionsEffectMonitor:Enable()
 
-	local bFlag = CCWATCH.CCS[CCWatchEffectSelection].WARN > 0
+	local bFlag = CCWATCH.EFFECTS[CCWatchEffectSelection].WARN > 0
 	CCWatchOptionsEffectWarn:SetChecked(bFlag)
 	CCWatchOptionsEffectWarn:Enable()
 end
@@ -595,26 +595,26 @@ function CCWatchOptionsEffects_OnEnter()
 		return
 	end
 
-	if CCWATCH.CCS[spellname] == nil then
+	if CCWATCH.EFFECTS[spellname] == nil then
 		CCWatch_AddMessage("Error : '" .. spellname .. "' not found in effect array.")
 		return
 	end
-	local str = spellname .. "\nDuration: " .. CCWATCH.CCS[spellname].DURATION .. "\nType: "
-	if CCWATCH.CCS[spellname].ETYPE == ETYPE_BUFF then
+	local str = spellname .. "\nDuration: " .. CCWATCH.EFFECTS[spellname].DURATION .. "\nType: "
+	if CCWATCH.EFFECTS[spellname].ETYPE == ETYPE_BUFF then
 		str = str .. "Buff"
-	elseif CCWATCH.CCS[spellname].ETYPE == ETYPE_DEBUFF then
+	elseif CCWATCH.EFFECTS[spellname].ETYPE == ETYPE_DEBUFF then
 		str = str .. "DeBuff"
 	else
 		str = str .. "CC"
 	end
 	str = str .. "\nMonitor: "
-	if CCWATCH.CCS[spellname].MONITOR then
+	if CCWATCH.EFFECTS[spellname].MONITOR then
 		str = str .. "on"
 	else
 		str = str .. "off"
 	end
 	str = str .. "\nWarn: "
-	if CCWATCH.CCS[spellname].WARN > 0 then
+	if CCWATCH.EFFECTS[spellname].WARN > 0 then
 		str = str .. "on"
 	else
 		str = str .. "off"
