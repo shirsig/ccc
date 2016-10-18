@@ -78,14 +78,19 @@ do
 	end
 end
 
-function aurae_UnitDebuffs(unit)
-	local debuffs = {}
-	local i = 1
-	while UnitDebuff(unit, i) do
-		debuffs[UnitDebuff(unit,i)] = true
-		i = i + 1
+do
+	local tt = CreateFrame('GameTooltip', 'aurae_tooltip', nil, 'GameTooltipTemplate')
+	function aurae_UnitDebuffs(unit)
+		local debuffs = {}
+		local i = 1
+		while UnitDebuff(unit, i) do
+			aurae_tooltip:SetOwner(UIParent)
+			aurae_tooltip:SetUnitDebuff(unit, i)
+			debuffs[aurae_tooltipTextLeft1:GetText()] = true
+			i = i + 1
+		end
+		return debuffs
 	end
-	return debuffs
 end
 
 local bars = {}
@@ -586,22 +591,6 @@ do
 	end
 end
 
-function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
-	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
-		if CCWATCH.EFFECTS[effect] and CCWATCH.EFFECTS[effect].MONITOR and bit.band(CCWATCH.EFFECTS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 and CCWatch_IsPlayer(unit) then
-			CCWatch_StartTimer(effect, unit, GetTime())
-		end
-	end
-end
-
-function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
-	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
-		if CCWATCH.EFFECTS[effect] and CCWATCH.EFFECTS[effect].MONITOR and bit.band(CCWATCH.EFFECTS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 and CCWatch_IsPlayer(unit) then
-			CCWatch_StartTimer(effect, unit, GetTime())
-		end
-	end
-end
-
 function CCWatch_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, unit in string.gfind(arg1, CCWATCH_TEXT_OFF) do
 		if CCWATCH.EFFECTS[effect] then
@@ -851,12 +840,20 @@ do
 
 		function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 			player[hostile_player(arg1)] = true
-			CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
+			for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
+				if CCWATCH.EFFECTS[effect] and CCWATCH.EFFECTS[effect].MONITOR and bit.band(CCWATCH.EFFECTS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
+					CCWatch_StartTimer(effect, unit, GetTime())
+				end
+			end
 		end
 
 		function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 			player[hostile_player(arg1)] = true
-			CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
+			for unit, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
+				if CCWATCH.EFFECTS[effect] and CCWATCH.EFFECTS[effect].MONITOR and bit.band(CCWATCH.EFFECTS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
+					CCWatch_StartTimer(effect, unit, GetTime())
+				end
+			end
 		end
 
 		function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
@@ -1018,11 +1015,9 @@ function CCWatch_LoadVariables()
 	CCWATCH.MONITORING = CCWatch_Save[CCWATCH.PROFILE].Monitoring
 
 	if bit.band(CCWATCH.MONITORING, ETYPE_CC) ~= 0 or bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF) ~= 0 then
-		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE'
 		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE'
 	end
 	if bit.band(CCWATCH.MONITORING, ETYPE_BUFF) ~= 0 then
-		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS'
 		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS'
 	end
 
