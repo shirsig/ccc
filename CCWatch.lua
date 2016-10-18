@@ -241,34 +241,11 @@ local function format_time(t)
 	end
 end
 
---function CCWatchWarn(msg, effect, unit, time)
---	local ncc = 0
---	local cc = CCWATCH.WARNTYPE
---	-- Emote, Say, Party, Raid, Yell, Custom:<ccname>
---	if cc == "RAID" and UnitInRaid'player' == nil then
---		cc = "PARTY"
---	end
---	if cc == "PARTY" and GetNumPartyMembers() == 0 then
---		return
---	end
---	if cc == "CHANNEL" then
---		ncc = GetChannelName(CCWATCH.WARNCUSTOMCC)
---	end
---	if time ~= nil then
---		msg = format(msg, unit, effect, time)
---	else
---		msg = format(msg, unit, effect)
---	end
 --	if CCWatch_Save[CCWATCH.PROFILE].WarnSelf then
 --		local info = ChatTypeInfo.RAID_WARNING
 --		RaidWarningFrame:AddMessage(msg, info.r, info.g, info.b, 1)
 --		PlaySound'RaidWarning'
 --	end
---	if cc == "EMOTE" then
---		msg = CCWATCH_WARN_EMOTE .. msg
---	end
---	SendChatMessage(msg, cc, nil, ncc)
---end
 
 function CCWatch_Config()
 	CCWATCH.EFFECTS = {}
@@ -293,17 +270,13 @@ function CCWatch_OnLoad()
 			tinsert(CCWATCH['GROUPS' .. strupper(type)], bar)
 		end
 	end
-
-
+	
 	CCWatch_Config()
 
 	CCWatchObject = this
 
 	this:RegisterEvent'UNIT_COMBAT'
 
---	if UnitLevel'player' < 60 then
---		this:RegisterEvent'CHAT_MSG_COMBAT_XP_GAIN'
--- 	end
  	this:RegisterEvent'CHAT_MSG_COMBAT_HONOR_GAIN'
 	this:RegisterEvent'CHAT_MSG_COMBAT_HOSTILE_DEATH'
 	this:RegisterEvent'PLAYER_REGEN_ENABLED'
@@ -659,56 +632,16 @@ function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
 end
 
 function CCWatch_EventHandler.UNIT_AURA()
+	-- TODO pet target (in other places too)
 	if arg1 ~= 'target' or UnitIsPlayer'target' then return end
 	local unit = CCWatch_TargetID()
 	local debuffs = aurae_UnitDebuffs'target'
 	for k, timer in aurae_timers do
 		if timer.UNIT == unit and not debuffs[timer.EFFECT] then
+			-- TODO only if "appreciated" (weird doTimer terminology)
 			CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
 		end
 	end
-
---	if arg1 == 'target' then end
---	for index, value in {"target","pettarget"} do
---		local target,sex,level
---		target = UnitName(value)
---		sex = UnitSex(value)
---		level = UnitLevel(value)
---		local found = DoTimer_ReturnTargetTable(target,sex,level)
---		if found then
---			local debuffs = DoTimer_ListDebuffs(value)
---			for i = table.getn(casted[found]),1,-1 do
---				local spellname = casted[found][i].spell
---				local english = casted[found][i].english
---				if GetTime() >= casted[found][i].time + .5 then
---					local ontarget
---					if english == "Spell Lock" then ontarget = 1 end --we will not delete spell lock
---					for ind,val in ipairs(debuffs) do
---						if spellname == val then ontarget = 1 end --a debuff found on the mob matches the query
---					end
---					if not DoTimer_TimerIsAppreciated(found,i) then ontarget = 1 end --we only want to deal with appreciated timers
---					if not ontarget then
---						local wrongreason -- if a new curse or a refresh, the timer will disappear before the other code adds it.  in this case we want to delete, not depreciate
---						local tables = {SpellSystem_IncomingSpell, SpellSystem_SentSpell, finalspell}
---						for index,value in ipairs(tables) do
---							for id = table.getn(value),1,-1 do
---								if (value[id].target == target and value[id].targetsex == sex and value[id].targetlevel == level) and ((value[id].spell == spellname) or string.sub(english,1,5) == "Curse" and string.sub(DoTimer_ReturnEnglish(value[id].spell),1,5) == "Curse") then wrongreason = 1 end
---							end
---						end
---						if not wrongreason then
---							local time = GetTime()
---							DoTimer_Debug(casted[found][i].spell.." not found on "..UnitName(value).."; depreciating if mob, deleting if not")
---							if casted[found].type == "mob" then DoTimer_DepreciateTimer(found,i) else DoTimer_RemoveTimer(found,i,1) end --player timers are removed because they cannot be depreciated
---						else
---							DoTimer_Debug(casted[found][i].spell.." not found on "..UnitName(value)..", but we expected that")
---							DoTimer_RemoveTimer(found,i)
---						end
---					end
---				end
---			end
---		end
---	end
-	-- TODO remove on target
 end
 
 --function DoTimer_ChangedTargets()
@@ -727,44 +660,6 @@ end
 --		end
 --	end
 --	if UnitName("target") then lasttarget = {UnitName("target"),UnitSex("target"),UnitLevel("target")} else lasttarget = {} end
---end
-
---function DoTimer_DebuffFade()
---	local chatspell,chattarget = SpellSystem_ParseString(arg1,fadesmsg)
---	--we will delete the timer if 1) the target is our current target, and 2) there are now no occurrences of the debuff on the target
---	if DoTimer_intable(chatspell,spells) then --scan target for debuffs; if no more occurrences then we can delete that timer
---	DoTimer_Debug(event)
---	if arg1 then DoTimer_Debug(arg1) end
---	DoTimer_Debug("the spell that faded is a timer spell")
---	if chattarget == UnitName("target") and DoT_OwnSpellOnTarget(chatspell) and not DoT_SpellOnTarget(chatspell) then
---		local found = DoTimer_ReturnTargetTable(UnitName("target"),UnitSex("target"),UnitLevel("target"))
---		if found then
---			for i = table.getn(casted[found]),1,-1 do
---				if casted[found][i].spell == chatspell and DoTimer_TimerIsAppreciated(found,i) then
---					DoTimer_Debug("no more occurrences of the spell, so removing the timer")
---					DoTimer_RemoveTimer(found,i,1)
---					break
---				end
---			end
---		end
---	end
---	elseif DoTimer_intable(chatspell,petspells) then --scan pettarget for pet related spells
---	DoTimer_Debug(event)
---	if arg1 then DoTimer_Debug(arg1) end
---	DoTimer_Debug("it was a pet spell")
---	if chattarget == UnitName("pettarget") and DoT_OwnSpellOnTarget(chatspell,"pettarget") and not DoT_SpellOnTarget(chatspell,"pettarget") then
---		local found = DoTimer_ReturnTargetTable(UnitName("pettarget"),UnitSex("pettarget"),UnitLevel("pettarget"))
---		if found then
---			for i = table.getn(casted[found]),1,-1 do
---				if casted[found][i].spell == chatspell and (not (DoTimer_ReturnEnglish(chatspell) == "Spell Lock")) and DoTimer_TimerIsAppreciated(found,i) then
---					DoTimer_Debug("no more occurrences, removing it")
---					DoTimer_RemoveTimer(found,i,1)
---					break
---				end
---			end
---		end
---	end
---	end
 --end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
