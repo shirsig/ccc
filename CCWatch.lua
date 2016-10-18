@@ -539,7 +539,7 @@ do
 
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for effect, info in pending do
-			if GetTime() >= info.time then
+			if GetTime() >= info.time and (CCWatch_IsPlayer(info.target) or CCWatch_TargetID() ~= info.target or aurae_UnitDebuffs'target'[effect]) then
 				CCWatch_StartTimer(effect, info.target, GetTime() - .5)
 				pending[effect] = nil
 			end
