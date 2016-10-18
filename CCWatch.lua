@@ -644,6 +644,7 @@ function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
 		if CCWatch_IsPlayer(unit) then
 			CCWatch_UNIT_DEATH(unit)
 		elseif unit == UnitName'target' and UnitIsDead'target' then
+			-- TODO only if "appreciated" (weird doTimer terminology)
 			CCWatch_UNIT_DEATH(CCWatch_TargetID())
 		end
 	end
