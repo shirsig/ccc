@@ -612,8 +612,8 @@ do
 	do
 		local patterns = {
 			'is immune to your (.*)%.',
-			'resists your (.*)%.',
 			'Your (.*) missed',
+			'Your (.*) was resisted',
 			'Your (.*) was evaded',
 			'Your (.*) was dodged',
 			'Your (.*) was deflected',
