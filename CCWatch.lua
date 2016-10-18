@@ -503,7 +503,8 @@ CCWatch_EventHandler = {}
 
 do
 	local function target_type()
-		return UnitCreatureFamily'target' or UnitCreatureType'target' or UnitRace'target'
+		local race = UnitRace'target'
+		return UnitCreatureFamily'target' or UnitRace'target' or UnitCreatureType'target'
 	end
 
 	local function target_sex()
@@ -600,7 +601,7 @@ do
 
 	function CCWatch_AbortUnitCasts(unit)
 		for k, v in pending do
-			if v.target == unit then
+			if v.target == unit or not unit and not CCWatch_IsPlayer(v.target) then
 				pending[k] = nil
 			end
 		end
@@ -772,9 +773,9 @@ do
 	end
 
 	function CCWatch_EventHandler.PLAYER_REGEN_ENABLED()
+		CCWatch_AbortUnitCasts()
 		for k, timer in timers do
 			if not CCWatch_IsPlayer(timer.TARGET) then
-				CCWatch_AbortUnitCasts(timer.UNIT)
 				CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
 			end
 		end
@@ -792,9 +793,9 @@ do
 	end
 
 	function CCWatch_UNIT_DEATH(unit)
+		CCWatch_AbortUnitCasts(unit)
 		for k, timer in timers do
 			if timer.UNIT == unit then
-				CCWatch_AbortUnitCasts(timer.UNIT)
 				CCWatch_StopTimer(timer.EFFECT, unit)
 			end
 		end
