@@ -784,7 +784,7 @@ do
 	function CCWatch_EventHandler.PLAYER_REGEN_ENABLED()
 		CCWatch_AbortUnitCasts()
 		for k, timer in timers do
-			if not CCWatch_IsPlayer(timer.TARGET) then
+			if not CCWatch_IsPlayer(timer.UNIT) then
 				CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
 			end
 		end
@@ -868,7 +868,7 @@ do
 
 		f:SetScript('OnEvent', function()
 			if strfind(arg1, '. You ') or strfind(arg1, ' you') then
-				add_recent(hostile_player(arg1))
+				add_recent(hostile_player(arg1)) -- TODO make sure this happens before the other handlers
 			end
 		end)
 
