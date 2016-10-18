@@ -4,11 +4,6 @@ CCWatchObject = nil
 
 CCWATCH_MAXBARS = 10
 
-CCW_EWARN_FADED = 1
-CCW_EWARN_APPLIED = 2
-CCW_EWARN_BROKEN = 4
-CCW_EWARN_LOWTIME = 8
-
 CCWATCH_SCHOOL = {
 	NONE = {1, 1, 1},
 	PHYSICAL = {1, 1, 0},
@@ -224,34 +219,34 @@ local function format_time(t)
 	end
 end
 
-function CCWatchWarn(msg, effect, unit, time)
-	local ncc = 0
-	local cc = CCWATCH.WARNTYPE
-	-- Emote, Say, Party, Raid, Yell, Custom:<ccname>
-	if cc == "RAID" and UnitInRaid'player' == nil then
-		cc = "PARTY"
-	end
-	if cc == "PARTY" and GetNumPartyMembers() == 0 then
-		return
-	end
-	if cc == "CHANNEL" then
-		ncc = GetChannelName(CCWATCH.WARNCUSTOMCC)
-	end
-	if time ~= nil then
-		msg = format(msg, unit, effect, time)
-	else
-		msg = format(msg, unit, effect)
-	end
-	if CCWatch_Save[CCWATCH.PROFILE].WarnSelf then
-		local info = ChatTypeInfo.RAID_WARNING
-		RaidWarningFrame:AddMessage(msg, info.r, info.g, info.b, 1)
-		PlaySound'RaidWarning'
-	end
-	if cc == "EMOTE" then
-		msg = CCWATCH_WARN_EMOTE .. msg
-	end
-	SendChatMessage(msg, cc, nil, ncc)
-end
+--function CCWatchWarn(msg, effect, unit, time)
+--	local ncc = 0
+--	local cc = CCWATCH.WARNTYPE
+--	-- Emote, Say, Party, Raid, Yell, Custom:<ccname>
+--	if cc == "RAID" and UnitInRaid'player' == nil then
+--		cc = "PARTY"
+--	end
+--	if cc == "PARTY" and GetNumPartyMembers() == 0 then
+--		return
+--	end
+--	if cc == "CHANNEL" then
+--		ncc = GetChannelName(CCWATCH.WARNCUSTOMCC)
+--	end
+--	if time ~= nil then
+--		msg = format(msg, unit, effect, time)
+--	else
+--		msg = format(msg, unit, effect)
+--	end
+--	if CCWatch_Save[CCWATCH.PROFILE].WarnSelf then
+--		local info = ChatTypeInfo.RAID_WARNING
+--		RaidWarningFrame:AddMessage(msg, info.r, info.g, info.b, 1)
+--		PlaySound'RaidWarning'
+--	end
+--	if cc == "EMOTE" then
+--		msg = CCWATCH_WARN_EMOTE .. msg
+--	end
+--	SendChatMessage(msg, cc, nil, ncc)
+--end
 
 function CCWatch_Config()
 	CCWATCH.EFFECTS = {}
@@ -464,29 +459,6 @@ function CCWatch_SlashCommandHandler(msg)
 			CCWatch_AddMessage(CCWATCH_SCALE..CCWATCH.SCALE)
 			CCWatch_AddMessage(CCWATCH_WIDTH..CCWATCH.WIDTH)
 			CCWatch_AddMessage(CCWATCH_ALPHA..CCWATCH.ALPHA)
-		elseif strsub(command, 1, 6) == "warncc" then
-			local cc = strupper(strsub(command, 8))
-			if cc ~= "EMOTE" and cc ~= "SAY" and cc ~= "PARTY" and cc ~= "RAID"
-				and cc ~= "YELL" and cc ~= "CHANNEL" then
-				CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC = cc
-				CCWATCH.WARNCUSTOMCC = cc
-				CCWatch_Save[CCWATCH.PROFILE].WarnType = "CHANNEL"
-				CCWatch_AddMessage(CCWATCH_WARNCC_CUSTOM .. cc)
-			else
-				CCWatch_Save[CCWATCH.PROFILE].WarnType = cc
-				CCWatch_AddMessage(CCWATCH_WARNCC_SETTO .. cc)
-			end
-			CCWATCH.WARNTYPE = CCWatch_Save[CCWATCH.PROFILE].WarnType
-		elseif command == "warn" then
-			if CCWATCH.WARNMSG ~= 0 then
-				CCWATCH.WARNMSG = 0
-				CCWatch_AddMessage(CCWATCH_WARN_DISABLED)
-			else
-				CCWATCH.WARNMSG = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME)
-				CCWatch_AddMessage(CCWATCH_WARN_ENABLED)
-				-- UpdateWarnUIPage()
-			end
-			CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
 		else
 			CCWatch_Help()
 		end
@@ -1017,7 +989,6 @@ end
 local function GetConfCC(k, v)
 	if CCWATCH.EFFECTS[k] then
 		CCWATCH.EFFECTS[k].MONITOR = v.MONITOR
-		CCWATCH.EFFECTS[k].WARN = v.WARN
 		CCWATCH.EFFECTS[k].COLOR = v.COLOR
 	end
 end
@@ -1047,11 +1018,6 @@ function CCWatch_LoadVariables()
 		arcanist = false,
 		style = 1,
 		Monitoring = bit.bor(ETYPE_CC, ETYPE_DEBUFF, ETYPE_BUFF),
-		WarnType = 'PARTY',
-		WarnSelf = false,
-		WarnLow = 10,
-		WarnMsg = bit.bor(CCW_EWARN_FADED, CCW_EWARN_APPLIED, CCW_EWARN_BROKEN, CCW_EWARN_LOWTIME),
-		WarnCustomCC = '',
 	}
 
 	CCWATCH.PROFILE = UnitName'player' .. '@' .. GetCVar'RealmName'
@@ -1077,10 +1043,6 @@ function CCWatch_LoadVariables()
 	CCWATCH.ALPHA = CCWatch_Save[CCWATCH.PROFILE].alpha
 
 	CCWATCH.MONITORING = CCWatch_Save[CCWATCH.PROFILE].Monitoring
-	CCWATCH.WARNTYPE = CCWatch_Save[CCWATCH.PROFILE].WarnType
-	CCWATCH.WARNLOW = CCWatch_Save[CCWATCH.PROFILE].WarnLow
-	CCWATCH.WARNMSG = CCWatch_Save[CCWATCH.PROFILE].WarnMsg
-	CCWATCH.WARNCUSTOMCC = CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC
 
 	if bit.band(CCWATCH.MONITORING, ETYPE_CC) ~= 0 or bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF) ~= 0 then
 		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE'

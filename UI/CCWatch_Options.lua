@@ -247,35 +247,6 @@ function CCWatchOptions_ArcanistToggle()
 	CCWatchOptionsFrameArcanist:SetChecked(CCWATCH.ARCANIST)
 end
 
-function CCWatchOptions_WarnAppliedToggle()
-	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_APPLIED)
-	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
-	CCWatchOptionsFrameWarnApplied:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED))
-end
-
-function CCWatchOptions_WarnFadedToggle()
-	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_FADED)
-	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
-	CCWatchOptionsFrameWarnFaded:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED))
-end
-
-function CCWatchOptions_WarnBrokenToggle()
-	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_BROKEN)
-	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
-	CCWatchOptionsFrameWarnBroken:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN))
-end
-
-function CCWatchOptions_WarnLowTimeToggle()
-	CCWATCH.WARNMSG = bit.bxor(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME)
-	CCWatch_Save[CCWATCH.PROFILE].WarnMsg = CCWATCH.WARNMSG
-	CCWatchOptionsFrameWarnLowTime:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME))
-end
-
-function CCWatchOptions_SetWarnLow()
-	CCWatch_Save[CCWATCH.PROFILE].WarnLow = CCWatchOptionsFrameWarnLowEdit:GetNumber()
-	CCWATCH.WARNLOW = CCWatch_Save[CCWATCH.PROFILE].WarnLow
-end
-
 function CCWatchOptionsStyleDropDown_OnInit()
 	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsStyleDropDown"
 	local info = {}
@@ -307,68 +278,6 @@ function CCWatchOptionsStyleDropDown_OnClick()
 	end
 end
 
-
-function CCWatchOptionsWarnCCDropDown_OnInit()
-	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsWarnCCDropDown"
-	local info = {}
-
-	info.text = "EMOTE"
-	info.value = "EMOTE"
-	info.owner = this
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick
-	UIDropDownMenu_AddButton(info)
-
-	info.text = "SAY"
-	info.value = "SAY"
-	info.owner = this
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick
-	UIDropDownMenu_AddButton(info)
-	
-	info.text = "PARTY"
-	info.value = "PARTY"
-	info.owner = this
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick
-	UIDropDownMenu_AddButton(info)
-
-	info.text = "RAID"
-	info.value = "RAID"
-	info.owner = this
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick
-	UIDropDownMenu_AddButton(info)
-
-	info.text = "YELL"
-	info.value = "YELL"
-	info.owner = this
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick
-	UIDropDownMenu_AddButton(info)
-
-	info.text = "CHANNEL"
-	info.value = "CHANNEL"
-	info.owner = this
-	info.func = CCWatchOptionsWarnCCDropDown_OnClick
-	UIDropDownMenu_AddButton(info)
-end
-
-function CCWatchOptionsWarnCCDropDown_OnClick()
-	if (this.value == "EMOTE") or (this.value == "SAY") or (this.value == "PARTY") 
-		or (this.value == "RAID") or (this.value == "YELL") or (this.value == "CHANNEL") then
-		CCWatch_Save[CCWATCH.PROFILE].WarnType = this.value;
-		CCWATCH.WARNTYPE = CCWatch_Save[CCWATCH.PROFILE].WarnType;
-		CCWatchOptionsWarnCCDropDownText:SetText(this.value);
-		if (this.value == "CHANNEL") then
-			CCWatchOptionsFrameCustomCCEdit:Show();
-		else
-			CCWatchOptionsFrameCustomCCEdit:Hide();
-		end
-		CCWatch_AddMessage(CCWATCH_WARNCC_SETTO..this.value);
-	end
-end
-
-function CCWatchOptions_SetCustomCC()
-	CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC = CCWatchOptionsFrameCustomCCEdit:GetText();
-	CCWATCH.WARNCUSTOMCC = CCWatch_Save[CCWATCH.PROFILE].WarnCustomCC;
-end
-
 --------------------------------------------------------------------------------
 -- Learn Frame
 --------------------------------------------------------------------------------
@@ -376,29 +285,23 @@ end
 function CCWatchOptions_MonitorToggle()
 end
 
-function CCWatchOptions_WarnToggle()
-end
-
 function CCWatchOptionsLearnModify_OnClick()
 	local monitor = CCWatchOptionsEffectMonitor:GetChecked()
-	local warn = CCWatchOptionsEffectWarn:GetChecked()
 	local color = {
 		r = CCWatchOptionsBarColorEffect.r,
 		g = CCWatchOptionsBarColorEffect.g,
 		b = CCWatchOptionsBarColorEffect.b,
 	}
-	CCWatch_ModifyEffect(CCWatchEffectSelection, monitor, warn, color)
+	CCWatch_ModifyEffect(CCWatchEffectSelection, monitor, color)
 end
 
 --------------------------------------------------------------------------------
 -- Custom effect management
 --------------------------------------------------------------------------------
 
-function CCWatch_ModifyEffect(effect, monitor, warn, color)
-	local iWarn = warn and 1 or 0
+function CCWatch_ModifyEffect(effect, monitor, color)
 	CCWatch_Save[CCWATCH.PROFILE].ConfCC[effect] = {
 		MONITOR = monitor,
-		WARN = iWarn,
 		COLOR = color,
 	}
 	CCWatch_LoadConfCCs()
@@ -481,10 +384,6 @@ function CCWatchOptionsLearnFillFields()
 
 	CCWatchOptionsEffectMonitor:SetChecked(CCWATCH.EFFECTS[CCWatchEffectSelection].MONITOR)
 	CCWatchOptionsEffectMonitor:Enable()
-
-	local bFlag = CCWATCH.EFFECTS[CCWatchEffectSelection].WARN > 0
-	CCWatchOptionsEffectWarn:SetChecked(bFlag)
-	CCWatchOptionsEffectWarn:Enable()
 end
 
 function CCWatchOptions_OnLoad()
@@ -506,17 +405,9 @@ function CCWatchOptions_Init()
 	CCWatchOptionsFrameUnlock:SetChecked(CCWATCH.STATUS == 2)
 	CCWatchOptionsFrameInvert:SetChecked(CCWATCH.INVERT)
 	CCWatchOptionsFrameArcanist:SetChecked(CCWATCH.ARCANIST)
-	CCWatchOptionsWarnCCDropDownText:SetText(CCWATCH.WARNTYPE)
-	CCWatchOptionsFrameCustomCCEdit:SetText(CCWATCH.WARNCUSTOMCC)
-	if CCWATCH.WARNTYPE == "CHANNEL" then
-		CCWatchOptionsFrameCustomCCEdit:Show()
-	else
-		CCWatchOptionsFrameCustomCCEdit:Hide()
-	end
 
 	CCWatchOptionsBarColorEffect:Disable()
 	CCWatchOptionsEffectMonitor:Disable()
-	CCWatchOptionsEffectWarn:Disable()
 
 	if CCWATCH.GROWTH == 1 then
 		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_UP)
@@ -535,11 +426,6 @@ function CCWatchOptions_Init()
 
 	CCWatchOptionsBarColorEffect.swatchFunc = CCWatchConfig_SwatchFunc_SetColor.Effect
 	CCWatchOptionsBarColorEffect.cancelFunc = CCWatchConfig_SwatchFunc_CancelColor.Effect
-
-	CCWatchOptionsFrameWarnApplied:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_APPLIED))
-	CCWatchOptionsFrameWarnFaded:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_FADED))
-	CCWatchOptionsFrameWarnBroken:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_BROKEN))
-	CCWatchOptionsFrameWarnLowTime:SetChecked(bit.band(CCWATCH.WARNMSG, CCW_EWARN_LOWTIME))
 
 	CCWatchOptionsBarsFrame:Show()
 	CCWatchOptionsEffectsTabTexture:Hide()
@@ -609,12 +495,6 @@ function CCWatchOptionsEffects_OnEnter()
 	end
 	str = str .. "\nMonitor: "
 	if CCWATCH.EFFECTS[spellname].MONITOR then
-		str = str .. "on"
-	else
-		str = str .. "off"
-	end
-	str = str .. "\nWarn: "
-	if CCWATCH.EFFECTS[spellname].WARN > 0 then
 		str = str .. "on"
 	else
 		str = str .. "off"
