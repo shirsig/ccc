@@ -659,11 +659,9 @@ function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
 end
 
 function CCWatch_EventHandler.UNIT_AURA()
-
 	if arg1 ~= 'target' or UnitIsPlayer'target' then return end
-	local unit = UnitName'target'
+	local unit = CCWatch_TargetID()
 	local debuffs = aurae_UnitDebuffs'target'
-
 	for k, timer in aurae_timers do
 		if timer.UNIT == unit and not debuffs[timer.EFFECT] then
 			CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
