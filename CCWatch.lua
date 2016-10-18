@@ -2,8 +2,6 @@ CCWatchLoaded = false
 
 CCWatchObject = nil
 
-local only_own_spells = true
-
 CCWATCH_MAXBARS = 10
 
 CCW_EWARN_FADED = 1
@@ -286,11 +284,12 @@ function CCWatch_OnLoad()
 
 	this:RegisterEvent'UNIT_COMBAT'
 
-	if UnitLevel'player' < 60 then
-		this:RegisterEvent'CHAT_MSG_COMBAT_XP_GAIN'
- 	end
+--	if UnitLevel'player' < 60 then
+--		this:RegisterEvent'CHAT_MSG_COMBAT_XP_GAIN'
+-- 	end
  	this:RegisterEvent'CHAT_MSG_COMBAT_HONOR_GAIN'
 	this:RegisterEvent'CHAT_MSG_COMBAT_HOSTILE_DEATH'
+	this:RegisterEvent'PLAYER_REGEN_ENABLED'
 
 	this:RegisterEvent'CHAT_MSG_SPELL_AURA_GONE_OTHER'
 	this:RegisterEvent'CHAT_MSG_SPELL_BREAK_AURA'
@@ -503,14 +502,30 @@ end
 CCWatch_EventHandler = {}
 
 do
-	local function target_info()
-		local target = UnitName'target'
-		return target and {
-			target = target,
-			exact_target = target .. '|' .. UnitLevel'target' .. '|' .. (UnitRace'target' or '') .. '|' .. (UnitCreatureType'target' or '') .. '|' .. (UnitCreatureFamily'target' or '') .. '|' .. (UnitSex'target' or '')
-		}
+	local function target_type()
+		return UnitCreatureFamily'target' or UnitCreatureType'target' or UnitRace'target'
 	end
 
+	local function target_sex()
+		local code = UnitSex'target'
+		if code == 2 then
+			return 'm'
+		elseif code == 3 then
+			return 'f'
+		else
+			return ''
+		end
+	end
+
+	function CCWatch_TargetID()
+		local name = UnitName'target'
+		if name then
+			return UnitIsPlayer'target' and name or '[' .. target_type() .. ' ' .. UnitLevel'target' .. target_sex() .. '] ' .. name
+		end
+	end
+end
+
+do
 	local casting = {}
 	local last_cast
 	local pending = {}
@@ -522,7 +537,7 @@ do
 			if HasAction(slot) and not GetActionText(slot) and not onself then
 				CCWatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 				CCWatch_Tooltip:SetAction(slot)
-				casting[CCWatch_TooltipTextLeft1:GetText()] = target_info()
+				casting[CCWatch_TooltipTextLeft1:GetText()] = CCWatch_TargetID()
 			end
 			return orig(slot, clicked, onself)
 		end
@@ -531,7 +546,7 @@ do
 	do
 		local orig = CastSpell
 		function CastSpell(index, booktype)
-			casting[GetSpellName(index, booktype)] = target_info()
+			casting[GetSpellName(index, booktype)] = CCWatch_TargetID()
 			return orig(index, booktype)
 		end
 	end
@@ -540,7 +555,7 @@ do
 		local orig = CastSpellByName
 		function CastSpellByName(text, onself)
 			if not onself then
-				casting[text] = target_info()
+				casting[text] = CCWatch_TargetID()
 			end
 			return orig(text, onself)
 		end
@@ -553,12 +568,12 @@ do
 	end
 
 	function CCWatch_EventHandler.SPELLCAST_STOP()
-		for effect, info in casting do
-			if (CCWatch_EffectActive(effect, info.target) or only_own_spells and CCWATCH.CCS[effect]) and CCWATCH.CCS[effect].ETYPE ~= ETYPE_BUFF then
+		for effect, target in casting do
+			if (CCWatch_EffectActive(effect, target) or not CCWatch_IsPlayer(target) and CCWATCH.CCS[effect]) and CCWATCH.CCS[effect].ETYPE ~= ETYPE_BUFF then
 				if pending[effect] then
 					last_cast = nil
 				else
-					pending[effect] = {target=only_own_spells and info.exact_target or info.target, time=GetTime() + .5}
+					pending[effect] = {target=target, time=GetTime() + .5}
 					last_cast = effect
 				end
 			end
@@ -575,9 +590,17 @@ do
 		end
 	end)
 
-	function CCWatch_AbortRefresh(effect, unit)
+	function CCWatch_AbortCast(effect, unit)
 		for k, v in pending do
 			if k == effect and v.target == unit then
+				pending[k] = nil
+			end
+		end
+	end
+
+	function CCWatch_AbortUnitCasts(unit)
+		for k, v in pending do
+			if v.target == unit then
 				pending[k] = nil
 			end
 		end
@@ -613,18 +636,16 @@ do
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
-	if only_own_spells then return end
 	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
-		if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
+		if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 and CCWatch_IsPlayer(unit) then
 			CCWatch_StartTimer(effect, unit, GetTime())
 		end
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS()
-	if only_own_spells then return end
 	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
-		if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
+		if CCWATCH.CCS[effect] and CCWATCH.CCS[effect].MONITOR and bit.band(CCWATCH.CCS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 and CCWatch_IsPlayer(unit) then
 			CCWatch_StartTimer(effect, unit, GetTime())
 		end
 	end
@@ -651,20 +672,17 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
 	for unit in string.gfind(arg1, CCWATCH_TEXT_DIE) do
-		CCWatch_StopUnitTimers(unit)
-	end
-end
-
-function CCWatch_EventHandler.CHAT_MSG_COMBAT_XP_GAIN()
-	for unit in string.gfind(arg1, CCWATCH_TEXT_DIEXP) do
-		CCWatch_StopUnitTimers(unit)
+		if CCWatch_IsPlayer(unit) then
+			CCWatch_UNIT_DEATH(unit)
+		elseif unit == UnitName'target' and UnitIsDead'target' then
+			CCWatch_UNIT_DEATH(CCWatch_TargetID())
+		end
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_HONOR_GAIN()
 	for unit in string.gfind(arg1, '(.+) dies') do
-		p(unit)
-		CCWatch_StopUnitTimers(unit)
+		CCWatch_UNIT_DEATH(unit)
 	end
 end
 
@@ -732,7 +750,7 @@ do
 
 		timer.END = timer.START
 
-		if CCWatch_IsPlayer() then
+		if CCWatch_IsPlayer(unit) then
 			timer.END = timer.END + CCWatch_DiminishedDuration(unit, effect, CCWATCH.CCS[effect].PVP_DURATION or CCWATCH.CCS[effect].DURATION)
 		else
 			timer.END = timer.END + CCWATCH.CCS[effect].DURATION
@@ -745,7 +763,7 @@ do
 		local old_timer = timers[effect .. '@' .. unit]
 		if old_timer and not old_timer.stopped then
 			old_timer.START = timer.START
-			old_timer.STOP = timer.STOP
+			old_timer.END = timer.END
 			old_timer.shown = old_timer.shown or timer.shown
 		else
 			timers[effect .. '@' .. unit] = timer
@@ -753,8 +771,17 @@ do
 		end
 	end
 
+	function CCWatch_EventHandler.PLAYER_REGEN_ENABLED()
+		for k, timer in timers do
+			if not CCWatch_IsPlayer(timer.TARGET) then
+				CCWatch_AbortUnitCasts(timer.UNIT)
+				CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
+			end
+		end
+	end
+
 	function CCWatch_StopTimer(effect, unit)
-		CCWatch_AbortRefresh(effect, unit)
+		CCWatch_AbortCast(effect, unit)
 
 		local key = effect .. '@' .. unit
 		if timers[key] then
@@ -764,9 +791,10 @@ do
 		end
 	end
 
-	function CCWatch_StopUnitTimers(unit)
+	function CCWatch_UNIT_DEATH(unit)
 		for k, timer in timers do
 			if timer.UNIT == unit then
+				CCWatch_AbortUnitCasts(timer.UNIT)
 				CCWatch_StopTimer(timer.EFFECT, unit)
 			end
 		end
@@ -821,7 +849,7 @@ do
 		end
 
 		function CCWatch_IsShown(unit)
-			if CCWATCH.STYLE == 2 or only_own_spells then
+			if CCWATCH.STYLE == 2 or not CCWatch_IsPlayer(unit) then
 				return true
 			end
 			local t = GetTime()
