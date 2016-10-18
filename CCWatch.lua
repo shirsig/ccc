@@ -82,21 +82,9 @@ function aurae_UnitDebuffs(unit)
 	local debuffs = {}
 	local i = 1
 	while UnitDebuff(unit, i) do
---		DoTimerScanningFrame:ClearLines()
---		DoTimerScanningFrame:SetUnitDebuff(unit,i)
---		local debuff = DoTimerScanningFrameTextLeft1:GetText()
---		if debuff then debuffs[debuff] = true end
 		debuffs[UnitDebuff(unit,i)] = true
 		i = i + 1
 	end
---	i = 1
---	while UnitBuff(unit,i) do
---		DoTimerScanningFrame:ClearLines()
---		DoTimerScanningFrame:SetUnitBuff(unit,i)
---		local spell = DoTimerScanningFrameTextLeft1:GetText()
---		if spell then table.insert(debuffs,spell) end
---		i = i + 1
---	end
 	return debuffs
 end
 
@@ -270,7 +258,7 @@ function CCWatch_OnLoad()
 			tinsert(CCWATCH['GROUPS' .. strupper(type)], bar)
 		end
 	end
-	
+
 	CCWatch_Config()
 
 	CCWatchObject = this
@@ -283,7 +271,6 @@ function CCWatch_OnLoad()
 
 	this:RegisterEvent'CHAT_MSG_SPELL_AURA_GONE_OTHER'
 	this:RegisterEvent'CHAT_MSG_SPELL_BREAK_AURA'
-	this:RegisterEvent'UNIT_AURA'
 
 	this:RegisterEvent'SPELLCAST_STOP'
 	this:RegisterEvent'SPELLCAST_INTERRUPTED'
@@ -618,28 +605,29 @@ end
 function CCWatch_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, unit in string.gfind(arg1, CCWATCH_TEXT_OFF) do
 		if CCWATCH.EFFECTS[effect] then
-			CCWatch_StopTimer(effect, unit)
+			if CCWatch_IsPlayer(unit) then
+				CCWatch_AbortCast(effect, unit)
+				CCWatch_StopTimer(effect, unit)
+			elseif unit == UnitName'target' then
+				-- TODO pet target (in other places too)
+				local unit = CCWatch_TargetID()
+				local debuffs = aurae_UnitDebuffs'target'
+				for k, timer in aurae_timers do
+					if timer.UNIT == unit and not debuffs[timer.EFFECT] then
+						-- TODO only if "appreciated" (weird doTimer terminology)
+						CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
+					end
+				end
+			end
 		end
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
 	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BREAK) do
-		if CCWATCH.EFFECTS[effect] then
+		if CCWATCH.EFFECTS[effect] and CCWatch_IsPlayer(unit) then
+			CCWatch_AbortCast(effect, unit)
 			CCWatch_StopTimer(effect, unit)
-		end
-	end
-end
-
-function CCWatch_EventHandler.UNIT_AURA()
-	-- TODO pet target (in other places too)
-	if arg1 ~= 'target' or UnitIsPlayer'target' then return end
-	local unit = CCWatch_TargetID()
-	local debuffs = aurae_UnitDebuffs'target'
-	for k, timer in aurae_timers do
-		if timer.UNIT == unit and not debuffs[timer.EFFECT] then
-			-- TODO only if "appreciated" (weird doTimer terminology)
-			CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
 		end
 	end
 end
@@ -724,6 +712,9 @@ do
 		for _, timer in aurae_timers do
 			if t > timer.END then
 				CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
+				if CCWatch_IsPlayer(timer.UNIT) then
+					CCWatch_AbortCast(timer.EFFECT, timer.UNIT)
+				end
 			end
 		end
 	end
@@ -773,8 +764,6 @@ do
 	end
 
 	function CCWatch_StopTimer(effect, unit)
-		CCWatch_AbortCast(effect, unit)
-
 		local key = effect .. '@' .. unit
 		if aurae_timers[key] then
 			aurae_timers[key].stopped = GetTime()
@@ -784,7 +773,9 @@ do
 	end
 
 	function CCWatch_UNIT_DEATH(unit)
-		CCWatch_AbortUnitCasts(unit)
+		if CCWatch_IsPlayer(unit) then
+			CCWatch_AbortUnitCasts(unit)
+		end
 		for k, timer in aurae_timers do
 			if timer.UNIT == unit then
 				CCWatch_StopTimer(timer.EFFECT, unit)
