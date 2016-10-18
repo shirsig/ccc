@@ -78,6 +78,28 @@ do
 	end
 end
 
+function aurae_UnitDebuffs(unit)
+	local debuffs = {}
+	local i = 1
+	while UnitDebuff(unit, i) do
+--		DoTimerScanningFrame:ClearLines()
+--		DoTimerScanningFrame:SetUnitDebuff(unit,i)
+--		local debuff = DoTimerScanningFrameTextLeft1:GetText()
+--		if debuff then debuffs[debuff] = true end
+		debuffs[UnitDebuff(unit,i)] = true
+		i = i + 1
+	end
+--	i = 1
+--	while UnitBuff(unit,i) do
+--		DoTimerScanningFrame:ClearLines()
+--		DoTimerScanningFrame:SetUnitBuff(unit,i)
+--		local spell = DoTimerScanningFrameTextLeft1:GetText()
+--		if spell then table.insert(debuffs,spell) end
+--		i = i + 1
+--	end
+	return debuffs
+end
+
 local bars = {}
 
 local function create_bar(name)
@@ -478,9 +500,9 @@ do
 	local function target_sex()
 		local code = UnitSex'target'
 		if code == 2 then
-			return 'm'
+			return 'M'
 		elseif code == 3 then
-			return 'f'
+			return 'F'
 		else
 			return ''
 		end
@@ -637,6 +659,17 @@ function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
 end
 
 function CCWatch_EventHandler.UNIT_AURA()
+
+	if arg1 ~= 'target' or UnitIsPlayer'target' then return end
+	local unit = UnitName'target'
+	local debuffs = aurae_UnitDebuffs'target'
+
+	for k, timer in aurae_timers do
+		if timer.UNIT == unit and not debuffs[timer.EFFECT] then
+			CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
+		end
+	end
+
 --	if arg1 == 'target' then end
 --	for index, value in {"target","pettarget"} do
 --		local target,sex,level
@@ -680,6 +713,62 @@ function CCWatch_EventHandler.UNIT_AURA()
 	-- TODO remove on target
 end
 
+--function DoTimer_ChangedTargets()
+--	local newtarget
+--	if UnitName("target") then newtarget = {UnitName("target"),UnitSex("target"),UnitLevel("target")} end
+--
+--	for i = 1,table.getn(casted) do casted[i].eligible = 1 end --all tables are now eligible for depreciated timers
+--	local found = DoTimer_ReturnTargetTable(lasttarget[1],lasttarget[2],lasttarget[3])
+--	if newtarget and newtarget[1] == lasttarget[1] and newtarget[2] == lasttarget[2] and newtarget[3] == lasttarget[3] then
+--		DoTimer_Debug("new target identical to old target")
+--		if found then
+--			DoTimer_Debug("depreciating all appreciated timers for "..casted[found].target)
+--			for i = table.getn(casted[found]),1,-1 do
+--				if DoTimer_TimerIsAppreciated(found,i) then DoTimer_DepreciateTimer(found,i) end --if we are switching targets to one that is "identical" to the previous, automatically depreciate since we know they are inaccurate
+--			end
+--		end
+--	end
+--	if UnitName("target") then lasttarget = {UnitName("target"),UnitSex("target"),UnitLevel("target")} else lasttarget = {} end
+--end
+
+--function DoTimer_DebuffFade()
+--	local chatspell,chattarget = SpellSystem_ParseString(arg1,fadesmsg)
+--	--we will delete the timer if 1) the target is our current target, and 2) there are now no occurrences of the debuff on the target
+--	if DoTimer_intable(chatspell,spells) then --scan target for debuffs; if no more occurrences then we can delete that timer
+--	DoTimer_Debug(event)
+--	if arg1 then DoTimer_Debug(arg1) end
+--	DoTimer_Debug("the spell that faded is a timer spell")
+--	if chattarget == UnitName("target") and DoT_OwnSpellOnTarget(chatspell) and not DoT_SpellOnTarget(chatspell) then
+--		local found = DoTimer_ReturnTargetTable(UnitName("target"),UnitSex("target"),UnitLevel("target"))
+--		if found then
+--			for i = table.getn(casted[found]),1,-1 do
+--				if casted[found][i].spell == chatspell and DoTimer_TimerIsAppreciated(found,i) then
+--					DoTimer_Debug("no more occurrences of the spell, so removing the timer")
+--					DoTimer_RemoveTimer(found,i,1)
+--					break
+--				end
+--			end
+--		end
+--	end
+--	elseif DoTimer_intable(chatspell,petspells) then --scan pettarget for pet related spells
+--	DoTimer_Debug(event)
+--	if arg1 then DoTimer_Debug(arg1) end
+--	DoTimer_Debug("it was a pet spell")
+--	if chattarget == UnitName("pettarget") and DoT_OwnSpellOnTarget(chatspell,"pettarget") and not DoT_SpellOnTarget(chatspell,"pettarget") then
+--		local found = DoTimer_ReturnTargetTable(UnitName("pettarget"),UnitSex("pettarget"),UnitLevel("pettarget"))
+--		if found then
+--			for i = table.getn(casted[found]),1,-1 do
+--				if casted[found][i].spell == chatspell and (not (DoTimer_ReturnEnglish(chatspell) == "Spell Lock")) and DoTimer_TimerIsAppreciated(found,i) then
+--					DoTimer_Debug("no more occurrences, removing it")
+--					DoTimer_RemoveTimer(found,i,1)
+--					break
+--				end
+--			end
+--		end
+--	end
+--	end
+--end
+
 function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
 	for unit in string.gfind(arg1, CCWATCH_TEXT_DIE) do
 		if CCWatch_IsPlayer(unit) then
@@ -703,10 +792,10 @@ function CCWatch_EventHandler.UNIT_COMBAT()
 end
 
 do
-	local timers = {}
+	aurae_timers = {}
 
 	local function place_timers()
-		for _, timer in timers do
+			for _, timer in aurae_timers do
 			if timer.shown and not timer.visible then
 				local group
 				if CCWATCH.EFFECTS[timer.EFFECT].ETYPE == ETYPE_BUFF then
@@ -739,7 +828,7 @@ do
 
 	function CCWatch_UpdateTimers()
 		local t = GetTime()
-		for _, timer in timers do
+		for _, timer in aurae_timers do
 			if t > timer.END then
 				CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
 			end
@@ -747,7 +836,7 @@ do
 	end
 
 	function CCWatch_EffectActive(effect, unit)
-		return timers[effect .. '@' .. unit] and true or false
+		return aurae_timers[effect .. '@' .. unit] and true or false
 	end
 
 	function CCWatch_StartTimer(effect, unit, start)
@@ -770,20 +859,20 @@ do
 			timer.END = timer.END + CCWATCH.EFFECTS[effect].A * CCWATCH.COMBO
 		end
 
-		local old_timer = timers[effect .. '@' .. unit]
+		local old_timer = aurae_timers[effect .. '@' .. unit]
 		if old_timer and not old_timer.stopped then
 			old_timer.START = timer.START
 			old_timer.END = timer.END
 			old_timer.shown = old_timer.shown or timer.shown
 		else
-			timers[effect .. '@' .. unit] = timer
+			aurae_timers[effect .. '@' .. unit] = timer
 			place_timers()
 		end
 	end
 
 	function CCWatch_EventHandler.PLAYER_REGEN_ENABLED()
 		CCWatch_AbortUnitCasts()
-		for k, timer in timers do
+		for k, timer in aurae_timers do
 			if not CCWatch_IsPlayer(timer.UNIT) then
 				CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
 			end
@@ -794,16 +883,16 @@ do
 		CCWatch_AbortCast(effect, unit)
 
 		local key = effect .. '@' .. unit
-		if timers[key] then
-			timers[key].stopped = GetTime()
-			timers[key] = nil
+		if aurae_timers[key] then
+			aurae_timers[key].stopped = GetTime()
+			aurae_timers[key] = nil
 			place_timers()
 		end
 	end
 
 	function CCWatch_UNIT_DEATH(unit)
 		CCWatch_AbortUnitCasts(unit)
-		for k, timer in timers do
+		for k, timer in aurae_timers do
 			if timer.UNIT == unit then
 				CCWatch_StopTimer(timer.EFFECT, unit)
 			end
@@ -831,7 +920,7 @@ do
 				end
 			end
 
-			for _, timer in timers do
+			for _, timer in aurae_timers do
 				if timer.UNIT == unit then
 					timer.shown = true
 				end
