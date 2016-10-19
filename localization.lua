@@ -272,9 +272,9 @@ aurae_WIDTH = "aurae Width set to "
 
 aurae_ALPHA = "aurae Alpha set to "
 
-aurae_LOADED = " Loaded - /ccw (c)Elwen&phoenixfire2001"
+aurae_LOADED = " Loaded - /aurae"
 
-aurae_HELP1  = " : Usage - /ccw option"
+aurae_HELP1  = " : Usage - /aurae option"
 aurae_HELP2  = "options:"
 aurae_HELP3  = " on     : Enables aurae"
 aurae_HELP4  = " off    : Disables aurae"
@@ -289,5 +289,3 @@ aurae_HELP12 = " alpha  : Set bar alpha, use 0 to 1"
 aurae_HELP13 = " grow   : Set bar growth up, down or off"
 aurae_HELP14 = " config : Show the configuration frame"
 aurae_HELP15 = " timers : Set timers display off, on or rev (countdown)"
-aurae_HELP16 = " warn   : enable/disable chat warning"
-aurae_HELP17 = " warncc : set which communication channel to use (EMOTE, SAY, PARTY, RAID, YELL or custom)"

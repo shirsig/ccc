@@ -287,7 +287,6 @@ function aurae_OnLoad()
 	this:RegisterEvent'UPDATE_BATTLEFIELD_SCORE'
 
 	SLASH_aurae1 = "/aurae"
-	SLASH_aurae2 = "/ccw"
 	SlashCmdList.aurae = aurae_SlashCommandHandler
 
 	aurae_AddMessage(aurae_FULLVERSION .. aurae_LOADED)
@@ -1233,8 +1232,6 @@ function aurae_Help()
 	aurae_AddMessage(aurae_HELP13)
 	aurae_AddMessage(aurae_HELP14)
 	aurae_AddMessage(aurae_HELP15)
-	aurae_AddMessage(aurae_HELP16)
-	aurae_AddMessage(aurae_HELP17)
 end
 
 function aurae_SetWidth(width)
