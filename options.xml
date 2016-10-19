@@ -4,20 +4,20 @@
 			..\..\..\FrameXML\UI.xsd">
 	<Script file="options.lua"/>
 
-	<Button name="CCWatchOptionsEffectsItemButtonTemplate" virtual="true">
+	<Button name="auraeOptionsEffectsItemButtonTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="280" y="16"/>
 		</Size>
 		<Scripts>
 			<OnClick>
 				if this:GetText() then
-					CCWatchEffectSelection = this:GetText()
-					CCWatchOptionsEffects_Update()
-					CCWatchOptionsLearnFillFields(true)
+					auraeEffectSelection = this:GetText()
+					auraeOptionsEffects_Update()
+					auraeOptionsLearnFillFields(true)
 				end
 			</OnClick>
 			<OnEnter>
-				CCWatchOptionsEffects_OnEnter()
+				auraeOptionsEffects_OnEnter()
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide()
@@ -42,7 +42,7 @@
 		</Layers>
 	</Button>
 
-	<Button name="CCWatchColorButtonTemplate" virtual="true">
+	<Button name="auraeColorButtonTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="16" y="16"/>
 		</Size>
@@ -92,7 +92,7 @@
 	</Button>
 
 <!-- Main Frame -->
-	<Frame name="CCWatchOptionsFrame" toplevel="true" frameStrata="MEDIUM" movable="true" enableMouse="true" hidden="true" parent="UIParent">
+	<Frame name="auraeOptionsFrame" toplevel="true" frameStrata="MEDIUM" movable="true" enableMouse="true" hidden="true" parent="UIParent">
 		<Size>
 			<AbsDimension x="450" y="525"/>
 		</Size>
@@ -112,7 +112,7 @@
 		</Backdrop>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture name="CCWatchOptionsFrameHeader" file="Interface\DialogFrame\UI-DialogBox-Header">
+				<Texture name="auraeOptionsFrameHeader" file="Interface\DialogFrame\UI-DialogBox-Header">
 					<Size>
 						<AbsDimension x="350" y="64"/>
 					</Size>
@@ -124,9 +124,9 @@
 						</Anchor>
 					</Anchors>
 				</Texture>
-				<FontString name="CCWatchOptions_TitleText" inherits="GameTooltipHeaderText" text="CCWATCH_OPTIONS_TITLE">
+				<FontString name="auraeOptions_TitleText" inherits="GameTooltipHeaderText" text="aurae_OPTIONS_TITLE">
 					<Anchors>
-						<Anchor point="TOP" relativeTo="CCWatchOptionsFrameHeader">
+						<Anchor point="TOP" relativeTo="auraeOptionsFrameHeader">
 							<Offset>
 								<AbsDimension x="0" y="-14"/>
 							</Offset>
@@ -136,7 +136,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button name="CCWatchOptionsBarsTab" text="CCWATCH_OPTIONS_BARS_TAB">
+			<Button name="auraeOptionsBarsTab" text="aurae_OPTIONS_BARS_TAB">
 				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
 					<EdgeSize>
 						<AbsValue val="16"/>
@@ -175,12 +175,12 @@
 				</Layers>
 				<Scripts>
 					<OnClick>
-						CCWatchOptionsBarsTab_OnClick();
+						auraeOptionsBarsTab_OnClick();
 					</OnClick>
 				</Scripts>
 			</Button>
 
-			<Button name="CCWatchOptionsEffectsTab" text="CCWATCH_OPTIONS_EFFECTS_TAB" hidden="false">
+			<Button name="auraeOptionsEffectsTab" text="aurae_OPTIONS_EFFECTS_TAB" hidden="false">
 				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
 					<EdgeSize>
 						<AbsValue val="16"/>
@@ -196,7 +196,7 @@
 					<AbsDimension x="132" y="28"/>
 				</Size>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="CCWatchOptionsBarsTab" relativePoint="RIGHT">
+					<Anchor point="LEFT" relativeTo="auraeOptionsBarsTab" relativePoint="RIGHT">
 						<Offset>
 							<AbsDimension x="8" y="0" />
 						</Offset>
@@ -218,12 +218,12 @@
 				</Layers>
 				<Scripts>
 					<OnClick>
-						CCWatchOptionsEffectsTab_OnClick();
+						auraeOptionsEffectsTab_OnClick();
 					</OnClick>
 				</Scripts>
 			</Button>
 
-			<Button name="CCWatchOptionsLearnTab" text="CCWATCH_OPTIONS_LEARN_TAB">
+			<Button name="auraeOptionsLearnTab" text="aurae_OPTIONS_LEARN_TAB">
 				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
 					<EdgeSize>
 						<AbsValue val="16"/>
@@ -239,7 +239,7 @@
 					<AbsDimension x="132" y="28"/>
 				</Size>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="CCWatchOptionsEffectsTab" relativePoint="RIGHT">
+					<Anchor point="LEFT" relativeTo="auraeOptionsEffectsTab" relativePoint="RIGHT">
 						<Offset>
 							<AbsDimension x="8" y="0" />
 						</Offset>
@@ -261,13 +261,13 @@
 				</Layers>
 				<Scripts>
 					<OnClick>
-						CCWatchOptionsLearnTab_OnClick();
+						auraeOptionsLearnTab_OnClick();
 					</OnClick>
 				</Scripts>
 			</Button>
 
 <!-- Bars Frame (Tab 1) -->
-			<Frame name="CCWatchOptionsBarsFrame" hidden="true">
+			<Frame name="auraeOptionsBarsFrame" hidden="true">
 				<Size>
 					<AbsDimension x="420" y="412"/>
 				</Size>
@@ -290,7 +290,7 @@
 					</BackgroundInsets>
 				</Backdrop>	
 				<Frames>
-					<Slider name="CCWatchSliderScale" inherits="OptionsSliderTemplate">
+					<Slider name="auraeSliderScale" inherits="OptionsSliderTemplate">
 						<Size>
 							<AbsDimension x="220" y="16"/>
 						</Size>
@@ -303,23 +303,23 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_SCALE);
+								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_SCALE);
 								getglobal(this:GetName().."High"):SetText("3.0");
 								getglobal(this:GetName().."Low"):SetText("0.5");
-								CCWatchSliderScale:SetMinMaxValues(0.5,3.0);
-								CCWatchSliderScale:SetValueStep(0.01);
+								auraeSliderScale:SetMinMaxValues(0.5,3.0);
+								auraeSliderScale:SetValueStep(0.01);
 							</OnLoad>
 							<OnValueChanged>
-								CCWATCH.SCALE = CCWatchSliderScale:GetValue();
-								CCWatch_Save[CCWATCH.PROFILE].scale = CCWATCH.SCALE;
-								CCWatchCC:SetScale(CCWATCH.SCALE);
-								CCWatchDebuff:SetScale(CCWATCH.SCALE);
-								CCWatchBuff:SetScale(CCWATCH.SCALE);
+								aurae.SCALE = auraeSliderScale:GetValue();
+								aurae_Save[aurae.PROFILE].scale = aurae.SCALE;
+								auraeCC:SetScale(aurae.SCALE);
+								auraeDebuff:SetScale(aurae.SCALE);
+								auraeBuff:SetScale(aurae.SCALE);
 							</OnValueChanged>
 						</Scripts>
 					</Slider>
 
-					<Slider name="CCWatchSliderWidth" inherits="OptionsSliderTemplate">
+					<Slider name="auraeSliderWidth" inherits="OptionsSliderTemplate">
 						<Size>
 							<AbsDimension x="220" y="16"/>
 						</Size>
@@ -332,21 +332,21 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_WIDTH);
+								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_WIDTH);
 								getglobal(this:GetName().."High"):SetText("300");
 								getglobal(this:GetName().."Low"):SetText("50");
-								CCWatchSliderWidth:SetMinMaxValues(50,300);
-								CCWatchSliderWidth:SetValueStep(2);
+								auraeSliderWidth:SetMinMaxValues(50,300);
+								auraeSliderWidth:SetValueStep(2);
 							</OnLoad>
 							<OnValueChanged>
-								CCWATCH.WIDTH = CCWatchSliderWidth:GetValue();
-								CCWatch_Save[CCWATCH.PROFILE].width = CCWATCH.WIDTH;
-								CCWatch_SetWidth(CCWATCH.WIDTH);
+								aurae.WIDTH = auraeSliderWidth:GetValue();
+								aurae_Save[aurae.PROFILE].width = aurae.WIDTH;
+								aurae_SetWidth(aurae.WIDTH);
 							</OnValueChanged>
 						</Scripts>
 					</Slider>
 
-					<Slider name="CCWatchSliderAlpha" inherits="OptionsSliderTemplate">
+					<Slider name="auraeSliderAlpha" inherits="OptionsSliderTemplate">
 						<Size>
 							<AbsDimension x="220" y="16"/>
 						</Size>
@@ -359,35 +359,35 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_TRANS);
+								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_TRANS);
 								getglobal(this:GetName().."High"):SetText("1.0");
 								getglobal(this:GetName().."Low"):SetText("0.0");
-								CCWatchSliderAlpha:SetMinMaxValues(0.0,1.0);
-								CCWatchSliderAlpha:SetValueStep(0.01);
+								auraeSliderAlpha:SetMinMaxValues(0.0,1.0);
+								auraeSliderAlpha:SetValueStep(0.01);
 							</OnLoad>
 							<OnValueChanged>
-								CCWATCH.ALPHA = CCWatchSliderAlpha:GetValue();
-								CCWatch_Save[CCWATCH.PROFILE].alpha = CCWATCH.ALPHA;
-								CCWatchBarCC1:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarCC2:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarCC3:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarCC4:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarCC5:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarDebuff1:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarDebuff2:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarDebuff3:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarDebuff4:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarDebuff5:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarBuff1:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarBuff2:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarBuff3:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarBuff4:SetAlpha(CCWATCH.ALPHA);
-								CCWatchBarBuff5:SetAlpha(CCWATCH.ALPHA);
+								aurae.ALPHA = auraeSliderAlpha:GetValue();
+								aurae_Save[aurae.PROFILE].alpha = aurae.ALPHA;
+								auraeBarCC1:SetAlpha(aurae.ALPHA);
+								auraeBarCC2:SetAlpha(aurae.ALPHA);
+								auraeBarCC3:SetAlpha(aurae.ALPHA);
+								auraeBarCC4:SetAlpha(aurae.ALPHA);
+								auraeBarCC5:SetAlpha(aurae.ALPHA);
+								auraeBarDebuff1:SetAlpha(aurae.ALPHA);
+								auraeBarDebuff2:SetAlpha(aurae.ALPHA);
+								auraeBarDebuff3:SetAlpha(aurae.ALPHA);
+								auraeBarDebuff4:SetAlpha(aurae.ALPHA);
+								auraeBarDebuff5:SetAlpha(aurae.ALPHA);
+								auraeBarBuff1:SetAlpha(aurae.ALPHA);
+								auraeBarBuff2:SetAlpha(aurae.ALPHA);
+								auraeBarBuff3:SetAlpha(aurae.ALPHA);
+								auraeBarBuff4:SetAlpha(aurae.ALPHA);
+								auraeBarBuff5:SetAlpha(aurae.ALPHA);
 							</OnValueChanged>
 						</Scripts>
 					</Slider>
 
-					<CheckButton name="CCWatchOptionsFrameUnlock" inherits="OptionsCheckButtonTemplate">
+					<CheckButton name="auraeOptionsFrameUnlock" inherits="OptionsCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -397,14 +397,14 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_UNLOCK);
+								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_UNLOCK);
 							</OnLoad>
 							<OnClick>
-								CCWatchOptions_UnlockToggle();
+								auraeOptions_UnlockToggle();
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-					<CheckButton name="CCWatchOptionsFrameInvert" inherits="OptionsCheckButtonTemplate">
+					<CheckButton name="auraeOptionsFrameInvert" inherits="OptionsCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -414,15 +414,15 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_INVERT);
+								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_INVERT);
 							</OnLoad>
 							<OnClick>
-								CCWatchOptions_InvertToggle();
+								auraeOptions_InvertToggle();
 							</OnClick>
 						</Scripts>
 					</CheckButton>
 
-					<Frame name="CCWatchGrowthDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
+					<Frame name="auraeGrowthDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
 						<Size>
 							<AbsDimension x="118" y="16"/>
 						</Size>
@@ -435,7 +435,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								UIDropDownMenu_Initialize(this, CCWatchGrowthDropDown_OnInit);
+								UIDropDownMenu_Initialize(this, auraeGrowthDropDown_OnInit);
 								UIDropDownMenu_SetWidth(130);
 							</OnLoad>
 						</Scripts>
@@ -443,16 +443,16 @@
 				</Frames>
 				<Scripts>
 					<OnShow>
-						CCWatchOptionsBarsFrame_OnShow();
+						auraeOptionsBarsFrame_OnShow();
 					</OnShow>
 					<OnHide>
-						CCWatchOptionsBarsFrame_OnHide();
+						auraeOptionsBarsFrame_OnHide();
 					</OnHide>
 				</Scripts>
 			</Frame>
 
 <!-- Effects Frame (Tab 2) -->
-			<Frame name="CCWatchOptionsEffectsFrame" hidden="true">
+			<Frame name="auraeOptionsEffectsFrame" hidden="true">
 				<Size>
 					<AbsDimension x="420" y="412"/>
 				</Size>
@@ -475,7 +475,7 @@
 					</BackgroundInsets>
 				</Backdrop>	
 				<Frames>
-					<CheckButton name="CCWatchOptionsFrameArcanist" inherits="OptionsCheckButtonTemplate">
+					<CheckButton name="auraeOptionsFrameArcanist" inherits="OptionsCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -485,15 +485,15 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_ARCANIST);
+								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_ARCANIST);
 							</OnLoad>
 							<OnClick>
-								CCWatchOptions_ArcanistToggle();
+								auraeOptions_ArcanistToggle();
 							</OnClick>
 						</Scripts>
 					</CheckButton>
 
-					<Frame name="CCWatchOptionsStyleDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
+					<Frame name="auraeOptionsStyleDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
 						<Size>
 							<AbsDimension x="118" y="16"/>
 						</Size>
@@ -506,12 +506,12 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								UIDropDownMenu_Initialize(this, CCWatchOptionsStyleDropDown_OnInit);
+								UIDropDownMenu_Initialize(this, auraeOptionsStyleDropDown_OnInit);
 								UIDropDownMenu_SetWidth(130);
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					<CheckButton name="CCWatchOptionsFrameMonitorCC" inherits="OptionsCheckButtonTemplate">
+					<CheckButton name="auraeOptionsFrameMonitorCC" inherits="OptionsCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -521,14 +521,14 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_MONITOR_CC);
+								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_MONITOR_CC);
 							</OnLoad>
 							<OnClick>
-								CCWatchOptions_MonitorCCToggle();
+								auraeOptions_MonitorCCToggle();
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-					<CheckButton name="CCWatchOptionsFrameMonitorDebuff" inherits="OptionsCheckButtonTemplate">
+					<CheckButton name="auraeOptionsFrameMonitorDebuff" inherits="OptionsCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -538,14 +538,14 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_MONITOR_DEBUFF);
+								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_MONITOR_DEBUFF);
 							</OnLoad>
 							<OnClick>
-								CCWatchOptions_MonitorDebuffToggle();
+								auraeOptions_MonitorDebuffToggle();
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-					<CheckButton name="CCWatchOptionsFrameMonitorBuff" inherits="OptionsCheckButtonTemplate">
+					<CheckButton name="auraeOptionsFrameMonitorBuff" inherits="OptionsCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -555,26 +555,26 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(CCWATCH_OPTIONS_MONITOR_BUFF);
+								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_MONITOR_BUFF);
 							</OnLoad>
 							<OnClick>
-								CCWatchOptions_MonitorBuffToggle();
+								auraeOptions_MonitorBuffToggle();
 							</OnClick>
 						</Scripts>
 					</CheckButton>
 				</Frames>
 				<Scripts>
 					<OnShow>
-						CCWatchOptionsEffectsFrame_OnShow();
+						auraeOptionsEffectsFrame_OnShow();
 					</OnShow>
 					<OnHide>
-						CCWatchOptionsEffectsFrame_OnHide();
+						auraeOptionsEffectsFrame_OnHide();
 					</OnHide>
 				</Scripts>
 			</Frame>
 
 <!-- Learn Frame (Tab 3) -->
-			<Frame name="CCWatchOptionsLearnFrame" hidden="true">
+			<Frame name="auraeOptionsLearnFrame" hidden="true">
 				<Size>
 					<AbsDimension x="420" y="412"/>
 				</Size>
@@ -597,7 +597,7 @@
 					</BackgroundInsets>
 				</Backdrop>	
 				<Frames>
-					<Frame name="CCWatchOptionsEffectFrame" inherits="OptionFrameBoxTemplate">
+					<Frame name="auraeOptionsEffectFrame" inherits="OptionFrameBoxTemplate">
 						<Size>
 							<AbsDimension x="380" y="205"/>
 						</Size>
@@ -628,7 +628,7 @@
 								</Anchors>			
 								<Layers>
 									<Layer>
-										<FontString inherits="GameFontNormalSmall" text="CCWATCH_NAME">
+										<FontString inherits="GameFontNormalSmall" text="aurae_NAME">
 											<Anchors>
 												<Anchor point="TOPLEFT">
 													<Offset>
@@ -639,7 +639,7 @@
 										</FontString>
 									</Layer>
 									<Layer>
-										<FontString name="CCWatchOptionsEffectNameStatic" inherits="GameFontNormal" text="">
+										<FontString name="auraeOptionsEffectNameStatic" inherits="GameFontNormal" text="">
 											<Anchors>
 												<Anchor point="TOPLEFT">
 													<Offset>
@@ -651,7 +651,7 @@
 									</Layer>
 
 									<Layer>
-										<FontString inherits="GameFontNormalSmall" text="CCWATCH_DURATION">
+										<FontString inherits="GameFontNormalSmall" text="aurae_DURATION">
 											<Anchors>
 												<Anchor point="TOPLEFT">
 													<Offset>
@@ -662,7 +662,7 @@
 										</FontString>
 									</Layer>
 									<Layer>
-										<FontString name="CCWatchOptionsEffectDurationStatic" inherits="GameFontNormal" text="">
+										<FontString name="auraeOptionsEffectDurationStatic" inherits="GameFontNormal" text="">
 											<Anchors>
 												<Anchor point="TOPLEFT">
 													<Offset>
@@ -675,7 +675,7 @@
 
 
 									<Layer>
-										<FontString inherits="GameFontNormalSmall" text="CCWATCH_TYPE">
+										<FontString inherits="GameFontNormalSmall" text="aurae_TYPE">
 											<Anchors>
 												<Anchor point="TOPLEFT">
 													<Offset>
@@ -686,7 +686,7 @@
 										</FontString>
 									</Layer>
 									<Layer>
-										<FontString name="CCWatchOptionsEffectType" inherits="GameFontNormal" text="">
+										<FontString name="auraeOptionsEffectType" inherits="GameFontNormal" text="">
 											<Anchors>
 												<Anchor point="TOPLEFT">
 													<Offset>
@@ -698,7 +698,7 @@
 									</Layer>
 
 									<Layer>
-										<FontString inherits="GameFontNormalSmall" text="CCWATCH_DR">
+										<FontString inherits="GameFontNormalSmall" text="aurae_DR">
 											<Anchors>
 												<Anchor point="TOPLEFT">
 													<Offset>
@@ -709,7 +709,7 @@
 										</FontString>
 									</Layer>
 									<Layer>
-										<FontString name="CCWatchOptionsEffectDR" inherits="GameFontNormal" text="">
+										<FontString name="auraeOptionsEffectDR" inherits="GameFontNormal" text="">
 											<Anchors>
 												<Anchor point="TOPLEFT">
 													<Offset>
@@ -727,7 +727,7 @@
 									</OnLoad>
 								</Scripts>
 							</Frame>
-							<Button name="CCWatchOptionsBarColorEffect" inherits="CCWatchColorButtonTemplate">
+							<Button name="auraeOptionsBarColorEffect" inherits="auraeColorButtonTemplate">
 								<Anchors>
 									<Anchor point="TOPLEFT">
 										<Offset>
@@ -736,7 +736,7 @@
 									</Anchor>
 								</Anchors>
 							</Button>
-							<CheckButton name="CCWatchOptionsEffectMonitor" inherits="OptionsCheckButtonTemplate">
+							<CheckButton name="auraeOptionsEffectMonitor" inherits="OptionsCheckButtonTemplate">
 								<Anchors>
 									<Anchor point="TOPLEFT">
 										<Offset>
@@ -746,14 +746,14 @@
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										getglobal(this:GetName().."Text"):SetText(CCWATCH_MONITOR);
+										getglobal(this:GetName().."Text"):SetText(aurae_MONITOR);
 									</OnLoad>
 									<OnClick>
-										CCWatchOptions_MonitorToggle();
+										auraeOptions_MonitorToggle();
 									</OnClick>
 								</Scripts>
 							</CheckButton>
-							<Button name="CCWatchOptionsLearnModify" inherits="GameMenuButtonTemplate" text="Modify">
+							<Button name="auraeOptionsLearnModify" inherits="GameMenuButtonTemplate" text="Modify">
 								<Size>
 									<AbsDimension x="100" y="21"/>
 								</Size>
@@ -766,14 +766,14 @@
 								</Anchors>
 								<Scripts>
 									<OnClick>
-										CCWatchOptionsLearnModify_OnClick();
+										auraeOptionsLearnModify_OnClick();
 									</OnClick>
 								</Scripts>
 							</Button>
 						</Frames>
 					</Frame>
 
-					<ScrollFrame name="CCWatchOptionsEffectsListScrollFrame" inherits="FauxScrollFrameTemplate">
+					<ScrollFrame name="auraeOptionsEffectsListScrollFrame" inherits="FauxScrollFrameTemplate">
 						<Size>
 							<AbsDimension x="350" y="176"/>
 						</Size>
@@ -786,89 +786,89 @@
 						</Anchors>
 						<Scripts>
 							<OnVerticalScroll>
-								FauxScrollFrame_OnVerticalScroll(16, CCWatchOptionsEffects_Update);
+								FauxScrollFrame_OnVerticalScroll(16, auraeOptionsEffects_Update);
 							</OnVerticalScroll>
 						</Scripts>
 					</ScrollFrame>
 
-					<Button name="CCWatchOptionsEffectsItem1" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem1" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsListScrollFrame" relativePoint="TOPLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsListScrollFrame" relativePoint="TOPLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
-					<Button name="CCWatchOptionsEffectsItem2" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem2" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsItem1" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsItem1" relativePoint="BOTTOMLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
-					<Button name="CCWatchOptionsEffectsItem3" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem3" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsItem2" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsItem2" relativePoint="BOTTOMLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
-					<Button name="CCWatchOptionsEffectsItem4" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem4" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsItem3" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsItem3" relativePoint="BOTTOMLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
-					<Button name="CCWatchOptionsEffectsItem5" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem5" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsItem4" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsItem4" relativePoint="BOTTOMLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
-					<Button name="CCWatchOptionsEffectsItem6" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem6" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsItem5" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsItem5" relativePoint="BOTTOMLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
-					<Button name="CCWatchOptionsEffectsItem7" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem7" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsItem6" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsItem6" relativePoint="BOTTOMLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
-					<Button name="CCWatchOptionsEffectsItem8" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem8" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsItem7" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsItem7" relativePoint="BOTTOMLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
-					<Button name="CCWatchOptionsEffectsItem9" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem9" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsItem8" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsItem8" relativePoint="BOTTOMLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
-					<Button name="CCWatchOptionsEffectsItem10" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem10" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsItem9" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsItem9" relativePoint="BOTTOMLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
-					<Button name="CCWatchOptionsEffectsItem11" inherits="CCWatchOptionsEffectsItemButtonTemplate">
+					<Button name="auraeOptionsEffectsItem11" inherits="auraeOptionsEffectsItemButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="CCWatchOptionsEffectsItem10" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="auraeOptionsEffectsItem10" relativePoint="BOTTOMLEFT">
 							</Anchor>
 						</Anchors>
 					</Button>
 				</Frames>
 				<Scripts>
 					<OnShow>
-						CCWatchOptionsLearnFrame_OnShow();
+						auraeOptionsLearnFrame_OnShow();
 					</OnShow>
 					<OnHide>
-						CCWatchOptionsLearnFrame_OnHide();
+						auraeOptionsLearnFrame_OnHide();
 					</OnHide>
 				</Scripts>
 			</Frame>
 
-			<Button name="CCWatchOptionsFrameDone" inherits="GameMenuButtonTemplate" text="CCWATCH_OPTIONS_DONE">
+			<Button name="auraeOptionsFrameDone" inherits="GameMenuButtonTemplate" text="aurae_OPTIONS_DONE">
 				<Anchors>
 					<Anchor point="BOTTOM">
 						<Offset>
@@ -878,20 +878,20 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						CCWatchOptions_Toggle();
+						auraeOptions_Toggle();
 					</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				CCWatchOptions_OnLoad();
+				auraeOptions_OnLoad();
 			</OnLoad>
 			<OnEvent>
-				CCWatchOptions_OnEvent(event);
+				auraeOptions_OnEvent(event);
 			</OnEvent>
 			<OnShow>
-				CCWatchOptionsBarsTab_OnClick();
+				auraeOptionsBarsTab_OnClick();
 				PlaySound("igMainMenuOption");
 			</OnShow>
 		</Scripts>

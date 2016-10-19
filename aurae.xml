@@ -9,7 +9,7 @@
 	<Script file="Interface\AddOns\aurae\data\buffs.lua"/>
 	<Script file="localization.lua"/>
 
-	<Frame name="CCWatchMovableTemplate" virtual="true">
+	<Frame name="auraeMovableTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="170" y="100" />
 		</Size>
@@ -18,19 +18,19 @@
 				this:EnableMouse(0)
 			</OnLoad>
  			<OnMouseDown>
- 				if ( arg1 == "LeftButton" and CCWATCH.STATUS == 2) then
- 					this:StartMoving();
+ 				if arg1 == "LeftButton" and aurae.STATUS == 2 then
+ 					this:StartMoving()
  				end
  			</OnMouseDown>
  			<OnMouseUp>
- 				if ( arg1 == "LeftButton" ) then
- 					this:StopMovingOrSizing();
+ 				if arg1 == "LeftButton" then
+ 					this:StopMovingOrSizing()
  				end
  			</OnMouseUp>
 		</Scripts>
 	</Frame>
 
-	<Frame name="CCWatchCC" movable="true" inherits="CCWatchMovableTemplate" parent="UIParent">
+	<Frame name="auraeCC" movable="true" inherits="auraeMovableTemplate" parent="UIParent">
 		<Anchors>
 			<Anchor point="CENTER">
 				<Offset>
@@ -40,7 +40,7 @@
 		</Anchors>
 	</Frame>
 
-	<Frame name="CCWatchDebuff" movable="true" inherits="CCWatchMovableTemplate" parent="UIParent">
+	<Frame name="auraeDebuff" movable="true" inherits="auraeMovableTemplate" parent="UIParent">
 		<Anchors>
 			<Anchor point="CENTER">
 				<Offset>
@@ -50,7 +50,7 @@
 		</Anchors>
 	</Frame>
 
-	<Frame name="CCWatchBuff" movable="true" inherits="CCWatchMovableTemplate" parent="UIParent">
+	<Frame name="auraeBuff" movable="true" inherits="auraeMovableTemplate" parent="UIParent">
 		<Anchors>
 			<Anchor point="CENTER">
 				<Offset>
@@ -63,22 +63,22 @@
 	<Frame>
 		<Scripts>
 			<OnLoad>
-				CCWatch_OnLoad()
+				aurae_OnLoad()
 			</OnLoad>
 			<OnUpdate>
-				CCWatch_OnUpdate()
+				aurae_OnUpdate()
 			</OnUpdate>
 			<OnEvent>
-				CCWatch_OnEvent(event)
+				aurae_OnEvent(event)
 			</OnEvent>
 		</Scripts>
 	</Frame>
 
 <!-- original SW hack for initialization due to lack of working GetTalentInfo() in the VARIABLE_LOADED, PLAYER_LOGIN, PLAYER_ENTERING_WORLD events -->
-	<Frame name="CCWatch_Variable_Frame" hidden="false">
+	<Frame name="aurae_Variable_Frame" hidden="false">
 		<Scripts>
 			<OnUpdate>
-				CCWatch_LoadVariablesOnUpdate(arg1)
+				aurae_LoadVariablesOnUpdate(arg1)
 			</OnUpdate>
 		</Scripts>
 	</Frame>
