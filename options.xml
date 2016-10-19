@@ -2,7 +2,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/ 
 			..\..\..\FrameXML\UI.xsd">
-	<Script file="CCWatch_Options.lua"/>
+	<Script file="options.lua"/>
 
 	<Button name="CCWatchOptionsEffectsItemButtonTemplate" virtual="true">
 		<Size>
@@ -10,17 +10,17 @@
 		</Size>
 		<Scripts>
 			<OnClick>
-				if this:GetText() ~= nil then
-					CCWatchEffectSelection = this:GetText();
-					CCWatchOptionsEffects_Update();
-					CCWatchOptionsLearnFillFields(true);
+				if this:GetText() then
+					CCWatchEffectSelection = this:GetText()
+					CCWatchOptionsEffects_Update()
+					CCWatchOptionsLearnFillFields(true)
 				end
 			</OnClick>
 			<OnEnter>
-				CCWatchOptionsEffects_OnEnter();
+				CCWatchOptionsEffects_OnEnter()
 			</OnEnter>
 			<OnLeave>
-				GameTooltip:Hide();
+				GameTooltip:Hide()
 			</OnLeave>
 		</Scripts>
 		<NormalText name="$parentText" inherits="GameFontNormal" justifyH="LEFT">

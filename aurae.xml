@@ -2,11 +2,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\..\..\FrameXML\UI.xsd">
 
-	<Script file="CCWatch.lua"/>
-	<Script file="CCWatch_Globals.lua"/>
-	<Script file="Interface\AddOns\CCWatch\Config\CCWatch_ConfigCC.lua"/>
-	<Script file="Interface\AddOns\CCWatch\Config\CCWatch_ConfigDebuff.lua"/>
-	<Script file="Interface\AddOns\CCWatch\Config\CCWatch_ConfigBuff.lua"/>
+	<Script file="aurae.lua"/>
+	<Script file="globals.lua"/>
+	<Script file="Interface\AddOns\aurae\data\ccs.lua"/>
+	<Script file="Interface\AddOns\aurae\data\debuffs.lua"/>
+	<Script file="Interface\AddOns\aurae\data\buffs.lua"/>
 	<Script file="localization.lua"/>
 
 	<Frame name="CCWatchMovableTemplate" virtual="true">
