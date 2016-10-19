@@ -613,7 +613,7 @@ function aurae_AuraGone(unit, effect)
 			local debuffs = aurae_UnitDebuffs'target'
 			for k, timer in aurae_timers do
 				if timer.UNIT == unit and not debuffs[timer.EFFECT] then
-					-- TODO only if "appreciated" (weird doTimer terminology)
+					-- TODO only if not deprecated
 					aurae_StopTimer(timer.EFFECT, timer.UNIT)
 				end
 			end
@@ -622,21 +622,7 @@ function aurae_AuraGone(unit, effect)
 end
 
 --function DoTimer_ChangedTargets()
---	local newtarget
---	if UnitName("target") then newtarget = {UnitName("target"),UnitSex("target"),UnitLevel("target")} end
---
---	for i = 1,table.getn(casted) do casted[i].eligible = 1 end --all tables are now eligible for depreciated timers
---	local found = DoTimer_ReturnTargetTable(lasttarget[1],lasttarget[2],lasttarget[3])
---	if newtarget and newtarget[1] == lasttarget[1] and newtarget[2] == lasttarget[2] and newtarget[3] == lasttarget[3] then
---		DoTimer_Debug("new target identical to old target")
---		if found then
---			DoTimer_Debug("depreciating all appreciated timers for "..casted[found].target)
---			for i = table.getn(casted[found]),1,-1 do
---				if DoTimer_TimerIsAppreciated(found,i) then DoTimer_DepreciateTimer(found,i) end --if we are switching targets to one that is "identical" to the previous, automatically depreciate since we know they are inaccurate
---			end
---		end
---	end
---	if UnitName("target") then lasttarget = {UnitName("target"),UnitSex("target"),UnitLevel("target")} else lasttarget = {} end
+	-- TODO deprecate every spell
 --end
 
 function aurae_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
@@ -644,7 +630,7 @@ function aurae_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
 		if aurae_IsPlayer(unit) then
 			aurae_UNIT_DEATH(unit)
 		elseif unit == UnitName'target' and UnitIsDead'target' then
-			-- TODO only if "appreciated" (weird doTimer terminology)
+			-- TODO only if not deprecated
 			aurae_UNIT_DEATH(aurae_TargetID())
 		end
 	end
