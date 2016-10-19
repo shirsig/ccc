@@ -79,12 +79,11 @@ do
 end
 
 do
-	local tt = CreateFrame('GameTooltip', 'aurae_tooltip', nil, 'GameTooltipTemplate')
+	CreateFrame('GameTooltip', 'aurae_tooltip', nil, 'GameTooltipTemplate'):SetOwner(aurae_tooltip)
 	function aurae_UnitDebuffs(unit)
 		local debuffs = {}
 		local i = 1
 		while UnitDebuff(unit, i) do
-			aurae_tooltip:SetOwner(UIParent)
 			aurae_tooltip:SetUnitDebuff(unit, i)
 			debuffs[aurae_tooltipTextLeft1:GetText()] = true
 			i = i + 1
