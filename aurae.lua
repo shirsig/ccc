@@ -629,10 +629,10 @@ end
 --end
 
 function aurae_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
-	for unit in string.gfind(arg1, 'slain (.*)!') do
+	for unit in string.gfind(arg1, '(.+) dies') do -- TODO dies event sometimes missing. kronos bug?
 		if aurae_IsPlayer(unit) then
 			aurae_UNIT_DEATH(unit)
-		elseif unit == UnitName'target' then -- and UnitIsDead'target' then TODO kronos bug?
+		elseif unit == UnitName'target' and UnitIsDead'target' then
 			-- TODO only if not deprecated (tentative)
 			aurae_UNIT_DEATH(aurae_TargetID())
 		end

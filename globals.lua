@@ -147,6 +147,4 @@ aurae_TEXT_BREAK = QuickLocalize(AURADISPELOTHER)
 aurae_TEXT_OFF = QuickLocalize(AURAREMOVEDOTHER)
 
 aurae_TEXT_BUFF_ON = QuickLocalize(AURAADDEDOTHERHELPFUL)
-aurae_TEXT_DIE = QuickLocalize(UNITDIESOTHER)
-aurae_TEXT_DIEXP = strsub(aurae_TEXT_DIE, 1, -2) .. ".+"
 end
