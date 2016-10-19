@@ -1,10 +1,10 @@
 #
 ## Interface: 11200
-## Title: CCWatch 11000.2
+## Title: aurae
 ## Notes: Displays a progress bar for any class CCs, Debuffs and Durations
 ## Author: Elwen+phoenixfire2001
 ## SavedVariables: CCWatch_Save
 ## OptionalDeps: myAddOns
 ## Dependencies: 
-CCWatch.xml
-UI\CCWatch_Options.xml
+aurae.xml
+UI\aurae_Options.xml

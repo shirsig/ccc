@@ -1,21 +1,21 @@
-CCWatchEffectSelection = ""
+auraeEffectSelection = ""
 local STATUS_COLOR = "|c000066FF"
 local AR_DiagOpen = false
 
 local DisplayTable = {}
 
-CCWatchConfig_SwatchFunc_SetColor = {
-	 ["Urge"]	= function(x) CCWatch_SetColorCallback("Urge") end,
-	 ["Low"]	= function(x) CCWatch_SetColorCallback("Low") end,
-	 ["Normal"]	= function(x) CCWatch_SetColorCallback("Normal") end,
-	 ["Effect"]	= function(x) CCWatch_SetColorCallback("Effect") end,
+auraeConfig_SwatchFunc_SetColor = {
+	 ["Urge"]	= function(x) aurae_SetColorCallback("Urge") end,
+	 ["Low"]	= function(x) aurae_SetColorCallback("Low") end,
+	 ["Normal"]	= function(x) aurae_SetColorCallback("Normal") end,
+	 ["Effect"]	= function(x) aurae_SetColorCallback("Effect") end,
 }
 
-CCWatchConfig_SwatchFunc_CancelColor = {
-	 ["Urge"]	= function(x) CCWatch_CancelColorCallback("Urge", x) end,
-	 ["Low"]	= function(x) CCWatch_CancelColorCallback("Low", x) end,
-	 ["Normal"]	= function(x) CCWatch_CancelColorCallback("Normal", x) end,
-	 ["Effect"]	= function(x) CCWatch_CancelColorCallback("Effect", x) end,
+auraeConfig_SwatchFunc_CancelColor = {
+	 ["Urge"]	= function(x) aurae_CancelColorCallback("Urge", x) end,
+	 ["Low"]	= function(x) aurae_CancelColorCallback("Low", x) end,
+	 ["Normal"]	= function(x) aurae_CancelColorCallback("Normal", x) end,
+	 ["Effect"]	= function(x) aurae_CancelColorCallback("Effect", x) end,
 }
 
 local function SetButtonPickerColor(button, color)
@@ -26,12 +26,12 @@ local function SetButtonPickerColor(button, color)
 	getglobal(button).b = color.b
 end
 
-function CCWatch_DisableDropDown(dropDown)
+function aurae_DisableDropDown(dropDown)
 	getglobal(dropDown:GetName() .. "Text"):SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
 	getglobal(dropDown:GetName() .. "Button"):Disable()
 end
 
-function CCWatch_EnableDropDown(dropDown)
+function aurae_EnableDropDown(dropDown)
 	getglobal(dropDown:GetName() .. "Text"):SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
 	getglobal(dropDown:GetName() .. "Button"):Enable()
 end
@@ -39,15 +39,15 @@ end
 
 function UpdateSortTable()
 	DisplayTable = {}
-	table.foreach(CCWATCH.EFFECTS, function (k, v) table.insert(DisplayTable, k) end)
+	table.foreach(aurae.EFFECTS, function (k, v) table.insert(DisplayTable, k) end)
 	sort(DisplayTable)
 end
 
-function CCWatchOptions_Toggle()
-	if(CCWatchOptionsFrame:IsVisible()) then
-		CCWatchOptionsFrame:Hide()
+function auraeOptions_Toggle()
+	if(auraeOptionsFrame:IsVisible()) then
+		auraeOptionsFrame:Hide()
 	else
-		CCWatchOptionsFrame:Show()
+		auraeOptionsFrame:Show()
 	end
 end
 
@@ -56,137 +56,137 @@ end
 -- Main Frame
 --------------------------------------------------------------------------------
 
-function CCWatchOptionsBarsTab_OnClick()
-	CCWatchOptionsBarsFrame:Show()
-	CCWatchOptionsEffectsFrame:Hide()
-	CCWatchOptionsLearnFrame:Hide()
+function auraeOptionsBarsTab_OnClick()
+	auraeOptionsBarsFrame:Show()
+	auraeOptionsEffectsFrame:Hide()
+	auraeOptionsLearnFrame:Hide()
 
 	PlaySound"igMainMenuOptionCheckBoxOn"
 end
 
-function CCWatchOptionsEffectsTab_OnClick()
-	CCWatchOptionsBarsFrame:Hide();
-	CCWatchOptionsEffectsFrame:Show();
-	CCWatchOptionsLearnFrame:Hide();
+function auraeOptionsEffectsTab_OnClick()
+	auraeOptionsBarsFrame:Hide();
+	auraeOptionsEffectsFrame:Show();
+	auraeOptionsLearnFrame:Hide();
 
 	PlaySound"igMainMenuOptionCheckBoxOn"
 end
 
-function CCWatchOptionsLearnTab_OnClick()
-	CCWatchOptionsBarsFrame:Hide();
-	CCWatchOptionsEffectsFrame:Hide();
-	CCWatchOptionsLearnFrame:Show();
+function auraeOptionsLearnTab_OnClick()
+	auraeOptionsBarsFrame:Hide();
+	auraeOptionsEffectsFrame:Hide();
+	auraeOptionsLearnFrame:Show();
 
 	PlaySound"igMainMenuOptionCheckBoxOn"
 end
 
-function CCWatchOptionsBarsFrame_OnShow()
-	CCWatchOptionsBarsTabTexture:Show()
-	CCWatchOptionsBarsTab:SetBackdropBorderColor(1, 1, 1, 1)
+function auraeOptionsBarsFrame_OnShow()
+	auraeOptionsBarsTabTexture:Show()
+	auraeOptionsBarsTab:SetBackdropBorderColor(1, 1, 1, 1)
 end
 
-function CCWatchOptionsEffectsFrame_OnShow()
-	CCWatchOptionsEffectsTabTexture:Show()
-	CCWatchOptionsEffectsTab:SetBackdropBorderColor(1, 1, 1, 1)
+function auraeOptionsEffectsFrame_OnShow()
+	auraeOptionsEffectsTabTexture:Show()
+	auraeOptionsEffectsTab:SetBackdropBorderColor(1, 1, 1, 1)
 end
 
-function CCWatchOptionsLearnFrame_OnShow()
-	CCWatchOptionsLearnTabTexture:Show()
-	CCWatchOptionsLearnTab:SetBackdropBorderColor(1, 1, 1, 1)
+function auraeOptionsLearnFrame_OnShow()
+	auraeOptionsLearnTabTexture:Show()
+	auraeOptionsLearnTab:SetBackdropBorderColor(1, 1, 1, 1)
 end
 
-function CCWatchOptionsBarsFrame_OnHide()
-	CCWatchOptionsBarsTabTexture:Hide()
-	CCWatchOptionsBarsTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0)
+function auraeOptionsBarsFrame_OnHide()
+	auraeOptionsBarsTabTexture:Hide()
+	auraeOptionsBarsTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0)
 end
 
-function CCWatchOptionsEffectsFrame_OnHide()
-	CCWatchOptionsEffectsTabTexture:Hide()
-	CCWatchOptionsEffectsTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0)
+function auraeOptionsEffectsFrame_OnHide()
+	auraeOptionsEffectsTabTexture:Hide()
+	auraeOptionsEffectsTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0)
 end
 
-function CCWatchOptionsLearnFrame_OnHide()
-	CCWatchOptionsLearnTabTexture:Hide()
-	CCWatchOptionsLearnTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0)
+function auraeOptionsLearnFrame_OnHide()
+	auraeOptionsLearnTabTexture:Hide()
+	auraeOptionsLearnTab:SetBackdropBorderColor(0.25, 0.25, 0.25, 1.0)
 end
 
 --------------------------------------------------------------------------------
 -- Bars Frame
 --------------------------------------------------------------------------------
 
-function CCWatchOptions_UnlockToggle()
-	if CCWATCH.STATUS == 2 then
-		CCWatch_BarLock();
-		CCWatch_AddMessage(CCWATCH_LOCKED);
+function auraeOptions_UnlockToggle()
+	if aurae.STATUS == 2 then
+		aurae_BarLock();
+		aurae_AddMessage(aurae_LOCKED);
 	else
-		CCWatch_BarUnlock();
-		CCWatch_AddMessage(CCWATCH_UNLOCKED);
+		aurae_BarUnlock();
+		aurae_AddMessage(aurae_UNLOCKED);
 	end
 end
 
-function CCWatchOptions_InvertToggle()
-	CCWATCH.INVERT = not CCWATCH.INVERT;
-	CCWatch_Save[CCWATCH.PROFILE].invert = CCWATCH.INVERT;
-	if CCWATCH.INVERT then
-		CCWatch_AddMessage(CCWATCH_INVERSION_ON);
+function auraeOptions_InvertToggle()
+	aurae.INVERT = not aurae.INVERT;
+	aurae_Save[aurae.PROFILE].invert = aurae.INVERT;
+	if aurae.INVERT then
+		aurae_AddMessage(aurae_INVERSION_ON);
 	else
-		CCWatch_AddMessage(CCWATCH_INVERSION_OFF);
+		aurae_AddMessage(aurae_INVERSION_OFF);
 	end
 end
 
-function CCWatchOptions_ColorOverTimeToggle()
-	CCWATCH.COLOROVERTIME = not CCWATCH.COLOROVERTIME;
-	CCWatch_Save[CCWATCH.PROFILE].ColorOverTime = CCWATCH.COLOROVERTIME;
-	if CCWATCH.COLOROVERTIME then
-		CCWatch_AddMessage(CCWATCH_COLOROVERTIME_ON);
+function auraeOptions_ColorOverTimeToggle()
+	aurae.COLOROVERTIME = not aurae.COLOROVERTIME;
+	aurae_Save[aurae.PROFILE].ColorOverTime = aurae.COLOROVERTIME;
+	if aurae.COLOROVERTIME then
+		aurae_AddMessage(aurae_COLOROVERTIME_ON);
 	else
-		CCWatch_AddMessage(CCWATCH_COLOROVERTIME_OFF);
+		aurae_AddMessage(aurae_COLOROVERTIME_OFF);
 	end
 end
 
-function CCWatchOptions_SetBarColorUrge()
-	CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue = CCWatchOptionsBarColorUrgeEdit:GetNumber();
-	CCWATCH.COTURGEVALUE = CCWatch_Save[CCWATCH.PROFILE].CoTUrgeValue;
+function auraeOptions_SetBarColorUrge()
+	aurae_Save[aurae.PROFILE].CoTUrgeValue = auraeOptionsBarColorUrgeEdit:GetNumber();
+	aurae.COTURGEVALUE = aurae_Save[aurae.PROFILE].CoTUrgeValue;
 end
 
-function CCWatchOptions_SetBarColorLow()
-	CCWatch_Save[CCWATCH.PROFILE].CoTLowValue = CCWatchOptionsBarColorLowEdit:GetNumber();
-	CCWATCH.COTLOWVALUE = CCWatch_Save[CCWATCH.PROFILE].CoTLowValue;
+function auraeOptions_SetBarColorLow()
+	aurae_Save[aurae.PROFILE].CoTLowValue = auraeOptionsBarColorLowEdit:GetNumber();
+	aurae.COTLOWVALUE = aurae_Save[aurae.PROFILE].CoTLowValue;
 end
 
-function CCWatchGrowthDropDown_OnInit()
-	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsMenuGrowthDropDown";
+function auraeGrowthDropDown_OnInit()
+	UIDROPDOWNMENU_INIT_MENU = "aurae_OptionsMenuGrowthDropDown";
 	local info = {}
 
-	info.text = CCWATCH_OPTION_GROWTH_UP
+	info.text = aurae_OPTION_GROWTH_UP
 	info.value = "up"
 	info.owner = this
-	info.func = CCWatchGrowthDropDown_OnClick
+	info.func = auraeGrowthDropDown_OnClick
 	UIDropDownMenu_AddButton(info)
 	
-	info.text = CCWATCH_OPTION_GROWTH_DOWN
+	info.text = aurae_OPTION_GROWTH_DOWN
 	info.value = "down"
 	info.owner = this
-	info.func = CCWatchGrowthDropDown_OnClick
+	info.func = auraeGrowthDropDown_OnClick
 	UIDropDownMenu_AddButton(info)
 end
 
-function CCWatchGrowthDropDown_OnClick()
+function auraeGrowthDropDown_OnClick()
 	if (this.value == "off") then
-		CCWatch_Save[CCWATCH.PROFILE].growth = 0;
-		CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth;
-		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_OFF);
-		CCWatch_AddMessage(CCWATCH_GROW_OFF);
+		aurae_Save[aurae.PROFILE].growth = 0;
+		aurae.GROWTH = aurae_Save[aurae.PROFILE].growth;
+		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_OFF);
+		aurae_AddMessage(aurae_GROW_OFF);
 	elseif( this.value == "up" ) then
-		CCWatch_Save[CCWATCH.PROFILE].growth = 1;
-		CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth;
-		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_UP);
-		CCWatch_AddMessage(CCWATCH_GROW_UP);
+		aurae_Save[aurae.PROFILE].growth = 1;
+		aurae.GROWTH = aurae_Save[aurae.PROFILE].growth;
+		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_UP);
+		aurae_AddMessage(aurae_GROW_UP);
 	elseif( this.value == "down" ) then
-		CCWatch_Save[CCWATCH.PROFILE].growth = 2;
-		CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth;
-		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN);
-		CCWatch_AddMessage(CCWATCH_GROW_DOWN);
+		aurae_Save[aurae.PROFILE].growth = 2;
+		aurae.GROWTH = aurae_Save[aurae.PROFILE].growth;
+		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_DOWN);
+		aurae_AddMessage(aurae_GROW_DOWN);
 	end
 end
 
@@ -194,87 +194,87 @@ end
 -- Monitor Frame
 --------------------------------------------------------------------------------
 
-function CCWatchOptions_MonitorCCToggle()
-	CCWATCH.MONITORING = bit.bxor(CCWATCH.MONITORING, ETYPE_CC)
-	CCWatch_Save[CCWATCH.PROFILE].Monitoring = CCWATCH.MONITORING
-	if bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF) == 0 then
-		if bit.band(CCWATCH.MONITORING, ETYPE_CC) ~= 0 then
-			CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
-			CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
+function auraeOptions_MonitorCCToggle()
+	aurae.MONITORING = bit.bxor(aurae.MONITORING, ETYPE_CC)
+	aurae_Save[aurae.PROFILE].Monitoring = aurae.MONITORING
+	if bit.band(aurae.MONITORING, ETYPE_DEBUFF) == 0 then
+		if bit.band(aurae.MONITORING, ETYPE_CC) ~= 0 then
+			auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		else
-			CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
-			CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
+			auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		end
 	end
 end
 
-function CCWatchOptions_MonitorDebuffToggle()
-	CCWATCH.MONITORING = bit.bxor(CCWATCH.MONITORING, ETYPE_DEBUFF)
-	CCWatch_Save[CCWATCH.PROFILE].Monitoring = CCWATCH.MONITORING
-	if bit.band(CCWATCH.MONITORING, ETYPE_CC) == 0 then
-		if bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF) ~= 0 then
-			CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
-			CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
+function auraeOptions_MonitorDebuffToggle()
+	aurae.MONITORING = bit.bxor(aurae.MONITORING, ETYPE_DEBUFF)
+	aurae_Save[aurae.PROFILE].Monitoring = aurae.MONITORING
+	if bit.band(aurae.MONITORING, ETYPE_CC) == 0 then
+		if bit.band(aurae.MONITORING, ETYPE_DEBUFF) ~= 0 then
+			auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		else
-			CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
-			CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
+			auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		end
 	end
 end
 
-function CCWatchOptions_MonitorBuffToggle()
-	CCWATCH.MONITORING = bit.bxor(CCWATCH.MONITORING, ETYPE_BUFF)
-	CCWatch_Save[CCWATCH.PROFILE].Monitoring = CCWATCH.MONITORING
-	if bit.band(CCWATCH.MONITORING, ETYPE_BUFF) ~= 0 then
-		CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"
-		CCWatchObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"
+function auraeOptions_MonitorBuffToggle()
+	aurae.MONITORING = bit.bxor(aurae.MONITORING, ETYPE_BUFF)
+	aurae_Save[aurae.PROFILE].Monitoring = aurae.MONITORING
+	if bit.band(aurae.MONITORING, ETYPE_BUFF) ~= 0 then
+		auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"
+		auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"
 	else
-		CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"
-		CCWatchObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"
+		auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"
+		auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"
 	end
 end
 
-function CCWatchOptions_ArcanistToggle()
-	CCWATCH.ARCANIST = not CCWATCH.ARCANIST
-	CCWatch_Save[CCWATCH.PROFILE].arcanist = CCWATCH.ARCANIST
-	if CCWATCH.ARCANIST then
-		CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION = CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION + 15
-		CCWatch_AddMessage(CCWATCH_ARCANIST_ON)
+function auraeOptions_ArcanistToggle()
+	aurae.ARCANIST = not aurae.ARCANIST
+	aurae_Save[aurae.PROFILE].arcanist = aurae.ARCANIST
+	if aurae.ARCANIST then
+		aurae.EFFECTS[aurae_POLYMORPH].DURATION = aurae.EFFECTS[aurae_POLYMORPH].DURATION + 15
+		aurae_AddMessage(aurae_ARCANIST_ON)
 	else
-		CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION = CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION - 15
-		CCWatch_AddMessage(CCWATCH_ARCANIST_OFF)
+		aurae.EFFECTS[aurae_POLYMORPH].DURATION = aurae.EFFECTS[aurae_POLYMORPH].DURATION - 15
+		aurae_AddMessage(aurae_ARCANIST_OFF)
 	end
-	CCWatchOptionsFrameArcanist:SetChecked(CCWATCH.ARCANIST)
+	auraeOptionsFrameArcanist:SetChecked(aurae.ARCANIST)
 end
 
-function CCWatchOptionsStyleDropDown_OnInit()
-	UIDROPDOWNMENU_INIT_MENU = "CCWatch_OptionsStyleDropDown"
+function auraeOptionsStyleDropDown_OnInit()
+	UIDROPDOWNMENU_INIT_MENU = "aurae_OptionsStyleDropDown"
 	local info = {}
 
-	info.text = CCWATCH_OPTION_STYLE_RECENT
+	info.text = aurae_OPTION_STYLE_RECENT
 	info.value = "recent"
 	info.owner = this
-	info.func = CCWatchOptionsStyleDropDown_OnClick
+	info.func = auraeOptionsStyleDropDown_OnClick
 	UIDropDownMenu_AddButton(info)
 	
-	info.text = CCWATCH_OPTION_STYLE_ALL
+	info.text = aurae_OPTION_STYLE_ALL
 	info.value = "all"
 	info.owner = this
-	info.func = CCWatchOptionsStyleDropDown_OnClick
+	info.func = auraeOptionsStyleDropDown_OnClick
 	UIDropDownMenu_AddButton(info)
 end
 
-function CCWatchOptionsStyleDropDown_OnClick()
+function auraeOptionsStyleDropDown_OnClick()
 	if this.value == "recent" then
-		CCWatch_Save[CCWATCH.PROFILE].style = 1
-		CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_RECENT)
-		CCWatch_AddMessage(CCWATCH_STYLE_RECENT)
+		aurae_Save[aurae.PROFILE].style = 1
+		aurae.STYLE = aurae_Save[aurae.PROFILE].style
+		auraeOptionsStyleDropDownText:SetText(aurae_OPTION_STYLE_RECENT)
+		aurae_AddMessage(aurae_STYLE_RECENT)
 	elseif this.value == "all" then
-		CCWatch_Save[CCWATCH.PROFILE].style = 2
-		CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_ALL)
-		CCWatch_AddMessage(CCWATCH_STYLE_ALL)
+		aurae_Save[aurae.PROFILE].style = 2
+		aurae.STYLE = aurae_Save[aurae.PROFILE].style
+		auraeOptionsStyleDropDownText:SetText(aurae_OPTION_STYLE_ALL)
+		aurae_AddMessage(aurae_STYLE_ALL)
 	end
 end
 
@@ -282,38 +282,38 @@ end
 -- Learn Frame
 --------------------------------------------------------------------------------
 
-function CCWatchOptions_MonitorToggle()
+function auraeOptions_MonitorToggle()
 end
 
-function CCWatchOptionsLearnModify_OnClick()
-	local monitor = CCWatchOptionsEffectMonitor:GetChecked()
+function auraeOptionsLearnModify_OnClick()
+	local monitor = auraeOptionsEffectMonitor:GetChecked()
 	local color = {
-		r = CCWatchOptionsBarColorEffect.r,
-		g = CCWatchOptionsBarColorEffect.g,
-		b = CCWatchOptionsBarColorEffect.b,
+		r = auraeOptionsBarColorEffect.r,
+		g = auraeOptionsBarColorEffect.g,
+		b = auraeOptionsBarColorEffect.b,
 	}
-	CCWatch_ModifyEffect(CCWatchEffectSelection, monitor, color)
+	aurae_ModifyEffect(auraeEffectSelection, monitor, color)
 end
 
 --------------------------------------------------------------------------------
 -- Custom effect management
 --------------------------------------------------------------------------------
 
-function CCWatch_ModifyEffect(effect, monitor, color)
-	CCWatch_Save[CCWATCH.PROFILE].ConfCC[effect] = {
+function aurae_ModifyEffect(effect, monitor, color)
+	aurae_Save[aurae.PROFILE].ConfCC[effect] = {
 		MONITOR = monitor,
 		COLOR = color,
 	}
-	CCWatch_LoadConfCCs()
+	aurae_LoadConfCCs()
 end
 
-function CCWatch_SetColorCallback(id)
+function aurae_SetColorCallback(id)
 	local iRed, iGreen, iBlue = ColorPickerFrame:GetColorRGB()
 	local swatch, button, border
 
-	button = getglobal("CCWatchOptionsBarColor" .. id)
-	swatch = getglobal("CCWatchOptionsBarColor" .. id .. "_SwatchTexture")
-	border = getglobal("CCWatchOptionsBarColor" .. id .. "_BorderTexture")
+	button = getglobal("auraeOptionsBarColor" .. id)
+	swatch = getglobal("auraeOptionsBarColor" .. id .. "_SwatchTexture")
+	border = getglobal("auraeOptionsBarColor" .. id .. "_BorderTexture")
 
 	swatch:SetVertexColor(iRed, iGreen, iBlue)
 	border:SetVertexColor(iRed, iGreen, iBlue)
@@ -322,33 +322,33 @@ function CCWatch_SetColorCallback(id)
 	button.b = iBlue
 
 	if id == "Urge" then
-		CCWATCH.COTURGECOLOR.r = iRed
-		CCWATCH.COTURGECOLOR.g = iGreen
-		CCWATCH.COTURGECOLOR.b = iBlue
-		CCWatch_Save[CCWATCH.PROFILE].CoTUrgeColor = CCWATCH.COTURGECOLOR
+		aurae.COTURGECOLOR.r = iRed
+		aurae.COTURGECOLOR.g = iGreen
+		aurae.COTURGECOLOR.b = iBlue
+		aurae_Save[aurae.PROFILE].CoTUrgeColor = aurae.COTURGECOLOR
 	elseif id == "Low" then
-		CCWATCH.COTLOWCOLOR.r = iRed
-		CCWATCH.COTLOWCOLOR.g = iGreen
-		CCWATCH.COTLOWCOLOR.b = iBlue
-		CCWatch_Save[CCWATCH.PROFILE].CoTLowColor = CCWATCH.COTLOWCOLOR
+		aurae.COTLOWCOLOR.r = iRed
+		aurae.COTLOWCOLOR.g = iGreen
+		aurae.COTLOWCOLOR.b = iBlue
+		aurae_Save[aurae.PROFILE].CoTLowColor = aurae.COTLOWCOLOR
 	elseif id == "Normal" then
-		CCWATCH.COTNORMALCOLOR.r = iRed
-		CCWATCH.COTNORMALCOLOR.g = iGreen
-		CCWATCH.COTNORMALCOLOR.b = iBlue
-		CCWatch_Save[CCWATCH.PROFILE].CoTNormalColor = CCWATCH.COTNORMALCOLOR
+		aurae.COTNORMALCOLOR.r = iRed
+		aurae.COTNORMALCOLOR.g = iGreen
+		aurae.COTNORMALCOLOR.b = iBlue
+		aurae_Save[aurae.PROFILE].CoTNormalColor = aurae.COTNORMALCOLOR
 	end
 end
 
-function CCWatch_CancelColorCallback(id, prev)
+function aurae_CancelColorCallback(id, prev)
 	local iRed = prev.r
 	local iGreen = prev.g
 	local iBlue = prev.b
 
 	local swatch, button, border
 
-	button = getglobal("CCWatchOptionsBarColor" .. id)
-	swatch = getglobal("CCWatchOptionsBarColor" .. id .. "_SwatchTexture")
-	border = getglobal("CCWatchOptionsBarColor" .. id .. "_BorderTexture")
+	button = getglobal("auraeOptionsBarColor" .. id)
+	swatch = getglobal("auraeOptionsBarColor" .. id .. "_SwatchTexture")
+	border = getglobal("auraeOptionsBarColor" .. id .. "_BorderTexture")
 	
 	swatch:SetVertexColor(iRed, iGreen, iBlue);
 	border:SetVertexColor(iRed, iGreen, iBlue);
@@ -359,79 +359,79 @@ end
 
 
 
-function CCWatchOptionsLearnFillFields()
-	if CCWatchEffectSelection == nil then
+function auraeOptionsLearnFillFields()
+	if auraeEffectSelection == nil then
 		return
 	end
 
-	CCWatchOptionsEffectNameStatic:SetText(CCWatchEffectSelection)
-	CCWatchOptionsEffectDurationStatic:SetText(CCWATCH.EFFECTS[CCWatchEffectSelection].DURATION)
+	auraeOptionsEffectNameStatic:SetText(auraeEffectSelection)
+	auraeOptionsEffectDurationStatic:SetText(aurae.EFFECTS[auraeEffectSelection].DURATION)
 
-	if CCWATCH.EFFECTS[CCWatchEffectSelection].ETYPE == ETYPE_BUFF then
-		CCWatchOptionsEffectType:SetText"BUFF"
-	elseif CCWATCH.EFFECTS[CCWatchEffectSelection].ETYPE == ETYPE_DEBUFF then
-		CCWatchOptionsEffectType:SetText"DEBUFF"
+	if aurae.EFFECTS[auraeEffectSelection].ETYPE == ETYPE_BUFF then
+		auraeOptionsEffectType:SetText"BUFF"
+	elseif aurae.EFFECTS[auraeEffectSelection].ETYPE == ETYPE_DEBUFF then
+		auraeOptionsEffectType:SetText"DEBUFF"
 	else
-		CCWatchOptionsEffectType:SetText"CC"
+		auraeOptionsEffectType:SetText"CC"
 	end
 
-	CCWatchOptionsBarColorEffect:Enable()
-	if CCWATCH.EFFECTS[CCWatchEffectSelection].COLOR ~= nil then
-		SetButtonPickerColor("CCWatchOptionsBarColorEffect", CCWATCH.EFFECTS[CCWatchEffectSelection].COLOR)
+	auraeOptionsBarColorEffect:Enable()
+	if aurae.EFFECTS[auraeEffectSelection].COLOR ~= nil then
+		SetButtonPickerColor("auraeOptionsBarColorEffect", aurae.EFFECTS[auraeEffectSelection].COLOR)
 	else
-		SetButtonPickerColor("CCWatchOptionsBarColorEffect", { r=1, g=1, b=1 })
+		SetButtonPickerColor("auraeOptionsBarColorEffect", { r=1, g=1, b=1 })
 	end
 
-	CCWatchOptionsEffectMonitor:SetChecked(CCWATCH.EFFECTS[CCWatchEffectSelection].MONITOR)
-	CCWatchOptionsEffectMonitor:Enable()
+	auraeOptionsEffectMonitor:SetChecked(aurae.EFFECTS[auraeEffectSelection].MONITOR)
+	auraeOptionsEffectMonitor:Enable()
 end
 
-function CCWatchOptions_OnLoad()
-	UIPanelWindows.CCWatchOptionsFrame = { area='center', pushable=1 }
+function auraeOptions_OnLoad()
+	UIPanelWindows.auraeOptionsFrame = { area='center', pushable=1 }
 end
 
 --------------------------------------------------------------------------------
 -- Init
 --------------------------------------------------------------------------------
-function CCWatchOptions_Init()
-	CCWatchSliderAlpha:SetValue(CCWATCH.ALPHA)
-	CCWatchSliderScale:SetValue(CCWATCH.SCALE)
-	CCWatchSliderWidth:SetValue(CCWATCH.WIDTH)
+function auraeOptions_Init()
+	auraeSliderAlpha:SetValue(aurae.ALPHA)
+	auraeSliderScale:SetValue(aurae.SCALE)
+	auraeSliderWidth:SetValue(aurae.WIDTH)
 
-	CCWatchOptionsFrameMonitorCC:SetChecked(bit.band(CCWATCH.MONITORING, ETYPE_CC))
-	CCWatchOptionsFrameMonitorDebuff:SetChecked(bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF))
-	CCWatchOptionsFrameMonitorBuff:SetChecked(bit.band(CCWATCH.MONITORING, ETYPE_BUFF))
+	auraeOptionsFrameMonitorCC:SetChecked(bit.band(aurae.MONITORING, ETYPE_CC))
+	auraeOptionsFrameMonitorDebuff:SetChecked(bit.band(aurae.MONITORING, ETYPE_DEBUFF))
+	auraeOptionsFrameMonitorBuff:SetChecked(bit.band(aurae.MONITORING, ETYPE_BUFF))
 
-	CCWatchOptionsFrameUnlock:SetChecked(CCWATCH.STATUS == 2)
-	CCWatchOptionsFrameInvert:SetChecked(CCWATCH.INVERT)
-	CCWatchOptionsFrameArcanist:SetChecked(CCWATCH.ARCANIST)
+	auraeOptionsFrameUnlock:SetChecked(aurae.STATUS == 2)
+	auraeOptionsFrameInvert:SetChecked(aurae.INVERT)
+	auraeOptionsFrameArcanist:SetChecked(aurae.ARCANIST)
 
-	CCWatchOptionsBarColorEffect:Disable()
-	CCWatchOptionsEffectMonitor:Disable()
+	auraeOptionsBarColorEffect:Disable()
+	auraeOptionsEffectMonitor:Disable()
 
-	if CCWATCH.GROWTH == 1 then
-		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_UP)
+	if aurae.GROWTH == 1 then
+		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_UP)
 	else
-		CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN)
+		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_DOWN)
 	end
 
-	if CCWATCH.STYLE == 1 then
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_RECENT)
+	if aurae.STYLE == 1 then
+		auraeOptionsStyleDropDownText:SetText(aurae_OPTION_STYLE_RECENT)
 	else
-		CCWatchOptionsStyleDropDownText:SetText(CCWATCH_OPTION_STYLE_ALL)
+		auraeOptionsStyleDropDownText:SetText(aurae_OPTION_STYLE_ALL)
 	end
 
 	UpdateSortTable()
-	CCWatchOptionsEffects_Update()
+	auraeOptionsEffects_Update()
 
-	CCWatchOptionsBarColorEffect.swatchFunc = CCWatchConfig_SwatchFunc_SetColor.Effect
-	CCWatchOptionsBarColorEffect.cancelFunc = CCWatchConfig_SwatchFunc_CancelColor.Effect
+	auraeOptionsBarColorEffect.swatchFunc = auraeConfig_SwatchFunc_SetColor.Effect
+	auraeOptionsBarColorEffect.cancelFunc = auraeConfig_SwatchFunc_CancelColor.Effect
 
-	CCWatchOptionsBarsFrame:Show()
-	CCWatchOptionsEffectsTabTexture:Hide()
-	CCWatchOptionsEffectsTab:SetBackdropBorderColor(.25, .25, .25, 1)
-	CCWatchOptionsLearnTabTexture:Hide()
-	CCWatchOptionsLearnTab:SetBackdropBorderColor(.25, .25, .25, 1)
+	auraeOptionsBarsFrame:Show()
+	auraeOptionsEffectsTabTexture:Hide()
+	auraeOptionsEffectsTab:SetBackdropBorderColor(.25, .25, .25, 1)
+	auraeOptionsLearnTabTexture:Hide()
+	auraeOptionsLearnTab:SetBackdropBorderColor(.25, .25, .25, 1)
 end
 
 --------------------------------------------------------------------------------
@@ -448,8 +448,8 @@ local function EffectsUpdate(k, v)
 		return
 	end
 
-	local itemSlot = getglobal("CCWatchOptionsEffectsItem" .. (item - curoffset + 1))
-	if v == CCWatchEffectSelection then
+	local itemSlot = getglobal("auraeOptionsEffectsItem" .. (item - curoffset + 1))
+	if v == auraeEffectSelection then
 		itemSlot:SetTextColor(1, 1, 0)
 	else
 		itemSlot:SetTextColor(1, 1, 1)
@@ -458,22 +458,22 @@ local function EffectsUpdate(k, v)
 	itemSlot:Show()
 end
 
-function CCWatchOptionsEffects_Update()
+function auraeOptionsEffects_Update()
 	CCcount = 0
 
 	CCcount = getn(DisplayTable)
 
-	FauxScrollFrame_Update(CCWatchOptionsEffectsListScrollFrame, CCcount, 11, 16)
+	FauxScrollFrame_Update(auraeOptionsEffectsListScrollFrame, CCcount, 11, 16)
 
 	item = -1
-	curoffset = FauxScrollFrame_GetOffset(CCWatchOptionsEffectsListScrollFrame)
+	curoffset = FauxScrollFrame_GetOffset(auraeOptionsEffectsListScrollFrame)
 
 	table.foreach(DisplayTable, EffectsUpdate)
 end
 
 -- Tooltip Window
 
-function CCWatchOptionsEffects_OnEnter()
+function auraeOptionsEffects_OnEnter()
 	GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
 
 	local spellname = this:GetText()
@@ -481,20 +481,20 @@ function CCWatchOptionsEffects_OnEnter()
 		return
 	end
 
-	if CCWATCH.EFFECTS[spellname] == nil then
-		CCWatch_AddMessage("Error : '" .. spellname .. "' not found in effect array.")
+	if aurae.EFFECTS[spellname] == nil then
+		aurae_AddMessage("Error : '" .. spellname .. "' not found in effect array.")
 		return
 	end
-	local str = spellname .. "\nDuration: " .. CCWATCH.EFFECTS[spellname].DURATION .. "\nType: "
-	if CCWATCH.EFFECTS[spellname].ETYPE == ETYPE_BUFF then
+	local str = spellname .. "\nDuration: " .. aurae.EFFECTS[spellname].DURATION .. "\nType: "
+	if aurae.EFFECTS[spellname].ETYPE == ETYPE_BUFF then
 		str = str .. "Buff"
-	elseif CCWATCH.EFFECTS[spellname].ETYPE == ETYPE_DEBUFF then
+	elseif aurae.EFFECTS[spellname].ETYPE == ETYPE_DEBUFF then
 		str = str .. "DeBuff"
 	else
 		str = str .. "CC"
 	end
 	str = str .. "\nMonitor: "
-	if CCWATCH.EFFECTS[spellname].MONITOR then
+	if aurae.EFFECTS[spellname].MONITOR then
 		str = str .. "on"
 	else
 		str = str .. "off"
@@ -505,11 +505,11 @@ end
 
 -- Confirm dialog frame
 
-function CCWatch_OpenDiagToggle()
-	if (CCWatch_DiagOpen) then
-		CCWatch_DiagOpen = false
+function aurae_OpenDiagToggle()
+	if (aurae_DiagOpen) then
+		aurae_DiagOpen = false
 	else
-		CCWatch_DiagOpen = true
+		aurae_DiagOpen = true
 	end
 end
 

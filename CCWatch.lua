@@ -1,10 +1,10 @@
-CCWatchLoaded = false
+auraeLoaded = false
 
-CCWatchObject = nil
+auraeObject = nil
 
-CCWATCH_MAXBARS = 10
+aurae_MAXBARS = 10
 
-CCWATCH_SCHOOL = {
+aurae_SCHOOL = {
 	NONE = {1, 1, 1},
 	PHYSICAL = {1, 1, 0},
 	HOLY = {1, .9, .5},
@@ -59,7 +59,7 @@ do
 		return 1 / 2^(dr[key].level - 1) * seconds
 	end
 
-	function CCWatch_DiminishedDuration(unit, effect, full_duration)
+	function aurae_DiminishedDuration(unit, effect, full_duration)
 		local class = DR_CLASS[effect]
 		if class then
 			local key = unit .. '|' .. class
@@ -103,7 +103,7 @@ local function create_bar(name)
 	local bgcolor = {0, .5, .5, .5}
 	local icon = bar.icon or nil
 	local iconpos = 'LEFT'
-	local texture = [[Interface\Addons\CCWatch\Textures\BantoBar]]
+	local texture = [[Interface\Addons\aurae\Textures\BantoBar]]
 	local width = 200
 	local height = 16
 	local point = 'CENTER'
@@ -234,39 +234,39 @@ local function format_time(t)
 	end
 end
 
---	if CCWatch_Save[CCWATCH.PROFILE].WarnSelf then
+--	if aurae_Save[aurae.PROFILE].WarnSelf then
 --		local info = ChatTypeInfo.RAID_WARNING
 --		RaidWarningFrame:AddMessage(msg, info.r, info.g, info.b, 1)
 --		PlaySound'RaidWarning'
 --	end
 
-function CCWatch_Config()
-	CCWATCH.EFFECTS = {}
+function aurae_Config()
+	aurae.EFFECTS = {}
 
-	CCWatch_ConfigCC()
-	CCWatch_ConfigDebuff()
-	CCWatch_ConfigBuff()
+	aurae_ConfigCC()
+	aurae_ConfigDebuff()
+	aurae_ConfigBuff()
 end
 
-function CCWatch_OnLoad()
-	CCWatch_Globals()
+function aurae_OnLoad()
+	aurae_Globals()
 
 	local dummy_timer = { stopped=0 }
 	for k, type in {'CC', 'Buff', 'Debuff'} do
-		for i = 1, CCWATCH_MAXBARS do
-			local name = 'CCWatchBar' .. type .. i
+		for i = 1, aurae_MAXBARS do
+			local name = 'auraeBar' .. type .. i
 			local bar = create_bar(name)
-			bar.frame:SetParent(getglobal('CCWatch' .. type))
+			bar.frame:SetParent(getglobal('aurae' .. type))
 			bar.frame:SetPoint('TOPLEFT', 0, -100 + i * 20)
 			setglobal(name, bar.frame)
 			bar.TIMER = dummy_timer
-			tinsert(CCWATCH['GROUPS' .. strupper(type)], bar)
+			tinsert(aurae['GROUPS' .. strupper(type)], bar)
 		end
 	end
 
-	CCWatch_Config()
+	aurae_Config()
 
-	CCWatchObject = this
+	auraeObject = this
 
 	this:RegisterEvent'UNIT_COMBAT'
 
@@ -286,24 +286,24 @@ function CCWatch_OnLoad()
 	this:RegisterEvent'UPDATE_MOUSEOVER_UNIT'
 	this:RegisterEvent'UPDATE_BATTLEFIELD_SCORE'
 
-	SLASH_CCWATCH1 = "/ccwatch"
-	SLASH_CCWATCH2 = "/ccw"
-	SlashCmdList.CCWATCH = CCWatch_SlashCommandHandler
+	SLASH_aurae1 = "/aurae"
+	SLASH_aurae2 = "/ccw"
+	SlashCmdList.aurae = aurae_SlashCommandHandler
 
-	CCWatch_AddMessage(CCWATCH_FULLVERSION .. CCWATCH_LOADED)
+	aurae_AddMessage(aurae_FULLVERSION .. aurae_LOADED)
 end
 
-function CCWatch_BarUnlock()
-	CCWATCH.STATUS = 2
+function aurae_BarUnlock()
+	aurae.STATUS = 2
 	for _, type in {'CC', 'Buff', 'Debuff'} do
-		getglobal('CCWatch' .. type):EnableMouse(1)
-		for i = 1, CCWATCH_MAXBARS do
-			local f = getglobal('CCWatchBar' .. type .. i)
-			f:SetAlpha(CCWATCH.ALPHA)
+		getglobal('aurae' .. type):EnableMouse(1)
+		for i = 1, aurae_MAXBARS do
+			local f = getglobal('auraeBar' .. type .. i)
+			f:SetAlpha(aurae.ALPHA)
 			f.statusbar:SetStatusBarColor(1, 1, 1)
 			f.statusbar:SetValue(1)
 			f.icon:SetNormalTexture[[Interface\Icons\INV_Misc_QuestionMark]]
-			f.text:SetText('CCWatch ' .. type .. ' Bar ' .. i)
+			f.text:SetText('aurae ' .. type .. ' Bar ' .. i)
 			f.timertext:SetText''
 			f.spark:Hide()
 			-- getglobal(barname.."StatusBarSpark"):SetPoint("CENTER", barname.."StatusBar", "LEFT", 0, 0)
@@ -311,155 +311,155 @@ function CCWatch_BarUnlock()
 	end
 end
 
-function CCWatch_BarLock()
-	CCWATCH.STATUS = 1
-	CCWatchCC:EnableMouse(0)
-	CCWatchDebuff:EnableMouse(0)
-	CCWatchBuff:EnableMouse(0)
+function aurae_BarLock()
+	aurae.STATUS = 1
+	auraeCC:EnableMouse(0)
+	auraeDebuff:EnableMouse(0)
+	auraeBuff:EnableMouse(0)
 
-	for i = 1, CCWATCH_MAXBARS do
-		getglobal("CCWatchBarCC" .. i):SetAlpha(0)
-		getglobal("CCWatchBarDebuff" .. i):SetAlpha(0)
-		getglobal("CCWatchBarBuff" .. i):SetAlpha(0)
+	for i = 1, aurae_MAXBARS do
+		getglobal("auraeBarCC" .. i):SetAlpha(0)
+		getglobal("auraeBarDebuff" .. i):SetAlpha(0)
+		getglobal("auraeBarBuff" .. i):SetAlpha(0)
 	end
 end
 
-function CCWatch_SlashCommandHandler(msg)
+function aurae_SlashCommandHandler(msg)
 	if msg then
 		local command = strlower(msg)
 		if command == "on" then
-			if CCWATCH.STATUS == 0 then
-				CCWATCH.STATUS = 1
-				CCWatch_Save[CCWATCH.PROFILE].status = CCWATCH.STATUS
-				CCWatch_AddMessage(CCWATCH_ENABLED)
+			if aurae.STATUS == 0 then
+				aurae.STATUS = 1
+				aurae_Save[aurae.PROFILE].status = aurae.STATUS
+				aurae_AddMessage(aurae_ENABLED)
 			end
 		elseif command == "off" then
-			if CCWATCH.STATUS ~= 0 then
-				CCWATCH.STATUS = 0
-				CCWatch_Save[CCWATCH.PROFILE].status = CCWATCH.STATUS
-				CCWatch_AddMessage(CCWATCH_DISABLED)
+			if aurae.STATUS ~= 0 then
+				aurae.STATUS = 0
+				aurae_Save[aurae.PROFILE].status = aurae.STATUS
+				aurae_AddMessage(aurae_DISABLED)
 			end
 		elseif command == "unlock" then
-			CCWatch_BarUnlock()
-			CCWatch_AddMessage(CCWATCH_UNLOCKED)
-			CCWatchOptionsFrameUnlock:SetChecked(true)
+			aurae_BarUnlock()
+			aurae_AddMessage(aurae_UNLOCKED)
+			auraeOptionsFrameUnlock:SetChecked(true)
 		elseif command == "lock" then
-			CCWatch_BarLock()
-			CCWatch_AddMessage(CCWATCH_LOCKED)
-			CCWatchOptionsFrameUnlock:SetChecked(false)
+			aurae_BarLock()
+			aurae_AddMessage(aurae_LOCKED)
+			auraeOptionsFrameUnlock:SetChecked(false)
 		elseif command == "invert" then
-			CCWATCH.INVERT = not CCWATCH.INVERT
-			CCWatch_Save[CCWATCH.PROFILE].invert = CCWATCH.INVERT
-			if CCWATCH.INVERT then
-				CCWatch_AddMessage(CCWATCH_INVERSION_ON)
+			aurae.INVERT = not aurae.INVERT
+			aurae_Save[aurae.PROFILE].invert = aurae.INVERT
+			if aurae.INVERT then
+				aurae_AddMessage(aurae_INVERSION_ON)
 			else
-				CCWatch_AddMessage(CCWATCH_INVERSION_OFF)
+				aurae_AddMessage(aurae_INVERSION_OFF)
 			end
-			CCWatchOptionsFrameInvert:SetChecked(CCWATCH.INVERT)
+			auraeOptionsFrameInvert:SetChecked(aurae.INVERT)
 		elseif command == "grow up" then
-			CCWatch_Save[CCWATCH.PROFILE].growth = 1
-			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
-			CCWatch_AddMessage(CCWATCH_GROW_UP)
-			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_UP)
+			aurae_Save[aurae.PROFILE].growth = 1
+			aurae.GROWTH = aurae_Save[aurae.PROFILE].growth
+			aurae_AddMessage(aurae_GROW_UP)
+			auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_UP)
 		elseif command == "grow down" then
-			CCWatch_Save[CCWATCH.PROFILE].growth = 2
-			CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
-			CCWatch_AddMessage(CCWATCH_GROW_DOWN)
-			CCWatchGrowthDropDownText:SetText(CCWATCH_OPTION_GROWTH_DOWN)
+			aurae_Save[aurae.PROFILE].growth = 2
+			aurae.GROWTH = aurae_Save[aurae.PROFILE].growth
+			aurae_AddMessage(aurae_GROW_DOWN)
+			auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_DOWN)
 		elseif command == "color school" then
-			CCWatch_Save[CCWATCH.PROFILE].color = CTYPE_SCHOOL
-			CCWatch_AddMessage'School color enabled.'
+			aurae_Save[aurae.PROFILE].color = CTYPE_SCHOOL
+			aurae_AddMessage'School color enabled.'
 		elseif command == "color progress" then
-			CCWatch_Save[CCWATCH.PROFILE].color = CTYPE_PROGRESS
-			CCWatch_AddMessage'Progress color enabled.'
+			aurae_Save[aurae.PROFILE].color = CTYPE_PROGRESS
+			aurae_AddMessage'Progress color enabled.'
 		elseif command == "color custom" then
-			CCWatch_Save[CCWATCH.PROFILE].color = CTYPE_CUSTOM
-			CCWatch_AddMessage'Custom color enabled.'
+			aurae_Save[aurae.PROFILE].color = CTYPE_CUSTOM
+			aurae_AddMessage'Custom color enabled.'
 		elseif command == "clear" then
-			CCWatch_Save[CCWATCH.PROFILE] = nil
-			CCWatch_Globals()
-			CCWatch_Config()
-			CCWatch_LoadVariables()
+			aurae_Save[aurae.PROFILE] = nil
+			aurae_Globals()
+			aurae_Config()
+			aurae_LoadVariables()
 		elseif command == "u" then
-			CCWatch_Config()
-			CCWatch_LoadConfCCs()
-			CCWatch_UpdateClassSpells(true)
+			aurae_Config()
+			aurae_LoadConfCCs()
+			aurae_UpdateClassSpells(true)
 		elseif command == "config" then
-			CCWatchOptionsFrame:Show()
+			auraeOptionsFrame:Show()
 		elseif strsub(command, 1, 5) == "scale" then
 			local scale = tonumber(strsub(command, 7))
 			if scale <= 3 and scale >= .25 then
-				CCWatch_Save[CCWATCH.PROFILE].scale = scale
-				CCWATCH.SCALE = scale
-				CCWatchCC:SetScale(CCWATCH.SCALE)
-				CCWatchDebuff:SetScale(CCWATCH.SCALE)
-				CCWatchBuff:SetScale(CCWATCH.SCALE)
-				CCWatch_AddMessage(CCWATCH_SCALE .. scale)
-				CCWatchSliderScale:SetValue(CCWATCH.SCALE)
+				aurae_Save[aurae.PROFILE].scale = scale
+				aurae.SCALE = scale
+				auraeCC:SetScale(aurae.SCALE)
+				auraeDebuff:SetScale(aurae.SCALE)
+				auraeBuff:SetScale(aurae.SCALE)
+				aurae_AddMessage(aurae_SCALE .. scale)
+				auraeSliderScale:SetValue(aurae.SCALE)
 			else
-				CCWatch_Help()
+				aurae_Help()
 			end
 		elseif strsub(command, 1, 5) == "width" then
 			local width = tonumber(strsub(command, 7))
 			if width <= 300 and width >= 50 then
-				CCWatch_Save[CCWATCH.PROFILE].width = width
-				CCWATCH.WIDTH = width
-				CCWatch_SetWidth(CCWATCH.WIDTH)
-				CCWatch_AddMessage(CCWATCH_WIDTH .. width)
-				CCWatchSliderWidth:SetValue(CCWATCH.WIDTH)
+				aurae_Save[aurae.PROFILE].width = width
+				aurae.WIDTH = width
+				aurae_SetWidth(aurae.WIDTH)
+				aurae_AddMessage(aurae_WIDTH .. width)
+				auraeSliderWidth:SetValue(aurae.WIDTH)
 			else
-				CCWatch_Help()
+				aurae_Help()
 			end
 		elseif strsub(command, 1, 5) == "alpha" then
 			local alpha = tonumber(strsub(command, 7))
 			if alpha <= 1 and alpha >= 0 then
-				CCWatch_Save[CCWATCH.PROFILE].alpha = alpha
-				CCWATCH.ALPHA = alpha
-				CCWatch_AddMessage(CCWATCH_ALPHA..alpha)
-				CCWatchSliderAlpha:SetValue(CCWATCH.ALPHA)
+				aurae_Save[aurae.PROFILE].alpha = alpha
+				aurae.ALPHA = alpha
+				aurae_AddMessage(aurae_ALPHA..alpha)
+				auraeSliderAlpha:SetValue(aurae.ALPHA)
 			else
-				CCWatch_Help()
+				aurae_Help()
 			end
 		elseif command == "print" then
-			CCWatch_AddMessage(CCWATCH_PROFILE_TEXT..CCWATCH.PROFILE);
-			if CCWATCH.STATUS == 0 then
-				CCWatch_AddMessage(CCWATCH_DISABLED)
-			elseif CCWATCH.STATUS == 2 then
-				CCWatch_AddMessage(CCWATCH_UNLOCKED)
+			aurae_AddMessage(aurae_PROFILE_TEXT..aurae.PROFILE);
+			if aurae.STATUS == 0 then
+				aurae_AddMessage(aurae_DISABLED)
+			elseif aurae.STATUS == 2 then
+				aurae_AddMessage(aurae_UNLOCKED)
 			else
-				CCWatch_AddMessage(CCWATCH_ENABLED)
+				aurae_AddMessage(aurae_ENABLED)
 			end
-			if CCWATCH.INVERT then
-				CCWatch_AddMessage(CCWATCH_INVERSION_ON)
+			if aurae.INVERT then
+				aurae_AddMessage(aurae_INVERSION_ON)
 			else
-				CCWatch_AddMessage(CCWATCH_INVERSION_OFF)
+				aurae_AddMessage(aurae_INVERSION_OFF)
 			end
-			if CCWATCH.GROWTH == 1 then
-				CCWatch_AddMessage(CCWATCH_GROW_UP)
+			if aurae.GROWTH == 1 then
+				aurae_AddMessage(aurae_GROW_UP)
 			else
-				CCWatch_AddMessage(CCWATCH_GROW_DOWN)
+				aurae_AddMessage(aurae_GROW_DOWN)
 			end
-			CCWatch_Config()
-			CCWatch_LoadConfCCs()
-			CCWatch_UpdateClassSpells(true)
+			aurae_Config()
+			aurae_LoadConfCCs()
+			aurae_UpdateClassSpells(true)
 
-			CCWatch_AddMessage(CCWATCH_SCALE..CCWATCH.SCALE)
-			CCWatch_AddMessage(CCWATCH_WIDTH..CCWATCH.WIDTH)
-			CCWatch_AddMessage(CCWATCH_ALPHA..CCWATCH.ALPHA)
+			aurae_AddMessage(aurae_SCALE..aurae.SCALE)
+			aurae_AddMessage(aurae_WIDTH..aurae.WIDTH)
+			aurae_AddMessage(aurae_ALPHA..aurae.ALPHA)
 		else
-			CCWatch_Help()
+			aurae_Help()
 		end
 	end
 end
 
-function CCWatch_OnEvent(event)
-	if CCWATCH.STATUS == 0 then
+function aurae_OnEvent(event)
+	if aurae.STATUS == 0 then
 		return
 	end
-	CCWatch_EventHandler[event]()
+	aurae_EventHandler[event]()
 end
 
-CCWatch_EventHandler = {}
+aurae_EventHandler = {}
 
 do
 	local function target_sex()
@@ -473,7 +473,7 @@ do
 		end
 	end
 
-	function CCWatch_TargetID()
+	function aurae_TargetID()
 		local name = UnitName'target'
 		if name then
 			return UnitIsPlayer'target' and name or '[' .. (UnitRace'target' and  UnitRace'target' .. ' ' or '') .. UnitLevel'target' .. target_sex() .. '] ' .. name
@@ -487,13 +487,13 @@ do
 	local pending = {}
 
 	do
-		CreateFrame('GameTooltip', 'CCWatch_Tooltip', nil, 'GameTooltipTemplate')
+		CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
 		local orig = UseAction
 		function UseAction(slot, clicked, onself)
 			if HasAction(slot) and not GetActionText(slot) and not onself then
-				CCWatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-				CCWatch_Tooltip:SetAction(slot)
-				casting[CCWatch_TooltipTextLeft1:GetText()] = CCWatch_TargetID()
+				aurae_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+				aurae_Tooltip:SetAction(slot)
+				casting[aurae_TooltipTextLeft1:GetText()] = aurae_TargetID()
 			end
 			return orig(slot, clicked, onself)
 		end
@@ -502,7 +502,7 @@ do
 	do
 		local orig = CastSpell
 		function CastSpell(index, booktype)
-			casting[GetSpellName(index, booktype)] = CCWatch_TargetID()
+			casting[GetSpellName(index, booktype)] = aurae_TargetID()
 			return orig(index, booktype)
 		end
 	end
@@ -511,25 +511,25 @@ do
 		local orig = CastSpellByName
 		function CastSpellByName(text, onself)
 			if not onself then
-				casting[text] = CCWatch_TargetID()
+				casting[text] = aurae_TargetID()
 			end
 			return orig(text, onself)
 		end
 	end
 
-	function CCWatch_EventHandler.CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
+	function aurae_EventHandler.CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
 		for effect in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
 			casting[effect] = nil
 		end
 	end
 
-	function CCWatch_EventHandler.SPELLCAST_STOP()
+	function aurae_EventHandler.SPELLCAST_STOP()
 		for effect, target in casting do
-			if (CCWatch_EffectActive(effect, target) or not CCWatch_IsPlayer(target) and CCWATCH.EFFECTS[effect]) and CCWATCH.EFFECTS[effect].ETYPE ~= ETYPE_BUFF then
+			if (aurae_EffectActive(effect, target) or not aurae_IsPlayer(target) and aurae.EFFECTS[effect]) and aurae.EFFECTS[effect].ETYPE ~= ETYPE_BUFF then
 				if pending[effect] then
 					last_cast = nil
 				else
-					pending[effect] = {target=target, time=GetTime() + .5 + (CCWATCH_ACTIONS[effect] and CCWATCH_ACTIONS[effect].DELAY or 0)}
+					pending[effect] = {target=target, time=GetTime() + .5 + (aurae_ACTIONS[effect] and aurae_ACTIONS[effect].DELAY or 0)}
 					last_cast = effect
 				end
 			end
@@ -539,14 +539,14 @@ do
 
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for effect, info in pending do
-			if GetTime() >= info.time and (CCWatch_IsPlayer(info.target) or CCWatch_TargetID() ~= info.target or aurae_UnitDebuffs'target'[effect]) then
-				CCWatch_StartTimer(effect, info.target, GetTime() - .5)
+			if GetTime() >= info.time and (aurae_IsPlayer(info.target) or aurae_TargetID() ~= info.target or aurae_UnitDebuffs'target'[effect]) then
+				aurae_StartTimer(effect, info.target, GetTime() - .5)
 				pending[effect] = nil
 			end
 		end
 	end)
 
-	function CCWatch_AbortCast(effect, unit)
+	function aurae_AbortCast(effect, unit)
 		for k, v in pending do
 			if k == effect and v.target == unit then
 				pending[k] = nil
@@ -554,15 +554,15 @@ do
 		end
 	end
 
-	function CCWatch_AbortUnitCasts(unit)
+	function aurae_AbortUnitCasts(unit)
 		for k, v in pending do
-			if v.target == unit or not unit and not CCWatch_IsPlayer(v.target) then
+			if v.target == unit or not unit and not aurae_IsPlayer(v.target) then
 				pending[k] = nil
 			end
 		end
 	end
 
-	function CCWatch_EventHandler.SPELLCAST_INTERRUPTED()
+	function aurae_EventHandler.SPELLCAST_INTERRUPTED()
 		if last_cast then
 			pending[last_cast] = nil
 		end
@@ -579,7 +579,7 @@ do
 			'Your (.*) is reflected',
 			'Your (.*) is parried'
 		}
-		function CCWatch_EventHandler.CHAT_MSG_SPELL_SELF_DAMAGE()
+		function aurae_EventHandler.CHAT_MSG_SPELL_SELF_DAMAGE()
 			for _, pattern in patterns do
 				local _, _, effect = strfind(arg1, pattern)
 				if effect then
@@ -591,31 +591,31 @@ do
 	end
 end
 
-function CCWatch_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
-	for effect, unit in string.gfind(arg1, CCWATCH_TEXT_OFF) do
-		CCWatch_AuraGone(unit, effect)
+function aurae_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
+	for effect, unit in string.gfind(arg1, aurae_TEXT_OFF) do
+		aurae_AuraGone(unit, effect)
 	end
 end
 
-function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
-	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BREAK) do
-		CCWatch_AuraGone(unit, effect)
+function aurae_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
+	for unit, effect in string.gfind(arg1, aurae_TEXT_BREAK) do
+		aurae_AuraGone(unit, effect)
 	end
 end
 
-function CCWatch_AuraGone(unit, effect)
-	if CCWATCH.EFFECTS[effect] then
-		if CCWatch_IsPlayer(unit) then
-			CCWatch_AbortCast(effect, unit)
-			CCWatch_StopTimer(effect, unit)
+function aurae_AuraGone(unit, effect)
+	if aurae.EFFECTS[effect] then
+		if aurae_IsPlayer(unit) then
+			aurae_AbortCast(effect, unit)
+			aurae_StopTimer(effect, unit)
 		elseif unit == UnitName'target' then
 			-- TODO pet target (in other places too)
-			local unit = CCWatch_TargetID()
+			local unit = aurae_TargetID()
 			local debuffs = aurae_UnitDebuffs'target'
 			for k, timer in aurae_timers do
 				if timer.UNIT == unit and not debuffs[timer.EFFECT] then
 					-- TODO only if "appreciated" (weird doTimer terminology)
-					CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
+					aurae_StopTimer(timer.EFFECT, timer.UNIT)
 				end
 			end
 		end
@@ -640,26 +640,26 @@ end
 --	if UnitName("target") then lasttarget = {UnitName("target"),UnitSex("target"),UnitLevel("target")} else lasttarget = {} end
 --end
 
-function CCWatch_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
-	for unit in string.gfind(arg1, CCWATCH_TEXT_DIE) do
-		if CCWatch_IsPlayer(unit) then
-			CCWatch_UNIT_DEATH(unit)
+function aurae_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
+	for unit in string.gfind(arg1, aurae_TEXT_DIE) do
+		if aurae_IsPlayer(unit) then
+			aurae_UNIT_DEATH(unit)
 		elseif unit == UnitName'target' and UnitIsDead'target' then
 			-- TODO only if "appreciated" (weird doTimer terminology)
-			CCWatch_UNIT_DEATH(CCWatch_TargetID())
+			aurae_UNIT_DEATH(aurae_TargetID())
 		end
 	end
 end
 
-function CCWatch_EventHandler.CHAT_MSG_COMBAT_HONOR_GAIN()
+function aurae_EventHandler.CHAT_MSG_COMBAT_HONOR_GAIN()
 	for unit in string.gfind(arg1, '(.+) dies') do
-		CCWatch_UNIT_DEATH(unit)
+		aurae_UNIT_DEATH(unit)
 	end
 end
 
-function CCWatch_EventHandler.UNIT_COMBAT()
+function aurae_EventHandler.UNIT_COMBAT()
 	if GetComboPoints() > 0 then
-		CCWATCH.COMBO = GetComboPoints()
+		aurae.COMBO = GetComboPoints()
 	end
 end
 
@@ -670,15 +670,15 @@ do
 			for _, timer in aurae_timers do
 			if timer.shown and not timer.visible then
 				local group
-				if CCWATCH.EFFECTS[timer.EFFECT].ETYPE == ETYPE_BUFF then
-					group = CCWATCH.GROUPSBUFF
-				elseif CCWATCH.EFFECTS[timer.EFFECT].ETYPE == ETYPE_DEBUFF then
-					group = CCWATCH.GROUPSDEBUFF
+				if aurae.EFFECTS[timer.EFFECT].ETYPE == ETYPE_BUFF then
+					group = aurae.GROUPSBUFF
+				elseif aurae.EFFECTS[timer.EFFECT].ETYPE == ETYPE_DEBUFF then
+					group = aurae.GROUPSDEBUFF
 				else
-					group = CCWATCH.GROUPSCC
+					group = aurae.GROUPSCC
 				end
-				if CCWATCH.GROWTH == 1 then
-					for i = 1, CCWATCH_MAXBARS do
+				if aurae.GROWTH == 1 then
+					for i = 1, aurae_MAXBARS do
 						if group[i].TIMER.stopped then
 							group[i].TIMER = timer
 							timer.visible = true
@@ -686,7 +686,7 @@ do
 						end
 					end
 				else
-					for i = CCWATCH_MAXBARS, 1, -1 do
+					for i = aurae_MAXBARS, 1, -1 do
 						if group[i].TIMER.stopped then
 							group[i].TIMER = timer
 							timer.visible = true
@@ -698,40 +698,40 @@ do
 		end
 	end
 
-	function CCWatch_UpdateTimers()
+	function aurae_UpdateTimers()
 		local t = GetTime()
 		for _, timer in aurae_timers do
 			if t > timer.END then
-				CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
-				if CCWatch_IsPlayer(timer.UNIT) then
-					CCWatch_AbortCast(timer.EFFECT, timer.UNIT)
+				aurae_StopTimer(timer.EFFECT, timer.UNIT)
+				if aurae_IsPlayer(timer.UNIT) then
+					aurae_AbortCast(timer.EFFECT, timer.UNIT)
 				end
 			end
 		end
 	end
 
-	function CCWatch_EffectActive(effect, unit)
+	function aurae_EffectActive(effect, unit)
 		return aurae_timers[effect .. '@' .. unit] and true or false
 	end
 
-	function CCWatch_StartTimer(effect, unit, start)
+	function aurae_StartTimer(effect, unit, start)
 		local timer = {
 			EFFECT = effect,
 			UNIT = unit,
 			START = start,
-			shown = CCWatch_IsShown(unit),
+			shown = aurae_IsShown(unit),
 		}
 
 		timer.END = timer.START
 
-		if CCWatch_IsPlayer(unit) then
-			timer.END = timer.END + CCWatch_DiminishedDuration(unit, effect, CCWATCH.EFFECTS[effect].PVP_DURATION or CCWATCH.EFFECTS[effect].DURATION)
+		if aurae_IsPlayer(unit) then
+			timer.END = timer.END + aurae_DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or aurae.EFFECTS[effect].DURATION)
 		else
-			timer.END = timer.END + CCWATCH.EFFECTS[effect].DURATION
+			timer.END = timer.END + aurae.EFFECTS[effect].DURATION
 		end
 
-		if CCWATCH.EFFECTS[effect].COMBO then
-			timer.END = timer.END + CCWATCH.EFFECTS[effect].A * CCWATCH.COMBO
+		if aurae.EFFECTS[effect].COMBO then
+			timer.END = timer.END + aurae.EFFECTS[effect].A * aurae.COMBO
 		end
 
 		local old_timer = aurae_timers[effect .. '@' .. unit]
@@ -745,16 +745,16 @@ do
 		end
 	end
 
-	function CCWatch_EventHandler.PLAYER_REGEN_ENABLED()
-		CCWatch_AbortUnitCasts()
+	function aurae_EventHandler.PLAYER_REGEN_ENABLED()
+		aurae_AbortUnitCasts()
 		for k, timer in aurae_timers do
-			if not CCWatch_IsPlayer(timer.UNIT) then
-				CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
+			if not aurae_IsPlayer(timer.UNIT) then
+				aurae_StopTimer(timer.EFFECT, timer.UNIT)
 			end
 		end
 	end
 
-	function CCWatch_StopTimer(effect, unit)
+	function aurae_StopTimer(effect, unit)
 		local key = effect .. '@' .. unit
 		if aurae_timers[key] then
 			aurae_timers[key].stopped = GetTime()
@@ -763,13 +763,13 @@ do
 		end
 	end
 
-	function CCWatch_UNIT_DEATH(unit)
-		if CCWatch_IsPlayer(unit) then
-			CCWatch_AbortUnitCasts(unit)
+	function aurae_UNIT_DEATH(unit)
+		if aurae_IsPlayer(unit) then
+			aurae_AbortUnitCasts(unit)
 		end
 		for k, timer in aurae_timers do
 			if timer.UNIT == unit then
-				CCWatch_StopTimer(timer.EFFECT, unit)
+				aurae_StopTimer(timer.EFFECT, unit)
 			end
 		end
 		place_timers()
@@ -840,76 +840,76 @@ do
 			RequestBattlefieldScoreData()
 		end)
 
-		function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
+		function aurae_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 			player[hostile_player(arg1)] = true
-			for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BUFF_ON) do
-				if CCWATCH.EFFECTS[effect] and CCWATCH.EFFECTS[effect].MONITOR and bit.band(CCWATCH.EFFECTS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
-					CCWatch_StartTimer(effect, unit, GetTime())
+			for unit, effect in string.gfind(arg1, aurae_TEXT_BUFF_ON) do
+				if aurae.EFFECTS[effect] and aurae.EFFECTS[effect].MONITOR and bit.band(aurae.EFFECTS[effect].ETYPE, aurae.MONITORING) ~= 0 then
+					aurae_StartTimer(effect, unit, GetTime())
 				end
 			end
 		end
 
-		function CCWatch_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
+		function aurae_EventHandler.CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 			player[hostile_player(arg1)] = true
-			for unit, effect in string.gfind(arg1, CCWATCH_TEXT_ON) do
-				if CCWATCH.EFFECTS[effect] and CCWATCH.EFFECTS[effect].MONITOR and bit.band(CCWATCH.EFFECTS[effect].ETYPE, CCWATCH.MONITORING) ~= 0 then
-					CCWatch_StartTimer(effect, unit, GetTime())
+			for unit, effect in string.gfind(arg1, aurae_TEXT_ON) do
+				if aurae.EFFECTS[effect] and aurae.EFFECTS[effect].MONITOR and bit.band(aurae.EFFECTS[effect].ETYPE, aurae.MONITORING) ~= 0 then
+					aurae_StartTimer(effect, unit, GetTime())
 				end
 			end
 		end
 
-		function CCWatch_EventHandler.PLAYER_TARGET_CHANGED()
+		function aurae_EventHandler.PLAYER_TARGET_CHANGED()
 			unit_changed'target'
 		end
 		
-		function CCWatch_EventHandler.UPDATE_MOUSEOVER_UNIT()
+		function aurae_EventHandler.UPDATE_MOUSEOVER_UNIT()
 			unit_changed'mouseover'
 		end
 
-		function CCWatch_EventHandler.UPDATE_BATTLEFIELD_SCORE()
+		function aurae_EventHandler.UPDATE_BATTLEFIELD_SCORE()
 			for i = 1, GetNumBattlefieldScores() do
 				player[GetBattlefieldScore(i)] = true
 			end
 		end
 
-		function CCWatch_IsShown(unit)
-			if not player[unit] or CCWATCH.STYLE == 2 then
+		function aurae_IsShown(unit)
+			if not player[unit] or aurae.STYLE == 2 then
 				return true
 			end
 			return UnitName'target' == unit or UnitName'mouseover' == unit or recent[unit] and GetTime() - recent[unit] <= 30
 		end
 
-		function CCWatch_IsPlayer(unit)
+		function aurae_IsPlayer(unit)
 			return player[unit]
 		end
 
-		function CCWatch_AddMessage(msg)
-			DEFAULT_CHAT_FRAME:AddMessage('<CCWatch> ' .. msg)
+		function aurae_AddMessage(msg)
+			DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
 		end
 	end
 end
 
-function CCWatch_OnUpdate()
-	if CCWATCH.STATUS == 0 then
+function aurae_OnUpdate()
+	if aurae.STATUS == 0 then
 		return
 	end
-	CCWatch_UpdateTimers()
-	if CCWATCH.STATUS == 2 then
+	aurae_UpdateTimers()
+	if aurae.STATUS == 2 then
 		return
 	end
-	CCWatch_UpdateBars()
+	aurae_UpdateBars()
 end
 
-function CCWatch_UpdateBars()
-	for _, group in {CCWATCH.GROUPSBUFF, CCWATCH.GROUPSDEBUFF, CCWATCH.GROUPSCC} do
+function aurae_UpdateBars()
+	for _, group in {aurae.GROUPSBUFF, aurae.GROUPSDEBUFF, aurae.GROUPSCC} do
 		for _, bar in group do
-			CCWatch_UpdateBar(bar)
+			aurae_UpdateBar(bar)
 		end
 	end
 end
 
-function CCWatch_UpdateBar(bar)
-	if CCWATCH.STATUS ~= 1 then
+function aurae_UpdateBar(bar)
+	if aurae.STATUS ~= 1 then
 		return
 	end
 
@@ -924,28 +924,28 @@ function CCWatch_UpdateBar(bar)
 			fade_bar(bar)
 		end
 	else
-		frame:SetAlpha(CCWATCH.ALPHA)
+		frame:SetAlpha(aurae.ALPHA)
 
 		local duration = timer.END - timer.START
 		local remaining = timer.END - t
 		local fraction = remaining / duration
 
-		frame.statusbar:SetValue(CCWATCH.INVERT and 1 - fraction or fraction)
+		frame.statusbar:SetValue(aurae.INVERT and 1 - fraction or fraction)
 
 		local sparkPosition = bar.width * fraction
 		frame.spark:Show()
-		frame.spark:SetPoint('CENTER', bar.frame.statusbar, CCWATCH.INVERT and 'RIGHT' or 'LEFT', CCWATCH.INVERT and -sparkPosition or sparkPosition, 0)
+		frame.spark:SetPoint('CENTER', bar.frame.statusbar, aurae.INVERT and 'RIGHT' or 'LEFT', aurae.INVERT and -sparkPosition or sparkPosition, 0)
 
 		frame.timertext:SetText(format_time(remaining))
 
 		local r, g, b
-		if CCWatch_Save[CCWATCH.PROFILE].color == CTYPE_SCHOOL then
-			r, g, b = unpack(CCWATCH.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
-		elseif CCWatch_Save[CCWATCH.PROFILE].color == CTYPE_PROGRESS then
+		if aurae_Save[aurae.PROFILE].color == CTYPE_SCHOOL then
+			r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
+		elseif aurae_Save[aurae.PROFILE].color == CTYPE_PROGRESS then
 			r, g, b = 1 - fraction, fraction, 0
-		elseif CCWatch_Save[CCWATCH.PROFILE].color == CTYPE_CUSTOM then
-			if CCWATCH.EFFECTS[timer.EFFECT].COLOR then
-				r, g, b = CCWATCH.EFFECTS[timer.EFFECT].COLOR.r, CCWATCH.EFFECTS[timer.EFFECT].COLOR.g, CCWATCH.EFFECTS[timer.EFFECT].COLOR.b
+		elseif aurae_Save[aurae.PROFILE].color == CTYPE_CUSTOM then
+			if aurae.EFFECTS[timer.EFFECT].COLOR then
+				r, g, b = aurae.EFFECTS[timer.EFFECT].COLOR.r, aurae.EFFECTS[timer.EFFECT].COLOR.g, aurae.EFFECTS[timer.EFFECT].COLOR.b
 			else
 				r, g, b = 1, 1, 1
 			end
@@ -953,34 +953,34 @@ function CCWatch_UpdateBar(bar)
 		frame.statusbar:SetStatusBarColor(r, g, b)
 		frame.statusbar:SetBackdropColor(r, g, b, .3)
 
-		frame.icon:SetNormalTexture([[Interface\Icons\]] .. (CCWATCH.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
+		frame.icon:SetNormalTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 		frame.text:SetText(timer.UNIT)
 	end
 end
 
 local function GetConfCC(k, v)
-	if CCWATCH.EFFECTS[k] then
-		CCWATCH.EFFECTS[k].MONITOR = v.MONITOR
-		CCWATCH.EFFECTS[k].COLOR = v.COLOR
+	if aurae.EFFECTS[k] then
+		aurae.EFFECTS[k].MONITOR = v.MONITOR
+		aurae.EFFECTS[k].COLOR = v.COLOR
 	end
 end
 
-function CCWatch_LoadConfCCs()
-	table.foreach(CCWatch_Save[CCWATCH.PROFILE].ConfCC, GetConfCC)
+function aurae_LoadConfCCs()
+	table.foreach(aurae_Save[aurae.PROFILE].ConfCC, GetConfCC)
 end
 
-function CCWatch_LoadVariablesOnUpdate(arg1)
-	if not CCWATCH.LOADEDVARIABLES then
-		CCWatch_LoadVariables()
-		CCWATCH.LOADEDVARIABLES = true
+function aurae_LoadVariablesOnUpdate(arg1)
+	if not aurae.LOADEDVARIABLES then
+		aurae_LoadVariables()
+		aurae.LOADEDVARIABLES = true
 	end
 end
 
-function CCWatch_LoadVariables()
+function aurae_LoadVariables()
 	local default_settings = {
 		SavedCC = {},
 		ConfCC = {},
-		status = CCWATCH.STATUS,
+		status = aurae.STATUS,
 		invert = false,
 		growth = 1,
 		color = CTYPE_SCHOOL,
@@ -992,90 +992,90 @@ function CCWatch_LoadVariables()
 		Monitoring = bit.bor(ETYPE_CC, ETYPE_DEBUFF, ETYPE_BUFF),
 	}
 
-	CCWATCH.PROFILE = UnitName'player' .. '@' .. GetCVar'RealmName'
+	aurae.PROFILE = UnitName'player' .. '@' .. GetCVar'RealmName'
 
-	CCWatch_Save[CCWATCH.PROFILE] = CCWatch_Save[CCWATCH.PROFILE] or {}
+	aurae_Save[aurae.PROFILE] = aurae_Save[aurae.PROFILE] or {}
 
 	for k, v in default_settings do
-		if CCWatch_Save[CCWATCH.PROFILE][k] == nil then
-			CCWatch_Save[CCWATCH.PROFILE][k] = v
+		if aurae_Save[aurae.PROFILE][k] == nil then
+			aurae_Save[aurae.PROFILE][k] = v
 		end
 	end
 
-	CCWATCH.ARCANIST = CCWatch_Save[CCWATCH.PROFILE].arcanist
+	aurae.ARCANIST = aurae_Save[aurae.PROFILE].arcanist
 
-	CCWatch_LoadConfCCs()
-	CCWatch_UpdateClassSpells(false)
+	aurae_LoadConfCCs()
+	aurae_UpdateClassSpells(false)
 
-	CCWATCH.STATUS = CCWatch_Save[CCWATCH.PROFILE].status
-	CCWATCH.INVERT = CCWatch_Save[CCWATCH.PROFILE].invert
-	CCWATCH.GROWTH = CCWatch_Save[CCWATCH.PROFILE].growth
-	CCWATCH.SCALE = CCWatch_Save[CCWATCH.PROFILE].scale
-	CCWATCH.WIDTH = CCWatch_Save[CCWATCH.PROFILE].width
-	CCWATCH.ALPHA = CCWatch_Save[CCWATCH.PROFILE].alpha
+	aurae.STATUS = aurae_Save[aurae.PROFILE].status
+	aurae.INVERT = aurae_Save[aurae.PROFILE].invert
+	aurae.GROWTH = aurae_Save[aurae.PROFILE].growth
+	aurae.SCALE = aurae_Save[aurae.PROFILE].scale
+	aurae.WIDTH = aurae_Save[aurae.PROFILE].width
+	aurae.ALPHA = aurae_Save[aurae.PROFILE].alpha
 
-	CCWATCH.MONITORING = CCWatch_Save[CCWATCH.PROFILE].Monitoring
+	aurae.MONITORING = aurae_Save[aurae.PROFILE].Monitoring
 
-	if bit.band(CCWATCH.MONITORING, ETYPE_CC) ~= 0 or bit.band(CCWATCH.MONITORING, ETYPE_DEBUFF) ~= 0 then
-		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE'
+	if bit.band(aurae.MONITORING, ETYPE_CC) ~= 0 or bit.band(aurae.MONITORING, ETYPE_DEBUFF) ~= 0 then
+		auraeObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE'
 	end
-	if bit.band(CCWATCH.MONITORING, ETYPE_BUFF) ~= 0 then
-		CCWatchObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS'
-	end
-
-	CCWATCH.STYLE = CCWatch_Save[CCWATCH.PROFILE].style
-
-	CCWatchCC:SetScale(CCWATCH.SCALE)
-	CCWatchDebuff:SetScale(CCWATCH.SCALE)
-	CCWatchBuff:SetScale(CCWATCH.SCALE)
-	CCWatch_SetWidth(CCWATCH.WIDTH)
-
-	if CCWATCH.STATUS == 2 then
-		CCWatch_BarUnlock()
+	if bit.band(aurae.MONITORING, ETYPE_BUFF) ~= 0 then
+		auraeObject:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS'
 	end
 
-	CCWatchOptions_Init()
-	CCWatch_BarLock()
+	aurae.STYLE = aurae_Save[aurae.PROFILE].style
+
+	auraeCC:SetScale(aurae.SCALE)
+	auraeDebuff:SetScale(aurae.SCALE)
+	auraeBuff:SetScale(aurae.SCALE)
+	aurae_SetWidth(aurae.WIDTH)
+
+	if aurae.STATUS == 2 then
+		aurae_BarUnlock()
+	end
+
+	auraeOptions_Init()
+	aurae_BarLock()
 end
 
-function CCWatch_UpdateImpGouge()
+function aurae_UpdateImpGouge()
 	local talentname, texture, _, _, rank = GetTalentInfo(2, 1)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.EFFECTS[CCWATCH_GOUGE].DURATION = 4 + rank * .5
+			aurae.EFFECTS[aurae_GOUGE].DURATION = 4 + rank * .5
 		end
-	elseif CCWATCH.EFFECTS[CCWATCH_GOUGE].DURATION == nil then
-		CCWATCH.EFFECTS[CCWATCH_GOUGE].DURATION = 4
+	elseif aurae.EFFECTS[aurae_GOUGE].DURATION == nil then
+		aurae.EFFECTS[aurae_GOUGE].DURATION = 4
 	end
 end
 
-function CCWatch_UpdateImpGarotte()
+function aurae_UpdateImpGarotte()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 8)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.EFFECTS[CCWATCH_GAROTTE].DURATION = 18 + rank * 3
+			aurae.EFFECTS[aurae_GAROTTE].DURATION = 18 + rank * 3
 		end
-	elseif CCWATCH.EFFECTS[CCWATCH_GAROTTE].DURATION == nil then
-		CCWATCH.EFFECTS[CCWATCH_GAROTTE].DURATION = 18
+	elseif aurae.EFFECTS[aurae_GAROTTE].DURATION == nil then
+		aurae.EFFECTS[aurae_GAROTTE].DURATION = 18
 	end
 end
 
-function CCWatch_UpdateKidneyShot()
+function aurae_UpdateKidneyShot()
 	local i = 1
 	while true do
 		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
 		if not name then
-			if CCWATCH.EFFECTS[CCWATCH_KS].DURATION == nil then
-				CCWATCH.EFFECTS[CCWATCH_KS].DURATION = 1
+			if aurae.EFFECTS[aurae_KS].DURATION == nil then
+				aurae.EFFECTS[aurae_KS].DURATION = 1
 			end
 			return
 		end
 
-		if name == CCWATCH_KS then
+		if name == aurae_KS then
 			if strsub(rank,string.len(rank)) == "1" then
-				CCWATCH.EFFECTS[CCWATCH_KS].DURATION = 0
+				aurae.EFFECTS[aurae_KS].DURATION = 0
 			else
-				CCWATCH.EFFECTS[CCWATCH_KS].DURATION = 1
+				aurae.EFFECTS[aurae_KS].DURATION = 1
 			end
 			return
 		end
@@ -1084,68 +1084,68 @@ function CCWatch_UpdateKidneyShot()
 	end
 end
 
-function CCWatch_UpdateImpTrap()
+function aurae_UpdateImpTrap()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 7)
 	if texture then
 		if rank ~= 0 then
 -- Freezing Trap is a true multi rank, hence already updated
-			CCWATCH.EFFECTS[CCWATCH_FREEZINGTRAP].DURATION = CCWATCH.EFFECTS[CCWATCH_FREEZINGTRAP].DURATION * (1 + rank * .15)
+			aurae.EFFECTS[aurae_FREEZINGTRAP].DURATION = aurae.EFFECTS[aurae_FREEZINGTRAP].DURATION * (1 + rank * .15)
 		end
 	end
 end
 
-function CCWatch_UpdateImpSeduce()
+function aurae_UpdateImpSeduce()
 	local talentname, texture, _, _, rank = GetTalentInfo(2, 7)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.EFFECTS[CCWATCH_SEDUCE].DURATION = 15 * (1 + rank * .10)
+			aurae.EFFECTS[aurae_SEDUCE].DURATION = 15 * (1 + rank * .10)
 		end
 	end
 end
 
-function CCWatch_UpdateBrutalImpact()
+function aurae_UpdateBrutalImpact()
 	local talentname, texture, _, _, rank = GetTalentInfo(2, 4)
 	if texture then
 		if rank ~= 0 then
 -- Bash is a true multi rank, hence already updated
-			CCWATCH.EFFECTS[CCWATCH_POUNCE].DURATION = 2 + rank * .50
-			CCWATCH.EFFECTS[CCWATCH_BASH].DURATION = CCWATCH.EFFECTS[CCWATCH_BASH].DURATION + rank * .50
+			aurae.EFFECTS[aurae_POUNCE].DURATION = 2 + rank * .50
+			aurae.EFFECTS[aurae_BASH].DURATION = aurae.EFFECTS[aurae_BASH].DURATION + rank * .50
 		end
 	end
 end
 
-function CCWatch_UpdatePermafrost()
+function aurae_UpdatePermafrost()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 2)
 	if texture then
 		if rank ~= 0 then
 -- Frostbolt is a true multi rank, hence already updated
-			CCWATCH.EFFECTS[CCWATCH_CONEOFCOLD].DURATION = 8 + .50 + rank * .50
-			CCWATCH.EFFECTS[CCWATCH_FROSTBOLT].DURATION = CCWATCH.EFFECTS[CCWATCH_FROSTBOLT].DURATION + .50 + rank * .50
+			aurae.EFFECTS[aurae_CONEOFCOLD].DURATION = 8 + .50 + rank * .50
+			aurae.EFFECTS[aurae_FROSTBOLT].DURATION = aurae.EFFECTS[aurae_FROSTBOLT].DURATION + .50 + rank * .50
 		end
 	end
 end
 
-function CCWatch_UpdateImpShadowWordPain()
+function aurae_UpdateImpShadowWordPain()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 4)
 	if texture then
 		if rank ~= 0 then
-			CCWATCH.EFFECTS[CCWATCH_SHADOWWORDPAIN].DURATION = 18 + rank * 3
+			aurae.EFFECTS[aurae_SHADOWWORDPAIN].DURATION = 18 + rank * 3
 		end
 	end
 end
 
-function CCWatch_GetSpellRank(spellname, spelleffect)
+function aurae_GetSpellRank(spellname, spelleffect)
 	local i = 1
 	local gotone = false
-	local maxrank = CCWATCH_ACTIONS[spellname].RANKS
+	local maxrank = aurae_ACTIONS[spellname].RANKS
 
 	while true do
 		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
 
 		if not name then
 			if not gotone then
-				if CCWATCH.EFFECTS[spelleffect].DURATION == nil then
-					CCWATCH.EFFECTS[spelleffect].DURATION = CCWATCH_ACTIONS[spellname].DURATION[maxrank]
+				if aurae.EFFECTS[spelleffect].DURATION == nil then
+					aurae.EFFECTS[spelleffect].DURATION = aurae_ACTIONS[spellname].DURATION[maxrank]
 				end
 			end
 			return
@@ -1155,7 +1155,7 @@ function CCWatch_GetSpellRank(spellname, spelleffect)
 			local currank = 1
 			while currank <= maxrank do
 				if tonumber(strsub(rank,string.len(rank))) == currank then
-					CCWATCH.EFFECTS[spelleffect].DURATION = CCWATCH_ACTIONS[spellname].DURATION[currank]
+					aurae.EFFECTS[spelleffect].DURATION = aurae_ACTIONS[spellname].DURATION[currank]
 					gotone = true
 				end
 				currank = currank + 1
@@ -1166,82 +1166,82 @@ function CCWatch_GetSpellRank(spellname, spelleffect)
 	end
 end
 
-function CCWatch_UpdateClassSpells()
+function aurae_UpdateClassSpells()
 	local _, eclass = UnitClass'player'
-	CCWatchOptionsFrameArcanist:Hide()
+	auraeOptionsFrameArcanist:Hide()
 	if eclass == "ROGUE" then
-		CCWatch_GetSpellRank(CCWATCH_SAP, CCWATCH_SAP)
-		CCWatch_UpdateImpGouge()
-		CCWatch_UpdateKidneyShot()
-		if CCWatch_ConfigBuff ~= nil then
-			CCWatch_UpdateImpGarotte()
+		aurae_GetSpellRank(aurae_SAP, aurae_SAP)
+		aurae_UpdateImpGouge()
+		aurae_UpdateKidneyShot()
+		if aurae_ConfigBuff ~= nil then
+			aurae_UpdateImpGarotte()
 		end
 	elseif eclass == "WARRIOR" then
-		CCWatch_GetSpellRank(CCWATCH_REND, CCWATCH_REND)
+		aurae_GetSpellRank(aurae_REND, aurae_REND)
 	elseif eclass == "WARLOCK" then
-		CCWatch_GetSpellRank(CCWATCH_FEAR, CCWATCH_FEAR)
-		CCWatch_GetSpellRank(CCWATCH_HOWLOFTERROR, CCWATCH_HOWLOFTERROR)
-		CCWatch_GetSpellRank(CCWATCH_BANISH, CCWATCH_BANISH)
-		CCWatch_GetSpellRank(CCWATCH_CORRUPTION, CCWATCH_CORRUPTION)
-		CCWatch_UpdateImpSeduce()
+		aurae_GetSpellRank(aurae_FEAR, aurae_FEAR)
+		aurae_GetSpellRank(aurae_HOWLOFTERROR, aurae_HOWLOFTERROR)
+		aurae_GetSpellRank(aurae_BANISH, aurae_BANISH)
+		aurae_GetSpellRank(aurae_CORRUPTION, aurae_CORRUPTION)
+		aurae_UpdateImpSeduce()
 	elseif eclass == "PALADIN" then
-		CCWatch_GetSpellRank(CCWATCH_HOJ, CCWATCH_HOJ)
-		if CCWatch_ConfigBuff ~= nil then
-			CCWatch_GetSpellRank(CCWATCH_DIVINESHIELD, CCWATCH_DIVINESHIELD)
+		aurae_GetSpellRank(aurae_HOJ, aurae_HOJ)
+		if aurae_ConfigBuff ~= nil then
+			aurae_GetSpellRank(aurae_DIVINESHIELD, aurae_DIVINESHIELD)
 		end
 	elseif eclass == "HUNTER" then
-		CCWatch_GetSpellRank(CCWATCH_FREEZINGTRAP_SPELL, CCWATCH_FREEZINGTRAP)
-		CCWatch_GetSpellRank(CCWATCH_SCAREBEAST, CCWATCH_SCAREBEAST)
-		CCWatch_UpdateImpTrap()
+		aurae_GetSpellRank(aurae_FREEZINGTRAP_SPELL, aurae_FREEZINGTRAP)
+		aurae_GetSpellRank(aurae_SCAREBEAST, aurae_SCAREBEAST)
+		aurae_UpdateImpTrap()
 	elseif eclass == "PRIEST" then
-		CCWatch_GetSpellRank(CCWATCH_SHACKLE, CCWATCH_SHACKLE)
-		if CCWatch_ConfigDebuff ~= nil then
-			CCWatch_UpdateImpShadowWordPain()
+		aurae_GetSpellRank(aurae_SHACKLE, aurae_SHACKLE)
+		if aurae_ConfigDebuff ~= nil then
+			aurae_UpdateImpShadowWordPain()
 		end
 	elseif eclass == "MAGE" then
-		if CCWatch_ConfigDebuff ~= nil then
-			CCWatch_GetSpellRank(CCWATCH_POLYMORPH, CCWATCH_POLYMORPH)
-			CCWatch_GetSpellRank(CCWATCH_FROSTBOLT, CCWATCH_FROSTBOLT)
-			CCWatch_GetSpellRank(CCWATCH_FIREBALL, CCWATCH_FIREBALL)
-			CCWatch_UpdatePermafrost()
+		if aurae_ConfigDebuff ~= nil then
+			aurae_GetSpellRank(aurae_POLYMORPH, aurae_POLYMORPH)
+			aurae_GetSpellRank(aurae_FROSTBOLT, aurae_FROSTBOLT)
+			aurae_GetSpellRank(aurae_FIREBALL, aurae_FIREBALL)
+			aurae_UpdatePermafrost()
 		end
-		CCWatchOptionsFrameArcanist:Show()
-		if CCWATCH.ARCANIST then
-			CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION = CCWATCH.EFFECTS[CCWATCH_POLYMORPH].DURATION + 15
+		auraeOptionsFrameArcanist:Show()
+		if aurae.ARCANIST then
+			aurae.EFFECTS[aurae_POLYMORPH].DURATION = aurae.EFFECTS[aurae_POLYMORPH].DURATION + 15
 		end
 	elseif eclass == "DRUID" then
-		CCWatch_GetSpellRank(CCWATCH_ROOTS, CCWATCH_ROOTS)
-		CCWatch_GetSpellRank(CCWATCH_HIBERNATE, CCWATCH_HIBERNATE)
-		CCWatch_GetSpellRank(CCWATCH_BASH, CCWATCH_BASH)
-		CCWatch_UpdateBrutalImpact()
+		aurae_GetSpellRank(aurae_ROOTS, aurae_ROOTS)
+		aurae_GetSpellRank(aurae_HIBERNATE, aurae_HIBERNATE)
+		aurae_GetSpellRank(aurae_BASH, aurae_BASH)
+		aurae_UpdateBrutalImpact()
 	end
 end
 
-function CCWatch_Help()
-	CCWatch_AddMessage(CCWATCH_FULLVERSION .. CCWATCH_HELP1)
-	CCWatch_AddMessage(CCWATCH_HELP2)
-	CCWatch_AddMessage(CCWATCH_HELP3)
-	CCWatch_AddMessage(CCWATCH_HELP4)
-	CCWatch_AddMessage(CCWATCH_HELP5)
-	CCWatch_AddMessage(CCWATCH_HELP6)
-	CCWatch_AddMessage(CCWATCH_HELP7)
-	CCWatch_AddMessage(CCWATCH_HELP8)
-	CCWatch_AddMessage(CCWATCH_HELP9)
-	CCWatch_AddMessage(CCWATCH_HELP10)
-	CCWatch_AddMessage(CCWATCH_HELP11)
-	CCWatch_AddMessage(CCWATCH_HELP12)
-	CCWatch_AddMessage(CCWATCH_HELP13)
-	CCWatch_AddMessage(CCWATCH_HELP14)
-	CCWatch_AddMessage(CCWATCH_HELP15)
-	CCWatch_AddMessage(CCWATCH_HELP16)
-	CCWatch_AddMessage(CCWATCH_HELP17)
+function aurae_Help()
+	aurae_AddMessage(aurae_FULLVERSION .. aurae_HELP1)
+	aurae_AddMessage(aurae_HELP2)
+	aurae_AddMessage(aurae_HELP3)
+	aurae_AddMessage(aurae_HELP4)
+	aurae_AddMessage(aurae_HELP5)
+	aurae_AddMessage(aurae_HELP6)
+	aurae_AddMessage(aurae_HELP7)
+	aurae_AddMessage(aurae_HELP8)
+	aurae_AddMessage(aurae_HELP9)
+	aurae_AddMessage(aurae_HELP10)
+	aurae_AddMessage(aurae_HELP11)
+	aurae_AddMessage(aurae_HELP12)
+	aurae_AddMessage(aurae_HELP13)
+	aurae_AddMessage(aurae_HELP14)
+	aurae_AddMessage(aurae_HELP15)
+	aurae_AddMessage(aurae_HELP16)
+	aurae_AddMessage(aurae_HELP17)
 end
 
-function CCWatch_SetWidth(width)
+function aurae_SetWidth(width)
 	for _, k in {'CC', 'Debuff', 'Buff'} do
-		for i = 1, CCWATCH_MAXBARS do
-			getglobal("CCWatchBar" .. k .. i):SetWidth(width + 10)
+		for i = 1, aurae_MAXBARS do
+			getglobal("auraeBar" .. k .. i):SetWidth(width + 10)
 		end
-		getglobal("CCWatch" .. k):SetWidth(width + 10)
+		getglobal("aurae" .. k):SetWidth(width + 10)
 	end
 end
