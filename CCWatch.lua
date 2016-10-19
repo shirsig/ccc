@@ -529,7 +529,7 @@ do
 				if pending[effect] then
 					last_cast = nil
 				else
-					pending[effect] = {target=target, time=GetTime() + .5}
+					pending[effect] = {target=target, time=GetTime() + .5 + (CCWATCH_ACTIONS[effect] and CCWATCH_ACTIONS[effect].DELAY or 0)}
 					last_cast = effect
 				end
 			end
@@ -1137,7 +1137,7 @@ end
 function CCWatch_GetSpellRank(spellname, spelleffect)
 	local i = 1
 	local gotone = false
-	local maxrank = CCWATCH_SPELLS[spellname].RANKS
+	local maxrank = CCWATCH_ACTIONS[spellname].RANKS
 
 	while true do
 		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
@@ -1145,7 +1145,7 @@ function CCWatch_GetSpellRank(spellname, spelleffect)
 		if not name then
 			if not gotone then
 				if CCWATCH.EFFECTS[spelleffect].DURATION == nil then
-					CCWATCH.EFFECTS[spelleffect].DURATION = CCWATCH_SPELLS[spellname].DURATION[maxrank]
+					CCWATCH.EFFECTS[spelleffect].DURATION = CCWATCH_ACTIONS[spellname].DURATION[maxrank]
 				end
 			end
 			return
@@ -1155,7 +1155,7 @@ function CCWatch_GetSpellRank(spellname, spelleffect)
 			local currank = 1
 			while currank <= maxrank do
 				if tonumber(strsub(rank,string.len(rank))) == currank then
-					CCWATCH.EFFECTS[spelleffect].DURATION = CCWATCH_SPELLS[spellname].DURATION[currank]
+					CCWATCH.EFFECTS[spelleffect].DURATION = CCWATCH_ACTIONS[spellname].DURATION[currank]
 					gotone = true
 				end
 				currank = currank + 1
