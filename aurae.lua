@@ -475,7 +475,7 @@ do
 	function aurae_TargetID()
 		local name = UnitName'target'
 		if name then
-			return UnitIsPlayer'target' and name or '[' .. (UnitRace'target' and  UnitRace'target' .. ' ' or '') .. UnitLevel'target' .. target_sex() .. '] ' .. name
+			return UnitIsPlayer'target' and name or '[' .. UnitLevel'target' .. target_sex() .. '] ' .. name
 		end
 	end
 end
