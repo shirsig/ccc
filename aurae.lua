@@ -622,7 +622,12 @@ function aurae_AuraGone(unit, effect)
 end
 
 --function DoTimer_ChangedTargets()
-	-- TODO deprecate every spell
+--	for k, timer in aurae_timers do
+--		if timer.UNIT == aurae_TargetID() then
+--			timer.deprecated = true
+--		end
+--	end
+	-- TODO deal with pending spells
 --end
 
 function aurae_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
