@@ -613,7 +613,7 @@ function aurae_AuraGone(unit, effect)
 			local debuffs = aurae_UnitDebuffs'target'
 			for k, timer in aurae_timers do
 				if timer.UNIT == unit and not debuffs[timer.EFFECT] then
-					-- TODO only if not deprecated
+					-- TODO only if not deprecated (tentative)
 					aurae_StopTimer(timer.EFFECT, timer.UNIT)
 				end
 			end
@@ -621,7 +621,7 @@ function aurae_AuraGone(unit, effect)
 	end
 end
 
---function DoTimer_ChangedTargets()
+--function DoTimer_ChangedTargets() TODO (tentative)
 --	for k, timer in aurae_timers do
 --		timer.deprecated = true
 --	end
@@ -629,11 +629,11 @@ end
 --end
 
 function aurae_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
-	for unit in string.gfind(arg1, aurae_TEXT_DIE) do
+	for unit in string.gfind(arg1, 'slain (.*)!') do
 		if aurae_IsPlayer(unit) then
 			aurae_UNIT_DEATH(unit)
-		elseif unit == UnitName'target' and UnitIsDead'target' then
-			-- TODO only if not deprecated
+		elseif unit == UnitName'target' then -- and UnitIsDead'target' then TODO kronos bug?
+			-- TODO only if not deprecated (tentative)
 			aurae_UNIT_DEATH(aurae_TargetID())
 		end
 	end
