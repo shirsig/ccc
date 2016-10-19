@@ -629,7 +629,7 @@ end
 --end
 
 function aurae_EventHandler.CHAT_MSG_COMBAT_HOSTILE_DEATH()
-	for unit in string.gfind(arg1, '(.+) dies') do -- TODO dies event sometimes missing. kronos bug?
+	for unit in string.gfind(arg1, '(.+) dies') do -- TODO does not work when xp is gained
 		if aurae_IsPlayer(unit) then
 			aurae_UNIT_DEATH(unit)
 		elseif unit == UnitName'target' and UnitIsDead'target' then
