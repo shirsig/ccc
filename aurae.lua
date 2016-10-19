@@ -623,9 +623,7 @@ end
 
 --function DoTimer_ChangedTargets()
 --	for k, timer in aurae_timers do
---		if timer.UNIT == aurae_TargetID() then
---			timer.deprecated = true
---		end
+--		timer.deprecated = true
 --	end
 	-- TODO deal with pending spells
 --end
