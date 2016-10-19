@@ -593,30 +593,31 @@ end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, unit in string.gfind(arg1, CCWATCH_TEXT_OFF) do
-		if CCWATCH.EFFECTS[effect] then
-			if CCWatch_IsPlayer(unit) then
-				CCWatch_AbortCast(effect, unit)
-				CCWatch_StopTimer(effect, unit)
-			elseif unit == UnitName'target' then
-				-- TODO pet target (in other places too)
-				local unit = CCWatch_TargetID()
-				local debuffs = aurae_UnitDebuffs'target'
-				for k, timer in aurae_timers do
-					if timer.UNIT == unit and not debuffs[timer.EFFECT] then
-						-- TODO only if "appreciated" (weird doTimer terminology)
-						CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
-					end
-				end
-			end
-		end
+		CCWatch_AuraGone(unit, effect)
 	end
 end
 
 function CCWatch_EventHandler.CHAT_MSG_SPELL_BREAK_AURA()
 	for unit, effect in string.gfind(arg1, CCWATCH_TEXT_BREAK) do
-		if CCWATCH.EFFECTS[effect] and CCWatch_IsPlayer(unit) then
+		CCWatch_AuraGone(unit, effect)
+	end
+end
+
+function CCWatch_AuraGone(unit, effect)
+	if CCWATCH.EFFECTS[effect] then
+		if CCWatch_IsPlayer(unit) then
 			CCWatch_AbortCast(effect, unit)
 			CCWatch_StopTimer(effect, unit)
+		elseif unit == UnitName'target' then
+			-- TODO pet target (in other places too)
+			local unit = CCWatch_TargetID()
+			local debuffs = aurae_UnitDebuffs'target'
+			for k, timer in aurae_timers do
+				if timer.UNIT == unit and not debuffs[timer.EFFECT] then
+					-- TODO only if "appreciated" (weird doTimer terminology)
+					CCWatch_StopTimer(timer.EFFECT, timer.UNIT)
+				end
+			end
 		end
 	end
 end
