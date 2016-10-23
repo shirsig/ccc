@@ -2,13 +2,18 @@ local _G, _M, _F = getfenv(0), {}, CreateFrame'Frame'
 setfenv(1, setmetatable(_M, {__index=_G}))
 _F:SetScript('OnUpdate', function() _M.UPDATE() end)
 _F:SetScript('OnEvent', function()
-	if aurae.STATUS == 0 then return end
+	if aurae and aurae.STATUS == 0 then return end
 	_M[event](this)
 end)
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
---for _, event in {'ADDON_LOADED', 'MERCHANT_SHOW', 'MERCHANT_CLOSED'} do
---	_F:RegisterEvent(event)
---end
+for _, event in {'ADDON_LOADED'} do
+	_F:RegisterEvent(event)
+end
+
+CreateFrame'Frame':SetScript('OnUpdate', function()
+	_G.aurae_LoadVariables()
+	this:SetScript('OnUpdate', nil)
+end)
 
 WIDTH = 200
 HEIGHT = 16
@@ -202,35 +207,38 @@ local function format_time(t)
 	end
 end
 
---	if _G.aurae_Save[aurae.PROFILE].WarnSelf then
---		local info = ChatTypeInfo.RAID_WARNING
---		RaidWarningFrame:AddMessage(msg, info.r, info.g, info.b, 1)
---		PlaySound'RaidWarning'
---	end
+function ADDON_LOADED()
+	if arg1 ~= 'aurae' then return end
 
-function _G.aurae_Config()
-	aurae.EFFECTS = {}
-
-	_G.aurae_ConfigCC()
-	_G.aurae_ConfigDebuff()
-	_G.aurae_ConfigBuff()
-end
-
-function _G.aurae_OnLoad()
 	_G.aurae_Globals()
 
 	local dummy_timer = {stopped=0}
-	for k, type in {'CC', 'Buff', 'Debuff'} do
+	for i, etype in {'Debuff', 'CC', 'Buff'} do
+		local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
+		local f = CreateFrame('Frame', 'aurae'..etype, UIParent)
+		f:SetWidth(WIDTH)
+		f:SetHeight(height)
+		f:SetMovable(true)
+		f:SetUserPlaced(true)
+		f:SetClampedToScreen(true)
+		f:RegisterForDrag('LeftButton')
+		f:SetScript('OnDragStart', function()
+			this:StartMoving()
+		end)
+		f:SetScript('OnDragStop', function()
+			this:StopMovingOrSizing()
+		end)
+		f:SetPoint('CENTER', -235 + (i - 1) * 235, 180)
 		for i = 1, MAXBARS do
-			local name = 'auraeBar' .. type .. i
+			local name = 'auraeBar' .. etype .. i
 			local bar = create_bar(name)
-			bar.frame:SetParent(getglobal('aurae' .. type))
-			local offset = -100 + i * 20
-			bar.frame:SetPoint('TOPLEFT', 0, offset)
-			bar.frame:SetPoint('TOPRIGHT', 0, offset)
+			bar.frame:SetParent(getglobal('aurae' .. etype))
+			local offset = 20 * (i - 1)
+			bar.frame:SetPoint('BOTTOMLEFT', 0, offset)
+			bar.frame:SetPoint('BOTTOMRIGHT', 0, offset)
 			setglobal(name, bar.frame)
 			bar.TIMER = dummy_timer
-			tinsert(aurae['GROUPS' .. strupper(type)], bar)
+			tinsert(aurae['GROUPS' .. strupper(etype)], bar)
 		end
 	end
 
@@ -258,6 +266,20 @@ function _G.aurae_OnLoad()
 	SlashCmdList.AURAE = SlashCommandHandler
 
 	_G.aurae_Print(_G.aurae_FULLVERSION .. _G.aurae_LOADED)
+end
+
+--	if _G.aurae_Save[aurae.PROFILE].WarnSelf then
+--		local info = ChatTypeInfo.RAID_WARNING
+--		RaidWarningFrame:AddMessage(msg, info.r, info.g, info.b, 1)
+--		PlaySound'RaidWarning'
+--	end
+
+function _G.aurae_Config()
+	aurae.EFFECTS = {}
+
+	_G.aurae_ConfigCC()
+	_G.aurae_ConfigDebuff()
+	_G.aurae_ConfigBuff()
 end
 
 function _G.aurae_BarUnlock()
@@ -912,13 +934,6 @@ end
 
 function _G.aurae_LoadConfCCs()
 	table.foreach(_G.aurae_Save[aurae.PROFILE].ConfCC, GetConfCC)
-end
-
-function _G.aurae_LoadVariablesOnUpdate(arg1)
-	if not aurae.LOADEDVARIABLES then
-		_G.aurae_LoadVariables()
-		aurae.LOADEDVARIABLES = true
-	end
 end
 
 function _G.aurae_LoadVariables()
