@@ -326,11 +326,11 @@ function SlashCommandHandler(msg)
 			end
 		elseif command == "unlock" then
 			_G.aurae_BarUnlock()
-			_G.aurae_Print(_G.aurae_UNLOCKED)
+			_G.aurae_Print('Bars unlocked')
 			auraeOptionsFrameUnlock:SetChecked(true)
 		elseif command == "lock" then
 			_G.aurae_BarLock()
-			_G.aurae_Print(_G.aurae_LOCKED)
+			_G.aurae_Print('Bars locked')
 			auraeOptionsFrameUnlock:SetChecked(false)
 		elseif command == "invert" then
 			aurae.INVERT = not aurae.INVERT

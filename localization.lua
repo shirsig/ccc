@@ -130,9 +130,6 @@ _G.aurae_NOTDETECTED = "not detected"
 _G.aurae_ENABLED = "aurae enabled"
 _G.aurae_DISABLED = "aurae disabled"
 
-_G.aurae_LOCKED = "aurae locked"
-_G.aurae_UNLOCKED = "aurae unlocked"
-
 _G.aurae_INVERSION_ON = "aurae inversion on"
 _G.aurae_INVERSION_OFF = "aurae inversion off"
 
