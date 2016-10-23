@@ -732,21 +732,18 @@ do
 		end
 
 		local function unit_changed(unitID)
-			if not UnitCanAttack('player', unitID) then
-				return
-			end
-
 			local unit = UnitName(unitID)
+			if unit then
+				player[unit] = UnitIsPlayer(unitID)
 
-			player[unit] = UnitIsPlayer(unitID)
-
-			if player[unit] then
-				add_recent(unit)
+				if player[unit] then
+					add_recent(unit)
+				end
+				if player[current[unitID]] and current[unitID] then
+					add_recent(current[unitID])
+				end
+				current[unitID] = unit
 			end
-			if player[current[unitID]] and current[unitID] then
-				add_recent(current[unitID])
-			end
-			current[unitID] = unit
 		end
 
 		for _, event in {
