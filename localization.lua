@@ -20,8 +20,6 @@ _G.aurae_OPTIONS_BARS_TAB = "Bars"
 _G.aurae_OPTIONS_EFFECTS_TAB = "Monitoring"
 _G.aurae_OPTIONS_LEARN_TAB = "Skills"
 
-_G.aurae_OPTIONS_TRANS = "Transparency"
-_G.aurae_OPTIONS_SCALE = "Scaling"
 _G.aurae_OPTIONS_DONE = "Done"
 _G.aurae_OPTIONS_UNLOCK = "Unlock"
 _G.aurae_OPTIONS_WIDTH = "Width"
@@ -77,23 +75,6 @@ _G.aurae_INNERVATE = "Innervate"
 _G.aurae_BARKSKIN = "Barkskin"
 _G.aurae_REGROWTH = "Regrowth"
 _G.aurae_FREGEN = "Frenzied Regeneration"
-
-
--- Hunter
-_G.aurae_FREEZINGTRAP = "Freezing Trap Effect"
-_G.aurae_FREEZINGTRAP_SPELL = "Freezing Trap"
-_G.aurae_SCAREBEAST = "Scare Beast"
-_G.aurae_IMPCS = "Improved Concussive Shot"
-_G.aurae_SCATTERSHOT = "Scatter Shot"
-_G.aurae_INTIMIDATION = "Intimidation"
-_G.aurae_COUNTERATTACK = "Counterattack"
-_G.aurae_WYVERNSTING = "Wyvernsting"
-_G.aurae_IMPROVEDWINGCLIP = "Improved Wingclip"
-_G.aurae_ENTRAPMENT = "Entrapment"
-_G.aurae_SERPENTSTING = "Serpent Sting"
-_G.aurae_VIPERSTING = "Viper Sting"
-_G.aurae_DETERRENCE = "Deterrence"
-_G.aurae_RAPIDFIRE = "Rapid Fire"
 
 -- Warrior
 _G.aurae_INTERCEPT = "Intercept Stun"
@@ -174,7 +155,3 @@ _G.aurae_COLOROVERTIME_ON = "Bar coloration over time enabled"
 _G.aurae_COLOROVERTIME_OFF = "Bar coloration over time disabled"
 _G.aurae_LEADINGTIMER_ON = "Timer position: leading"
 _G.aurae_LEADINGTIMER_OFF = "Timer position: trailing"
-
-_G.aurae_SCALE = "aurae Scale set to "
-
-_G.aurae_ALPHA = "aurae Alpha set to "

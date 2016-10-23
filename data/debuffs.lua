@@ -1,7 +1,8 @@
 local _G = getfenv(0)
 function _G.aurae_ConfigDebuff()
 
-	-- Rogue - Debuffs
+	-- Rogue
+
 	aurae.EFFECTS[_G.aurae_RUPTURE] = {
 		ICON = 'Ability_Rogue_Rupture',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
@@ -52,7 +53,8 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	-- Priest - Debuffs
+	-- Priest
+
 	aurae.EFFECTS["Shadow Word: Pain"] = {
 		ICON = 'Spell_Shadow_ShadowWordPain',
 		SCHOOL = _G.aurae_SCHOOL.SHADOW,
@@ -83,7 +85,7 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	-- Mage - Debuffs
+	-- Mage
 
 	aurae.EFFECTS['Pyroclasm'] = {
 		ICON = 'Spell_Fire_Volcano',
@@ -180,7 +182,8 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	-- Druid - Debuffs
+	-- Druid
+
 	aurae.EFFECTS[_G.aurae_FAERIEFIRE] = {
 		ICON = 'Spell_Nature_FaerieFire',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
@@ -203,8 +206,9 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	-- Hunter - Debuffs
-	aurae.EFFECTS[_G.aurae_SERPENTSTING] = {
+	-- Hunter
+
+	aurae.EFFECTS["Serpent Sting"] = {
 		ICON = 'Ability_Hunter_Quickshot',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_DEBUFF,
@@ -212,7 +216,7 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_VIPERSTING] = {
+	aurae.EFFECTS["Viper Sting"] = {
 		ICON = 'Ability_Hunter_AimedShot',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_DEBUFF,
@@ -220,9 +224,9 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	-- Paladin - Debuffs
+	-- Paladin
 
-	-- Warlock - Debuffs
+	-- Warlock
 
 	aurae.EFFECTS['Shadowburn'] = {
 		ICON = 'Spell_Shadow_ScourgeBuild',
@@ -377,7 +381,8 @@ function _G.aurae_ConfigDebuff()
 		DURATION = 6,
 		MONITOR = true,
 	}
-	-- Shaman - Debuffs
+
+	-- Shaman
 
 	aurae.EFFECTS["Frost Shock"] = {
 		ICON = 'Spell_Frost_FrostShock',
@@ -409,5 +414,5 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	-- Specific - Debuffs
+	-- Misc
 end

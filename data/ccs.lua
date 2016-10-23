@@ -1,7 +1,8 @@
 local _G = getfenv(0)
 function _G.aurae_ConfigCC()
 
-	-- Rogue - Stun/Root CCs
+	-- Rogue
+
 	aurae.EFFECTS[_G.aurae_GOUGE] = {
 		ICON = 'Ability_Gouge',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
@@ -45,7 +46,8 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	-- Priest - Stun/Root CCs
+	-- Priest
+
 	aurae.EFFECTS["Shackle Undead"] = {
 		ICON = 'Spell_Nature_Slow',
 		SCHOOL = _G.aurae_SCHOOL.HOLY,
@@ -73,7 +75,8 @@ function _G.aurae_ConfigCC()
 		DIMINISH = 0
 	}
 
-	-- Mage - Stun/Root CCs
+	-- Mage
+
 	aurae.EFFECTS["Polymorph"] = {
 		ICON = 'Spell_Nature_Polymorph', -- Spell_Magic_PolymorphPig, TODO Ability_Hunter_Pet_Turtle
 		SCHOOL = _G.aurae_SCHOOL.ARCANE,
@@ -99,7 +102,8 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	-- Druid - Stun/Root CCs
+	-- Druid
+
 	aurae.EFFECTS[_G.aurae_ROOTS] = {
 		ICON = 'Spell_Nature_StrangleVines',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
@@ -148,8 +152,9 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	-- Hunter - Stun/Root CCs
-	aurae.EFFECTS[_G.aurae_FREEZINGTRAP] = {
+	-- Hunter
+
+	aurae.EFFECTS["Freezing Trap Effect"] = {
 		ICON = 'Spell_Frost_ChainsOfIce',
 		SCHOOL = _G.aurae_SCHOOL.FROST,
 		ETYPE = ETYPE_CC,
@@ -157,7 +162,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_IMPCS] = {
+	aurae.EFFECTS["Improved Concussive Shot"] = {
 		ICON = 'Spell_Frost_IceShock',
 		SCHOOL = _G.aurae_SCHOOL.ARCANE,
 		ETYPE = ETYPE_CC,
@@ -165,7 +170,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_SCAREBEAST] = {
+	aurae.EFFECTS["Scare Beast"] = {
 		ICON = 'Ability_Druid_Cower',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_CC,
@@ -173,7 +178,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_SCATTERSHOT] = {
+	aurae.EFFECTS["Scatter Shot"] = {
 		ICON = 'Ability_GolemStormBolt',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -181,7 +186,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_INTIMIDATION] = {
+	aurae.EFFECTS["Intimidation"] = {
 		ICON = 'Ability_Devour',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -189,7 +194,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_COUNTERATTACK] = {
+	aurae.EFFECTS["Counterattack"] = {
 		ICON = 'Ability_Warrior_Challange',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -197,7 +202,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_IMPROVEDWINGCLIP] = {
+	aurae.EFFECTS["Improved Wingclip"] = {
 		ICON = 'Ability_Rogue_Trip',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -205,7 +210,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_WYVERNSTING] = {
+	aurae.EFFECTS["Wyvernsting"] = {
 		ICON = 'INV_Spear_02',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_CC,
@@ -213,7 +218,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_ENTRAPMENT] = {
+	aurae.EFFECTS["Entrapment"] = {
 		ICON = 'Spell_Nature_StrangleVines',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -221,7 +226,8 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	-- Paladin - Stun/Root CCs
+	-- Paladin
+
 	aurae.EFFECTS["Hammer of Justice"] = {
 		ICON = 'Spell_Holy_SealOfMight',
 		SCHOOL = _G.aurae_SCHOOL.HOLY,
@@ -246,7 +252,8 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	-- Warlock - Stun/Root CCs
+	-- Warlock
+
 	aurae.EFFECTS["Seduction"] = {
 		ICON = 'Spell_Shadow_MindSteal',
 		SCHOOL = _G.aurae_SCHOOL.SHADOW,
@@ -287,7 +294,8 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	-- Warrior - Stun/Root CCs
+	-- Warrior
+
 	aurae.EFFECTS[_G.aurae_INTERCEPT] = {
 		ICON = 'Ability_Rogue_Sprint',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
@@ -344,9 +352,8 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	-- Specific - Stun/Root CCs
+	-- Misc
 
-	-- Tauren
 	aurae.EFFECTS[_G.aurae_WARSTOMP] = {
 		ICON = 'Ability_WarStomp',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
@@ -373,7 +380,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	-- Reckless Helmet
+	-- Rocket Helm
 	aurae.EFFECTS[_G.aurae_ROCKETHELM] = {
 		ICON = 'INV_Helmet_49',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,

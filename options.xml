@@ -317,48 +317,21 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_SCALE);
-								getglobal(this:GetName().."High"):SetText("3.0");
-								getglobal(this:GetName().."Low"):SetText("0.5");
-								auraeSliderScale:SetMinMaxValues(0.5,3.0);
-								auraeSliderScale:SetValueStep(0.01);
+								getglobal(this:GetName().."Text"):SetText('Scaling')
+								getglobal(this:GetName().."High"):SetText("3.0")
+								getglobal(this:GetName().."Low"):SetText("0.5")
+								auraeSliderScale:SetMinMaxValues(0.5,3.0)
+								auraeSliderScale:SetValueStep(0.01)
 							</OnLoad>
 							<OnValueChanged>
-								aurae.SCALE = auraeSliderScale:GetValue();
-								aurae_Save[aurae.PROFILE].scale = aurae.SCALE;
-								auraeCC:SetScale(aurae.SCALE);
-								auraeDebuff:SetScale(aurae.SCALE);
-								auraeBuff:SetScale(aurae.SCALE);
+								aurae.SCALE = auraeSliderScale:GetValue()
+								aurae_Save[aurae.PROFILE].scale = aurae.SCALE
+								auraeCC:SetScale(aurae.SCALE)
+								auraeDebuff:SetScale(aurae.SCALE)
+								auraeBuff:SetScale(aurae.SCALE)
 							</OnValueChanged>
 						</Scripts>
 					</Slider>
-
-					<Slider name="auraeSliderWidth" inherits="OptionsSliderTemplate">
-						<Size>
-							<AbsDimension x="220" y="16"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOP">
-								<Offset>
-									<AbsDimension x="0" y="-80" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_WIDTH);
-								getglobal(this:GetName().."High"):SetText("300");
-								getglobal(this:GetName().."Low"):SetText("50");
-								auraeSliderWidth:SetMinMaxValues(50,300);
-								auraeSliderWidth:SetValueStep(2);
-							</OnLoad>
-							<OnValueChanged>
-								aurae_Save[aurae.PROFILE].width = auraeSliderWidth:GetValue()
-								aurae_ApplyWidth()
-							</OnValueChanged>
-						</Scripts>
-					</Slider>
-
 					<Slider name="auraeSliderAlpha" inherits="OptionsSliderTemplate">
 						<Size>
 							<AbsDimension x="220" y="16"/>
@@ -372,30 +345,15 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Text"):SetText(aurae_OPTIONS_TRANS);
-								getglobal(this:GetName().."High"):SetText("1.0");
-								getglobal(this:GetName().."Low"):SetText("0.0");
-								auraeSliderAlpha:SetMinMaxValues(0.0,1.0);
-								auraeSliderAlpha:SetValueStep(0.01);
+								getglobal(this:GetName().."Text"):SetText('Opacity')
+								getglobal(this:GetName().."High"):SetText("1.0")
+								getglobal(this:GetName().."Low"):SetText("0.0")
+								auraeSliderAlpha:SetMinMaxValues(0.0,1.0)
+								auraeSliderAlpha:SetValueStep(0.01)
 							</OnLoad>
 							<OnValueChanged>
-								aurae.ALPHA = auraeSliderAlpha:GetValue();
-								aurae_Save[aurae.PROFILE].alpha = aurae.ALPHA;
-								auraeBarCC1:SetAlpha(aurae.ALPHA);
-								auraeBarCC2:SetAlpha(aurae.ALPHA);
-								auraeBarCC3:SetAlpha(aurae.ALPHA);
-								auraeBarCC4:SetAlpha(aurae.ALPHA);
-								auraeBarCC5:SetAlpha(aurae.ALPHA);
-								auraeBarDebuff1:SetAlpha(aurae.ALPHA);
-								auraeBarDebuff2:SetAlpha(aurae.ALPHA);
-								auraeBarDebuff3:SetAlpha(aurae.ALPHA);
-								auraeBarDebuff4:SetAlpha(aurae.ALPHA);
-								auraeBarDebuff5:SetAlpha(aurae.ALPHA);
-								auraeBarBuff1:SetAlpha(aurae.ALPHA);
-								auraeBarBuff2:SetAlpha(aurae.ALPHA);
-								auraeBarBuff3:SetAlpha(aurae.ALPHA);
-								auraeBarBuff4:SetAlpha(aurae.ALPHA);
-								auraeBarBuff5:SetAlpha(aurae.ALPHA);
+								aurae.ALPHA = auraeSliderAlpha:GetValue()
+								aurae_Save[aurae.PROFILE].alpha = aurae.ALPHA
 							</OnValueChanged>
 						</Scripts>
 					</Slider>

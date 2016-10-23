@@ -216,7 +216,7 @@ function ADDON_LOADED()
 	for i, etype in {'Debuff', 'CC', 'Buff'} do
 		local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
 		local f = CreateFrame('Frame', 'aurae'..etype, UIParent)
-		f:SetWidth(WIDTH)
+		f:SetWidth(WIDTH + HEIGHT)
 		f:SetHeight(height)
 		f:SetMovable(true)
 		f:SetUserPlaced(true)
@@ -373,18 +373,7 @@ function SlashCommandHandler(msg)
 				auraeCC:SetScale(aurae.SCALE)
 				auraeDebuff:SetScale(aurae.SCALE)
 				auraeBuff:SetScale(aurae.SCALE)
-				_G.aurae_Print(_G.aurae_SCALE .. scale)
 				auraeSliderScale:SetValue(aurae.SCALE)
-			else
-				_G.aurae_Help()
-			end
-		elseif strsub(command, 1, 5) == "width" then
-			local width = tonumber(strsub(command, 7))
-			if width <= 300 and width >= 50 then
-				_G.aurae_Save[aurae.PROFILE].width = width
-				_G.aurae_ApplyWidth()
-				_G.aurae_Print('New width: ' .. width)
-				auraeSliderWidth:SetValue(width)
 			else
 				_G.aurae_Help()
 			end
@@ -393,7 +382,7 @@ function SlashCommandHandler(msg)
 			if alpha <= 1 and alpha >= 0 then
 				_G.aurae_Save[aurae.PROFILE].alpha = alpha
 				aurae.ALPHA = alpha
-				_G.aurae_Print(_G.aurae_ALPHA..alpha)
+				_G.aurae_Print('Alpha: '..alpha)
 				auraeSliderAlpha:SetValue(aurae.ALPHA)
 			else
 				_G.aurae_Help()
@@ -415,10 +404,7 @@ function SlashCommandHandler(msg)
 			_G.aurae_Config()
 			_G.aurae_LoadConfCCs()
 			_G.aurae_UpdateClassSpells(true)
-
-			_G.aurae_Print(_G.aurae_SCALE..aurae.SCALE)
-			_G.aurae_Print('New width: '..aurae_Save[aurae.PROFILE].width)
-			_G.aurae_Print(_G.aurae_ALPHA..aurae.ALPHA)
+			_G.aurae_Print('Alpha: '..aurae.ALPHA)
 		else
 			_G.aurae_Help()
 		end
@@ -943,7 +929,6 @@ function LoadVariables()
 
 	aurae.STATUS = _G.aurae_Save[aurae.PROFILE].status
 	aurae.INVERT = _G.aurae_Save[aurae.PROFILE].invert
-	aurae.SCALE = _G.aurae_Save[aurae.PROFILE].scale
 	aurae.ALPHA = _G.aurae_Save[aurae.PROFILE].alpha
 
 	aurae.MONITORING = _G.aurae_Save[aurae.PROFILE].Monitoring
@@ -1021,7 +1006,7 @@ function _G.aurae_UpdateImpTrap()
 	if texture then
 		if rank ~= 0 then
 -- Freezing Trap is a true multi rank, hence already updated
-			aurae.EFFECTS[_G.aurae_FREEZINGTRAP].DURATION = aurae.EFFECTS[_G.aurae_FREEZINGTRAP].DURATION * (1 + rank * .15)
+			aurae.EFFECTS["Freezing Trap Effect"].DURATION = aurae.EFFECTS["Freezing Trap Effect"].DURATION * (1 + rank * .15)
 		end
 	end
 end
@@ -1122,8 +1107,8 @@ function _G.aurae_UpdateClassSpells()
 			_G.aurae_GetSpellRank("Divine Shield", "Divine Shield")
 		end
 	elseif eclass == "HUNTER" then
-		_G.aurae_GetSpellRank(_G.aurae_FREEZINGTRAP_SPELL, _G.aurae_FREEZINGTRAP)
-		_G.aurae_GetSpellRank(_G.aurae_SCAREBEAST, _G.aurae_SCAREBEAST)
+		_G.aurae_GetSpellRank("Freezing Trap", "Freezing Trap Effect")
+		_G.aurae_GetSpellRank("Scare Beast", "Scare Beast")
 		_G.aurae_UpdateImpTrap()
 	elseif eclass == "PRIEST" then
 		_G.aurae_GetSpellRank("Shackle Undead", "Shackle Undead")

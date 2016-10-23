@@ -70,29 +70,29 @@ aurae_ACTIONS["Shackle Undead"] = {
 }
 
 -- Druid
-aurae_ACTIONS[aurae_ROOTS] = {
+aurae_ACTIONS["Entangling Roots"] = {
 	RANKS = 6,
 	DURATION = {12, 15, 18, 21, 24, 27},
 }
 
-aurae_ACTIONS[aurae_BASH] = {
+aurae_ACTIONS["Bash"] = {
 	RANKS = 3,
 	DURATION = {2, 3, 4},
 }
 
-aurae_ACTIONS[aurae_HIBERNATE] = {
+aurae_ACTIONS["Hibernate"] = {
 	RANKS = 3,
 	DURATION = {20, 30, 40},
 }
 
 -- Hunter
-aurae_ACTIONS[aurae_FREEZINGTRAP_SPELL] = {
+aurae_ACTIONS["Freezing Trap"] = {
 	RANKS = 3,
 	DURATION = {10, 15, 20},
-	EFFECTNAME = aurae_FREEZINGTRAP,
+	EFFECTNAME = "Freezing Trap Effect",
 }
 
-aurae_ACTIONS[aurae_SCAREBEAST] = {
+aurae_ACTIONS["Scare Beast"] = {
 	RANKS = 3,
 	DURATION = {10, 15, 20},
 }
@@ -141,8 +141,8 @@ aurae_ACTIONS["Sap"] = {
 }
 
 aurae_TEXT_ON = QuickLocalize(AURAADDEDOTHERHARMFUL)
+aurae_TEXT_BUFF_ON = QuickLocalize(AURAADDEDOTHERHELPFUL)
 aurae_TEXT_BREAK = QuickLocalize(AURADISPELOTHER)
 aurae_TEXT_OFF = QuickLocalize(AURAREMOVEDOTHER)
 
-aurae_TEXT_BUFF_ON = QuickLocalize(AURAADDEDOTHERHELPFUL)
 end

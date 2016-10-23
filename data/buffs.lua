@@ -1,7 +1,8 @@
 local _G = getfenv(0)
 function _G.aurae_ConfigBuff()
 
-	-- Rogue - Target Buffs
+	-- Rogue
+
 	aurae.EFFECTS[_G.aurae_ADRENALINERUSH] = {
 		ICON = 'Spell_Shadow_ShadowWordDominate',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
@@ -30,7 +31,8 @@ function _G.aurae_ConfigBuff()
 		DURATION = 15,
 		MONITOR = true,
 	}
-	-- Priest - Buffs
+	-- Priest
+
 	aurae.EFFECTS["Shadow Word: Shield"] = {
 		ICON = 'Spell_Holy_PowerWordShield',
 		SCHOOL = _G.aurae_SCHOOL.HOLY,
@@ -54,7 +56,8 @@ function _G.aurae_ConfigBuff()
 		MONITOR = true,
 	}
 
-	-- Mage - Buffs
+	-- Mage
+
 	aurae.EFFECTS["Arcane Power"] = {
 		ICON = 'Spell_Nature_Lightning',
 		SCHOOL = _G.aurae_SCHOOL.ARCANE,
@@ -79,7 +82,8 @@ function _G.aurae_ConfigBuff()
 		MONITOR = true,
 	}
 
-	-- Druid - Buffs
+	-- Druid
+
 	aurae.EFFECTS[_G.aurae_NATURESGRASP] = {
 		ICON = 'Spell_Nature_NaturesWrath',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
@@ -130,22 +134,25 @@ function _G.aurae_ConfigBuff()
 		MONITOR = true,
 	}
 
-	-- Hunter - Buffs
-	aurae.EFFECTS[_G.aurae_DETERRENCE] = {
+	-- Hunter
+
+	aurae.EFFECTS["Deterrence"] = {
 		ICON = 'Ability_Whirlwind',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 10,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_RAPIDFIRE] = {
+	aurae.EFFECTS["Rapid Fire"] = {
 		ICON = 'Ability_Hunter_RunningShot',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 15,
 		MONITOR = true,
 	}
-	-- Paladin - Buffs
+
+	-- Paladin
+
 	aurae.EFFECTS["Divine Shield"] = {
 		ICON = 'Spell_Holy_DivineIntervention',
 		SCHOOL = _G.aurae_SCHOOL.HOLY,
@@ -168,7 +175,8 @@ function _G.aurae_ConfigBuff()
 		MONITOR = true,
 	}
 
-	-- Warlock - Buffs
+	-- Warlock
+
 	aurae.EFFECTS["Sacrifice"] = {
 		ICON = 'Spell_Shadow_SacrificialShield',
 		SCHOOL = _G.aurae_SCHOOL.SHADOW,
@@ -183,7 +191,9 @@ function _G.aurae_ConfigBuff()
 		DURATION = 45,
 		MONITOR = true,
 	}
-	-- Warrior - Buffs
+
+	-- Warrior
+
 	aurae.EFFECTS[_G.aurae_BERSERKERRAGE] = {
 		ICON = 'Spell_Nature_AncestralGuardian',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
@@ -233,9 +243,9 @@ function _G.aurae_ConfigBuff()
 		DURATION = 30,
 		MONITOR = true,
 	}
-	-- Specific - Buffs
 
-	-- Forsaken
+	-- Misc
+
 	aurae.EFFECTS[_G.aurae_WOTF] = {
 		ICON = 'Spell_Shadow_RaiseDead',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
@@ -244,7 +254,6 @@ function _G.aurae_ConfigBuff()
 		MONITOR = true,
 	}
 
-	-- Human
 	aurae.EFFECTS[_G.aurae_PERCEPTION] = {
 		ICON = 'Spell_Nature_Sleep',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,

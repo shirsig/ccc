@@ -3,5 +3,10 @@
 ## Notes: aurae
 ## Author: shirsig
 ## SavedVariables: aurae_Save
-aurae.xml
+aurae.lua
+globals.lua
+data\ccs.lua
+data\debuffs.lua
+data\buffs.lua
+localization.lua
 options.xml
