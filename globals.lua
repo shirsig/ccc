@@ -26,7 +26,6 @@ aurae.STATUS = 0
 aurae.INVERT = false
 aurae.GROWTH = 0
 aurae.SCALE = 1
-aurae.WIDTH = 160
 aurae.ALPHA = 1
 
 aurae.VARIABLES_LOADED = false

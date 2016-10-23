@@ -353,9 +353,8 @@
 								auraeSliderWidth:SetValueStep(2);
 							</OnLoad>
 							<OnValueChanged>
-								aurae.WIDTH = auraeSliderWidth:GetValue();
-								aurae_Save[aurae.PROFILE].width = aurae.WIDTH;
-								aurae_SetWidth(aurae.WIDTH);
+								aurae_Save[aurae.PROFILE].width = auraeSliderWidth:GetValue()
+								aurae_ApplyWidth()
 							</OnValueChanged>
 						</Scripts>
 					</Slider>

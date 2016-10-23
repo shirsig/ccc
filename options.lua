@@ -396,7 +396,7 @@ end
 function auraeOptions_Init()
 	auraeSliderAlpha:SetValue(aurae.ALPHA)
 	auraeSliderScale:SetValue(aurae.SCALE)
-	auraeSliderWidth:SetValue(aurae.WIDTH)
+	auraeSliderWidth:SetValue(aurae_Save[aurae.PROFILE].width)
 
 	auraeOptionsFrameMonitorCC:SetChecked(bit.band(aurae.MONITORING, ETYPE_CC))
 	auraeOptionsFrameMonitorDebuff:SetChecked(bit.band(aurae.MONITORING, ETYPE_DEBUFF))

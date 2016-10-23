@@ -267,8 +267,6 @@ aurae_WARN_ENABLED = "Chat alerts enabled"
 
 aurae_SCALE = "aurae Scale set to "
 
-aurae_WIDTH = "aurae Width set to "
-
 aurae_ALPHA = "aurae Alpha set to "
 
 aurae_LOADED = " Loaded - /aurae"

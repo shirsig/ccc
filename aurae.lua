@@ -10,6 +10,8 @@ CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
 --	_F:RegisterEvent(event)
 --end
 
+WIDTH = 200
+HEIGHT = 16
 MAXBARS = 10
 
 _G.aurae_SCHOOL = {
@@ -104,17 +106,8 @@ local function create_bar(name)
 	local bar = {}
 	bars[name] = bar
 
-	local color = bar.color or {1, 0, 1}
-	local bgcolor = {0, .5, .5, .5}
 	local icon = bar.icon or nil
 	local texture = [[Interface\Addons\aurae\Textures\BantoBar]]
-	local width = 200
-	local height = 16
-	local point = 'CENTER'
-	local rframe = UIParent
-	local rpoint = 'CENTER'
-	local xoffset = 0
-	local yoffset = 0
 	local text = bar.text
 	local fontsize = 11
 	local textcolor = {1, 1, 1}
@@ -124,67 +117,57 @@ local function create_bar(name)
 	local font, _, style = GameFontHighlight:GetFont()
 
 	bar.fadetime = .5
-	bar.width = 200
-	bar.bgcolor = bgcolor
 	bar.textcolor = textcolor
 	bar.timertextcolor = timertextcolor
 
 	local f = CreateFrame('Button', nil, UIParent)
 
-	f:SetWidth(width + height)
-	f:SetHeight(height)
-	f:ClearAllPoints()
-	f:SetPoint(point, rframe, rpoint, xoffset, yoffset)
+	f:SetHeight(HEIGHT)
 
 	f:EnableMouse(false)
 	f:RegisterForClicks()
 	f:SetScript('OnClick', nil)
 
 	f.icon = f:CreateTexture()
-	f.icon:SetHeight(height)
-	f.icon:SetWidth(height)
-	f.icon:SetPoint('LEFT', 0, 0)
+	f.icon:SetWidth(HEIGHT)
+	f.icon:SetPoint('TOPLEFT', 0, 0)
+	f.icon:SetPoint('BOTTOMLEFT', 0, 0)
 	f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
 	f.icon:SetTexCoord(.08, .92, .08, .92)
 
 	f.statusbar = CreateFrame('StatusBar', nil, f)
-	f.statusbar:ClearAllPoints()
-	f.statusbar:SetHeight(height)
-	f.statusbar:SetWidth(width)
-	f.statusbar:SetPoint('TOPLEFT', f, 'TOPLEFT', height, 0)
+	f.statusbar:SetPoint('TOPLEFT', f.icon, 'TOPRIGHT', 0, 0)
+	f.statusbar:SetPoint('BOTTOMRIGHT', 0, 0)
 	f.statusbar:SetStatusBarTexture(texture)
-	f.statusbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
+	f.statusbar:SetStatusBarColor(.5, .5, .5, 1)
 	f.statusbar:SetMinMaxValues(0, 1)
 	f.statusbar:SetValue(1)
 	f.statusbar:SetBackdrop{bgFile=texture}
-	f.statusbar:SetBackdropColor(bgcolor[1], bgcolor[2], bgcolor[3], bgcolor[4])
+	f.statusbar:SetBackdropColor(.5, .5, .5, .3)
 
 	f.spark = f.statusbar:CreateTexture(nil, 'OVERLAY')
 	f.spark:SetTexture[[Interface\CastingBar\UI-CastingBar-Spark]]
 	f.spark:SetWidth(16)
-	f.spark:SetHeight(height + 25)
+	f.spark:SetHeight(HEIGHT + 25)
 	f.spark:SetBlendMode'ADD'
-	f.spark:Show()
-
-	f.timertext = f.statusbar:CreateFontString(nil, 'OVERLAY')
-	f.timertext:SetFontObject(GameFontHighlight)
-	f.timertext:SetFont(font, fontsize, style)
-	f.timertext:SetHeight(height)
-	f.timertext:SetWidth(timertextwidth)
-	f.timertext:SetPoint('LEFT', f.statusbar, 'LEFT', 0, 0)
-	f.timertext:SetJustifyH'RIGHT'
-	f.timertext:SetText''
-	f.timertext:SetTextColor(timertextcolor[1], timertextcolor[2], timertextcolor[3], timertextcolor[4])
 
 	f.text = f.statusbar:CreateFontString(nil, 'OVERLAY')
 	f.text:SetFontObject(GameFontHighlight)
 	f.text:SetFont(font, fontsize, style)
-	f.text:SetHeight(height)
-	f.text:SetWidth((width - timertextwidth) * .9)
-	f.text:SetPoint('RIGHT', f.statusbar, 'RIGHT', 0, 0)
+	f.text:SetPoint('TOPLEFT', 2, 0)
+	f.text:SetPoint('BOTTOMRIGHT', -2, 0)
 	f.text:SetJustifyH'LEFT'
 	f.text:SetText(text)
 	f.text:SetTextColor(textcolor[1], textcolor[2], textcolor[3], textcolor[4])
+
+	f.timertext = f.statusbar:CreateFontString(nil, 'OVERLAY')
+	f.timertext:SetFontObject(GameFontHighlight)
+	f.timertext:SetFont(font, fontsize, style)
+	f.timertext:SetPoint('TOPLEFT', 2, 0)
+	f.timertext:SetPoint('BOTTOMRIGHT', -2, 0)
+	f.timertext:SetJustifyH'RIGHT'
+	f.timertext:SetText''
+	f.timertext:SetTextColor(timertextcolor[1], timertextcolor[2], timertextcolor[3], timertextcolor[4])
 
 --	if bar.onclick then
 --		TODO
@@ -209,13 +192,13 @@ local function format_time(t)
 	local m = floor((t - h * 3600) / 60)
 	local s = t - (h * 3600 + m * 60)
 	if h > 0 then
-		return format('%d:%02d', h, m)
+		return format('%d:%02d:02d', h, m, s)
 	elseif m > 0 then
-		return format('%d:%02d', m, floor(s))
+		return format('%d:%02d', m, s)
 	elseif s < 10 then
-		return format('%1.1f', s)
+		return format('%.1f', s)
 	else
-		return format('%.0f', floor(s))
+		return format('%.0f', s)
 	end
 end
 
@@ -236,13 +219,15 @@ end
 function _G.aurae_OnLoad()
 	_G.aurae_Globals()
 
-	local dummy_timer = { stopped=0 }
+	local dummy_timer = {stopped=0}
 	for k, type in {'CC', 'Buff', 'Debuff'} do
 		for i = 1, MAXBARS do
 			local name = 'auraeBar' .. type .. i
 			local bar = create_bar(name)
 			bar.frame:SetParent(getglobal('aurae' .. type))
-			bar.frame:SetPoint('TOPLEFT', 0, -100 + i * 20)
+			local offset = -100 + i * 20
+			bar.frame:SetPoint('TOPLEFT', 0, offset)
+			bar.frame:SetPoint('TOPRIGHT', 0, offset)
 			setglobal(name, bar.frame)
 			bar.TIMER = dummy_timer
 			tinsert(aurae['GROUPS' .. strupper(type)], bar)
@@ -284,7 +269,7 @@ function _G.aurae_BarUnlock()
 			f:SetAlpha(aurae.ALPHA)
 			f.statusbar:SetStatusBarColor(1, 1, 1)
 			f.statusbar:SetValue(1)
-			f.icon:SetNormalTexture[[Interface\Icons\INV_Misc_QuestionMark]]
+			f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
 			f.text:SetText('aurae ' .. type .. ' Bar ' .. i)
 			f.timertext:SetText''
 			f.spark:Hide()
@@ -385,10 +370,9 @@ function SlashCommandHandler(msg)
 			local width = tonumber(strsub(command, 7))
 			if width <= 300 and width >= 50 then
 				_G.aurae_Save[aurae.PROFILE].width = width
-				aurae.WIDTH = width
-				_G.aurae_SetWidth(aurae.WIDTH)
-				_G.aurae_Print(_G.aurae_WIDTH .. width)
-				auraeSliderWidth:SetValue(aurae.WIDTH)
+				_G.aurae_ApplyWidth()
+				_G.aurae_Print('New width: ' .. width)
+				auraeSliderWidth:SetValue(width)
 			else
 				_G.aurae_Help()
 			end
@@ -426,7 +410,7 @@ function SlashCommandHandler(msg)
 			_G.aurae_UpdateClassSpells(true)
 
 			_G.aurae_Print(_G.aurae_SCALE..aurae.SCALE)
-			_G.aurae_Print(_G.aurae_WIDTH..aurae.WIDTH)
+			_G.aurae_Print('New width: '..aurae_Save[aurae.PROFILE].width)
 			_G.aurae_Print(_G.aurae_ALPHA..aurae.ALPHA)
 		else
 			_G.aurae_Help()
@@ -449,7 +433,7 @@ do
 	function TargetID()
 		local name = UnitName'target'
 		if name then
-			return UnitIsPlayer'target' and name or '[' .. UnitLevel'target' .. target_sex() .. '] ' .. name
+			return UnitIsPlayer'target' and name or name .. ' [' .. UnitLevel'target' .. target_sex() .. ']'
 		end
 	end
 end
@@ -893,7 +877,7 @@ function UpdateBar(bar)
 
 		frame.statusbar:SetValue(aurae.INVERT and 1 - fraction or fraction)
 
-		local sparkPosition = bar.width * fraction
+		local sparkPosition = (WIDTH - HEIGHT) * fraction
 		frame.spark:Show()
 		frame.spark:SetPoint('CENTER', bar.frame.statusbar, aurae.INVERT and 'RIGHT' or 'LEFT', aurae.INVERT and -sparkPosition or sparkPosition, 0)
 
@@ -914,7 +898,7 @@ function UpdateBar(bar)
 		frame.statusbar:SetStatusBarColor(r, g, b)
 		frame.statusbar:SetBackdropColor(r, g, b, .3)
 
-		frame.icon:SetNormalTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
+		frame.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 		frame.text:SetText(timer.UNIT)
 	end
 end
@@ -972,7 +956,6 @@ function _G.aurae_LoadVariables()
 	aurae.INVERT = _G.aurae_Save[aurae.PROFILE].invert
 	aurae.GROWTH = _G.aurae_Save[aurae.PROFILE].growth
 	aurae.SCALE = _G.aurae_Save[aurae.PROFILE].scale
-	aurae.WIDTH = _G.aurae_Save[aurae.PROFILE].width
 	aurae.ALPHA = _G.aurae_Save[aurae.PROFILE].alpha
 
 	aurae.MONITORING = _G.aurae_Save[aurae.PROFILE].Monitoring
@@ -986,10 +969,10 @@ function _G.aurae_LoadVariables()
 
 	aurae.STYLE = _G.aurae_Save[aurae.PROFILE].style
 
-	auraeCC:SetScale(aurae.SCALE)
-	auraeDebuff:SetScale(aurae.SCALE)
-	auraeBuff:SetScale(aurae.SCALE)
-	_G.aurae_SetWidth(aurae.WIDTH)
+--	auraeCC:SetScale(aurae.SCALE)
+--	auraeDebuff:SetScale(aurae.SCALE)
+--	auraeBuff:SetScale(aurae.SCALE)
+	_G.aurae_ApplyWidth()
 
 	if aurae.STATUS == 2 then
 		_G.aurae_BarUnlock()
@@ -1196,11 +1179,8 @@ function _G.aurae_Help()
 	_G.aurae_Print(_G.aurae_HELP15)
 end
 
-function _G.aurae_SetWidth(width)
+function _G.aurae_ApplyWidth()
 	for _, k in {'CC', 'Debuff', 'Buff'} do
-		for i = 1, MAXBARS do
-			getglobal("auraeBar" .. k .. i):SetWidth(width + 10)
-		end
-		getglobal("aurae" .. k):SetWidth(width + 10)
+		getglobal("aurae" .. k):SetWidth(WIDTH)
 	end
 end
