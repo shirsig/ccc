@@ -224,7 +224,7 @@ function ADDON_LOADED()
 		f:SetScript('OnDragStop', function()
 			this:StopMovingOrSizing()
 		end)
-		f:SetPoint('CENTER', -235 + (i - 1) * 235, 150)
+		f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
 		for i = 1, MAXBARS do
 			local name = 'auraeBar' .. etype .. i
 			local bar = create_bar(name)
