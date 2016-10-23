@@ -265,7 +265,7 @@ function ADDON_LOADED()
 	_G.SLASH_AURAE1 = '/aurae'
 	SlashCmdList.AURAE = SlashCommandHandler
 
-	_G.aurae_Print(_G.aurae_FULLVERSION .. _G.aurae_LOADED)
+	_G.aurae_Print("aurae Loaded - /aurae")
 end
 
 --	if _G.aurae_Save[aurae.PROFILE].WarnSelf then
@@ -345,16 +345,6 @@ function SlashCommandHandler(msg)
 				_G.aurae_Print(_G.aurae_INVERSION_OFF)
 			end
 			auraeOptionsFrameInvert:SetChecked(aurae.INVERT)
-		elseif command == "grow up" then
-			_G.aurae_Save[aurae.PROFILE].growth = 1
-			aurae.GROWTH = _G.aurae_Save[aurae.PROFILE].growth
-			_G.aurae_Print(_G.aurae_GROW_UP)
-			auraeGrowthDropDownText:SetText(_G.aurae_OPTION_GROWTH_UP)
-		elseif command == "grow down" then
-			_G.aurae_Save[aurae.PROFILE].growth = 2
-			aurae.GROWTH = _G.aurae_Save[aurae.PROFILE].growth
-			_G.aurae_Print(_G.aurae_GROW_DOWN)
-			auraeGrowthDropDownText:SetText(_G.aurae_OPTION_GROWTH_DOWN)
 		elseif command == "color school" then
 			_G.aurae_Save[aurae.PROFILE].color = CTYPE_SCHOOL
 			_G.aurae_Print'School color enabled.'
@@ -409,7 +399,7 @@ function SlashCommandHandler(msg)
 				_G.aurae_Help()
 			end
 		elseif command == "print" then
-			_G.aurae_Print(_G.aurae_PROFILE_TEXT..aurae.PROFILE);
+			_G.aurae_Print("Profile: "..aurae.PROFILE)
 			if aurae.STATUS == 0 then
 				_G.aurae_Print(_G.aurae_DISABLED)
 			elseif aurae.STATUS == 2 then
@@ -421,11 +411,6 @@ function SlashCommandHandler(msg)
 				_G.aurae_Print(_G.aurae_INVERSION_ON)
 			else
 				_G.aurae_Print(_G.aurae_INVERSION_OFF)
-			end
-			if aurae.GROWTH == 1 then
-				_G.aurae_Print(_G.aurae_GROW_UP)
-			else
-				_G.aurae_Print(_G.aurae_GROW_DOWN)
 			end
 			_G.aurae_Config()
 			_G.aurae_LoadConfCCs()
@@ -634,7 +619,7 @@ do
 	_G.aurae_timers = {}
 
 	local function place_timers()
-			for _, timer in _G.aurae_timers do
+		for _, timer in _G.aurae_timers do
 			if timer.shown and not timer.visible then
 				local group
 				if aurae.EFFECTS[timer.EFFECT].ETYPE == ETYPE_BUFF then
@@ -644,21 +629,11 @@ do
 				else
 					group = aurae.GROUPSCC
 				end
-				if aurae.GROWTH == 1 then
-					for i = 1, MAXBARS do
-						if group[i].TIMER.stopped then
-							group[i].TIMER = timer
-							timer.visible = true
-							break
-						end
-					end
-				else
-					for i = MAXBARS, 1, -1 do
-						if group[i].TIMER.stopped then
-							group[i].TIMER = timer
-							timer.visible = true
-							break
-						end
+				for i = 1, MAXBARS do
+					if group[i].TIMER.stopped then
+						group[i].TIMER = timer
+						timer.visible = true
+						break
 					end
 				end
 			end
@@ -942,7 +917,6 @@ function LoadVariables()
 		ConfCC = {},
 		status = aurae.STATUS,
 		invert = false,
-		growth = 1,
 		color = CTYPE_SCHOOL,
 		scale = 1,
 		width = 160,
@@ -969,7 +943,6 @@ function LoadVariables()
 
 	aurae.STATUS = _G.aurae_Save[aurae.PROFILE].status
 	aurae.INVERT = _G.aurae_Save[aurae.PROFILE].invert
-	aurae.GROWTH = _G.aurae_Save[aurae.PROFILE].growth
 	aurae.SCALE = _G.aurae_Save[aurae.PROFILE].scale
 	aurae.ALPHA = _G.aurae_Save[aurae.PROFILE].alpha
 
@@ -1057,7 +1030,7 @@ function _G.aurae_UpdateImpSeduce()
 	local talentname, texture, _, _, rank = GetTalentInfo(2, 7)
 	if texture then
 		if rank ~= 0 then
-			aurae.EFFECTS[_G.aurae_SEDUCE].DURATION = 15 * (1 + rank * .10)
+			aurae.EFFECTS["Seduction"].DURATION = 15 * (1 + rank * .10)
 		end
 	end
 end
@@ -1078,8 +1051,8 @@ function _G.aurae_UpdatePermafrost()
 	if texture then
 		if rank ~= 0 then
 -- Frostbolt is a true multi rank, hence already updated
-			aurae.EFFECTS[_G.aurae_CONEOFCOLD].DURATION = 8 + .50 + rank * .50
-			aurae.EFFECTS[_G.aurae_FROSTBOLT].DURATION = aurae.EFFECTS[_G.aurae_FROSTBOLT].DURATION + .50 + rank * .50
+			aurae.EFFECTS["Cone of Cold"].DURATION = 8 + .50 + rank * .50
+			aurae.EFFECTS["Frostbolt"].DURATION = aurae.EFFECTS["Frostbolt"].DURATION + .50 + rank * .50
 		end
 	end
 end
@@ -1088,7 +1061,7 @@ function _G.aurae_UpdateImpShadowWordPain()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 4)
 	if texture then
 		if rank ~= 0 then
-			aurae.EFFECTS[_G.aurae_SHADOWWORDPAIN].DURATION = 18 + rank * 3
+			aurae.EFFECTS["Shadow Word: Pain"].DURATION = 18 + rank * 3
 		end
 	end
 end
@@ -1138,35 +1111,35 @@ function _G.aurae_UpdateClassSpells()
 	elseif eclass == "WARRIOR" then
 		_G.aurae_GetSpellRank(_G.aurae_REND, _G.aurae_REND)
 	elseif eclass == "WARLOCK" then
-		_G.aurae_GetSpellRank(_G.aurae_FEAR, _G.aurae_FEAR)
-		_G.aurae_GetSpellRank(_G.aurae_HOWLOFTERROR, _G.aurae_HOWLOFTERROR)
-		_G.aurae_GetSpellRank(_G.aurae_BANISH, _G.aurae_BANISH)
-		_G.aurae_GetSpellRank(_G.aurae_CORRUPTION, _G.aurae_CORRUPTION)
+		_G.aurae_GetSpellRank("Fear", "Fear")
+		_G.aurae_GetSpellRank("Howl of Terror", "Howl of Terror")
+		_G.aurae_GetSpellRank("Banish", "Banish")
+		_G.aurae_GetSpellRank("Corruption", "Corruption")
 		_G.aurae_UpdateImpSeduce()
 	elseif eclass == "PALADIN" then
-		_G.aurae_GetSpellRank(_G.aurae_HOJ, _G.aurae_HOJ)
+		_G.aurae_GetSpellRank("Hammer of Justice", "Hammer of Justice")
 		if _G.aurae_ConfigBuff ~= nil then
-			_G.aurae_GetSpellRank(_G.aurae_DIVINESHIELD, _G.aurae_DIVINESHIELD)
+			_G.aurae_GetSpellRank("Divine Shield", "Divine Shield")
 		end
 	elseif eclass == "HUNTER" then
 		_G.aurae_GetSpellRank(_G.aurae_FREEZINGTRAP_SPELL, _G.aurae_FREEZINGTRAP)
 		_G.aurae_GetSpellRank(_G.aurae_SCAREBEAST, _G.aurae_SCAREBEAST)
 		_G.aurae_UpdateImpTrap()
 	elseif eclass == "PRIEST" then
-		_G.aurae_GetSpellRank(_G.aurae_SHACKLE, _G.aurae_SHACKLE)
+		_G.aurae_GetSpellRank("Shackle Undead", "Shackle Undead")
 		if _G.aurae_ConfigDebuff ~= nil then
 			_G.aurae_UpdateImpShadowWordPain()
 		end
 	elseif eclass == "MAGE" then
 		if _G.aurae_ConfigDebuff ~= nil then
-			_G.aurae_GetSpellRank(_G.aurae_POLYMORPH, _G.aurae_POLYMORPH)
-			_G.aurae_GetSpellRank(_G.aurae_FROSTBOLT, _G.aurae_FROSTBOLT)
-			_G.aurae_GetSpellRank(_G.aurae_FIREBALL, _G.aurae_FIREBALL)
+			_G.aurae_GetSpellRank("Polymorph", "Polymorph")
+			_G.aurae_GetSpellRank("Frostbolt", "Frostbolt")
+			_G.aurae_GetSpellRank("Fireball", "Fireball")
 			_G.aurae_UpdatePermafrost()
 		end
 		auraeOptionsFrameArcanist:Show()
 		if aurae.ARCANIST then
-			aurae.EFFECTS[_G.aurae_POLYMORPH].DURATION = aurae.EFFECTS[_G.aurae_POLYMORPH].DURATION + 15
+			aurae.EFFECTS["Polymorph"].DURATION = aurae.EFFECTS["Polymorph"].DURATION + 15
 		end
 	elseif eclass == "DRUID" then
 		_G.aurae_GetSpellRank(_G.aurae_ROOTS, _G.aurae_ROOTS)
@@ -1177,21 +1150,17 @@ function _G.aurae_UpdateClassSpells()
 end
 
 function _G.aurae_Help()
-	_G.aurae_Print(_G.aurae_FULLVERSION .. _G.aurae_HELP1)
-	_G.aurae_Print(_G.aurae_HELP2)
-	_G.aurae_Print(_G.aurae_HELP3)
-	_G.aurae_Print(_G.aurae_HELP4)
-	_G.aurae_Print(_G.aurae_HELP5)
-	_G.aurae_Print(_G.aurae_HELP6)
-	_G.aurae_Print(_G.aurae_HELP7)
-	_G.aurae_Print(_G.aurae_HELP8)
-	_G.aurae_Print(_G.aurae_HELP9)
-	_G.aurae_Print(_G.aurae_HELP10)
-	_G.aurae_Print(_G.aurae_HELP11)
-	_G.aurae_Print(_G.aurae_HELP12)
-	_G.aurae_Print(_G.aurae_HELP13)
-	_G.aurae_Print(_G.aurae_HELP14)
-	_G.aurae_Print(_G.aurae_HELP15)
+	_G.aurae_Print("aurae : Usage - /aurae option")
+	_G.aurae_Print("options:")
+	_G.aurae_Print(" on     : Enables aurae")
+	_G.aurae_Print(" off    : Disables aurae")
+	_G.aurae_Print(" lock   : Locks aurae and enables")
+	_G.aurae_Print(" unlock : Allows you to move aurae")
+	_G.aurae_Print(" u      : Update improved skill ranks")
+	_G.aurae_Print(" print  : Prints the current configuration")
+	_G.aurae_Print(" invert : Invert progress bar direction")
+	_G.aurae_Print(" alpha  : Set bar alpha, use 0 to 1")
+	_G.aurae_Print(" config : Show the configuration frame")
 end
 
 function _G.aurae_ApplyWidth()

@@ -434,25 +434,6 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-
-					<Frame name="auraeGrowthDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
-						<Size>
-							<AbsDimension x="118" y="16"/>
-						</Size>
-						<Anchors>
-							<Anchor point="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="6" y="10"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								UIDropDownMenu_Initialize(this, auraeGrowthDropDown_OnInit);
-								UIDropDownMenu_SetWidth(130);
-							</OnLoad>
-						</Scripts>
-					</Frame>
 				</Frames>
 				<Scripts>
 					<OnShow>
@@ -505,7 +486,6 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-
 					<Frame name="auraeOptionsStyleDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
 						<Size>
 							<AbsDimension x="118" y="16"/>

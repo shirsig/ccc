@@ -154,42 +154,6 @@ function auraeOptions_SetBarColorLow()
 	aurae.COTLOWVALUE = aurae_Save[aurae.PROFILE].CoTLowValue;
 end
 
-function auraeGrowthDropDown_OnInit()
-	UIDROPDOWNMENU_INIT_MENU = "aurae_OptionsMenuGrowthDropDown";
-	local info = {}
-
-	info.text = aurae_OPTION_GROWTH_UP
-	info.value = "up"
-	info.owner = this
-	info.func = auraeGrowthDropDown_OnClick
-	UIDropDownMenu_AddButton(info)
-	
-	info.text = aurae_OPTION_GROWTH_DOWN
-	info.value = "down"
-	info.owner = this
-	info.func = auraeGrowthDropDown_OnClick
-	UIDropDownMenu_AddButton(info)
-end
-
-function auraeGrowthDropDown_OnClick()
-	if (this.value == "off") then
-		aurae_Save[aurae.PROFILE].growth = 0;
-		aurae.GROWTH = aurae_Save[aurae.PROFILE].growth;
-		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_OFF);
-		aurae_Print(aurae_GROW_OFF);
-	elseif( this.value == "up" ) then
-		aurae_Save[aurae.PROFILE].growth = 1;
-		aurae.GROWTH = aurae_Save[aurae.PROFILE].growth;
-		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_UP);
-		aurae_Print(aurae_GROW_UP);
-	elseif( this.value == "down" ) then
-		aurae_Save[aurae.PROFILE].growth = 2;
-		aurae.GROWTH = aurae_Save[aurae.PROFILE].growth;
-		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_DOWN);
-		aurae_Print(aurae_GROW_DOWN);
-	end
-end
-
 --------------------------------------------------------------------------------
 -- Monitor Frame
 --------------------------------------------------------------------------------
@@ -256,7 +220,7 @@ function auraeOptionsStyleDropDown_OnInit()
 	info.owner = this
 	info.func = auraeOptionsStyleDropDown_OnClick
 	UIDropDownMenu_AddButton(info)
-	
+
 	info.text = aurae_OPTION_STYLE_ALL
 	info.value = "all"
 	info.owner = this
@@ -408,12 +372,6 @@ function auraeOptions_Init()
 
 	auraeOptionsBarColorEffect:Disable()
 	auraeOptionsEffectMonitor:Disable()
-
-	if aurae.GROWTH == 1 then
-		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_UP)
-	else
-		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_DOWN)
-	end
 
 	if aurae.STYLE == 1 then
 		auraeOptionsStyleDropDownText:SetText(aurae_OPTION_STYLE_RECENT)
