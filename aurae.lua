@@ -11,7 +11,7 @@ for _, event in {'ADDON_LOADED'} do
 end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
-	_G.aurae_LoadVariables()
+	LoadVariables()
 	this:SetScript('OnUpdate', nil)
 end)
 
@@ -74,7 +74,7 @@ do
 		return 1 / 2^(dr[key].level - 1) * seconds
 	end
 
-	function _G.aurae_DiminishedDuration(unit, effect, full_duration)
+	function DiminishedDuration(unit, effect, full_duration)
 		local class = DR_CLASS[effect]
 		if class then
 			local key = unit .. '|' .. class
@@ -228,7 +228,7 @@ function ADDON_LOADED()
 		f:SetScript('OnDragStop', function()
 			this:StopMovingOrSizing()
 		end)
-		f:SetPoint('CENTER', -235 + (i - 1) * 235, 180)
+		f:SetPoint('CENTER', -235 + (i - 1) * 235, 150)
 		for i = 1, MAXBARS do
 			local name = 'auraeBar' .. etype .. i
 			local bar = create_bar(name)
@@ -368,7 +368,7 @@ function SlashCommandHandler(msg)
 			_G.aurae_Save[aurae.PROFILE] = nil
 			_G.aurae_Globals()
 			_G.aurae_Config()
-			_G.aurae_LoadVariables()
+			LoadVariables()
 		elseif command == "u" then
 			_G.aurae_Config()
 			_G.aurae_LoadConfCCs()
@@ -571,17 +571,17 @@ end
 
 function CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, unit in string.gfind(arg1, _G.aurae_TEXT_OFF) do
-		_G.aurae_AuraGone(unit, effect)
+		AuraGone(unit, effect)
 	end
 end
 
 function CHAT_MSG_SPELL_BREAK_AURA()
 	for unit, effect in string.gfind(arg1, _G.aurae_TEXT_BREAK) do
-		_G.aurae_AuraGone(unit, effect)
+		AuraGone(unit, effect)
 	end
 end
 
-function _G.aurae_AuraGone(unit, effect)
+function AuraGone(unit, effect)
 	if aurae.EFFECTS[effect] then
 		if _G.aurae_IsPlayer(unit) then
 			AbortCast(effect, unit)
@@ -692,7 +692,7 @@ do
 		timer.END = timer.START
 
 		if _G.aurae_IsPlayer(unit) then
-			timer.END = timer.END + _G.aurae_DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or aurae.EFFECTS[effect].DURATION)
+			timer.END = timer.END + DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or aurae.EFFECTS[effect].DURATION)
 		else
 			timer.END = timer.END + aurae.EFFECTS[effect].DURATION
 		end
@@ -936,7 +936,7 @@ function _G.aurae_LoadConfCCs()
 	table.foreach(_G.aurae_Save[aurae.PROFILE].ConfCC, GetConfCC)
 end
 
-function _G.aurae_LoadVariables()
+function LoadVariables()
 	local default_settings = {
 		SavedCC = {},
 		ConfCC = {},
