@@ -117,10 +117,10 @@ end
 function auraeOptions_UnlockToggle()
 	if aurae.STATUS == 2 then
 		aurae_BarLock();
-		aurae_AddMessage(aurae_LOCKED);
+		aurae_Print(aurae_LOCKED);
 	else
 		aurae_BarUnlock();
-		aurae_AddMessage(aurae_UNLOCKED);
+		aurae_Print(aurae_UNLOCKED);
 	end
 end
 
@@ -128,9 +128,9 @@ function auraeOptions_InvertToggle()
 	aurae.INVERT = not aurae.INVERT;
 	aurae_Save[aurae.PROFILE].invert = aurae.INVERT;
 	if aurae.INVERT then
-		aurae_AddMessage(aurae_INVERSION_ON);
+		aurae_Print(aurae_INVERSION_ON);
 	else
-		aurae_AddMessage(aurae_INVERSION_OFF);
+		aurae_Print(aurae_INVERSION_OFF);
 	end
 end
 
@@ -138,9 +138,9 @@ function auraeOptions_ColorOverTimeToggle()
 	aurae.COLOROVERTIME = not aurae.COLOROVERTIME;
 	aurae_Save[aurae.PROFILE].ColorOverTime = aurae.COLOROVERTIME;
 	if aurae.COLOROVERTIME then
-		aurae_AddMessage(aurae_COLOROVERTIME_ON);
+		aurae_Print(aurae_COLOROVERTIME_ON);
 	else
-		aurae_AddMessage(aurae_COLOROVERTIME_OFF);
+		aurae_Print(aurae_COLOROVERTIME_OFF);
 	end
 end
 
@@ -176,17 +176,17 @@ function auraeGrowthDropDown_OnClick()
 		aurae_Save[aurae.PROFILE].growth = 0;
 		aurae.GROWTH = aurae_Save[aurae.PROFILE].growth;
 		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_OFF);
-		aurae_AddMessage(aurae_GROW_OFF);
+		aurae_Print(aurae_GROW_OFF);
 	elseif( this.value == "up" ) then
 		aurae_Save[aurae.PROFILE].growth = 1;
 		aurae.GROWTH = aurae_Save[aurae.PROFILE].growth;
 		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_UP);
-		aurae_AddMessage(aurae_GROW_UP);
+		aurae_Print(aurae_GROW_UP);
 	elseif( this.value == "down" ) then
 		aurae_Save[aurae.PROFILE].growth = 2;
 		aurae.GROWTH = aurae_Save[aurae.PROFILE].growth;
 		auraeGrowthDropDownText:SetText(aurae_OPTION_GROWTH_DOWN);
-		aurae_AddMessage(aurae_GROW_DOWN);
+		aurae_Print(aurae_GROW_DOWN);
 	end
 end
 
@@ -199,11 +199,11 @@ function auraeOptions_MonitorCCToggle()
 	aurae_Save[aurae.PROFILE].Monitoring = aurae.MONITORING
 	if bit.band(aurae.MONITORING, ETYPE_DEBUFF) == 0 then
 		if bit.band(aurae.MONITORING, ETYPE_CC) ~= 0 then
-			auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
-			auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
+			_F:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			_F:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		else
-			auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
-			auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
+			_F:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			_F:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		end
 	end
 end
@@ -213,11 +213,11 @@ function auraeOptions_MonitorDebuffToggle()
 	aurae_Save[aurae.PROFILE].Monitoring = aurae.MONITORING
 	if bit.band(aurae.MONITORING, ETYPE_CC) == 0 then
 		if bit.band(aurae.MONITORING, ETYPE_DEBUFF) ~= 0 then
-			auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
-			auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
+			_F:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			_F:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		else
-			auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
-			auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
+			_F:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE"
+			_F:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE"
 		end
 	end
 end
@@ -226,11 +226,11 @@ function auraeOptions_MonitorBuffToggle()
 	aurae.MONITORING = bit.bxor(aurae.MONITORING, ETYPE_BUFF)
 	aurae_Save[aurae.PROFILE].Monitoring = aurae.MONITORING
 	if bit.band(aurae.MONITORING, ETYPE_BUFF) ~= 0 then
-		auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"
-		auraeObject:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"
+		_F:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"
+		_F:RegisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"
 	else
-		auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"
-		auraeObject:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"
+		_F:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS"
+		_F:UnregisterEvent"CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS"
 	end
 end
 
@@ -239,10 +239,10 @@ function auraeOptions_ArcanistToggle()
 	aurae_Save[aurae.PROFILE].arcanist = aurae.ARCANIST
 	if aurae.ARCANIST then
 		aurae.EFFECTS[aurae_POLYMORPH].DURATION = aurae.EFFECTS[aurae_POLYMORPH].DURATION + 15
-		aurae_AddMessage(aurae_ARCANIST_ON)
+		aurae_Print(aurae_ARCANIST_ON)
 	else
 		aurae.EFFECTS[aurae_POLYMORPH].DURATION = aurae.EFFECTS[aurae_POLYMORPH].DURATION - 15
-		aurae_AddMessage(aurae_ARCANIST_OFF)
+		aurae_Print(aurae_ARCANIST_OFF)
 	end
 	auraeOptionsFrameArcanist:SetChecked(aurae.ARCANIST)
 end
@@ -269,12 +269,12 @@ function auraeOptionsStyleDropDown_OnClick()
 		aurae_Save[aurae.PROFILE].style = 1
 		aurae.STYLE = aurae_Save[aurae.PROFILE].style
 		auraeOptionsStyleDropDownText:SetText(aurae_OPTION_STYLE_RECENT)
-		aurae_AddMessage(aurae_STYLE_RECENT)
+		aurae_Print(aurae_STYLE_RECENT)
 	elseif this.value == "all" then
 		aurae_Save[aurae.PROFILE].style = 2
 		aurae.STYLE = aurae_Save[aurae.PROFILE].style
 		auraeOptionsStyleDropDownText:SetText(aurae_OPTION_STYLE_ALL)
-		aurae_AddMessage(aurae_STYLE_ALL)
+		aurae_Print(aurae_STYLE_ALL)
 	end
 end
 
@@ -482,7 +482,7 @@ function auraeOptionsEffects_OnEnter()
 	end
 
 	if aurae.EFFECTS[spellname] == nil then
-		aurae_AddMessage("Error : '" .. spellname .. "' not found in effect array.")
+		aurae_Print("Error : '" .. spellname .. "' not found in effect array.")
 		return
 	end
 	local str = spellname .. "\nDuration: " .. aurae.EFFECTS[spellname].DURATION .. "\nType: "

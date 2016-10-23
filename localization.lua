@@ -28,7 +28,6 @@ aurae_OPTIONS_BARS_TAB = "Bars"
 aurae_OPTIONS_EFFECTS_TAB = "Monitoring"
 aurae_OPTIONS_LEARN_TAB = "Skills"
 
-aurae_OPTIONS_TITLE = "aurae Options"
 aurae_OPTIONS_TRANS = "Transparency"
 aurae_OPTIONS_SCALE = "Scaling"
 aurae_OPTIONS_DONE = "Done"

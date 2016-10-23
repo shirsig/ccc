@@ -428,6 +428,14 @@ aurae.EFFECTS[aurae_HAMSTRING] = {
 	MONITOR = true,
 	WARN = 0,
 }
+aurae.EFFECTS["Piercing Howl"] = {
+	ICON = 'Spell_Shadow_DeathScream',
+	SCHOOL = aurae_SCHOOL.PHYSICAL,
+	ETYPE = ETYPE_DEBUFF,
+	DURATION = 6,
+	MONITOR = true,
+	WARN = 0,
+}
 -- Shaman - Debuffs
 
 aurae.EFFECTS[aurae_FROSTSHOCK] = {

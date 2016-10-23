@@ -40,6 +40,20 @@
 				<FontString name="$parent_Text" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT"/>
 			</Layer>
 		</Layers>
+        <Frames>
+            <CheckButton inherits="OptionsCheckButtonTemplate">
+                <Size>
+                    <AbsDimension x="16" y="16"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="RIGHT">
+                        <Offset>
+                            <AbsDimension x="-10" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </CheckButton>
+        </Frames>
 	</Button>
 
 	<Button name="auraeColorButtonTemplate" virtual="true">
@@ -124,7 +138,7 @@
 						</Anchor>
 					</Anchors>
 				</Texture>
-				<FontString name="auraeOptions_TitleText" inherits="GameTooltipHeaderText" text="aurae_OPTIONS_TITLE">
+				<FontString name="auraeOptions_TitleText" inherits="GameTooltipHeaderText" text="AURAE">
 					<Anchors>
 						<Anchor point="TOP" relativeTo="auraeOptionsFrameHeader">
 							<Offset>
@@ -860,10 +874,10 @@
 				</Frames>
 				<Scripts>
 					<OnShow>
-						auraeOptionsLearnFrame_OnShow();
+						auraeOptionsLearnFrame_OnShow()
 					</OnShow>
 					<OnHide>
-						auraeOptionsLearnFrame_OnHide();
+						auraeOptionsLearnFrame_OnHide()
 					</OnHide>
 				</Scripts>
 			</Frame>
@@ -878,21 +892,21 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						auraeOptions_Toggle();
+						auraeOptions_Toggle()
 					</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				auraeOptions_OnLoad();
+				auraeOptions_OnLoad()
 			</OnLoad>
 			<OnEvent>
-				auraeOptions_OnEvent(event);
+				auraeOptions_OnEvent(event)
 			</OnEvent>
 			<OnShow>
-				auraeOptionsBarsTab_OnClick();
-				PlaySound("igMainMenuOption");
+				auraeOptionsBarsTab_OnClick()
+				PlaySound'igMainMenuOption'
 			</OnShow>
 		</Scripts>
 	</Frame>

@@ -65,17 +65,11 @@
 			<OnLoad>
 				aurae_OnLoad()
 			</OnLoad>
-			<OnUpdate>
-				aurae_OnUpdate()
-			</OnUpdate>
-			<OnEvent>
-				aurae_OnEvent(event)
-			</OnEvent>
 		</Scripts>
 	</Frame>
 
 <!-- original SW hack for initialization due to lack of working GetTalentInfo() in the VARIABLE_LOADED, PLAYER_LOGIN, PLAYER_ENTERING_WORLD events -->
-	<Frame name="aurae_Variable_Frame" hidden="false">
+	<Frame>
 		<Scripts>
 			<OnUpdate>
 				aurae_LoadVariablesOnUpdate(arg1)
