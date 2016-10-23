@@ -15,7 +15,7 @@ CreateFrame'Frame':SetScript('OnUpdate', function()
 	this:SetScript('OnUpdate', nil)
 end)
 
-WIDTH = 200
+WIDTH = 170
 HEIGHT = 16
 MAXBARS = 10
 
@@ -114,12 +114,8 @@ local function create_bar(name)
 	local icon = bar.icon or nil
 	local texture = [[Interface\Addons\aurae\Textures\BantoBar]]
 	local text = bar.text
-	local fontsize = 11
-	local textcolor = {1, 1, 1}
-	local timertextcolor = {1, 1, 1}
-
-	local timertextwidth = fontsize * 3.6
 	local font, _, style = GameFontHighlight:GetFont()
+	local fontsize = 11
 
 	bar.fadetime = .5
 	bar.textcolor = textcolor
@@ -157,22 +153,22 @@ local function create_bar(name)
 	f.spark:SetBlendMode'ADD'
 
 	f.text = f.statusbar:CreateFontString(nil, 'OVERLAY')
+--	f.text:SetFontObject(GameFontHighlightSmallOutline)
 	f.text:SetFontObject(GameFontHighlight)
 	f.text:SetFont(font, fontsize, style)
 	f.text:SetPoint('TOPLEFT', 2, 0)
 	f.text:SetPoint('BOTTOMRIGHT', -2, 0)
 	f.text:SetJustifyH'LEFT'
 	f.text:SetText(text)
-	f.text:SetTextColor(textcolor[1], textcolor[2], textcolor[3], textcolor[4])
 
 	f.timertext = f.statusbar:CreateFontString(nil, 'OVERLAY')
+--	f.text:SetFontObject(GameFontHighlightSmallOutline)
 	f.timertext:SetFontObject(GameFontHighlight)
 	f.timertext:SetFont(font, fontsize, style)
 	f.timertext:SetPoint('TOPLEFT', 2, 0)
 	f.timertext:SetPoint('BOTTOMRIGHT', -2, 0)
 	f.timertext:SetJustifyH'RIGHT'
 	f.timertext:SetText''
-	f.timertext:SetTextColor(timertextcolor[1], timertextcolor[2], timertextcolor[3], timertextcolor[4])
 
 --	if bar.onclick then
 --		TODO
@@ -474,7 +470,7 @@ do
 
 	function SPELLCAST_STOP()
 		for effect, target in casting do
-			if (EffectActive(effect, target) or not _G.aurae_IsPlayer(target) and aurae.EFFECTS[effect]) and aurae.EFFECTS[effect].ETYPE ~= ETYPE_BUFF then
+			if (EffectActive(effect, target) or not IsPlayer(target) and aurae.EFFECTS[effect]) and aurae.EFFECTS[effect].ETYPE ~= ETYPE_BUFF then
 				if pending[effect] then
 					last_cast = nil
 				else
@@ -488,8 +484,8 @@ do
 
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for effect, info in pending do
-			if GetTime() >= info.time and (_G.aurae_IsPlayer(info.target) or TargetID() ~= info.target or UnitDebuffs'target'[effect]) then
-				_G.aurae_StartTimer(effect, info.target, GetTime() - .5)
+			if GetTime() >= info.time and (IsPlayer(info.target) or TargetID() ~= info.target or UnitDebuffs'target'[effect]) then
+				StartTimer(effect, info.target, GetTime() - .5)
 				pending[effect] = nil
 			end
 		end
@@ -505,7 +501,7 @@ do
 
 	function AbortUnitCasts(unit)
 		for k, v in pending do
-			if v.target == unit or not unit and not _G.aurae_IsPlayer(v.target) then
+			if v.target == unit or not unit and not IsPlayer(v.target) then
 				pending[k] = nil
 			end
 		end
@@ -554,7 +550,7 @@ end
 
 function AuraGone(unit, effect)
 	if aurae.EFFECTS[effect] then
-		if _G.aurae_IsPlayer(unit) then
+		if IsPlayer(unit) then
 			AbortCast(effect, unit)
 			_G.aurae_StopTimer(effect, unit)
 		elseif unit == UnitName'target' then
@@ -580,18 +576,18 @@ end
 
 function CHAT_MSG_COMBAT_HOSTILE_DEATH()
 	for unit in string.gfind(arg1, '(.+) dies') do -- TODO does not work when xp is gained
-		if _G.aurae_IsPlayer(unit) then
-			_G.aurae_UNIT_DEATH(unit)
+		if IsPlayer(unit) then
+			UnitDied(unit)
 		elseif unit == UnitName'target' and UnitIsDead'target' then
 			-- TODO only if not deprecated (tentative)
-			_G.aurae_UNIT_DEATH(TargetID())
+			UnitDied(TargetID())
 		end
 	end
 end
 
 function CHAT_MSG_COMBAT_HONOR_GAIN()
 	for unit in string.gfind(arg1, '(.+) dies') do
-		_G.aurae_UNIT_DEATH(unit)
+		UnitDied(unit)
 	end
 end
 
@@ -631,7 +627,7 @@ do
 		for _, timer in _G.aurae_timers do
 			if t > timer.END then
 				_G.aurae_StopTimer(timer.EFFECT, timer.UNIT)
-				if _G.aurae_IsPlayer(timer.UNIT) then
+				if IsPlayer(timer.UNIT) then
 					AbortCast(timer.EFFECT, timer.UNIT)
 				end
 			end
@@ -642,7 +638,7 @@ do
 		return _G.aurae_timers[effect .. '@' .. unit] and true or false
 	end
 
-	function _G.aurae_StartTimer(effect, unit, start)
+	function StartTimer(effect, unit, start)
 		local timer = {
 			EFFECT = effect,
 			UNIT = unit,
@@ -652,7 +648,7 @@ do
 
 		timer.END = timer.START
 
-		if _G.aurae_IsPlayer(unit) then
+		if IsPlayer(unit) then
 			timer.END = timer.END + DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or aurae.EFFECTS[effect].DURATION)
 		else
 			timer.END = timer.END + aurae.EFFECTS[effect].DURATION
@@ -676,7 +672,7 @@ do
 	function PLAYER_REGEN_ENABLED()
 		AbortUnitCasts()
 		for k, timer in _G.aurae_timers do
-			if not _G.aurae_IsPlayer(timer.UNIT) then
+			if not IsPlayer(timer.UNIT) then
 				_G.aurae_StopTimer(timer.EFFECT, timer.UNIT)
 			end
 		end
@@ -691,8 +687,8 @@ do
 		end
 	end
 
-	function _G.aurae_UNIT_DEATH(unit)
-		if _G.aurae_IsPlayer(unit) then
+	function UnitDied(unit)
+		if IsPlayer(unit) then
 			AbortUnitCasts(unit)
 		end
 		for k, timer in _G.aurae_timers do
@@ -769,7 +765,7 @@ do
 			player[hostile_player(arg1)] = true
 			for unit, effect in string.gfind(arg1, _G.aurae_TEXT_BUFF_ON) do
 				if aurae.EFFECTS[effect] and aurae.EFFECTS[effect].MONITOR and bit.band(aurae.EFFECTS[effect].ETYPE, aurae.MONITORING) ~= 0 then
-					_G.aurae_StartTimer(effect, unit, GetTime())
+					StartTimer(effect, unit, GetTime())
 				end
 			end
 		end
@@ -778,7 +774,7 @@ do
 			player[hostile_player(arg1)] = true
 			for unit, effect in string.gfind(arg1, _G.aurae_TEXT_ON) do
 				if aurae.EFFECTS[effect] and aurae.EFFECTS[effect].MONITOR and bit.band(aurae.EFFECTS[effect].ETYPE, aurae.MONITORING) ~= 0 then
-					_G.aurae_StartTimer(effect, unit, GetTime())
+					StartTimer(effect, unit, GetTime())
 				end
 			end
 		end
@@ -804,7 +800,7 @@ do
 			return UnitName'target' == unit or UnitName'mouseover' == unit or recent[unit] and GetTime() - recent[unit] <= 30
 		end
 
-		function _G.aurae_IsPlayer(unit)
+		function IsPlayer(unit)
 			return player[unit]
 		end
 
@@ -857,7 +853,7 @@ function UpdateBar(bar)
 
 		frame.statusbar:SetValue(aurae.INVERT and 1 - fraction or fraction)
 
-		local sparkPosition = (WIDTH - HEIGHT) * fraction
+		local sparkPosition = WIDTH * fraction
 		frame.spark:Show()
 		frame.spark:SetPoint('CENTER', bar.frame.statusbar, aurae.INVERT and 'RIGHT' or 'LEFT', aurae.INVERT and -sparkPosition or sparkPosition, 0)
 
@@ -939,10 +935,9 @@ function LoadVariables()
 
 	aurae.STYLE = _G.aurae_Save[aurae.PROFILE].style
 
---	auraeCC:SetScale(aurae.SCALE)
---	auraeDebuff:SetScale(aurae.SCALE)
---	auraeBuff:SetScale(aurae.SCALE)
-	_G.aurae_ApplyWidth()
+	auraeCC:SetScale(aurae.SCALE)
+	auraeDebuff:SetScale(aurae.SCALE)
+	auraeBuff:SetScale(aurae.SCALE)
 
 	if aurae.STATUS == 2 then
 		_G.aurae_BarUnlock()
@@ -986,7 +981,7 @@ function _G.aurae_UpdateKidneyShot()
 		end
 
 		if name == _G.aurae_KS then
-			if strsub(rank,string.len(rank)) == "1" then
+			if strsub(rank, string.len(rank)) == "1" then
 				aurae.EFFECTS[_G.aurae_KS].DURATION = 0
 			else
 				aurae.EFFECTS[_G.aurae_KS].DURATION = 1
@@ -1143,10 +1138,4 @@ function _G.aurae_Help()
 	_G.aurae_Print(" invert : Invert progress bar direction")
 	_G.aurae_Print(" alpha  : Set bar alpha, use 0 to 1")
 	_G.aurae_Print(" config : Show the configuration frame")
-end
-
-function _G.aurae_ApplyWidth()
-	for _, k in {'CC', 'Debuff', 'Buff'} do
-		getglobal("aurae" .. k):SetWidth(WIDTH)
-	end
 end
