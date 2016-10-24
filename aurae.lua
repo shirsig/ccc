@@ -371,7 +371,7 @@ function SlashCommandHandler(msg)
 				auraeBuff:SetScale(aurae.SCALE)
 				auraeSliderScale:SetValue(aurae.SCALE)
 			else
-				_G.aurae_Help()
+				Help()
 			end
 		elseif strsub(command, 1, 5) == "alpha" then
 			local alpha = tonumber(strsub(command, 7))
@@ -381,7 +381,7 @@ function SlashCommandHandler(msg)
 				_G.aurae_Print('Alpha: '..alpha)
 				auraeSliderAlpha:SetValue(aurae.ALPHA)
 			else
-				_G.aurae_Help()
+				Help()
 			end
 		elseif command == "print" then
 			_G.aurae_Print("Profile: "..aurae.PROFILE)
@@ -402,7 +402,7 @@ function SlashCommandHandler(msg)
 			_G.aurae_UpdateClassSpells(true)
 			_G.aurae_Print('Alpha: '..aurae.ALPHA)
 		else
-			_G.aurae_Help()
+			Help()
 		end
 	end
 end
@@ -552,7 +552,7 @@ function AuraGone(unit, effect)
 	if aurae.EFFECTS[effect] then
 		if IsPlayer(unit) then
 			AbortCast(effect, unit)
-			_G.aurae_StopTimer(effect, unit)
+			StopTimer(effect, unit)
 		elseif unit == UnitName'target' then
 			-- TODO pet target (in other places too)
 			local unit = TargetID()
@@ -560,7 +560,7 @@ function AuraGone(unit, effect)
 			for k, timer in _G.aurae_timers do
 				if timer.UNIT == unit and not debuffs[timer.EFFECT] then
 					-- TODO only if not deprecated (tentative)
-					_G.aurae_StopTimer(timer.EFFECT, timer.UNIT)
+					StopTimer(timer.EFFECT, timer.UNIT)
 				end
 			end
 		end
@@ -626,7 +626,7 @@ do
 		local t = GetTime()
 		for _, timer in _G.aurae_timers do
 			if t > timer.END then
-				_G.aurae_StopTimer(timer.EFFECT, timer.UNIT)
+				StopTimer(timer.EFFECT, timer.UNIT)
 				if IsPlayer(timer.UNIT) then
 					AbortCast(timer.EFFECT, timer.UNIT)
 				end
@@ -673,12 +673,12 @@ do
 		AbortUnitCasts()
 		for k, timer in _G.aurae_timers do
 			if not IsPlayer(timer.UNIT) then
-				_G.aurae_StopTimer(timer.EFFECT, timer.UNIT)
+				StopTimer(timer.EFFECT, timer.UNIT)
 			end
 		end
 	end
 
-	function _G.aurae_StopTimer(effect, unit)
+	function StopTimer(effect, unit)
 		local key = effect .. '@' .. unit
 		if _G.aurae_timers[key] then
 			_G.aurae_timers[key].stopped = GetTime()
@@ -688,12 +688,10 @@ do
 	end
 
 	function UnitDied(unit)
-		if IsPlayer(unit) then
-			AbortUnitCasts(unit)
-		end
+		AbortUnitCasts(unit)
 		for k, timer in _G.aurae_timers do
 			if timer.UNIT == unit then
-				_G.aurae_StopTimer(timer.EFFECT, unit)
+				StopTimer(timer.EFFECT, unit)
 			end
 		end
 		place_timers()
@@ -1126,7 +1124,7 @@ function _G.aurae_UpdateClassSpells()
 	end
 end
 
-function _G.aurae_Help()
+function Help()
 	_G.aurae_Print("aurae : Usage - /aurae option")
 	_G.aurae_Print("options:")
 	_G.aurae_Print(" on     : Enables aurae")

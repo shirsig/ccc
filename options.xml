@@ -41,7 +41,7 @@
 			</Layer>
 		</Layers>
         <Frames>
-            <CheckButton inherits="OptionsCheckButtonTemplate">
+            <CheckButton name="$parentMonitor" inherits="OptionsCheckButtonTemplate">
                 <Size>
                     <AbsDimension x="16" y="16"/>
                 </Size>

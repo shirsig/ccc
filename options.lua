@@ -5,16 +5,10 @@ local AR_DiagOpen = false
 local DisplayTable = {}
 
 auraeConfig_SwatchFunc_SetColor = {
-	 ["Urge"]	= function(x) aurae_SetColorCallback("Urge") end,
-	 ["Low"]	= function(x) aurae_SetColorCallback("Low") end,
-	 ["Normal"]	= function(x) aurae_SetColorCallback("Normal") end,
 	 ["Effect"]	= function(x) aurae_SetColorCallback("Effect") end,
 }
 
 auraeConfig_SwatchFunc_CancelColor = {
-	 ["Urge"]	= function(x) aurae_CancelColorCallback("Urge", x) end,
-	 ["Low"]	= function(x) aurae_CancelColorCallback("Low", x) end,
-	 ["Normal"]	= function(x) aurae_CancelColorCallback("Normal", x) end,
 	 ["Effect"]	= function(x) aurae_CancelColorCallback("Effect", x) end,
 }
 
@@ -39,7 +33,9 @@ end
 
 function UpdateSortTable()
 	DisplayTable = {}
-	table.foreach(aurae.EFFECTS, function (k, v) table.insert(DisplayTable, k) end)
+	for effect, _ in aurae.EFFECTS do
+		tinsert(DisplayTable, effect)
+	end
 	sort(DisplayTable)
 end
 
@@ -274,23 +270,6 @@ function aurae_SetColorCallback(id)
 	button.r = iRed
 	button.g = iGreen
 	button.b = iBlue
-
-	if id == "Urge" then
-		aurae.COTURGECOLOR.r = iRed
-		aurae.COTURGECOLOR.g = iGreen
-		aurae.COTURGECOLOR.b = iBlue
-		aurae_Save[aurae.PROFILE].CoTUrgeColor = aurae.COTURGECOLOR
-	elseif id == "Low" then
-		aurae.COTLOWCOLOR.r = iRed
-		aurae.COTLOWCOLOR.g = iGreen
-		aurae.COTLOWCOLOR.b = iBlue
-		aurae_Save[aurae.PROFILE].CoTLowColor = aurae.COTLOWCOLOR
-	elseif id == "Normal" then
-		aurae.COTNORMALCOLOR.r = iRed
-		aurae.COTNORMALCOLOR.g = iGreen
-		aurae.COTNORMALCOLOR.b = iBlue
-		aurae_Save[aurae.PROFILE].CoTNormalColor = aurae.COTNORMALCOLOR
-	end
 end
 
 function aurae_CancelColorCallback(id, prev)
@@ -391,11 +370,11 @@ local curoffset
 
 local function EffectsUpdate(k, v)
 	item = item + 1
-	if (curoffset > item) or ((item - curoffset) >= 11) then
+	if curoffset > item or item - curoffset >= 11 then
 		return
 	end
 
-	local itemSlot = getglobal("auraeOptionsEffectsItem" .. (item - curoffset + 1))
+	local itemSlot = getglobal("auraeOptionsEffectsItem"..(item - curoffset + 1))
 	if v == auraeEffectSelection then
 		itemSlot:SetTextColor(1, 1, 0)
 	else

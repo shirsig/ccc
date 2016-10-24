@@ -30,7 +30,7 @@ function aurae_ConfigBuff()
 		DURATION = 15,
 		MONITOR = true,
 	}
-	
+
 	-- Priest
 
 	aurae.EFFECTS["Shadow Word: Shield"] = {
