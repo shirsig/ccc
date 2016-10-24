@@ -643,8 +643,9 @@ do
 
 		local function unit_changed(unitID)
 			local unit = UnitName(unitID)
-			player[unit] = UnitIsPlayer(unitID)
 			if unit then
+				player[unit] = UnitIsPlayer(unitID) and true or false
+
 				if player[unit] then
 					add_recent(unit)
 				end
@@ -675,7 +676,7 @@ do
 		end)
 
 		function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
-			player[hostile_player(arg1)] = true
+			if player[hostile_player(arg1)] == nil then player[hostile_player(arg1)] = true end -- wrong for pets
 			for unit, effect in string.gfind(arg1, QuickLocalize(AURAADDEDOTHERHELPFUL)) do
 				if IsPlayer(unit) and aurae.EFFECTS[effect] then
 					StartTimer(effect, unit, GetTime())
@@ -684,7 +685,7 @@ do
 		end
 
 		function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
-			player[hostile_player(arg1)] = true
+			if player[hostile_player(arg1)] == nil then player[hostile_player(arg1)] = true end -- wrong for pets
 			for unit, effect in string.gfind(arg1, QuickLocalize(AURAADDEDOTHERHARMFUL)) do
 				if IsPlayer(unit) and aurae.EFFECTS[effect] then
 					StartTimer(effect, unit, GetTime())
