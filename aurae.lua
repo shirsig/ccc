@@ -2,16 +2,14 @@ local _G, _M, _F = getfenv(0), {}, CreateFrame'Frame'
 setfenv(1, setmetatable(_M, {__index=_G}))
 _F:SetScript('OnUpdate', function() _M.UPDATE() end)
 _F:SetScript('OnEvent', function()
-	if not aurae_settings.enabled then return end
 	_M[event](this)
 end)
+_F:RegisterEvent'ADDON_LOADED'
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
-	Initialize()
 	LoadVariables()
 	this:SetScript('OnUpdate', nil)
-	Print('aurae loaded - /aurae')
 end)
 
 WIDTH = 170
@@ -21,10 +19,6 @@ MAXBARS = 10
 _G.ETYPE_CC = 1
 _G.ETYPE_DEBUFF = 2
 _G.ETYPE_BUFF = 4
-
-CTYPE_SCHOOL = 1
-CTYPE_PROGRESS = 2
-CTYPE_CUSTOM = 3
 
 --_G.aurae_ARCANIST_ON = "Arcanist' Set activated (+15 sec to ".."Polymorph".." spell)"
 --_G.aurae_ARCANIST_OFF = "Arcanist' Set off"
@@ -279,13 +273,7 @@ function SlashCommandHandler(msg)
 	if msg then
 		local args = tokenize(msg)
 		local command = strlower(msg)
-		if command == "on" then
-			aurae_settings.enabled = true
-			Print('aurae enabled.')
-		elseif command == "off" then
-			aurae_settings.enabled = false
-			Print('aurae disabled.')
-		elseif command == "unlock" then
+		if command == "unlock" then
 			UnlockBars()
 			Print('Bars unlocked.')
 		elseif command == "lock" then
@@ -299,26 +287,20 @@ function SlashCommandHandler(msg)
 			else
 				Print('Bar inversion off.')
 			end
-		elseif command == "color school" then
-			aurae_settings.color = CTYPE_SCHOOL
-			Print'School color enabled.'
-		elseif command == "color progress" then
-			aurae_settings.color = CTYPE_PROGRESS
-			Print'Progress color enabled.'
-		elseif command == "color custom" then
-			aurae_settings.color = CTYPE_CUSTOM
-			Print'Custom color enabled.'
+		elseif args[1] == 'color' and (args[2] == 'school' or args[2] == 'progress' or args[2] == 'custom') then
+			aurae_settings.color = args[2]
+			Print('Color: ' .. args[2])
 		elseif args[1] == "customcolor" then
-			aurae_settings.colors[args[2]] = {tonumber(args[3])/255, tonumber(args[4])/255, tonumber(args[5])/255}
-		elseif command == "clear" then
+			local effect = gsub(msg, '%s*%S+%s*', '', 4)
+			aurae_settings.colors[effect] = {tonumber(args[2])/255, tonumber(args[3])/255, tonumber(args[4])/255}
+		elseif command == 'clear' then
 			aurae_settings = nil
 			LoadVariables()
-		elseif command == "reload" then
+		elseif command == 'reload' then
 			aurae_ConfigCC()
 			aurae_ConfigDebuff()
 			aurae_ConfigBuff()
 			UpdateClassSpells(true)
-		elseif command == "config" then
 		elseif strsub(command, 1, 5) == "scale" then
 			local scale = tonumber(strsub(command, 7))
 			if scale then
@@ -350,13 +332,13 @@ function SlashCommandHandler(msg)
 end
 
 function Usage()
-	Print("on | off")
-	Print("lock | unlock")
-	Print("reload")
-	Print("invert")
-	Print("alpha [0,1]")
-	Print("color (school | progress | custom)")
-	Print("customcolor <effect> [1,255] [1,255] [1,255]")
+	Print("Usage:")
+	Print("  lock | unlock")
+	Print("  reload")
+	Print("  invert")
+	Print("  alpha [0,1]")
+	Print("  color (school | progress | custom)")
+	Print("  customcolor [1,255] [1,255] [1,255] <effect>")
 end
 
 do
@@ -743,9 +725,6 @@ do
 end
 
 function UPDATE()
-	if not aurae_settings.enabled then
-		return
-	end
 	UpdateTimers()
 	if not aurae.LOCKED then
 		return
@@ -792,11 +771,11 @@ function UpdateBar(bar)
 		frame.timertext:SetText(format_time(remaining))
 
 		local r, g, b
-		if aurae_settings.color == CTYPE_SCHOOL then
+		if aurae_settings.color == 'school' then
 			r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
-		elseif aurae_settings.color == CTYPE_PROGRESS then
+		elseif aurae_settings.color == 'progress' then
 			r, g, b = 1 - fraction, fraction, 0
-		elseif aurae_settings.color == CTYPE_CUSTOM then
+		elseif aurae_settings.color == 'custom' then
 			if aurae_settings.colors[timer.EFFECT] then
 				r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
 			else
@@ -814,15 +793,16 @@ end
 do
 	local default_settings = {
 		colors = {},
-		enabled = true,
 		invert = false,
-		color = CTYPE_SCHOOL,
+		color = 'school',
 		scale = 1,
 		alpha = 1,
 		arcanist = false,
 	}
 
-	function Initialize()
+	function ADDON_LOADED()
+		if arg1 ~= 'aurae' then return end
+
 		local dummy_timer = {stopped=0}
 		for i, etype in {'Debuff', 'CC', 'Buff'} do
 			local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
@@ -881,6 +861,8 @@ do
 
 		LockBars()
 	end
+
+	Print('aurae loaded - /aurae')
 end
 
 function LoadVariables()
