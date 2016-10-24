@@ -35,20 +35,16 @@ function QuickLocalize(str)
 	return str
 end
 
-_G.aurae_Save = {}
+_G.aurae_settings = {}
 
 _G.aurae = {}
 aurae.EFFECTS = {}
-aurae.PROFILE = ""
 aurae.COMBO = 0
 aurae.STATUS = 0
 
 aurae.INVERT = false
 aurae.SCALE = 1
 aurae.ALPHA = 1
-
-aurae.VARIABLES_LOADED = false
-aurae.VARIABLE_TIMER = 0
 
 -- effect groups for each bar
 aurae.GROUPSCC = {}
@@ -239,7 +235,7 @@ local function format_time(t)
 	end
 end
 
---	if _G.aurae_Save[aurae.PROFILE].WarnSelf then
+--	if aurae_settings.WarnSelf then
 --		local info = ChatTypeInfo.RAID_WARNING
 --		RaidWarningFrame:AddMessage(msg, info.r, info.g, info.b, 1)
 --		PlaySound'RaidWarning'
@@ -270,52 +266,61 @@ function LockBars()
 	auraeBuff:EnableMouse(0)
 
 	for i = 1, MAXBARS do
-		getglobal("auraeBarCC" .. i):SetAlpha(0)
-		getglobal("auraeBarDebuff" .. i):SetAlpha(0)
-		getglobal("auraeBarBuff" .. i):SetAlpha(0)
+		getglobal('auraeBarCC' .. i):SetAlpha(0)
+		getglobal('auraeBarDebuff' .. i):SetAlpha(0)
+		getglobal('auraeBarBuff' .. i):SetAlpha(0)
 	end
+end
+
+function tokenize(str)
+	local tokens = {}
+	for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
+	return tokens
 end
 
 function SlashCommandHandler(msg)
 	if msg then
+		local args = tokenize(msg)
 		local command = strlower(msg)
 		if command == "on" then
 			if aurae.STATUS == 0 then
 				aurae.STATUS = 1
-				_G.aurae_Save[aurae.PROFILE].status = aurae.STATUS
-				_G.aurae_Print('aurae enabled')
+				aurae_settings.status = aurae.STATUS
+				Print('aurae enabled')
 			end
 		elseif command == "off" then
 			if aurae.STATUS ~= 0 then
 				aurae.STATUS = 0
-				_G.aurae_Save[aurae.PROFILE].status = aurae.STATUS
-				_G.aurae_Print('aurae disabled')
+				aurae_settings.status = aurae.STATUS
+				Print('aurae disabled')
 			end
 		elseif command == "unlock" then
 			UnlockBars()
-			_G.aurae_Print('Bars unlocked')
+			Print('Bars unlocked')
 		elseif command == "lock" then
 			LockBars()
-			_G.aurae_Print('Bars locked')
+			Print('Bars locked')
 		elseif command == "invert" then
 			aurae.INVERT = not aurae.INVERT
-			_G.aurae_Save[aurae.PROFILE].invert = aurae.INVERT
+			aurae_settings.invert = aurae.INVERT
 			if aurae.INVERT then
-				_G.aurae_Print('Bar inversion on.')
+				Print('Bar inversion on.')
 			else
-				_G.aurae_Print('Bar inversion off.')
+				Print('Bar inversion off.')
 			end
 		elseif command == "color school" then
-			_G.aurae_Save[aurae.PROFILE].color = CTYPE_SCHOOL
-			_G.aurae_Print'School color enabled.'
+			aurae_settings.color = CTYPE_SCHOOL
+			Print'School color enabled.'
 		elseif command == "color progress" then
-			_G.aurae_Save[aurae.PROFILE].color = CTYPE_PROGRESS
-			_G.aurae_Print'Progress color enabled.'
+			aurae_settings.color = CTYPE_PROGRESS
+			Print'Progress color enabled.'
 		elseif command == "color custom" then
-			_G.aurae_Save[aurae.PROFILE].color = CTYPE_CUSTOM
-			_G.aurae_Print'Custom color enabled.'
+			aurae_settings.color = CTYPE_CUSTOM
+			Print'Custom color enabled.'
+		elseif args[1] == "customcolor" then
+			aurae_settings.colors[args[2]] = {tonumber(args[3])/255, tonumber(args[4])/255, tonumber(args[5])/255}
 		elseif command == "clear" then
-			_G.aurae_Save[aurae.PROFILE] = nil
+			aurae_settings = nil
 			LoadVariables()
 		elseif command == "reload" then
 			_G.aurae_ConfigCC()
@@ -326,7 +331,7 @@ function SlashCommandHandler(msg)
 		elseif strsub(command, 1, 5) == "scale" then
 			local scale = tonumber(strsub(command, 7))
 			if scale <= 3 and scale >= .25 then
-				_G.aurae_Save[aurae.PROFILE].scale = scale
+				aurae_settings.scale = scale
 				aurae.SCALE = scale
 				auraeCC:SetScale(aurae.SCALE)
 				auraeDebuff:SetScale(aurae.SCALE)
@@ -338,9 +343,9 @@ function SlashCommandHandler(msg)
 		elseif strsub(command, 1, 5) == "alpha" then
 			local alpha = tonumber(strsub(command, 7))
 			if alpha <= 1 and alpha >= 0 then
-				_G.aurae_Save[aurae.PROFILE].alpha = alpha
+				aurae_settings.alpha = alpha
 				aurae.ALPHA = alpha
-				_G.aurae_Print('Alpha: '..alpha)
+				Print('Alpha: '..alpha)
 				auraeSliderAlpha:SetValue(aurae.ALPHA)
 			else
 				Help()
@@ -352,12 +357,13 @@ function SlashCommandHandler(msg)
 end
 
 function Help()
-	_G.aurae_Print("on | off")
-	_G.aurae_Print("lock | unlock")
-	_G.aurae_Print("reload")
-	_G.aurae_Print("invert")
-	_G.aurae_Print("alpha [0,1]")
-	_G.aurae_Print("color (school | progress | custom)")
+	Print("on | off")
+	Print("lock | unlock")
+	Print("reload")
+	Print("invert")
+	Print("alpha [0,1]")
+	Print("color (school | progress | custom)")
+	Print("customcolor <effect> [1,255] [1,255] [1,255]")
 end
 
 do
@@ -755,7 +761,7 @@ do
 			return player[unit]
 		end
 
-		function _G.aurae_Print(msg)
+		function Print(msg)
 			DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
 		end
 	end
@@ -811,13 +817,13 @@ function UpdateBar(bar)
 		frame.timertext:SetText(format_time(remaining))
 
 		local r, g, b
-		if _G.aurae_Save[aurae.PROFILE].color == CTYPE_SCHOOL then
+		if aurae_settings.color == CTYPE_SCHOOL then
 			r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
-		elseif _G.aurae_Save[aurae.PROFILE].color == CTYPE_PROGRESS then
+		elseif aurae_settings.color == CTYPE_PROGRESS then
 			r, g, b = 1 - fraction, fraction, 0
-		elseif _G.aurae_Save[aurae.PROFILE].color == CTYPE_CUSTOM then
-			if aurae.EFFECTS[timer.EFFECT].COLOR then
-				r, g, b = aurae.EFFECTS[timer.EFFECT].COLOR.r, aurae.EFFECTS[timer.EFFECT].COLOR.g, aurae.EFFECTS[timer.EFFECT].COLOR.b
+		elseif aurae_settings.color == CTYPE_CUSTOM then
+			if aurae_settings.colors[timer.EFFECT] then
+				r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
 			else
 				r, g, b = 1, 1, 1
 			end
@@ -885,10 +891,10 @@ function LoadVariables()
 	_G.SLASH_AURAE1 = '/aurae'
 	SlashCmdList.AURAE = SlashCommandHandler
 
-	_G.aurae_Print("aurae loaded - /aurae")
+	Print("aurae loaded - /aurae")
 
 	local default_settings = {
-		custom_colors = {},
+		colors = {},
 		status = aurae.STATUS,
 		invert = false,
 		color = CTYPE_SCHOOL,
@@ -899,17 +905,13 @@ function LoadVariables()
 		style = 1,
 	}
 
-	aurae.PROFILE = UnitName'player' .. '@' .. GetCVar'RealmName'
-
-	_G.aurae_Save[aurae.PROFILE] = _G.aurae_Save[aurae.PROFILE] or {}
-
 	for k, v in default_settings do
-		if _G.aurae_Save[aurae.PROFILE][k] == nil then
-			_G.aurae_Save[aurae.PROFILE][k] = v
+		if aurae_settings[k] == nil then
+			aurae_settings[k] = v
 		end
 	end
 
-	aurae.ARCANIST = _G.aurae_Save[aurae.PROFILE].arcanist
+	aurae.ARCANIST = aurae_settings.arcanist
 
 	_G.aurae_ConfigCC()
 	_G.aurae_ConfigDebuff()
@@ -917,11 +919,11 @@ function LoadVariables()
 
 	_G.aurae_UpdateClassSpells(false)
 
-	aurae.STATUS = _G.aurae_Save[aurae.PROFILE].status
-	aurae.INVERT = _G.aurae_Save[aurae.PROFILE].invert
-	aurae.ALPHA = _G.aurae_Save[aurae.PROFILE].alpha
+	aurae.STATUS = aurae_settings.status
+	aurae.INVERT = aurae_settings.invert
+	aurae.ALPHA = aurae_settings.alpha
 
-	aurae.STYLE = _G.aurae_Save[aurae.PROFILE].style
+	aurae.STYLE = aurae_settings.style
 
 	auraeCC:SetScale(aurae.SCALE)
 	auraeDebuff:SetScale(aurae.SCALE)
@@ -1064,14 +1066,14 @@ end
 
 function _G.aurae_UpdateClassSpells()
 	local _, eclass = UnitClass'player'
-	if eclass == "ROGUE" then
+	if eclass == 'ROGUE' then
 		GetSpellRank("Sap", "Sap")
 		_G.aurae_UpdateImpGouge()
 		_G.aurae_UpdateKidneyShot()
 		if _G.aurae_ConfigBuff ~= nil then
 			_G.aurae_UpdateImpGarotte()
 		end
-	elseif eclass == "WARRIOR" then
+	elseif eclass == 'WARRIOR' then
 		GetSpellRank("Rend", "Rend")
 	elseif eclass == "WARLOCK" then
 		GetSpellRank("Fear", "Fear")
@@ -1079,21 +1081,21 @@ function _G.aurae_UpdateClassSpells()
 		GetSpellRank("Banish", "Banish")
 		GetSpellRank("Corruption", "Corruption")
 		_G.aurae_UpdateImpSeduce()
-	elseif eclass == "PALADIN" then
+	elseif eclass == 'PALADIN' then
 		GetSpellRank("Hammer of Justice", "Hammer of Justice")
 		if _G.aurae_ConfigBuff ~= nil then
 			GetSpellRank("Divine Shield", "Divine Shield")
 		end
-	elseif eclass == "HUNTER" then
+	elseif eclass == 'HUNTER' then
 		GetSpellRank("Freezing Trap", "Freezing Trap Effect")
 		GetSpellRank("Scare Beast", "Scare Beast")
 		_G.aurae_UpdateImpTrap()
-	elseif eclass == "PRIEST" then
+	elseif eclass == 'PRIEST' then
 		GetSpellRank("Shackle Undead", "Shackle Undead")
 		if _G.aurae_ConfigDebuff ~= nil then
 			_G.aurae_UpdateImpShadowWordPain()
 		end
-	elseif eclass == "MAGE" then
+	elseif eclass == 'MAGE' then
 		if _G.aurae_ConfigDebuff ~= nil then
 			GetSpellRank("Polymorph", "Polymorph")
 			GetSpellRank("Frostbolt", "Frostbolt")
@@ -1103,7 +1105,7 @@ function _G.aurae_UpdateClassSpells()
 		if aurae.ARCANIST then
 			aurae.EFFECTS["Polymorph"].DURATION = aurae.EFFECTS["Polymorph"].DURATION + 15
 		end
-	elseif eclass == "DRUID" then
+	elseif eclass == 'DRUID' then
 		GetSpellRank("Entangling Roots", "Entangling Roots")
 		GetSpellRank("Hibernate", "Hibernate")
 		GetSpellRank("Bash", "Bash")

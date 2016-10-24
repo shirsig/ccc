@@ -2,7 +2,7 @@
 ## Title: aurae
 ## Notes: aurae
 ## Author: shirsig
-## SavedVariables: aurae_Save
+## SavedVariablesPerCharacter: aurae_settings
 aurae.lua
 data\actions.lua
 data\ccs.lua
