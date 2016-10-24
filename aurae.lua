@@ -326,7 +326,7 @@ function SlashCommandHandler(msg)
 			_G.aurae_ConfigCC()
 			_G.aurae_ConfigDebuff()
 			_G.aurae_ConfigBuff()
-			_G.aurae_UpdateClassSpells(true)
+			UpdateClassSpells(true)
 		elseif command == "config" then
 		elseif strsub(command, 1, 5) == "scale" then
 			local scale = tonumber(strsub(command, 7))
@@ -338,7 +338,7 @@ function SlashCommandHandler(msg)
 				auraeBuff:SetScale(aurae.SCALE)
 				auraeSliderScale:SetValue(aurae.SCALE)
 			else
-				Help()
+				Usage()
 			end
 		elseif strsub(command, 1, 5) == "alpha" then
 			local alpha = tonumber(strsub(command, 7))
@@ -348,15 +348,15 @@ function SlashCommandHandler(msg)
 				Print('Alpha: '..alpha)
 				auraeSliderAlpha:SetValue(aurae.ALPHA)
 			else
-				Help()
+				Usage()
 			end
 		else
-			Help()
+			Usage()
 		end
 	end
 end
 
-function Help()
+function Usage()
 	Print("on | off")
 	Print("lock | unlock")
 	Print("reload")
@@ -367,21 +367,12 @@ function Help()
 end
 
 do
-	local function target_sex()
-		local code = UnitSex'target'
-		if code == 2 then
-			return 'M'
-		elseif code == 3 then
-			return 'F'
-		else
-			return ''
-		end
-	end
-
+	local gender = {[2]='M', [3]='F' }
+	
 	function TargetID()
 		local name = UnitName'target'
 		if name then
-			return UnitIsPlayer'target' and name or name .. ' [' .. UnitLevel'target' .. target_sex() .. ']'
+			return UnitIsPlayer'target' and name or name .. ' [' .. UnitLevel'target' .. (gender[UnitSex'target'] or '') .. ']'
 		end
 	end
 end
@@ -893,7 +884,7 @@ function LoadVariables()
 	_G.aurae_ConfigDebuff()
 	_G.aurae_ConfigBuff()
 
-	_G.aurae_UpdateClassSpells(false)
+	UpdateClassSpells(false)
 
 	aurae.STATUS = aurae_settings.status
 	aurae.INVERT = aurae_settings.invert
@@ -1041,7 +1032,7 @@ function GetSpellRank(spellname, spelleffect)
 	end
 end
 
-function _G.aurae_UpdateClassSpells()
+function UpdateClassSpells()
 	local _, eclass = UnitClass'player'
 	if eclass == 'ROGUE' then
 		GetSpellRank("Sap", "Sap")
