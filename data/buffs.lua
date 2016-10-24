@@ -3,28 +3,28 @@ function _G.aurae_ConfigBuff()
 
 	-- Rogue
 
-	aurae.EFFECTS[_G.aurae_ADRENALINERUSH] = {
+	aurae.EFFECTS["Adrenaline Rush"] = {
 		ICON = 'Spell_Shadow_ShadowWordDominate',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 15,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_ROGUESPRINT] = {
+	aurae.EFFECTS["Sprint"] = {
 		ICON = 'Ability_Rogue_Sprint',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 15,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_EVASION] = {
+	aurae.EFFECTS["Evasion"] = {
 		ICON = 'Spell_Shadow_ShadowWard',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 15,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_BLADEFLURRY] = {
+	aurae.EFFECTS["Blade Flurry"] = {
 		ICON = 'Ability_GhoulFrenzy',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
@@ -84,49 +84,49 @@ function _G.aurae_ConfigBuff()
 
 	-- Druid
 
-	aurae.EFFECTS[_G.aurae_NATURESGRASP] = {
+	aurae.EFFECTS["Nature's Grasp"] = {
 		ICON = 'Spell_Nature_NaturesWrath',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 45,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_REJUVENATION] = {
+	aurae.EFFECTS["Rejuvenation"] = {
 		ICON = 'Spell_Nature_Rejuvenation',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 12,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_REGROWTH] = {
+	aurae.EFFECTS["Regrowth"] = {
 		ICON = 'Spell_Nature_ResistNature',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 21,
 		MONITOR = false,
 	}
-	aurae.EFFECTS[_G.aurae_DASH] = {
+	aurae.EFFECTS["Dash"] = {
 		ICON = 'Ability_Druid_Dash',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 15,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_INNERVATE] = {
+	aurae.EFFECTS["Innervate"] = {
 		ICON = 'Spell_Nature_Lightning',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 20,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_BARKSKIN] = {
+	aurae.EFFECTS["Barkskin"] = {
 		ICON = 'Spell_Nature_StoneClawTotem',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 15,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_FREGEN] = {
+	aurae.EFFECTS["Frenzied Regeneration"] = {
 		ICON = 'Ability_BullRush',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
@@ -194,49 +194,49 @@ function _G.aurae_ConfigBuff()
 
 	-- Warrior
 
-	aurae.EFFECTS[_G.aurae_BERSERKERRAGE] = {
+	aurae.EFFECTS["Berserker Rage"] = {
 		ICON = 'Spell_Nature_AncestralGuardian',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 10,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_BLOODRAGE] = {
+	aurae.EFFECTS["Bloodrage"] = {
 		ICON = 'Ability_Racial_BloodRage',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 10,
 		MONITOR = false,
 	}
-	aurae.EFFECTS[_G.aurae_LASTSTAND] = {
+	aurae.EFFECTS["Last Stand"] = {
 		ICON = 'Spell_Holy_AshesToAshes',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 20,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_RETALIATION] = {
+	aurae.EFFECTS["Retaliation"] = {
 		ICON = 'Ability_Warrior_Challange',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 15,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_SHIELDWALL] = {
+	aurae.EFFECTS["Shield Wall"] = {
 		ICON = 'Ability_Warrior_ShieldWall',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 10,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_RECKLESSNESS] = {
+	aurae.EFFECTS["Recklessness"] = {
 		ICON = 'Ability_CriticalStrike',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
 		DURATION = 15,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_DEATHWISH] = {
+	aurae.EFFECTS["Death Wish"] = {
 		ICON = 'Spell_Shadow_DeathPact',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
@@ -246,7 +246,7 @@ function _G.aurae_ConfigBuff()
 
 	-- Misc
 
-	aurae.EFFECTS[_G.aurae_WOTF] = {
+	aurae.EFFECTS["Will of the Forsaken"] = {
 		ICON = 'Spell_Shadow_RaiseDead',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,
@@ -254,7 +254,7 @@ function _G.aurae_ConfigBuff()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_PERCEPTION] = {
+	aurae.EFFECTS["Perception"] = {
 		ICON = 'Spell_Nature_Sleep',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_BUFF,

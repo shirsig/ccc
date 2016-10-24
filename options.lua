@@ -134,16 +134,6 @@ function auraeOptions_InvertToggle()
 	end
 end
 
-function auraeOptions_ColorOverTimeToggle()
-	aurae.COLOROVERTIME = not aurae.COLOROVERTIME;
-	aurae_Save[aurae.PROFILE].ColorOverTime = aurae.COLOROVERTIME;
-	if aurae.COLOROVERTIME then
-		aurae_Print(aurae_COLOROVERTIME_ON);
-	else
-		aurae_Print(aurae_COLOROVERTIME_OFF);
-	end
-end
-
 function auraeOptions_SetBarColorUrge()
 	aurae_Save[aurae.PROFILE].CoTUrgeValue = auraeOptionsBarColorUrgeEdit:GetNumber();
 	aurae.COTURGEVALUE = aurae_Save[aurae.PROFILE].CoTUrgeValue;

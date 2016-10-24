@@ -3,7 +3,7 @@ function _G.aurae_ConfigDebuff()
 
 	-- Rogue
 
-	aurae.EFFECTS[_G.aurae_RUPTURE] = {
+	aurae.EFFECTS["Rupture"] = {
 		ICON = 'Ability_Rogue_Rupture',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_DEBUFF,
@@ -13,7 +13,7 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_GAROTTE] = {
+	aurae.EFFECTS["Garrote"] = {
 		ICON = 'Ability_Rogue_Garrote',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_DEBUFF,
@@ -21,7 +21,7 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_RIPOSTE] = {
+	aurae.EFFECTS["Riposte"] = {
 		ICON = 'Ability_Warrior_Challange',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_DEBUFF,
@@ -29,7 +29,7 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_CRIPPLINGP] = {
+	aurae.EFFECTS["Crippling Poison"] = {
 		ICON = 'Ability_PoisonSting',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_DEBUFF,
@@ -37,7 +37,7 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_DEADLYP] = {
+	aurae.EFFECTS["Deadly Poison"] = {
 		ICON = 'Ability_Rogue_DualWeild',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_DEBUFF,
@@ -45,7 +45,7 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_IMPROVEDKICK] = {
+	aurae.EFFECTS["Kick - Silenced"] = {
 		ICON = 'Ability_Kick',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_DEBUFF,
@@ -184,21 +184,21 @@ function _G.aurae_ConfigDebuff()
 
 	-- Druid
 
-	aurae.EFFECTS[_G.aurae_FAERIEFIRE] = {
+	aurae.EFFECTS["Faerie Fire"] = {
 		ICON = 'Spell_Nature_FaerieFire',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_DEBUFF,
 		DURATION = 40,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_FAERIEFIREFERAL] = {
+	aurae.EFFECTS["Faerie Fire (Feral)"] = {
 		ICON = 'Spell_Nature_FaerieFire',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_DEBUFF,
 		DURATION = 40,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_MOONFIRE] = {
+	aurae.EFFECTS["Moonfire"] = {
 		ICON = 'Spell_Nature_StarFall',
 		SCHOOL = _G.aurae_SCHOOL.ARCANE,
 		ETYPE = ETYPE_DEBUFF,
@@ -346,28 +346,28 @@ function _G.aurae_ConfigDebuff()
 		MONITOR = true,
 	}
 	-- Warrior - Debuffs
-	aurae.EFFECTS[_G.aurae_DISARM] = {
+	aurae.EFFECTS["Disarm"] = {
 		ICON = 'Ability_Warrior_Disarm',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_DEBUFF,
 		DURATION = 10,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_MORTALSTRIKE] = {
+	aurae.EFFECTS["Mortal Strike"] = {
 		ICON = 'Ability_Warrior_SavageBlow',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_DEBUFF,
 		DURATION = 10,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_REND] = {
+	aurae.EFFECTS["Rend"] = {
 		ICON = 'Ability_Gouge',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_DEBUFF,
 		DURATION = 21,
 		MONITOR = true,
 	}
-	aurae.EFFECTS[_G.aurae_HAMSTRING] = {
+	aurae.EFFECTS["Hamstring"] = {
 		ICON = 'Ability_ShockWave',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_DEBUFF,

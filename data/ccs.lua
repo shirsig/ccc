@@ -3,7 +3,7 @@ function _G.aurae_ConfigCC()
 
 	-- Rogue
 
-	aurae.EFFECTS[_G.aurae_GOUGE] = {
+	aurae.EFFECTS["Gouge"] = {
 		ICON = 'Ability_Gouge',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -11,7 +11,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_BLIND] = {
+	aurae.EFFECTS["Blind"] = {
 		ICON = 'Spell_Shadow_MindSteal',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -19,7 +19,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_SAP] = {
+	aurae.EFFECTS["Sap"] = {
 		ICON = 'Ability_Sap',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -28,7 +28,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_KS] = {
+	aurae.EFFECTS["Kidney Shot"] = {
 		ICON = 'Ability_Rogue_KidneyShot',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -38,7 +38,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_CS] = {
+	aurae.EFFECTS["Cheap Shot"] = {
 		ICON = 'Ability_CheapShot',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -104,7 +104,7 @@ function _G.aurae_ConfigCC()
 
 	-- Druid
 
-	aurae.EFFECTS[_G.aurae_ROOTS] = {
+	aurae.EFFECTS["Entangling Roots"] = {
 		ICON = 'Spell_Nature_StrangleVines',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_CC,
@@ -112,7 +112,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_HIBERNATE] = {
+	aurae.EFFECTS["Hibernate"] = {
 		ICON = 'Spell_Nature_Sleep',
 		SCHOOL = _G.aurae_SCHOOL.NATURE,
 		ETYPE = ETYPE_CC,
@@ -120,7 +120,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_FERALCHARGE] = {
+	aurae.EFFECTS["Feral Charge"] = {
 		ICON = 'Ability_Hunter_Pet_Bear',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -128,7 +128,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_IMPSTARFIRE] = {
+	aurae.EFFECTS["Improved Starfire"] = {
 		ICON = 'Spell_Arcane_StarFire',
 		SCHOOL = _G.aurae_SCHOOL.ARCANE,
 		ETYPE = ETYPE_CC,
@@ -136,7 +136,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_POUNCE] = {
+	aurae.EFFECTS["Pounce"] = {
 		ICON = 'Ability_Druid_SupriseAttack',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -144,7 +144,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_BASH] = {
+	aurae.EFFECTS["Bash"] = {
 		ICON = 'Ability_Druid_Bash',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -296,7 +296,7 @@ function _G.aurae_ConfigCC()
 
 	-- Warrior
 
-	aurae.EFFECTS[_G.aurae_INTERCEPT] = {
+	aurae.EFFECTS["Intercept Stun"] = {
 		ICON = 'Ability_Rogue_Sprint',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -304,7 +304,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_MACESPE] = {
+	aurae.EFFECTS["Mace Specialization"] = {
 		ICON = 'INV_Mace_01',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -312,7 +312,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_HAMSTRING] = {
+	aurae.EFFECTS["Hamstring"] = {
 		ICON = 'Ability_ShockWave',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -320,7 +320,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_IMPHAMSTRING] = {
+	aurae.EFFECTS["Improved Hamstring"] = {
 		ICON = 'Ability_ShockWave',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -328,7 +328,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_INTIMIDATINGSHOUT] = {
+	aurae.EFFECTS["Intimidating Shout"] = {
 		ICON = 'Ability_GolemThunderClap',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -336,7 +336,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_IMPREVENGE] = {
+	aurae.EFFECTS["Revenge Stun"] = {
 		ICON = 'Ability_Warrior_Revenge',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -344,7 +344,7 @@ function _G.aurae_ConfigCC()
 		MONITOR = true,
 	}
 
-	aurae.EFFECTS[_G.aurae_CONCUSSIONBLOW] = {
+	aurae.EFFECTS["Concussion Blow"] = {
 		ICON = 'Ability_ThunderBolt',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -354,7 +354,7 @@ function _G.aurae_ConfigCC()
 
 	-- Misc
 
-	aurae.EFFECTS[_G.aurae_WARSTOMP] = {
+	aurae.EFFECTS["War Stomp"] = {
 		ICON = 'Ability_WarStomp',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -363,7 +363,7 @@ function _G.aurae_ConfigCC()
 	}
 
 	-- Green Whelp Armour
-	aurae.EFFECTS[_G.aurae_SLEEP] = {
+	aurae.EFFECTS["Sleep"] = {
 		ICON = 'Spell_Holy_MindVision',
 		SCHOOL = _G.aurae_SCHOOL.SHADOW,
 		ETYPE = ETYPE_CC,
@@ -372,7 +372,7 @@ function _G.aurae_ConfigCC()
 	}
 
 	-- Net O Matic
-	aurae.EFFECTS[_G.aurae_NETOMATIC] = {
+	aurae.EFFECTS["Net-o-Matic"] = {
 		ICON = 'INV_Misc_Net_01',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,
@@ -381,7 +381,7 @@ function _G.aurae_ConfigCC()
 	}
 
 	-- Rocket Helm
-	aurae.EFFECTS[_G.aurae_ROCKETHELM] = {
+	aurae.EFFECTS["Reckless Charge"] = {
 		ICON = 'INV_Helmet_49',
 		SCHOOL = _G.aurae_SCHOOL.PHYSICAL,
 		ETYPE = ETYPE_CC,

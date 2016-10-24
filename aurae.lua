@@ -951,10 +951,10 @@ function _G.aurae_UpdateImpGouge()
 	local talentname, texture, _, _, rank = GetTalentInfo(2, 1)
 	if texture then
 		if rank ~= 0 then
-			aurae.EFFECTS[_G.aurae_GOUGE].DURATION = 4 + rank * .5
+			aurae.EFFECTS["Gouge"].DURATION = 4 + rank * .5
 		end
-	elseif aurae.EFFECTS[_G.aurae_GOUGE].DURATION == nil then
-		aurae.EFFECTS[_G.aurae_GOUGE].DURATION = 4
+	elseif aurae.EFFECTS["Gouge"].DURATION == nil then
+		aurae.EFFECTS["Gouge"].DURATION = 4
 	end
 end
 
@@ -962,10 +962,10 @@ function _G.aurae_UpdateImpGarotte()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 8)
 	if texture then
 		if rank ~= 0 then
-			aurae.EFFECTS[_G.aurae_GAROTTE].DURATION = 18 + rank * 3
+			aurae.EFFECTS["Garrote"].DURATION = 18 + rank * 3
 		end
-	elseif aurae.EFFECTS[_G.aurae_GAROTTE].DURATION == nil then
-		aurae.EFFECTS[_G.aurae_GAROTTE].DURATION = 18
+	elseif aurae.EFFECTS["Garrote"].DURATION == nil then
+		aurae.EFFECTS["Garrote"].DURATION = 18
 	end
 end
 
@@ -974,17 +974,17 @@ function _G.aurae_UpdateKidneyShot()
 	while true do
 		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
 		if not name then
-			if aurae.EFFECTS[_G.aurae_KS].DURATION == nil then
-				aurae.EFFECTS[_G.aurae_KS].DURATION = 1
+			if aurae.EFFECTS["Kidney Shot"].DURATION == nil then
+				aurae.EFFECTS["Kidney Shot"].DURATION = 1
 			end
 			return
 		end
 
-		if name == _G.aurae_KS then
+		if name == "Kidney Shot" then
 			if strsub(rank, string.len(rank)) == "1" then
-				aurae.EFFECTS[_G.aurae_KS].DURATION = 0
+				aurae.EFFECTS["Kidney Shot"].DURATION = 0
 			else
-				aurae.EFFECTS[_G.aurae_KS].DURATION = 1
+				aurae.EFFECTS["Kidney Shot"].DURATION = 1
 			end
 			return
 		end
@@ -1017,8 +1017,8 @@ function _G.aurae_UpdateBrutalImpact()
 	if texture then
 		if rank ~= 0 then
 -- Bash is a true multi rank, hence already updated
-			aurae.EFFECTS[_G.aurae_POUNCE].DURATION = 2 + rank * .50
-			aurae.EFFECTS[_G.aurae_BASH].DURATION = aurae.EFFECTS[_G.aurae_BASH].DURATION + rank * .50
+			aurae.EFFECTS["Pounce"].DURATION = 2 + rank * .50
+			aurae.EFFECTS["Bash"].DURATION = aurae.EFFECTS["Bash"].DURATION + rank * .50
 		end
 	end
 end
@@ -1079,14 +1079,14 @@ function _G.aurae_UpdateClassSpells()
 	local _, eclass = UnitClass'player'
 	auraeOptionsFrameArcanist:Hide()
 	if eclass == "ROGUE" then
-		_G.aurae_GetSpellRank(_G.aurae_SAP, _G.aurae_SAP)
+		_G.aurae_GetSpellRank("Sap", "Sap")
 		_G.aurae_UpdateImpGouge()
 		_G.aurae_UpdateKidneyShot()
 		if _G.aurae_ConfigBuff ~= nil then
 			_G.aurae_UpdateImpGarotte()
 		end
 	elseif eclass == "WARRIOR" then
-		_G.aurae_GetSpellRank(_G.aurae_REND, _G.aurae_REND)
+		_G.aurae_GetSpellRank("Rend", "Rend")
 	elseif eclass == "WARLOCK" then
 		_G.aurae_GetSpellRank("Fear", "Fear")
 		_G.aurae_GetSpellRank("Howl of Terror", "Howl of Terror")
@@ -1119,9 +1119,9 @@ function _G.aurae_UpdateClassSpells()
 			aurae.EFFECTS["Polymorph"].DURATION = aurae.EFFECTS["Polymorph"].DURATION + 15
 		end
 	elseif eclass == "DRUID" then
-		_G.aurae_GetSpellRank(_G.aurae_ROOTS, _G.aurae_ROOTS)
-		_G.aurae_GetSpellRank(_G.aurae_HIBERNATE, _G.aurae_HIBERNATE)
-		_G.aurae_GetSpellRank(_G.aurae_BASH, _G.aurae_BASH)
+		_G.aurae_GetSpellRank("Entangling Roots", "Entangling Roots")
+		_G.aurae_GetSpellRank("Hibernate", "Hibernate")
+		_G.aurae_GetSpellRank("Bash", "Bash")
 		_G.aurae_UpdateBrutalImpact()
 	end
 end
