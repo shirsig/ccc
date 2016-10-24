@@ -6,9 +6,6 @@ _F:SetScript('OnEvent', function()
 	_M[event](this)
 end)
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
---for _, event in {} do
---	_F:RegisterEvent(event)
---end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	LoadVariables()
@@ -110,7 +107,7 @@ do
 	local dr = {}
 
 	local function diminish(key, seconds)
-		return 1 / 2^(dr[key].level - 1) * seconds
+		return 1 / 2 ^ (dr[key].level - 1) * seconds
 	end
 
 	function DiminishedDuration(unit, effect, full_duration)
@@ -320,7 +317,7 @@ function SlashCommandHandler(msg)
 		elseif command == "clear" then
 			_G.aurae_Save[aurae.PROFILE] = nil
 			LoadVariables()
-		elseif command == "u" then
+		elseif command == "reload" then
 			_G.aurae_ConfigCC()
 			_G.aurae_ConfigDebuff()
 			_G.aurae_ConfigBuff()
@@ -352,6 +349,15 @@ function SlashCommandHandler(msg)
 			Help()
 		end
 	end
+end
+
+function Help()
+	_G.aurae_Print("on | off")
+	_G.aurae_Print("lock | unlock")
+	_G.aurae_Print("reload")
+	_G.aurae_Print("invert")
+	_G.aurae_Print("alpha [0,1]")
+	_G.aurae_Print("color (school | progress | custom)")
 end
 
 do
@@ -879,7 +885,7 @@ function LoadVariables()
 	_G.SLASH_AURAE1 = '/aurae'
 	SlashCmdList.AURAE = SlashCommandHandler
 
-	_G.aurae_Print("aurae Loaded - /aurae")
+	_G.aurae_Print("aurae loaded - /aurae")
 
 	local default_settings = {
 		custom_colors = {},
@@ -1103,16 +1109,4 @@ function _G.aurae_UpdateClassSpells()
 		GetSpellRank("Bash", "Bash")
 		_G.aurae_UpdateBrutalImpact()
 	end
-end
-
-function Help()
-	_G.aurae_Print("aurae : Usage - /aurae option")
-	_G.aurae_Print("options:")
-	_G.aurae_Print(" on     : Enables aurae")
-	_G.aurae_Print(" off    : Disables aurae")
-	_G.aurae_Print(" lock   : Locks aurae and enables")
-	_G.aurae_Print(" unlock : Allows you to move aurae")
-	_G.aurae_Print(" u      : Update improved skill ranks")
-	_G.aurae_Print(" invert : Invert progress bar direction")
-	_G.aurae_Print(" alpha  : Set bar alpha, use 0 to 1")
 end
