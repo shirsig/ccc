@@ -518,7 +518,6 @@ function AuraGone(unit, effect)
 			local debuffs = UnitDebuffs'target'
 			for k, timer in _G.aurae_timers do
 				if timer.UNIT == unit and not debuffs[timer.EFFECT] then
-					-- TODO only if not deprecated (tentative)
 					StopTimer(timer.EFFECT, timer.UNIT)
 				end
 			end
@@ -526,19 +525,11 @@ function AuraGone(unit, effect)
 	end
 end
 
---function DoTimer_ChangedTargets() TODO (tentative)
---	for k, timer in _G.aurae_timers do
---		timer.deprecated = true
---	end
-	-- TODO deal with pending spells
---end
-
 function CHAT_MSG_COMBAT_HOSTILE_DEATH()
 	for unit in string.gfind(arg1, '(.+) dies') do -- TODO does not work when xp is gained
 		if IsPlayer(unit) then
 			UnitDied(unit)
 		elseif unit == UnitName'target' and UnitIsDead'target' then
-			-- TODO only if not deprecated (tentative)
 			UnitDied(TargetID())
 		end
 	end
@@ -751,7 +742,7 @@ do
 		end
 
 		function IsShown(unit)
-			if not player[unit] or aurae.STYLE == 2 then
+			if not player[unit] or aurae_settings.mode == 2 then
 				return true
 			end
 			return UnitName'target' == unit or UnitName'mouseover' == unit or recent[unit] and GetTime() - recent[unit] <= 30
@@ -880,8 +871,6 @@ function LoadVariables()
 	_G.SLASH_AURAE1 = '/aurae'
 	SlashCmdList.AURAE = SlashCommandHandler
 
-	Print("aurae loaded - /aurae")
-
 	local default_settings = {
 		colors = {},
 		status = aurae.STATUS,
@@ -891,7 +880,7 @@ function LoadVariables()
 		width = 160,
 		alpha = 1,
 		arcanist = false,
-		style = 1,
+		mode = 1,
 	}
 
 	for k, v in default_settings do
@@ -899,8 +888,6 @@ function LoadVariables()
 			aurae_settings[k] = v
 		end
 	end
-
-	aurae.ARCANIST = aurae_settings.arcanist
 
 	_G.aurae_ConfigCC()
 	_G.aurae_ConfigDebuff()
@@ -911,8 +898,7 @@ function LoadVariables()
 	aurae.STATUS = aurae_settings.status
 	aurae.INVERT = aurae_settings.invert
 	aurae.ALPHA = aurae_settings.alpha
-
-	aurae.STYLE = aurae_settings.style
+	aurae.ARCANIST = aurae_settings.arcanist
 
 	auraeCC:SetScale(aurae.SCALE)
 	auraeDebuff:SetScale(aurae.SCALE)
@@ -923,6 +909,8 @@ function LoadVariables()
 	end
 
 	LockBars()
+
+	Print('aurae loaded - /aurae')
 end
 
 function _G.aurae_UpdateImpGouge()
