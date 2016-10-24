@@ -1002,7 +1002,7 @@ end
 function GetSpellRank(spellname, spelleffect)
 	local i = 1
 	local gotone = false
-	local maxrank = _G.aurae_ACTIONS[spellname].RANKS
+	local maxrank = getn(_G.aurae_ACTIONS[spellname].DURATION)
 
 	while true do
 		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
