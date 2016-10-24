@@ -875,7 +875,7 @@ do
 		auraeCC:SetAlpha(aurae_settings.alpha)
 		auraeDebuff:SetAlpha(aurae_settings.alpha)
 		auraeBuff:SetAlpha(aurae_settings.alpha)
-		
+
 		_G.SLASH_AURAE1 = '/aurae'
 		SlashCmdList.AURAE = SlashCommandHandler
 
