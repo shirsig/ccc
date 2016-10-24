@@ -368,7 +368,7 @@ end
 
 do
 	local gender = {[2]='M', [3]='F' }
-	
+
 	function TargetID()
 		local name = UnitName'target'
 		if name then
@@ -856,7 +856,6 @@ function LoadVariables()
 		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
 		'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
 		'PLAYER_TARGET_CHANGED', 'UPDATE_MOUSEOVER_UNIT', 'UPDATE_BATTLEFIELD_SCORE',
-
 	} do _F:RegisterEvent(event) end
 
 	_G.SLASH_AURAE1 = '/aurae'

@@ -15,6 +15,7 @@ aurae_ACTIONS["Polymorph"] = {
 aurae_ACTIONS["Fireball"] = {
 	RANKS = 11,
 	DURATION = {4, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8},
+	DELAY = .5,
 }
 
 aurae_ACTIONS["Frostbolt"] = {
