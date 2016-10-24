@@ -43,8 +43,6 @@ _G.aurae = {}
 aurae.EFFECTS = {}
 aurae.COMBO = 0
 
-aurae.INVERT = false
-
 -- effect groups for each bar
 aurae.GROUPSCC = {}
 aurae.GROUPSDEBUFF = {}
@@ -294,9 +292,9 @@ function SlashCommandHandler(msg)
 			LockBars()
 			Print('Bars locked.')
 		elseif command == "invert" then
-			aurae.INVERT = not aurae.INVERT
-			aurae_settings.invert = aurae.INVERT
-			if aurae.INVERT then
+			aurae_settings.invert = not aurae_settings.invert
+			aurae_settings.invert = aurae_settings.invert
+			if aurae_settings.invert then
 				Print('Bar inversion on.')
 			else
 				Print('Bar inversion off.')
@@ -785,11 +783,11 @@ function UpdateBar(bar)
 		local remaining = timer.END - t
 		local fraction = remaining / duration
 
-		frame.statusbar:SetValue(aurae.INVERT and 1 - fraction or fraction)
+		frame.statusbar:SetValue(aurae_settings.invert and 1 - fraction or fraction)
 
 		local sparkPosition = WIDTH * fraction
 		frame.spark:Show()
-		frame.spark:SetPoint('CENTER', bar.frame.statusbar, aurae.INVERT and 'RIGHT' or 'LEFT', aurae.INVERT and -sparkPosition or sparkPosition, 0)
+		frame.spark:SetPoint('CENTER', bar.frame.statusbar, aurae_settings.invert and 'RIGHT' or 'LEFT', aurae_settings.invert and -sparkPosition or sparkPosition, 0)
 
 		frame.timertext:SetText(format_time(remaining))
 
@@ -870,6 +868,14 @@ do
 			end
 		end
 
+		auraeCC:SetScale(aurae_settings.scale)
+		auraeDebuff:SetScale(aurae_settings.scale)
+		auraeBuff:SetScale(aurae_settings.scale)
+
+		auraeCC:SetAlpha(aurae_settings.alpha)
+		auraeDebuff:SetAlpha(aurae_settings.alpha)
+		auraeBuff:SetAlpha(aurae_settings.alpha)
+		
 		_G.SLASH_AURAE1 = '/aurae'
 		SlashCmdList.AURAE = SlashCommandHandler
 
@@ -882,16 +888,6 @@ function LoadVariables()
 	aurae_ConfigDebuff()
 	aurae_ConfigBuff()
 	UpdateClassSpells(false)
-
-	aurae.INVERT = aurae_settings.invert
-
-	auraeCC:SetScale(aurae_settings.scale)
-	auraeDebuff:SetScale(aurae_settings.scale)
-	auraeBuff:SetScale(aurae_settings.scale)
-
-	auraeCC:SetAlpha(aurae_settings.alpha)
-	auraeDebuff:SetAlpha(aurae_settings.alpha)
-	auraeBuff:SetAlpha(aurae_settings.alpha)
 end
 
 function _G.aurae_UpdateImpGouge()
