@@ -4,7 +4,7 @@
 ## Author: shirsig
 ## SavedVariables: aurae_Save
 aurae.lua
-globals.lua
+data\actions.lua
 data\ccs.lua
 data\debuffs.lua
 data\buffs.lua

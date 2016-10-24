@@ -1,45 +1,5 @@
-ETYPE_CC = 1
-ETYPE_DEBUFF = 2
-ETYPE_BUFF = 4
-
-CTYPE_SCHOOL = 1
-CTYPE_PROGRESS = 2
-CTYPE_CUSTOM = 3
-
-function QuickLocalize(str)
--- just remove $1 & $2 args because we *know that the order is not changed*.
--- not fail proof if ever it occurs (should be a more clever function, and return found arguments order)
-	str = string.gsub(str, ".%$", "")
-	str = string.gsub(str, "%%s", "\(.+\)")
-	return str
-end
-
-function aurae_Globals()
-
-aurae_Save = {}
-
-aurae = {}
-aurae.PROFILE = ""
-aurae.COMBO = 0
-aurae.STATUS = 0
-
-aurae.INVERT = false
-aurae.SCALE = 1
-aurae.ALPHA = 1
-
-aurae.VARIABLES_LOADED = false
-aurae.VARIABLE_TIMER = 0
-
--- effect groups for each bar
-aurae.GROUPSCC = {}
-aurae.GROUPSDEBUFF = {}
-aurae.GROUPSBUFF = {}
-
--- CC Durations according to rank
--- WARNING : in case of difference between skill and effect, separate strings have to be used.
--- (see Hunter 'Freeze Trap' for instance)
-
 aurae_ACTIONS = {}
+
 -- Warrior
 aurae_ACTIONS["Rend"] = {
 	RANKS = 7,
@@ -139,10 +99,3 @@ aurae_ACTIONS["Sap"] = {
 	RANKS = 3,
 	DURATION = {25, 35, 45},
 }
-
-aurae_TEXT_ON = QuickLocalize(AURAADDEDOTHERHARMFUL)
-aurae_TEXT_BUFF_ON = QuickLocalize(AURAADDEDOTHERHELPFUL)
-aurae_TEXT_BREAK = QuickLocalize(AURADISPELOTHER)
-aurae_TEXT_OFF = QuickLocalize(AURAREMOVEDOTHER)
-
-end

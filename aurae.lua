@@ -6,9 +6,9 @@ _F:SetScript('OnEvent', function()
 	_M[event](this)
 end)
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
-for _, event in {'ADDON_LOADED'} do
-	_F:RegisterEvent(event)
-end
+--for _, event in {} do
+--	_F:RegisterEvent(event)
+--end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	LoadVariables()
@@ -18,6 +18,45 @@ end)
 WIDTH = 170
 HEIGHT = 16
 MAXBARS = 10
+
+_G.ETYPE_CC = 1
+_G.ETYPE_DEBUFF = 2
+_G.ETYPE_BUFF = 4
+
+CTYPE_SCHOOL = 1
+CTYPE_PROGRESS = 2
+CTYPE_CUSTOM = 3
+
+--_G.aurae_ARCANIST_ON = "Arcanist' Set activated (+15 sec to ".."Polymorph".." spell)"
+--_G.aurae_ARCANIST_OFF = "Arcanist' Set off"
+
+function QuickLocalize(str)
+	-- just remove $1 & $2 args because we *know that the order is not changed*.
+	-- not fail proof if ever it occurs (should be a more clever function, and return found arguments order)
+	str = string.gsub(str, ".%$", "")
+	str = string.gsub(str, "%%s", "\(.+\)")
+	return str
+end
+
+_G.aurae_Save = {}
+
+_G.aurae = {}
+aurae.EFFECTS = {}
+aurae.PROFILE = ""
+aurae.COMBO = 0
+aurae.STATUS = 0
+
+aurae.INVERT = false
+aurae.SCALE = 1
+aurae.ALPHA = 1
+
+aurae.VARIABLES_LOADED = false
+aurae.VARIABLE_TIMER = 0
+
+-- effect groups for each bar
+aurae.GROUPSCC = {}
+aurae.GROUPSDEBUFF = {}
+aurae.GROUPSBUFF = {}
 
 _G.aurae_SCHOOL = {
 	NONE = {1, 1, 1},
@@ -203,82 +242,13 @@ local function format_time(t)
 	end
 end
 
-function ADDON_LOADED()
-	if arg1 ~= 'aurae' then return end
-
-	_G.aurae_Globals()
-
-	local dummy_timer = {stopped=0}
-	for i, etype in {'Debuff', 'CC', 'Buff'} do
-		local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
-		local f = CreateFrame('Frame', 'aurae'..etype, UIParent)
-		f:SetWidth(WIDTH + HEIGHT)
-		f:SetHeight(height)
-		f:SetMovable(true)
-		f:SetUserPlaced(true)
-		f:SetClampedToScreen(true)
-		f:RegisterForDrag('LeftButton')
-		f:SetScript('OnDragStart', function()
-			this:StartMoving()
-		end)
-		f:SetScript('OnDragStop', function()
-			this:StopMovingOrSizing()
-		end)
-		f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
-		for i = 1, MAXBARS do
-			local name = 'auraeBar' .. etype .. i
-			local bar = create_bar(name)
-			bar.frame:SetParent(getglobal('aurae' .. etype))
-			local offset = 20 * (i - 1)
-			bar.frame:SetPoint('BOTTOMLEFT', 0, offset)
-			bar.frame:SetPoint('BOTTOMRIGHT', 0, offset)
-			setglobal(name, bar.frame)
-			bar.TIMER = dummy_timer
-			tinsert(aurae['GROUPS' .. strupper(etype)], bar)
-		end
-	end
-
-	_G.aurae_Config()
-
-	_F:RegisterEvent'UNIT_COMBAT'
-
-	_F:RegisterEvent'CHAT_MSG_COMBAT_HONOR_GAIN'
-	_F:RegisterEvent'CHAT_MSG_COMBAT_HOSTILE_DEATH'
-	_F:RegisterEvent'PLAYER_REGEN_ENABLED'
-
-	_F:RegisterEvent'CHAT_MSG_SPELL_AURA_GONE_OTHER'
-	_F:RegisterEvent'CHAT_MSG_SPELL_BREAK_AURA'
-
-	_F:RegisterEvent'SPELLCAST_STOP'
-	_F:RegisterEvent'SPELLCAST_INTERRUPTED'
-	_F:RegisterEvent'CHAT_MSG_SPELL_SELF_DAMAGE'
-	_F:RegisterEvent'CHAT_MSG_SPELL_FAILED_LOCALPLAYER'
-
-	_F:RegisterEvent'PLAYER_TARGET_CHANGED'
-	_F:RegisterEvent'UPDATE_MOUSEOVER_UNIT'
-	_F:RegisterEvent'UPDATE_BATTLEFIELD_SCORE'
-
-	_G.SLASH_AURAE1 = '/aurae'
-	SlashCmdList.AURAE = SlashCommandHandler
-
-	_G.aurae_Print("aurae Loaded - /aurae")
-end
-
 --	if _G.aurae_Save[aurae.PROFILE].WarnSelf then
 --		local info = ChatTypeInfo.RAID_WARNING
 --		RaidWarningFrame:AddMessage(msg, info.r, info.g, info.b, 1)
 --		PlaySound'RaidWarning'
 --	end
 
-function _G.aurae_Config()
-	aurae.EFFECTS = {}
-
-	_G.aurae_ConfigCC()
-	_G.aurae_ConfigDebuff()
-	_G.aurae_ConfigBuff()
-end
-
-function _G.aurae_BarUnlock()
+function UnlockBars()
 	aurae.STATUS = 2
 	for _, type in {'CC', 'Buff', 'Debuff'} do
 		getglobal('aurae' .. type):EnableMouse(1)
@@ -296,7 +266,7 @@ function _G.aurae_BarUnlock()
 	end
 end
 
-function _G.aurae_BarLock()
+function LockBars()
 	aurae.STATUS = 1
 	auraeCC:EnableMouse(0)
 	auraeDebuff:EnableMouse(0)
@@ -316,27 +286,27 @@ function SlashCommandHandler(msg)
 			if aurae.STATUS == 0 then
 				aurae.STATUS = 1
 				_G.aurae_Save[aurae.PROFILE].status = aurae.STATUS
-				_G.aurae_Print(_G.aurae_ENABLED)
+				_G.aurae_Print('aurae enabled')
 			end
 		elseif command == "off" then
 			if aurae.STATUS ~= 0 then
 				aurae.STATUS = 0
 				_G.aurae_Save[aurae.PROFILE].status = aurae.STATUS
-				_G.aurae_Print(_G.aurae_DISABLED)
+				_G.aurae_Print('aurae disabled')
 			end
 		elseif command == "unlock" then
-			_G.aurae_BarUnlock()
+			UnlockBars()
 			_G.aurae_Print('Bars unlocked')
 		elseif command == "lock" then
-			_G.aurae_BarLock()
+			LockBars()
 			_G.aurae_Print('Bars locked')
 		elseif command == "invert" then
 			aurae.INVERT = not aurae.INVERT
 			_G.aurae_Save[aurae.PROFILE].invert = aurae.INVERT
 			if aurae.INVERT then
-				_G.aurae_Print(_G.aurae_INVERSION_ON)
+				_G.aurae_Print('Bar inversion on.')
 			else
-				_G.aurae_Print(_G.aurae_INVERSION_OFF)
+				_G.aurae_Print('Bar inversion off.')
 			end
 		elseif command == "color school" then
 			_G.aurae_Save[aurae.PROFILE].color = CTYPE_SCHOOL
@@ -349,12 +319,11 @@ function SlashCommandHandler(msg)
 			_G.aurae_Print'Custom color enabled.'
 		elseif command == "clear" then
 			_G.aurae_Save[aurae.PROFILE] = nil
-			_G.aurae_Globals()
-			_G.aurae_Config()
 			LoadVariables()
 		elseif command == "u" then
-			_G.aurae_Config()
-			_G.aurae_LoadConfCCs()
+			_G.aurae_ConfigCC()
+			_G.aurae_ConfigDebuff()
+			_G.aurae_ConfigBuff()
 			_G.aurae_UpdateClassSpells(true)
 		elseif command == "config" then
 		elseif strsub(command, 1, 5) == "scale" then
@@ -515,13 +484,13 @@ do
 end
 
 function CHAT_MSG_SPELL_AURA_GONE_OTHER()
-	for effect, unit in string.gfind(arg1, _G.aurae_TEXT_OFF) do
+	for effect, unit in string.gfind(arg1, QuickLocalize(AURAREMOVEDOTHER)) do
 		AuraGone(unit, effect)
 	end
 end
 
 function CHAT_MSG_SPELL_BREAK_AURA()
-	for unit, effect in string.gfind(arg1, _G.aurae_TEXT_BREAK) do
+	for unit, effect in string.gfind(arg1, QuickLocalize(AURADISPELOTHER)) do
 		AuraGone(unit, effect)
 	end
 end
@@ -739,8 +708,8 @@ do
 
 		function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 			player[hostile_player(arg1)] = true
-			for unit, effect in string.gfind(arg1, _G.aurae_TEXT_BUFF_ON) do
-				if IsPlayer(unit) and aurae.EFFECTS[effect] and aurae.EFFECTS[effect].MONITOR and bit.band(aurae.EFFECTS[effect].ETYPE, aurae.MONITORING) ~= 0 then
+			for unit, effect in string.gfind(arg1, QuickLocalize(AURAADDEDOTHERHELPFUL)) do
+				if IsPlayer(unit) and aurae.EFFECTS[effect] then
 					StartTimer(effect, unit, GetTime())
 				end
 			end
@@ -748,8 +717,8 @@ do
 
 		function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 			player[hostile_player(arg1)] = true
-			for unit, effect in string.gfind(arg1, _G.aurae_TEXT_ON) do
-				if IsPlayer(unit) and aurae.EFFECTS[effect] and aurae.EFFECTS[effect].MONITOR and bit.band(aurae.EFFECTS[effect].ETYPE, aurae.MONITORING) ~= 0 then
+			for unit, effect in string.gfind(arg1, QuickLocalize(AURAADDEDOTHERHARMFUL)) do
+				if IsPlayer(unit) and aurae.EFFECTS[effect] then
 					StartTimer(effect, unit, GetTime())
 				end
 			end
@@ -855,21 +824,65 @@ function UpdateBar(bar)
 	end
 end
 
-local function GetConfCC(k, v)
-	if aurae.EFFECTS[k] then
-		aurae.EFFECTS[k].MONITOR = v.MONITOR
-		aurae.EFFECTS[k].COLOR = v.COLOR
-	end
-end
-
-function _G.aurae_LoadConfCCs()
-	table.foreach(_G.aurae_Save[aurae.PROFILE].ConfCC, GetConfCC)
-end
-
 function LoadVariables()
+	local dummy_timer = {stopped=0}
+	for i, etype in {'Debuff', 'CC', 'Buff'} do
+		local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
+		local f = CreateFrame('Frame', 'aurae'..etype, UIParent)
+		f:SetWidth(WIDTH + HEIGHT)
+		f:SetHeight(height)
+		f:SetMovable(true)
+		f:SetUserPlaced(true)
+		f:SetClampedToScreen(true)
+		f:RegisterForDrag('LeftButton')
+		f:SetScript('OnDragStart', function()
+			this:StartMoving()
+		end)
+		f:SetScript('OnDragStop', function()
+			this:StopMovingOrSizing()
+		end)
+		f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
+		for i = 1, MAXBARS do
+			local name = 'auraeBar' .. etype .. i
+			local bar = create_bar(name)
+			bar.frame:SetParent(getglobal('aurae' .. etype))
+			local offset = 20 * (i - 1)
+			bar.frame:SetPoint('BOTTOMLEFT', 0, offset)
+			bar.frame:SetPoint('BOTTOMRIGHT', 0, offset)
+			setglobal(name, bar.frame)
+			bar.TIMER = dummy_timer
+			tinsert(aurae['GROUPS' .. strupper(etype)], bar)
+		end
+	end
+
+	_F:RegisterEvent'UNIT_COMBAT'
+
+	_F:RegisterEvent'CHAT_MSG_COMBAT_HONOR_GAIN'
+	_F:RegisterEvent'CHAT_MSG_COMBAT_HOSTILE_DEATH'
+	_F:RegisterEvent'PLAYER_REGEN_ENABLED'
+
+	_F:RegisterEvent'CHAT_MSG_SPELL_AURA_GONE_OTHER'
+	_F:RegisterEvent'CHAT_MSG_SPELL_BREAK_AURA'
+
+	_F:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE'
+	_F:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS'
+
+	_F:RegisterEvent'SPELLCAST_STOP'
+	_F:RegisterEvent'SPELLCAST_INTERRUPTED'
+	_F:RegisterEvent'CHAT_MSG_SPELL_SELF_DAMAGE'
+	_F:RegisterEvent'CHAT_MSG_SPELL_FAILED_LOCALPLAYER'
+
+	_F:RegisterEvent'PLAYER_TARGET_CHANGED'
+	_F:RegisterEvent'UPDATE_MOUSEOVER_UNIT'
+	_F:RegisterEvent'UPDATE_BATTLEFIELD_SCORE'
+
+	_G.SLASH_AURAE1 = '/aurae'
+	SlashCmdList.AURAE = SlashCommandHandler
+
+	_G.aurae_Print("aurae Loaded - /aurae")
+
 	local default_settings = {
-		SavedCC = {},
-		ConfCC = {},
+		custom_colors = {},
 		status = aurae.STATUS,
 		invert = false,
 		color = CTYPE_SCHOOL,
@@ -878,7 +891,6 @@ function LoadVariables()
 		alpha = 1,
 		arcanist = false,
 		style = 1,
-		Monitoring = bit.bor(ETYPE_CC, ETYPE_DEBUFF, ETYPE_BUFF),
 	}
 
 	aurae.PROFILE = UnitName'player' .. '@' .. GetCVar'RealmName'
@@ -893,21 +905,15 @@ function LoadVariables()
 
 	aurae.ARCANIST = _G.aurae_Save[aurae.PROFILE].arcanist
 
-	_G.aurae_LoadConfCCs()
+	_G.aurae_ConfigCC()
+	_G.aurae_ConfigDebuff()
+	_G.aurae_ConfigBuff()
+
 	_G.aurae_UpdateClassSpells(false)
 
 	aurae.STATUS = _G.aurae_Save[aurae.PROFILE].status
 	aurae.INVERT = _G.aurae_Save[aurae.PROFILE].invert
 	aurae.ALPHA = _G.aurae_Save[aurae.PROFILE].alpha
-
-	aurae.MONITORING = _G.aurae_Save[aurae.PROFILE].Monitoring
-
-	if bit.band(aurae.MONITORING, ETYPE_CC) ~= 0 or bit.band(aurae.MONITORING, ETYPE_DEBUFF) ~= 0 then
-		_F:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE'
-	end
-	if bit.band(aurae.MONITORING, ETYPE_BUFF) ~= 0 then
-		_F:RegisterEvent'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS'
-	end
 
 	aurae.STYLE = _G.aurae_Save[aurae.PROFILE].style
 
@@ -916,10 +922,10 @@ function LoadVariables()
 	auraeBuff:SetScale(aurae.SCALE)
 
 	if aurae.STATUS == 2 then
-		_G.aurae_BarUnlock()
+		UnlockBars()
 	end
 
-	_G.aurae_BarLock()
+	LockBars()
 end
 
 function _G.aurae_UpdateImpGouge()
