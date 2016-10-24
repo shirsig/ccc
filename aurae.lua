@@ -643,9 +643,8 @@ do
 
 		local function unit_changed(unitID)
 			local unit = UnitName(unitID)
+			player[unit] = UnitIsPlayer(unitID)
 			if unit then
-				player[unit] = UnitIsPlayer(unitID)
-
 				if player[unit] then
 					add_recent(unit)
 				end
