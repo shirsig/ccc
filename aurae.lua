@@ -224,7 +224,7 @@ function ADDON_LOADED()
 		f:SetScript('OnDragStop', function()
 			this:StopMovingOrSizing()
 		end)
-		f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
+		f:SetPoint('CENTER', -210 + (i - 1) * 210, 140)
 		for i = 1, MAXBARS do
 			local name = 'auraeBar' .. etype .. i
 			local bar = create_bar(name)
@@ -764,7 +764,7 @@ do
 		function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 			player[hostile_player(arg1)] = true
 			for unit, effect in string.gfind(arg1, _G.aurae_TEXT_BUFF_ON) do
-				if aurae.EFFECTS[effect] and aurae.EFFECTS[effect].MONITOR and bit.band(aurae.EFFECTS[effect].ETYPE, aurae.MONITORING) ~= 0 then
+				if IsPlayer(unit) and aurae.EFFECTS[effect] and aurae.EFFECTS[effect].MONITOR and bit.band(aurae.EFFECTS[effect].ETYPE, aurae.MONITORING) ~= 0 then
 					StartTimer(effect, unit, GetTime())
 				end
 			end
@@ -773,7 +773,7 @@ do
 		function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 			player[hostile_player(arg1)] = true
 			for unit, effect in string.gfind(arg1, _G.aurae_TEXT_ON) do
-				if aurae.EFFECTS[effect] and aurae.EFFECTS[effect].MONITOR and bit.band(aurae.EFFECTS[effect].ETYPE, aurae.MONITORING) ~= 0 then
+				if IsPlayer(unit) and aurae.EFFECTS[effect] and aurae.EFFECTS[effect].MONITOR and bit.band(aurae.EFFECTS[effect].ETYPE, aurae.MONITORING) ~= 0 then
 					StartTimer(effect, unit, GetTime())
 				end
 			end
