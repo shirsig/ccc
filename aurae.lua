@@ -379,24 +379,6 @@ function SlashCommandHandler(msg)
 			else
 				Help()
 			end
-		elseif command == "print" then
-			_G.aurae_Print("Profile: "..aurae.PROFILE)
-			if aurae.STATUS == 0 then
-				_G.aurae_Print(_G.aurae_DISABLED)
-			elseif aurae.STATUS == 2 then
-				_G.aurae_Print(_G.aurae_UNLOCKED)
-			else
-				_G.aurae_Print(_G.aurae_ENABLED)
-			end
-			if aurae.INVERT then
-				_G.aurae_Print(_G.aurae_INVERSION_ON)
-			else
-				_G.aurae_Print(_G.aurae_INVERSION_OFF)
-			end
-			_G.aurae_Config()
-			_G.aurae_LoadConfCCs()
-			_G.aurae_UpdateClassSpells(true)
-			_G.aurae_Print('Alpha: '..aurae.ALPHA)
 		else
 			Help()
 		end
@@ -1125,8 +1107,6 @@ function Help()
 	_G.aurae_Print(" lock   : Locks aurae and enables")
 	_G.aurae_Print(" unlock : Allows you to move aurae")
 	_G.aurae_Print(" u      : Update improved skill ranks")
-	_G.aurae_Print(" print  : Prints the current configuration")
 	_G.aurae_Print(" invert : Invert progress bar direction")
 	_G.aurae_Print(" alpha  : Set bar alpha, use 0 to 1")
-	_G.aurae_Print(" config : Show the configuration frame")
 end
