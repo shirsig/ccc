@@ -2,14 +2,16 @@ local _G, _M, _F = getfenv(0), {}, CreateFrame'Frame'
 setfenv(1, setmetatable(_M, {__index=_G}))
 _F:SetScript('OnUpdate', function() _M.UPDATE() end)
 _F:SetScript('OnEvent', function()
-	if aurae and aurae.STATUS == 0 then return end
+	if not aurae_settings.enabled then return end
 	_M[event](this)
 end)
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
+	Initialize()
 	LoadVariables()
 	this:SetScript('OnUpdate', nil)
+	Print('aurae loaded - /aurae')
 end)
 
 WIDTH = 170
@@ -40,11 +42,8 @@ _G.aurae_settings = {}
 _G.aurae = {}
 aurae.EFFECTS = {}
 aurae.COMBO = 0
-aurae.STATUS = 0
 
 aurae.INVERT = false
-aurae.SCALE = 1
-aurae.ALPHA = 1
 
 -- effect groups for each bar
 aurae.GROUPSCC = {}
@@ -206,7 +205,7 @@ local function create_bar(name)
 --		TODO
 --	end
 
-	bar.frame = f	
+	bar.frame = f
 	return bar
 end
 
@@ -242,12 +241,12 @@ end
 --	end
 
 function UnlockBars()
-	aurae.STATUS = 2
+	aurae.LOCKED = false
 	for _, type in {'CC', 'Buff', 'Debuff'} do
-		getglobal('aurae' .. type):EnableMouse(1)
+		_G['aurae' .. type]:EnableMouse(1)
 		for i = 1, MAXBARS do
 			local f = getglobal('auraeBar' .. type .. i)
-			f:SetAlpha(aurae.ALPHA)
+			f:SetAlpha(1)
 			f.statusbar:SetStatusBarColor(1, 1, 1)
 			f.statusbar:SetValue(1)
 			f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
@@ -260,7 +259,7 @@ function UnlockBars()
 end
 
 function LockBars()
-	aurae.STATUS = 1
+	aurae.LOCKED = true
 	auraeCC:EnableMouse(0)
 	auraeDebuff:EnableMouse(0)
 	auraeBuff:EnableMouse(0)
@@ -283,23 +282,17 @@ function SlashCommandHandler(msg)
 		local args = tokenize(msg)
 		local command = strlower(msg)
 		if command == "on" then
-			if aurae.STATUS == 0 then
-				aurae.STATUS = 1
-				aurae_settings.status = aurae.STATUS
-				Print('aurae enabled')
-			end
+			aurae_settings.enabled = true
+			Print('aurae enabled.')
 		elseif command == "off" then
-			if aurae.STATUS ~= 0 then
-				aurae.STATUS = 0
-				aurae_settings.status = aurae.STATUS
-				Print('aurae disabled')
-			end
+			aurae_settings.enabled = false
+			Print('aurae disabled.')
 		elseif command == "unlock" then
 			UnlockBars()
-			Print('Bars unlocked')
+			Print('Bars unlocked.')
 		elseif command == "lock" then
 			LockBars()
-			Print('Bars locked')
+			Print('Bars locked.')
 		elseif command == "invert" then
 			aurae.INVERT = not aurae.INVERT
 			aurae_settings.invert = aurae.INVERT
@@ -323,30 +316,32 @@ function SlashCommandHandler(msg)
 			aurae_settings = nil
 			LoadVariables()
 		elseif command == "reload" then
-			_G.aurae_ConfigCC()
-			_G.aurae_ConfigDebuff()
-			_G.aurae_ConfigBuff()
+			aurae_ConfigCC()
+			aurae_ConfigDebuff()
+			aurae_ConfigBuff()
 			UpdateClassSpells(true)
 		elseif command == "config" then
 		elseif strsub(command, 1, 5) == "scale" then
 			local scale = tonumber(strsub(command, 7))
-			if scale <= 3 and scale >= .25 then
+			if scale then
+				scale = max(.25, min(3, scale))
 				aurae_settings.scale = scale
-				aurae.SCALE = scale
-				auraeCC:SetScale(aurae.SCALE)
-				auraeDebuff:SetScale(aurae.SCALE)
-				auraeBuff:SetScale(aurae.SCALE)
-				auraeSliderScale:SetValue(aurae.SCALE)
+				auraeCC:SetScale(scale)
+				auraeDebuff:SetScale(scale)
+				auraeBuff:SetScale(scale)
+				Print('Scale: ' .. scale)
 			else
 				Usage()
 			end
 		elseif strsub(command, 1, 5) == "alpha" then
 			local alpha = tonumber(strsub(command, 7))
-			if alpha <= 1 and alpha >= 0 then
+			if alpha then
+				alpha = max(0, min(1, alpha))
 				aurae_settings.alpha = alpha
-				aurae.ALPHA = alpha
-				Print('Alpha: '..alpha)
-				auraeSliderAlpha:SetValue(aurae.ALPHA)
+				auraeCC:SetAlpha(alpha)
+				auraeDebuff:SetAlpha(alpha)
+				auraeBuff:SetAlpha(alpha)
+				Print('Alpha: ' .. alpha)
 			else
 				Usage()
 			end
@@ -721,7 +716,7 @@ do
 		function PLAYER_TARGET_CHANGED()
 			unit_changed'target'
 		end
-		
+
 		function UPDATE_MOUSEOVER_UNIT()
 			unit_changed'mouseover'
 		end
@@ -733,10 +728,10 @@ do
 		end
 
 		function IsShown(unit)
-			if not player[unit] or aurae_settings.mode == 2 then
-				return true
-			end
-			return UnitName'target' == unit or UnitName'mouseover' == unit or recent[unit] and GetTime() - recent[unit] <= 30
+			return not player[unit]
+					or UnitName'target' == unit
+					or UnitName'mouseover' == unit
+					or recent[unit] and GetTime() - recent[unit] <= 30
 		end
 
 		function IsPlayer(unit)
@@ -750,11 +745,11 @@ do
 end
 
 function UPDATE()
-	if aurae.STATUS == 0 then
+	if not aurae_settings.enabled then
 		return
 	end
 	UpdateTimers()
-	if aurae.STATUS == 2 then
+	if not aurae.LOCKED then
 		return
 	end
 	UpdateBars()
@@ -769,7 +764,7 @@ function UpdateBars()
 end
 
 function UpdateBar(bar)
-	if aurae.STATUS ~= 1 then
+	if not aurae.LOCKED then
 		return
 	end
 
@@ -784,7 +779,7 @@ function UpdateBar(bar)
 			fade_bar(bar)
 		end
 	else
-		frame:SetAlpha(aurae.ALPHA)
+		frame:SetAlpha(1)
 
 		local duration = timer.END - timer.START
 		local remaining = timer.END - t
@@ -818,89 +813,85 @@ function UpdateBar(bar)
 	end
 end
 
-function LoadVariables()
-	local dummy_timer = {stopped=0}
-	for i, etype in {'Debuff', 'CC', 'Buff'} do
-		local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
-		local f = CreateFrame('Frame', 'aurae'..etype, UIParent)
-		f:SetWidth(WIDTH + HEIGHT)
-		f:SetHeight(height)
-		f:SetMovable(true)
-		f:SetUserPlaced(true)
-		f:SetClampedToScreen(true)
-		f:RegisterForDrag('LeftButton')
-		f:SetScript('OnDragStart', function()
-			this:StartMoving()
-		end)
-		f:SetScript('OnDragStop', function()
-			this:StopMovingOrSizing()
-		end)
-		f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
-		for i = 1, MAXBARS do
-			local name = 'auraeBar' .. etype .. i
-			local bar = create_bar(name)
-			bar.frame:SetParent(getglobal('aurae' .. etype))
-			local offset = 20 * (i - 1)
-			bar.frame:SetPoint('BOTTOMLEFT', 0, offset)
-			bar.frame:SetPoint('BOTTOMRIGHT', 0, offset)
-			setglobal(name, bar.frame)
-			bar.TIMER = dummy_timer
-			tinsert(aurae['GROUPS' .. strupper(etype)], bar)
-		end
-	end
-
-	for _, event in {
-		'UNIT_COMBAT',
-		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
-		'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
-		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
-		'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
-		'PLAYER_TARGET_CHANGED', 'UPDATE_MOUSEOVER_UNIT', 'UPDATE_BATTLEFIELD_SCORE',
-	} do _F:RegisterEvent(event) end
-
-	_G.SLASH_AURAE1 = '/aurae'
-	SlashCmdList.AURAE = SlashCommandHandler
-
+do
 	local default_settings = {
 		colors = {},
-		status = aurae.STATUS,
+		enabled = true,
 		invert = false,
 		color = CTYPE_SCHOOL,
 		scale = 1,
-		width = 160,
 		alpha = 1,
 		arcanist = false,
-		mode = 1,
 	}
 
-	for k, v in default_settings do
-		if aurae_settings[k] == nil then
-			aurae_settings[k] = v
+	function Initialize()
+		local dummy_timer = {stopped=0}
+		for i, etype in {'Debuff', 'CC', 'Buff'} do
+			local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
+			local f = CreateFrame('Frame', 'aurae'..etype, UIParent)
+			f:SetWidth(WIDTH + HEIGHT)
+			f:SetHeight(height)
+			f:SetMovable(true)
+			f:SetUserPlaced(true)
+			f:SetClampedToScreen(true)
+			f:RegisterForDrag('LeftButton')
+			f:SetScript('OnDragStart', function()
+				this:StartMoving()
+			end)
+			f:SetScript('OnDragStop', function()
+				this:StopMovingOrSizing()
+			end)
+			f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
+			for i = 1, MAXBARS do
+				local name = 'auraeBar' .. etype .. i
+				local bar = create_bar(name)
+				bar.frame:SetParent(getglobal('aurae' .. etype))
+				local offset = 20 * (i - 1)
+				bar.frame:SetPoint('BOTTOMLEFT', 0, offset)
+				bar.frame:SetPoint('BOTTOMRIGHT', 0, offset)
+				_G[name] = bar.frame
+				bar.TIMER = dummy_timer
+				tinsert(aurae['GROUPS' .. strupper(etype)], bar)
+			end
 		end
+
+		for _, event in {
+			'UNIT_COMBAT',
+			'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
+			'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
+			'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
+			'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
+			'PLAYER_TARGET_CHANGED', 'UPDATE_MOUSEOVER_UNIT', 'UPDATE_BATTLEFIELD_SCORE',
+		} do _F:RegisterEvent(event) end
+
+		for k, v in default_settings do
+			if aurae_settings[k] == nil then
+				aurae_settings[k] = v
+			end
+		end
+
+		_G.SLASH_AURAE1 = '/aurae'
+		SlashCmdList.AURAE = SlashCommandHandler
+
+		LockBars()
 	end
+end
 
-	_G.aurae_ConfigCC()
-	_G.aurae_ConfigDebuff()
-	_G.aurae_ConfigBuff()
-
+function LoadVariables()
+	aurae_ConfigCC()
+	aurae_ConfigDebuff()
+	aurae_ConfigBuff()
 	UpdateClassSpells(false)
 
-	aurae.STATUS = aurae_settings.status
 	aurae.INVERT = aurae_settings.invert
-	aurae.ALPHA = aurae_settings.alpha
-	aurae.ARCANIST = aurae_settings.arcanist
 
-	auraeCC:SetScale(aurae.SCALE)
-	auraeDebuff:SetScale(aurae.SCALE)
-	auraeBuff:SetScale(aurae.SCALE)
+	auraeCC:SetScale(aurae_settings.scale)
+	auraeDebuff:SetScale(aurae_settings.scale)
+	auraeBuff:SetScale(aurae_settings.scale)
 
-	if aurae.STATUS == 2 then
-		UnlockBars()
-	end
-
-	LockBars()
-
-	Print('aurae loaded - /aurae')
+	auraeCC:SetAlpha(aurae_settings.alpha)
+	auraeDebuff:SetAlpha(aurae_settings.alpha)
+	auraeBuff:SetAlpha(aurae_settings.alpha)
 end
 
 function _G.aurae_UpdateImpGouge()
@@ -953,7 +944,7 @@ function _G.aurae_UpdateImpTrap()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 7)
 	if texture then
 		if rank ~= 0 then
--- Freezing Trap is a true multi rank, hence already updated
+			-- Freezing Trap is a true multi rank, hence already updated
 			aurae.EFFECTS["Freezing Trap Effect"].DURATION = aurae.EFFECTS["Freezing Trap Effect"].DURATION * (1 + rank * .15)
 		end
 	end
@@ -972,7 +963,7 @@ function _G.aurae_UpdateBrutalImpact()
 	local talentname, texture, _, _, rank = GetTalentInfo(2, 4)
 	if texture then
 		if rank ~= 0 then
--- Bash is a true multi rank, hence already updated
+			-- Bash is a true multi rank, hence already updated
 			aurae.EFFECTS["Pounce"].DURATION = 2 + rank * .50
 			aurae.EFFECTS["Bash"].DURATION = aurae.EFFECTS["Bash"].DURATION + rank * .50
 		end
@@ -983,7 +974,7 @@ function _G.aurae_UpdatePermafrost()
 	local talentname, texture, _, _, rank = GetTalentInfo(3, 2)
 	if texture then
 		if rank ~= 0 then
--- Frostbolt is a true multi rank, hence already updated
+			-- Frostbolt is a true multi rank, hence already updated
 			aurae.EFFECTS["Cone of Cold"].DURATION = 8 + .50 + rank * .50
 			aurae.EFFECTS["Frostbolt"].DURATION = aurae.EFFECTS["Frostbolt"].DURATION + .50 + rank * .50
 		end
@@ -1069,7 +1060,7 @@ function UpdateClassSpells()
 			GetSpellRank("Fireball", "Fireball")
 			_G.aurae_UpdatePermafrost()
 		end
-		if aurae.ARCANIST then
+		if aurae_settings.arcanist then
 			aurae.EFFECTS["Polymorph"].DURATION = aurae.EFFECTS["Polymorph"].DURATION + 15
 		end
 	elseif eclass == 'DRUID' then
