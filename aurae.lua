@@ -327,11 +327,9 @@ function SlashCommandHandler(msg)
 		elseif command == "unlock" then
 			_G.aurae_BarUnlock()
 			_G.aurae_Print('Bars unlocked')
-			auraeOptionsFrameUnlock:SetChecked(true)
 		elseif command == "lock" then
 			_G.aurae_BarLock()
 			_G.aurae_Print('Bars locked')
-			auraeOptionsFrameUnlock:SetChecked(false)
 		elseif command == "invert" then
 			aurae.INVERT = not aurae.INVERT
 			_G.aurae_Save[aurae.PROFILE].invert = aurae.INVERT
@@ -340,7 +338,6 @@ function SlashCommandHandler(msg)
 			else
 				_G.aurae_Print(_G.aurae_INVERSION_OFF)
 			end
-			auraeOptionsFrameInvert:SetChecked(aurae.INVERT)
 		elseif command == "color school" then
 			_G.aurae_Save[aurae.PROFILE].color = CTYPE_SCHOOL
 			_G.aurae_Print'School color enabled.'
@@ -360,7 +357,6 @@ function SlashCommandHandler(msg)
 			_G.aurae_LoadConfCCs()
 			_G.aurae_UpdateClassSpells(true)
 		elseif command == "config" then
-			auraeOptionsFrame:Show()
 		elseif strsub(command, 1, 5) == "scale" then
 			local scale = tonumber(strsub(command, 7))
 			if scale <= 3 and scale >= .25 then
@@ -941,7 +937,6 @@ function LoadVariables()
 		_G.aurae_BarUnlock()
 	end
 
-	auraeOptions_Init()
 	_G.aurae_BarLock()
 end
 
@@ -1041,7 +1036,7 @@ function _G.aurae_UpdateImpShadowWordPain()
 	end
 end
 
-function _G.aurae_GetSpellRank(spellname, spelleffect)
+function GetSpellRank(spellname, spelleffect)
 	local i = 1
 	local gotone = false
 	local maxrank = _G.aurae_ACTIONS[spellname].RANKS
@@ -1075,51 +1070,49 @@ end
 
 function _G.aurae_UpdateClassSpells()
 	local _, eclass = UnitClass'player'
-	auraeOptionsFrameArcanist:Hide()
 	if eclass == "ROGUE" then
-		_G.aurae_GetSpellRank("Sap", "Sap")
+		GetSpellRank("Sap", "Sap")
 		_G.aurae_UpdateImpGouge()
 		_G.aurae_UpdateKidneyShot()
 		if _G.aurae_ConfigBuff ~= nil then
 			_G.aurae_UpdateImpGarotte()
 		end
 	elseif eclass == "WARRIOR" then
-		_G.aurae_GetSpellRank("Rend", "Rend")
+		GetSpellRank("Rend", "Rend")
 	elseif eclass == "WARLOCK" then
-		_G.aurae_GetSpellRank("Fear", "Fear")
-		_G.aurae_GetSpellRank("Howl of Terror", "Howl of Terror")
-		_G.aurae_GetSpellRank("Banish", "Banish")
-		_G.aurae_GetSpellRank("Corruption", "Corruption")
+		GetSpellRank("Fear", "Fear")
+		GetSpellRank("Howl of Terror", "Howl of Terror")
+		GetSpellRank("Banish", "Banish")
+		GetSpellRank("Corruption", "Corruption")
 		_G.aurae_UpdateImpSeduce()
 	elseif eclass == "PALADIN" then
-		_G.aurae_GetSpellRank("Hammer of Justice", "Hammer of Justice")
+		GetSpellRank("Hammer of Justice", "Hammer of Justice")
 		if _G.aurae_ConfigBuff ~= nil then
-			_G.aurae_GetSpellRank("Divine Shield", "Divine Shield")
+			GetSpellRank("Divine Shield", "Divine Shield")
 		end
 	elseif eclass == "HUNTER" then
-		_G.aurae_GetSpellRank("Freezing Trap", "Freezing Trap Effect")
-		_G.aurae_GetSpellRank("Scare Beast", "Scare Beast")
+		GetSpellRank("Freezing Trap", "Freezing Trap Effect")
+		GetSpellRank("Scare Beast", "Scare Beast")
 		_G.aurae_UpdateImpTrap()
 	elseif eclass == "PRIEST" then
-		_G.aurae_GetSpellRank("Shackle Undead", "Shackle Undead")
+		GetSpellRank("Shackle Undead", "Shackle Undead")
 		if _G.aurae_ConfigDebuff ~= nil then
 			_G.aurae_UpdateImpShadowWordPain()
 		end
 	elseif eclass == "MAGE" then
 		if _G.aurae_ConfigDebuff ~= nil then
-			_G.aurae_GetSpellRank("Polymorph", "Polymorph")
-			_G.aurae_GetSpellRank("Frostbolt", "Frostbolt")
-			_G.aurae_GetSpellRank("Fireball", "Fireball")
+			GetSpellRank("Polymorph", "Polymorph")
+			GetSpellRank("Frostbolt", "Frostbolt")
+			GetSpellRank("Fireball", "Fireball")
 			_G.aurae_UpdatePermafrost()
 		end
-		auraeOptionsFrameArcanist:Show()
 		if aurae.ARCANIST then
 			aurae.EFFECTS["Polymorph"].DURATION = aurae.EFFECTS["Polymorph"].DURATION + 15
 		end
 	elseif eclass == "DRUID" then
-		_G.aurae_GetSpellRank("Entangling Roots", "Entangling Roots")
-		_G.aurae_GetSpellRank("Hibernate", "Hibernate")
-		_G.aurae_GetSpellRank("Bash", "Bash")
+		GetSpellRank("Entangling Roots", "Entangling Roots")
+		GetSpellRank("Hibernate", "Hibernate")
+		GetSpellRank("Bash", "Bash")
 		_G.aurae_UpdateBrutalImpact()
 	end
 end

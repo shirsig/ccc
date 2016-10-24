@@ -9,4 +9,3 @@ data\ccs.lua
 data\debuffs.lua
 data\buffs.lua
 localization.lua
-options.xml
