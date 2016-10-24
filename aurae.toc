@@ -8,4 +8,3 @@ data\actions.lua
 data\ccs.lua
 data\debuffs.lua
 data\buffs.lua
-localization.lua
