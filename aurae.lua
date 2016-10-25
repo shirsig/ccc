@@ -130,23 +130,16 @@ function UnitDebuffs(unit)
 end
 
 local function create_bar()
-	local bar = {}
 
-	local icon = bar.icon or nil
 	local texture = [[Interface\Addons\aurae\Textures\BantoBar]]
-	local text = bar.text
 	local font, _, style = GameFontHighlight:GetFont()
 	local fontsize = 11
 
-	bar.fadetime = .5
-
 	local f = CreateFrame('Button', nil, UIParent)
 
-	f:SetHeight(HEIGHT)
+	f.fadetime = .5
 
-	f:EnableMouse(false)
-	f:RegisterForClicks()
-	f:SetScript('OnClick', nil)
+	f:SetHeight(HEIGHT)
 
 	f.icon = f:CreateTexture()
 	f.icon:SetWidth(HEIGHT)
@@ -178,7 +171,7 @@ local function create_bar()
 	f.text:SetPoint('TOPLEFT', 2, 0)
 	f.text:SetPoint('BOTTOMRIGHT', -2, 0)
 	f.text:SetJustifyH'LEFT'
-	f.text:SetText(text)
+	f.text:SetText''
 
 	f.timertext = f.statusbar:CreateFontString(nil, 'OVERLAY')
 --	f.text:SetFontObject(GameFontHighlightSmallOutline)
@@ -189,21 +182,26 @@ local function create_bar()
 	f.timertext:SetJustifyH'RIGHT'
 	f.timertext:SetText''
 
---	if bar.onclick then
---		TODO
---	end
+	f:EnableMouse(false)
+	f:RegisterForClicks()
 
-	bar.frame = f
-	return bar
+--	f:SetScript('OnUpdate', function()
+--		f:EnableMouse(IsControlKeyDown())
+--	end)
+--	f:SetScript('OnClick', function()
+--		TargetByName(this.TIMER.UNIT, true)
+--	end)
+
+	return f
 end
 
 local function fade_bar(bar)
 	if bar.fadeelapsed > bar.fadetime then
-		bar.frame:SetAlpha(0)
+		bar:SetAlpha(0)
 	else
 		local t = bar.fadetime - bar.fadeelapsed
 		local a = t / bar.fadetime
-		bar.frame:SetAlpha(a)
+		bar:SetAlpha(a)
 	end
 end
 
@@ -357,7 +355,7 @@ do
 	do
 		local orig = UseAction
 		function _G.UseAction(slot, clicked, onself)
-			if HasAction(slot) and not GetActionText(slot) and not onself then
+			if HasAction(slot) and not GetActionText(slot) then
 				aurae_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 				aurae_Tooltip:SetAction(slot)
 				casting[aurae_TooltipTextLeft1:GetText()] = TargetID()
@@ -763,30 +761,29 @@ function UpdateBar(bar)
 		return
 	end
 
-	local frame = bar.frame
 	local timer = bar.TIMER
 
 	local t = GetTime()
 	if timer.stopped then
-		if frame:GetAlpha() > 0 then
-			frame.spark:Hide()
+		if bar:GetAlpha() > 0 then
+			bar.spark:Hide()
 			bar.fadeelapsed = GetTime() - timer.stopped
 			fade_bar(bar)
 		end
 	else
-		frame:SetAlpha(1)
+		bar:SetAlpha(1)
 
 		local duration = timer.END - timer.START
 		local remaining = timer.END - t
 		local fraction = remaining / duration
 
-		frame.statusbar:SetValue(aurae_settings.invert and 1 - fraction or fraction)
+		bar.statusbar:SetValue(aurae_settings.invert and 1 - fraction or fraction)
 
 		local sparkPosition = WIDTH * fraction
-		frame.spark:Show()
-		frame.spark:SetPoint('CENTER', bar.frame.statusbar, aurae_settings.invert and 'RIGHT' or 'LEFT', aurae_settings.invert and -sparkPosition or sparkPosition, 0)
+		bar.spark:Show()
+		bar.spark:SetPoint('CENTER', bar.statusbar, aurae_settings.invert and 'RIGHT' or 'LEFT', aurae_settings.invert and -sparkPosition or sparkPosition, 0)
 
-		frame.timertext:SetText(format_time(remaining))
+		bar.timertext:SetText(format_time(remaining))
 
 		local r, g, b
 		if aurae_settings.color == 'school' then
@@ -800,11 +797,11 @@ function UpdateBar(bar)
 				r, g, b = 1, 1, 1
 			end
 		end
-		frame.statusbar:SetStatusBarColor(r, g, b)
-		frame.statusbar:SetBackdropColor(r, g, b, .3)
+		bar.statusbar:SetStatusBarColor(r, g, b)
+		bar.statusbar:SetBackdropColor(r, g, b, .3)
 
-		frame.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
-		frame.text:SetText(timer.label)
+		bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
+		bar.text:SetText(timer.label)
 	end
 end
 
@@ -824,7 +821,7 @@ do
 		local dummy_timer = {stopped=0}
 		for i, etype in {'Debuff', 'CC', 'Buff'} do
 			local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
-			local f = CreateFrame('Frame', 'aurae'..etype, UIParent)
+			local f = CreateFrame('Frame', 'aurae' .. etype, UIParent)
 			f:SetWidth(WIDTH + HEIGHT)
 			f:SetHeight(height)
 			f:SetMovable(true)
@@ -839,13 +836,12 @@ do
 			end)
 			f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
 			for i = 1, MAXBARS do
-				local name = 'auraeBar' .. etype .. i
 				local bar = create_bar()
-				bar.frame:SetParent(getglobal('aurae' .. etype))
+				bar:SetParent(getglobal('aurae' .. etype))
 				local offset = 20 * (i - 1)
-				bar.frame:SetPoint('BOTTOMLEFT', 0, offset)
-				bar.frame:SetPoint('BOTTOMRIGHT', 0, offset)
-				_G[name] = bar.frame
+				bar:SetPoint('BOTTOMLEFT', 0, offset)
+				bar:SetPoint('BOTTOMRIGHT', 0, offset)
+				_G['auraeBar' .. etype .. i] = bar
 				bar.TIMER = dummy_timer
 				tinsert(aurae['GROUPS' .. strupper(etype)], bar)
 			end
