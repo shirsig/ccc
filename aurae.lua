@@ -93,8 +93,10 @@ do
 
 	local dr = {}
 
+	local factor = {1, 1/2, 1/4, 0}
+
 	local function diminish(key, seconds)
-		return 1 / 2 ^ (dr[key].level - 1) * seconds
+		return factor[dr[key].level] * seconds
 	end
 
 	function DiminishedDuration(unit, effect, full_duration)
@@ -106,9 +108,8 @@ do
 			elseif dr[key].level < 3 then
 				dr[key].level = dr[key].level + 1
 				dr[key].timeout = GetTime() + diminish(key, full_duration) + 15
-			else
-				return 0
 			end
+			StartDRTimer(effect, unit, class, dr[key].level, dr[key].timeout)
 			return diminish(key, full_duration)
 		else
 			return full_duration
@@ -477,14 +478,14 @@ function AuraGone(unit, effect)
 	if aurae.EFFECTS[effect] then
 		if IsPlayer(unit) then
 			AbortCast(effect, unit)
-			StopTimer(effect, unit)
+			StopTimer(effect .. '@' .. unit)
 		elseif unit == UnitName'target' then
 			-- TODO pet target (in other places too)
 			local unit = TargetID()
 			local debuffs = UnitDebuffs'target'
-			for k, timer in _G.aurae_timers do
+			for k, timer in timers do
 				if timer.UNIT == unit and not debuffs[timer.EFFECT] then
-					StopTimer(timer.EFFECT, timer.UNIT)
+					StopTimer(timer.EFFECT .. '@' .. timer.UNIT)
 				end
 			end
 		end
@@ -514,10 +515,10 @@ function UNIT_COMBAT()
 end
 
 do
-	_G.aurae_timers = {}
+	timers = {}
 
 	local function place_timers()
-		for _, timer in _G.aurae_timers do
+		for _, timer in timers do
 			if timer.shown and not timer.visible then
 				local group
 				if aurae.EFFECTS[timer.EFFECT].ETYPE == ETYPE_BUFF then
@@ -540,9 +541,9 @@ do
 
 	function UpdateTimers()
 		local t = GetTime()
-		for _, timer in _G.aurae_timers do
+		for k, timer in timers do
 			if t > timer.END then
-				StopTimer(timer.EFFECT, timer.UNIT)
+				StopTimer(k)
 				if IsPlayer(timer.UNIT) then
 					AbortCast(timer.EFFECT, timer.UNIT)
 				end
@@ -551,18 +552,20 @@ do
 	end
 
 	function EffectActive(effect, unit)
-		return _G.aurae_timers[effect .. '@' .. unit] and true or false
+		return timers[effect .. '@' .. unit] and true or false
 	end
 
 	function StartTimer(effect, unit, start)
-		local timer = {
-			EFFECT = effect,
-			UNIT = unit,
-			START = start,
-			shown = IsShown(unit),
-		}
+		local key = effect .. '@' .. unit
+		local timer = timers[key] or {}
+		timers[key] = timer
 
+		timer.EFFECT = effect
+		timer.UNIT = unit
+		timer.START = start
+		timer.shown = IsShown(unit)
 		timer.END = timer.START
+		timer.label = unit
 
 		if IsPlayer(unit) then
 			timer.END = timer.END + DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or aurae.EFFECTS[effect].DURATION)
@@ -574,40 +577,51 @@ do
 			timer.END = timer.END + aurae.EFFECTS[effect].A * aurae.COMBO
 		end
 
-		local old_timer = _G.aurae_timers[effect .. '@' .. unit]
-		if old_timer and not old_timer.stopped then
-			old_timer.START = timer.START
-			old_timer.END = timer.END
-			old_timer.shown = old_timer.shown or timer.shown
-		else
-			_G.aurae_timers[effect .. '@' .. unit] = timer
+		timer.stopped = nil
+		place_timers()
+	end
+
+	do
+		local label = {'½', '¼', '0'}
+		function StartDRTimer(effect, unit, class, level, timeout)
+			local key = class .. '@' .. unit
+			local timer = timers[key] or {}
+			timers[key] = timer
+
+			timer.EFFECT = effect
+			timer.UNIT = unit
+			timer.START = GetTime()
+			timer.END = timeout
+			timer.shown = IsShown(unit)
+			timer.label = 'DR (' .. label[level] .. ') - ' .. unit
+
+			timer.stopped = nil
 			place_timers()
 		end
 	end
 
 	function PLAYER_REGEN_ENABLED()
 		AbortUnitCasts()
-		for k, timer in _G.aurae_timers do
+		for k, timer in timers do
 			if not IsPlayer(timer.UNIT) then
-				StopTimer(timer.EFFECT, timer.UNIT)
+				StopTimer(k)
 			end
 		end
 	end
 
-	function StopTimer(effect, unit)
-		local key = effect .. '@' .. unit
-		if _G.aurae_timers[key] then
-			_G.aurae_timers[key].stopped = GetTime()
-			_G.aurae_timers[key] = nil
+	function StopTimer(key)
+		if timers[key] then
+			timers[key].stopped = GetTime()
+			timers[key] = nil
 			place_timers()
 		end
 	end
 
 	function UnitDied(unit)
 		AbortUnitCasts(unit)
-		for k, timer in _G.aurae_timers do
+		for k, timer in timers do
 			if timer.UNIT == unit then
-				StopTimer(timer.EFFECT, unit)
+				StopTimer(k)
 			end
 		end
 		place_timers()
@@ -633,7 +647,7 @@ do
 				end
 			end
 
-			for _, timer in _G.aurae_timers do
+			for _, timer in timers do
 				if timer.UNIT == unit then
 					timer.shown = true
 				end
@@ -786,7 +800,7 @@ function UpdateBar(bar)
 		frame.statusbar:SetBackdropColor(r, g, b, .3)
 
 		frame.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
-		frame.text:SetText(timer.UNIT)
+		frame.text:SetText(timer.label)
 	end
 end
 
