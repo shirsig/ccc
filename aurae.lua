@@ -129,11 +129,8 @@ function UnitDebuffs(unit)
 	return debuffs
 end
 
-local bars = {}
-
-local function create_bar(name)
+local function create_bar()
 	local bar = {}
-	bars[name] = bar
 
 	local icon = bar.icon or nil
 	local texture = [[Interface\Addons\aurae\Textures\BantoBar]]
@@ -142,8 +139,6 @@ local function create_bar(name)
 	local fontsize = 11
 
 	bar.fadetime = .5
-	bar.textcolor = textcolor
-	bar.timertextcolor = timertextcolor
 
 	local f = CreateFrame('Button', nil, UIParent)
 
@@ -836,7 +831,7 @@ do
 			f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
 			for i = 1, MAXBARS do
 				local name = 'auraeBar' .. etype .. i
-				local bar = create_bar(name)
+				local bar = create_bar()
 				bar.frame:SetParent(getglobal('aurae' .. etype))
 				local offset = 20 * (i - 1)
 				bar.frame:SetPoint('BOTTOMLEFT', 0, offset)
