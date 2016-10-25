@@ -286,9 +286,10 @@ function SlashCommandHandler(msg)
 		elseif args[1] == 'color' and (args[2] == 'school' or args[2] == 'progress' or args[2] == 'custom') then
 			aurae_settings.color = args[2]
 			Print('Color: ' .. args[2])
-		elseif args[1] == "customcolor" then
+		elseif args[1] == "customcolor" and tonumber(args[2]) and tonumber(args[3]) and tonumber(args[4]) and args[5] and aurae.EFFECTS[args[5]] then
 			local effect = gsub(msg, '%s*%S+%s*', '', 4)
-			aurae_settings.colors[effect] = {tonumber(args[2])/255, tonumber(args[3])/255, tonumber(args[4])/255}
+			aurae_settings.colors[effect] = {tonumber(args[2])/255, tonumber(args[3])/255, tonumber(args[4])/255 }
+			print('Custom color: ' .. color_code(unpack(aurae_settings.colors[effect])) .. effect .. '|r')
 		elseif command == 'clear' then
 			aurae_settings = nil
 			LoadVariables()
@@ -509,6 +510,10 @@ function UNIT_COMBAT()
 	end
 end
 
+function color_code(r, g, b)
+	return format('|cFF%02X%02X%02X', r*255, g*255, b*255)
+end
+
 do
 	timers = {}
 
@@ -577,7 +582,11 @@ do
 	end
 
 	do
-		local label = {'½', '¼', '0'}
+		local label = {
+			color_code(1, 1, 0) .. 'DR: ½|r',
+			color_code(1, .5, 0) .. 'DR: ¼|r',
+			color_code(1, 0, 0) .. 'DR: 0|r',
+		}
 		function StartDRTimer(effect, unit, class, level, timeout)
 			local key = class .. '@' .. unit
 			local timer = timers[key] or {}
@@ -588,7 +597,7 @@ do
 			timer.START = GetTime()
 			timer.END = timeout
 			timer.shown = IsShown(unit)
-			timer.label = 'DR (' .. label[level] .. ') - ' .. unit
+			timer.label = label[level] .. ' - ' .. unit
 
 			timer.stopped = nil
 			place_timers()
