@@ -102,7 +102,7 @@ do
 	function DiminishedDuration(unit, effect, full_duration)
 		local class = DR_CLASS[effect]
 		if class then
-			StartDRTimer(effect, unit)
+			StartDR(effect, unit)
 			return full_duration * factor[timers[class .. '@' .. unit].DR]
 		else
 			return full_duration
@@ -461,22 +461,26 @@ function CHAT_MSG_SPELL_BREAK_AURA()
 	end
 end
 
+function ActivateDRTimer(effect, unit)
+	for k, v in DR_CLASS do
+		if v == DR_CLASS[effect] and EffectActive(k, unit) then
+			return
+		end
+	end
+	local timer = timers[DR_CLASS[effect] .. '@' .. unit]
+	if timer then
+		timer.START = GetTime()
+		timer.END = timer.START + 15
+	end
+end
+
 function AuraGone(unit, effect)
 	if aurae.EFFECTS[effect] then
 		if IsPlayer(unit) then
 			AbortCast(effect, unit)
 			StopTimer(effect .. '@' .. unit)
 			if DR_CLASS[effect] then
-				for k, v in DR_CLASS do
-					if v == DR_CLASS[effect] and EffectActive(k, unit) then
-						return
-					end
-				end
-				local timer = timers[DR_CLASS[effect] .. '@' .. unit]
-				if timer then
-					timer.START = GetTime()
-					timer.END = timer.START + 15
-				end
+				ActivateDRTimer(effect, unit)
 			end
 		elseif unit == UnitName'target' then
 			-- TODO pet target (in other places too)
@@ -547,8 +551,8 @@ do
 		for k, timer in timers do
 			if timer.END and t > timer.END then
 				StopTimer(k)
-				if IsPlayer(timer.UNIT) then
-					AbortCast(timer.EFFECT, timer.UNIT)
+				if DR_CLASS[timer.EFFECT] and not timer.DR then
+					ActivateDRTimer(timer.EFFECT, timer.UNIT)
 				end
 			end
 		end
@@ -583,7 +587,7 @@ do
 		place_timers()
 	end
 
-	function StartDRTimer(effect, unit)
+	function StartDR(effect, unit)
 
 		local key = DR_CLASS[effect] .. '@' .. unit
 		local timer = timers[key] or {}
