@@ -466,14 +466,18 @@ function AuraGone(unit, effect)
 		if IsPlayer(unit) then
 			AbortCast(effect, unit)
 			StopTimer(effect .. '@' .. unit)
-			for k, v in DR_CLASS do
-				if v == DR_CLASS[effect] and EffectActive(k, unit) then
-					return
+			if DR_CLASS[effect] then
+				for k, v in DR_CLASS do
+					if v == DR_CLASS[effect] and EffectActive(k, unit) then
+						return
+					end
+				end
+				local timer = timers[DR_CLASS[effect] .. '@' .. unit]
+				if timer then
+					timer.START = GetTime()
+					timer.END = timer.START + 15
 				end
 			end
-			local timer = timers[DR_CLASS[effect] .. '@' .. unit]
-			timer.START = GetTime()
-			timer.END = timer.START + 15
 		elseif unit == UnitName'target' then
 			-- TODO pet target (in other places too)
 			local unit = TargetID()
