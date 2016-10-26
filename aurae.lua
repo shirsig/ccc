@@ -54,7 +54,7 @@ _G.aurae_SCHOOL = {
 }
 
 do
-	local DR_CLASS = {
+	DR_CLASS = {
 		["Bash"] = 1,
 		["Hammer of Justice"] = 1,
 		["Cheap Shot"] = 1,
@@ -102,15 +102,8 @@ do
 	function DiminishedDuration(unit, effect, full_duration)
 		local class = DR_CLASS[effect]
 		if class then
-			local key = unit .. '|' .. class
-			if not dr[key] or dr[key].timeout < GetTime() then
-				dr[key] = {level=1, timeout=GetTime() + full_duration + 15}
-			elseif dr[key].level < 3 then
-				dr[key].level = dr[key].level + 1
-				dr[key].timeout = GetTime() + diminish(key, full_duration) + 15
-			end
-			StartDRTimer(effect, unit, class, dr[key].level, dr[key].timeout)
-			return diminish(key, full_duration)
+			StartDRTimer(effect, unit)
+			return full_duration * factor[timers[class .. '@' .. unit].DR]
 		else
 			return full_duration
 		end
@@ -473,6 +466,14 @@ function AuraGone(unit, effect)
 		if IsPlayer(unit) then
 			AbortCast(effect, unit)
 			StopTimer(effect .. '@' .. unit)
+			for k, v in DR_CLASS do
+				if v == DR_CLASS[effect] and EffectActive(k, unit) then
+					return
+				end
+			end
+			local timer = timers[DR_CLASS[effect] .. '@' .. unit]
+			timer.START = GetTime()
+			timer.END = timer.START + 15
 		elseif unit == UnitName'target' then
 			-- TODO pet target (in other places too)
 			local unit = TargetID()
@@ -540,7 +541,7 @@ do
 	function UpdateTimers()
 		local t = GetTime()
 		for k, timer in timers do
-			if t > timer.END then
+			if timer.END and t > timer.END then
 				StopTimer(k)
 				if IsPlayer(timer.UNIT) then
 					AbortCast(timer.EFFECT, timer.UNIT)
@@ -563,7 +564,6 @@ do
 		timer.START = start
 		timer.shown = IsShown(unit)
 		timer.END = timer.START
-		timer.label = unit
 
 		if IsPlayer(unit) then
 			timer.END = timer.END + DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or aurae.EFFECTS[effect].DURATION)
@@ -579,25 +579,21 @@ do
 		place_timers()
 	end
 
-	do
-		local label = {
-			color_code(1, 1, 0) .. 'DR: ½|r',
-			color_code(1, .5, 0) .. 'DR: ¼|r',
-			color_code(1, 0, 0) .. 'DR: 0|r',
-		}
-		function StartDRTimer(effect, unit, class, level, timeout)
-			local key = class .. '@' .. unit
-			local timer = timers[key] or {}
+	function StartDRTimer(effect, unit)
+
+		local key = DR_CLASS[effect] .. '@' .. unit
+		local timer = timers[key] or {}
+
+		if not timer.DR or timer.DR < 3 then
 			timers[key] = timer
 
 			timer.EFFECT = effect
 			timer.UNIT = unit
-			timer.START = GetTime()
-			timer.END = timeout
-			timer.shown = IsShown(unit)
-			timer.label = label[level] .. ' - ' .. unit
+			timer.START = nil
+			timer.END = nil
+			timer.shown = timer.shown or IsShown(unit)
+			timer.DR = min(3, (timer.DR or 0) + 1)
 
-			timer.stopped = nil
 			place_timers()
 		end
 	end
@@ -756,52 +752,78 @@ function UpdateBars()
 	end
 end
 
-function UpdateBar(bar)
-	if not aurae.LOCKED then
-		return
-	end
-
-	local timer = bar.TIMER
-
-	local t = GetTime()
-	if timer.stopped then
-		if bar:GetAlpha() > 0 then
-			bar.spark:Hide()
-			bar.fadeelapsed = GetTime() - timer.stopped
-			fade_bar(bar)
+do
+	local dr_prefix = {
+		color_code(1, 1, 0) .. 'DR: ½|r - ',
+		color_code(1, .5, 0) .. 'DR: ¼|r - ',
+		color_code(1, 0, 0) .. 'DR: 0|r - ',
+	}
+	function UpdateBar(bar)
+		if not aurae.LOCKED then
+			return
 		end
-	else
-		bar:SetAlpha(1)
 
-		local duration = timer.END - timer.START
-		local remaining = timer.END - t
-		local fraction = remaining / duration
+		local timer = bar.TIMER
 
-		bar.statusbar:SetValue(aurae_settings.invert and 1 - fraction or fraction)
+		if timer.stopped then
+			if bar:GetAlpha() > 0 then
+				bar.spark:Hide()
+				bar.fadeelapsed = GetTime() - timer.stopped
+				fade_bar(bar)
+			end
+		else
+			bar:SetAlpha(1)
+			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
+			bar.text:SetText((timer.DR and dr_prefix[timer.DR] or '') .. timer.UNIT)
 
-		local sparkPosition = WIDTH * fraction
-		bar.spark:Show()
-		bar.spark:SetPoint('CENTER', bar.statusbar, aurae_settings.invert and 'RIGHT' or 'LEFT', aurae_settings.invert and -sparkPosition or sparkPosition, 0)
+			if timer.START then
+				local duration = timer.END - timer.START
+				local remaining = timer.END - GetTime()
+				local fraction = remaining / duration
 
-		bar.timertext:SetText(format_time(remaining))
+				bar.statusbar:SetValue(aurae_settings.invert and 1 - fraction or fraction)
 
-		local r, g, b
-		if aurae_settings.color == 'school' then
-			r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
-		elseif aurae_settings.color == 'progress' then
-			r, g, b = 1 - fraction, fraction, 0
-		elseif aurae_settings.color == 'custom' then
-			if aurae_settings.colors[timer.EFFECT] then
-				r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
+				local sparkPosition = WIDTH * fraction
+				bar.spark:Show()
+				bar.spark:SetPoint('CENTER', bar.statusbar, aurae_settings.invert and 'RIGHT' or 'LEFT', aurae_settings.invert and -sparkPosition or sparkPosition, 0)
+
+				bar.timertext:SetText(format_time(remaining))
+
+				local r, g, b
+				if aurae_settings.color == 'school' then
+					r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
+				elseif aurae_settings.color == 'progress' then
+					r, g, b = 1 - fraction, fraction, 0
+				elseif aurae_settings.color == 'custom' then
+					if aurae_settings.colors[timer.EFFECT] then
+						r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
+					else
+						r, g, b = 1, 1, 1
+					end
+				end
+				bar.statusbar:SetStatusBarColor(r, g, b)
+				bar.statusbar:SetBackdropColor(r, g, b, .3)
 			else
-				r, g, b = 1, 1, 1
+				bar.statusbar:SetValue(1)
+				bar.spark:Hide()
+				bar.timertext:SetText('')
+
+				local r, g, b
+				if aurae_settings.color == 'school' then
+					r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
+				elseif aurae_settings.color == 'progress' then
+					r, g, b = 0, 1, 0
+				elseif aurae_settings.color == 'custom' then
+					if aurae_settings.colors[timer.EFFECT] then
+						r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
+					else
+						r, g, b = 1, 1, 1
+					end
+				end
+				bar.statusbar:SetStatusBarColor(r, g, b)
+				bar.statusbar:SetBackdropColor(r, g, b, .3)
 			end
 		end
-		bar.statusbar:SetStatusBarColor(r, g, b)
-		bar.statusbar:SetBackdropColor(r, g, b, .3)
-
-		bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
-		bar.text:SetText(timer.label)
 	end
 end
 
