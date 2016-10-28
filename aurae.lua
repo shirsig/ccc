@@ -124,7 +124,7 @@ end
 
 local function create_bar()
 
-	local texture = [[Interface\Addons\aurae\Textures\BantoBar]]
+	local texture = [[Interface\Addons\aurae\bar]]
 	local font, _, style = GameFontHighlight:GetFont()
 	local fontsize = 11
 
