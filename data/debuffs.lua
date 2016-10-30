@@ -61,12 +61,21 @@ aurae.EFFECTS["Devouring Plague"] = {
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 24,
 }
+
+aurae.EFFECTS["Vampiric Embrace"] = {
+	ICON = 'Spell_Shadow_UnsummonBuilding',
+	SCHOOL = aurae_SCHOOL.SHADOW,
+	ETYPE = ETYPE_DEBUFF,
+	DURATION = 60,
+}
+
 aurae.EFFECTS["Weakened Soul"] = {
 	ICON = 'Spell_Holy_AshesToAshes',
 	SCHOOL = aurae_SCHOOL.HOLY,
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 15,
 }
+
 aurae.EFFECTS["Holy Fire"] = {
 	ICON = 'Spell_Holy_SearingLight',
 	SCHOOL = aurae_SCHOOL.HOLY,
@@ -96,6 +105,7 @@ aurae.EFFECTS["Detect Magic"] = {
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 120,
 }
+
 aurae.EFFECTS["Frostbolt"] = {
 	ICON = 'Spell_Frost_FrostBolt02',
 	SCHOOL = aurae_SCHOOL.FROST,
@@ -167,12 +177,14 @@ aurae.EFFECTS["Faerie Fire"] = {
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 40,
 }
+
 aurae.EFFECTS["Faerie Fire (Feral)"] = {
 	ICON = 'Spell_Nature_FaerieFire',
 	SCHOOL = aurae_SCHOOL.NATURE,
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 40,
 }
+
 aurae.EFFECTS["Moonfire"] = {
 	ICON = 'Spell_Nature_StarFall',
 	SCHOOL = aurae_SCHOOL.ARCANE,
@@ -283,12 +295,14 @@ aurae.EFFECTS["Curse of Doom"] = {
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 60,
 }
+
 aurae.EFFECTS["Siphon Life"] = {
 	ICON = 'Spell_Shadow_Requiem',
 	SCHOOL = aurae_SCHOOL.SHADOW,
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 30,
 }
+
 aurae.EFFECTS["Improved Shadow Bolt"] = {
 	ICON = 'Spell_Shadow_ShadowBolt',
 	SCHOOL = aurae_SCHOOL.SHADOW,
@@ -302,31 +316,37 @@ aurae.EFFECTS["Spell Lock"] = {
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 3,
 }
+
 -- Warrior - Debuffs
+
 aurae.EFFECTS["Disarm"] = {
 	ICON = 'Ability_Warrior_Disarm',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 10,
 }
+
 aurae.EFFECTS["Mortal Strike"] = {
 	ICON = 'Ability_Warrior_SavageBlow',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 10,
 }
+
 aurae.EFFECTS["Rend"] = {
 	ICON = 'Ability_Gouge',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 21,
 }
+
 aurae.EFFECTS["Hamstring"] = {
 	ICON = 'Ability_ShockWave',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 15,
 }
+
 aurae.EFFECTS["Piercing Howl"] = {
 	ICON = 'Spell_Shadow_DeathScream',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
@@ -349,12 +369,14 @@ aurae.EFFECTS["Flame Shock"] = {
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 12,
 }
+
 aurae.EFFECTS["Frostbrand Weapon"] = {
 	ICON = 'Spell_Frost_FrostBrand',
 	SCHOOL = aurae_SCHOOL.FROST,
 	ETYPE = ETYPE_DEBUFF,
 	DURATION = 8,
 }
+
 aurae.EFFECTS["Stormstrike"] = {
 	ICON = 'Spell_Holy_SealOfMight',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
