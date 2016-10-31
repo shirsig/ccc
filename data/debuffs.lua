@@ -48,6 +48,13 @@ aurae.EFFECTS["Kick - Silenced"] = {
 
 -- Priest
 
+aurae.EFFECTS['Blackout'] = {
+	ICON = 'Spell_Shadow_GatherShadows',
+	SCHOOL = aurae_SCHOOL.SHADOW,
+	ETYPE = ETYPE_DEBUFF,
+	DURATION = 3,
+}
+
 aurae.EFFECTS["Shadow Word: Pain"] = {
 	ICON = 'Spell_Shadow_ShadowWordPain',
 	SCHOOL = aurae_SCHOOL.SHADOW,
@@ -219,13 +226,6 @@ aurae.EFFECTS['Shadowburn'] = {
 	DURATION = 5,
 }
 
-aurae.EFFECTS['Shadow Vulnerability'] = {
-	ICON = 'spell_shadow_blackplague',
-	SCHOOL = aurae_SCHOOL.SHADOW,
-	ETYPE = ETYPE_DEBUFF,
-	DURATION = 15,
-}
-
 aurae.EFFECTS["Immolate"] = {
 	ICON = 'Spell_Fire_Immolation',
 	SCHOOL = aurae_SCHOOL.FIRE,
@@ -303,7 +303,7 @@ aurae.EFFECTS["Siphon Life"] = {
 	DURATION = 30,
 }
 
-aurae.EFFECTS["Improved Shadow Bolt"] = {
+aurae.EFFECTS["Shadow Vulnerability"] = {
 	ICON = 'Spell_Shadow_ShadowBolt',
 	SCHOOL = aurae_SCHOOL.SHADOW,
 	ETYPE = ETYPE_DEBUFF,
