@@ -12,6 +12,10 @@ CreateFrame'Frame':SetScript('OnUpdate', function()
 	this:SetScript('OnUpdate', nil)
 end)
 
+function Print(msg)
+	DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
+end
+
 function QuickLocalize(str)
 	-- just remove $1 & $2 args because we *know that the order is not changed*.
 	-- not fail proof if ever it occurs (should be a more clever function, and return found arguments order)
@@ -283,7 +287,7 @@ do
 				aurae_ConfigCC()
 				aurae_ConfigDebuff()
 				aurae_ConfigBuff()
-				UpdateClassSpells(true)
+				UpdateClassSpells()
 			elseif strsub(command, 1, 5) == "scale" then
 				local scale = tonumber(strsub(command, 7))
 				if scale then
@@ -326,7 +330,7 @@ function Usage()
 end
 
 do
-	local gender = {[2]='M', [3]='F' }
+	local gender = {[2]='M', [3]='F'}
 
 	function TargetID()
 		local name = UnitName'target'
@@ -529,226 +533,220 @@ function color_code(r, g, b)
 	return format('|cFF%02X%02X%02X', r*255, g*255, b*255)
 end
 
-do
-	timers = {}
+timers = {}
 
-	local function place_timers()
-		for _, timer in timers do
-			if timer.shown and not timer.visible then
-				local group
-				if aurae.EFFECTS[timer.EFFECT].ETYPE == ETYPE_BUFF then
-					group = aurae.GROUPSBUFF
-				elseif aurae.EFFECTS[timer.EFFECT].ETYPE == ETYPE_DEBUFF then
-					group = aurae.GROUPSDEBUFF
-				else
-					group = aurae.GROUPSCC
-				end
-				for i = 1, MAXBARS do
-					if group[i].TIMER.stopped then
-						group[i].TIMER = timer
-						timer.visible = true
-						break
-					end
+local function place_timers()
+	for _, timer in timers do
+		if timer.shown and not timer.visible then
+			local group
+			if aurae.EFFECTS[timer.EFFECT].ETYPE == ETYPE_BUFF then
+				group = aurae.GROUPSBUFF
+			elseif aurae.EFFECTS[timer.EFFECT].ETYPE == ETYPE_DEBUFF then
+				group = aurae.GROUPSDEBUFF
+			else
+				group = aurae.GROUPSCC
+			end
+			for i = 1, MAXBARS do
+				if group[i].TIMER.stopped then
+					group[i].TIMER = timer
+					timer.visible = true
+					break
 				end
 			end
 		end
 	end
+end
 
-	function UpdateTimers()
-		local t = GetTime()
-		for k, timer in timers do
-			if timer.END and t > timer.END then
-				StopTimer(k)
-				if DR_CLASS[timer.EFFECT] and not timer.DR then
-					ActivateDRTimer(timer.EFFECT, timer.UNIT)
-				end
+function UpdateTimers()
+	local t = GetTime()
+	for k, timer in timers do
+		if timer.END and t > timer.END then
+			StopTimer(k)
+			if DR_CLASS[timer.EFFECT] and not timer.DR then
+				ActivateDRTimer(timer.EFFECT, timer.UNIT)
 			end
 		end
 	end
+end
 
-	function EffectActive(effect, unit)
-		return timers[effect .. '@' .. unit] and true or false
+function EffectActive(effect, unit)
+	return timers[effect .. '@' .. unit] and true or false
+end
+
+function StartTimer(effect, unit, start)
+	local key = effect .. '@' .. unit
+	local timer = timers[key] or {}
+	timers[key] = timer
+
+	timer.EFFECT = effect
+	timer.UNIT = unit
+	timer.START = start
+	timer.shown = IsShown(unit)
+	timer.END = timer.START
+
+	if IsPlayer(unit) then
+		timer.END = timer.END + DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or aurae.EFFECTS[effect].DURATION)
+	else
+		timer.END = timer.END + aurae.EFFECTS[effect].DURATION
 	end
 
-	function StartTimer(effect, unit, start)
-		local key = effect .. '@' .. unit
-		local timer = timers[key] or {}
+	if aurae.EFFECTS[effect].COMBO then
+		timer.END = timer.END + aurae.EFFECTS[effect].A * aurae.COMBO
+	end
+
+	timer.stopped = nil
+	place_timers()
+end
+
+function StartDR(effect, unit)
+
+	local key = DR_CLASS[effect] .. '@' .. unit
+	local timer = timers[key] or {}
+
+	if not timer.DR or timer.DR < 3 then
 		timers[key] = timer
 
 		timer.EFFECT = effect
 		timer.UNIT = unit
-		timer.START = start
-		timer.shown = IsShown(unit)
-		timer.END = timer.START
+		timer.START = nil
+		timer.END = nil
+		timer.shown = timer.shown or IsShown(unit)
+		timer.DR = min(3, (timer.DR or 0) + 1)
 
-		if IsPlayer(unit) then
-			timer.END = timer.END + DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or aurae.EFFECTS[effect].DURATION)
-		else
-			timer.END = timer.END + aurae.EFFECTS[effect].DURATION
-		end
-
-		if aurae.EFFECTS[effect].COMBO then
-			timer.END = timer.END + aurae.EFFECTS[effect].A * aurae.COMBO
-		end
-
-		timer.stopped = nil
 		place_timers()
 	end
+end
 
-	function StartDR(effect, unit)
-
-		local key = DR_CLASS[effect] .. '@' .. unit
-		local timer = timers[key] or {}
-
-		if not timer.DR or timer.DR < 3 then
-			timers[key] = timer
-
-			timer.EFFECT = effect
-			timer.UNIT = unit
-			timer.START = nil
-			timer.END = nil
-			timer.shown = timer.shown or IsShown(unit)
-			timer.DR = min(3, (timer.DR or 0) + 1)
-
-			place_timers()
+function PLAYER_REGEN_ENABLED()
+	AbortUnitCasts()
+	for k, timer in timers do
+		if not IsPlayer(timer.UNIT) then
+			StopTimer(k)
 		end
 	end
+end
 
-	function PLAYER_REGEN_ENABLED()
-		AbortUnitCasts()
-		for k, timer in timers do
-			if not IsPlayer(timer.UNIT) then
-				StopTimer(k)
+function StopTimer(key)
+	if timers[key] then
+		timers[key].stopped = GetTime()
+		timers[key] = nil
+		place_timers()
+	end
+end
+
+function UnitDied(unit)
+	AbortUnitCasts(unit)
+	for k, timer in timers do
+		if timer.UNIT == unit then
+			StopTimer(k)
+		end
+	end
+	place_timers()
+end
+
+do
+	local f = CreateFrame'Frame'
+	local player, current, recent = {}, {}, {}
+
+	local function hostile_player(msg)
+		local _, _, name = strfind(arg1, "^([^%s']*)")
+		return name
+	end
+
+	local function add_recent(unit)
+		local t = GetTime()
+
+		recent[unit] = t
+
+		for k, v in recent do
+			if t - v > 30 then
+				recent[k] = nil
 			end
 		end
-	end
 
-	function StopTimer(key)
-		if timers[key] then
-			timers[key].stopped = GetTime()
-			timers[key] = nil
-			place_timers()
-		end
-	end
-
-	function UnitDied(unit)
-		AbortUnitCasts(unit)
-		for k, timer in timers do
+		for _, timer in timers do
 			if timer.UNIT == unit then
-				StopTimer(k)
+				timer.shown = true
 			end
 		end
 		place_timers()
 	end
 
-	do
-		local f = CreateFrame'Frame'
-		local player, current, recent = {}, {}, {}
+	local function unit_changed(unitID)
+		local unit = UnitName(unitID)
+		if unit then
+			player[unit] = UnitIsPlayer(unitID) and true or false
 
-		local function hostile_player(msg)
-			local _, _, name = strfind(arg1, "^([^%s']*)")
-			return name
+			if player[unit] then
+				add_recent(unit)
+			end
+			if player[current[unitID]] and current[unitID] then
+				add_recent(current[unitID])
+			end
+			current[unitID] = unit
 		end
+	end
 
-		local function add_recent(unit)
-			local t = GetTime()
+	for _, event in {
+		'CHAT_MSG_COMBAT_HOSTILEPLAYER_HITS',
+		'CHAT_MSG_COMBAT_HOSTILEPLAYER_MISSES',
+		'CHAT_MSG_SPELL_HOSTILEPLAYER_DAMAGE',
+		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
+		'CHAT_MSG_SPELL_HOSTILEPLAYER_BUFF',
+		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
+	} do f:RegisterEvent(event) end
 
-			recent[unit] = t
-
-			for k, v in recent do
-				if t - v > 30 then
-					recent[k] = nil
-				end
-			end
-
-			for _, timer in timers do
-				if timer.UNIT == unit then
-					timer.shown = true
-				end
-			end
-			place_timers()
+	f:SetScript('OnEvent', function()
+		if strfind(arg1, '. You ') or strfind(arg1, ' you') then
+			add_recent(hostile_player(arg1)) -- TODO make sure this happens before the other handlers
 		end
+	end)
 
-		local function unit_changed(unitID)
-			local unit = UnitName(unitID)
-			if unit then
-				player[unit] = UnitIsPlayer(unitID) and true or false
+	f:SetScript('OnUpdate', function()
+		RequestBattlefieldScoreData()
+	end)
 
-				if player[unit] then
-					add_recent(unit)
-				end
-				if player[current[unitID]] and current[unitID] then
-					add_recent(current[unitID])
-				end
-				current[unitID] = unit
-			end
-		end
-
-		for _, event in {
-			'CHAT_MSG_COMBAT_HOSTILEPLAYER_HITS',
-			'CHAT_MSG_COMBAT_HOSTILEPLAYER_MISSES',
-			'CHAT_MSG_SPELL_HOSTILEPLAYER_DAMAGE',
-			'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
-			'CHAT_MSG_SPELL_HOSTILEPLAYER_BUFF',
-			'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
-		} do f:RegisterEvent(event) end
-
-		f:SetScript('OnEvent', function()
-			if strfind(arg1, '. You ') or strfind(arg1, ' you') then
-				add_recent(hostile_player(arg1)) -- TODO make sure this happens before the other handlers
-			end
-		end)
-
-		f:SetScript('OnUpdate', function()
-			RequestBattlefieldScoreData()
-		end)
-
-		function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
-			if player[hostile_player(arg1)] == nil then player[hostile_player(arg1)] = true end -- wrong for pets
-			for unit, effect in string.gfind(arg1, QuickLocalize(AURAADDEDOTHERHELPFUL)) do
-				if IsPlayer(unit) and aurae.EFFECTS[effect] then
-					StartTimer(effect, unit, GetTime())
-				end
+	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
+		if player[hostile_player(arg1)] == nil then player[hostile_player(arg1)] = true end -- wrong for pets
+		for unit, effect in string.gfind(arg1, QuickLocalize(AURAADDEDOTHERHELPFUL)) do
+			if IsPlayer(unit) and aurae.EFFECTS[effect] then
+				StartTimer(effect, unit, GetTime())
 			end
 		end
+	end
 
-		function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
-			if player[hostile_player(arg1)] == nil then player[hostile_player(arg1)] = true end -- wrong for pets
-			for unit, effect in string.gfind(arg1, QuickLocalize(AURAADDEDOTHERHARMFUL)) do
-				if IsPlayer(unit) and aurae.EFFECTS[effect] then
-					StartTimer(effect, unit, GetTime())
-				end
+	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
+		if player[hostile_player(arg1)] == nil then player[hostile_player(arg1)] = true end -- wrong for pets
+		for unit, effect in string.gfind(arg1, QuickLocalize(AURAADDEDOTHERHARMFUL)) do
+			if IsPlayer(unit) and aurae.EFFECTS[effect] then
+				StartTimer(effect, unit, GetTime())
 			end
 		end
+	end
 
-		function PLAYER_TARGET_CHANGED()
-			unit_changed'target'
-		end
+	function PLAYER_TARGET_CHANGED()
+		unit_changed'target'
+	end
 
-		function UPDATE_MOUSEOVER_UNIT()
-			unit_changed'mouseover'
-		end
+	function UPDATE_MOUSEOVER_UNIT()
+		unit_changed'mouseover'
+	end
 
-		function UPDATE_BATTLEFIELD_SCORE()
-			for i = 1, GetNumBattlefieldScores() do
-				player[GetBattlefieldScore(i)] = true
-			end
+	function UPDATE_BATTLEFIELD_SCORE()
+		for i = 1, GetNumBattlefieldScores() do
+			player[GetBattlefieldScore(i)] = true
 		end
+	end
 
-		function IsShown(unit)
-			return not player[unit]
-					or UnitName'target' == unit
-					or UnitName'mouseover' == unit
-					or recent[unit] and GetTime() - recent[unit] <= 30
-		end
+	function IsShown(unit)
+		return not player[unit]
+				or UnitName'target' == unit
+				or UnitName'mouseover' == unit
+				or recent[unit] and GetTime() - recent[unit] <= 30
+	end
 
-		function IsPlayer(unit)
-			return player[unit]
-		end
-
-		function Print(msg)
-			DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
-		end
+	function IsPlayer(unit)
+		return player[unit]
 	end
 end
 
@@ -921,7 +919,7 @@ function LoadVariables()
 	aurae_ConfigCC()
 	aurae_ConfigDebuff()
 	aurae_ConfigBuff()
-	UpdateClassSpells(false)
+	UpdateClassSpells()
 end
 
 function UpdateImpGouge()
