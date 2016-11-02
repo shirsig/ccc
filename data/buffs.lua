@@ -89,6 +89,7 @@ aurae.EFFECTS["Rejuvenation"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 12,
 }
+
 aurae.EFFECTS["Regrowth"] = {
 	ICON = 'Spell_Nature_ResistNature',
 	SCHOOL = aurae_SCHOOL.NATURE,
@@ -102,6 +103,7 @@ aurae.EFFECTS["Dash"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 15,
 }
+
 aurae.EFFECTS["Innervate"] = {
 	ICON = 'Spell_Nature_Lightning',
 	SCHOOL = aurae_SCHOOL.NATURE,
@@ -115,6 +117,7 @@ aurae.EFFECTS["Barkskin"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 15,
 }
+
 aurae.EFFECTS["Frenzied Regeneration"] = {
 	ICON = 'Ability_BullRush',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,

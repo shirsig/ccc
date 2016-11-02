@@ -7,11 +7,6 @@ end)
 _F:RegisterEvent'ADDON_LOADED'
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
 
-CreateFrame'Frame':SetScript('OnUpdate', function()
-	LoadVariables()
-	this:SetScript('OnUpdate', nil)
-end)
-
 function Print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
 end
@@ -578,10 +573,12 @@ function StartTimer(effect, unit, start)
 	timer.shown = IsShown(unit)
 	timer.END = timer.START
 
+	local duration = aurae.EFFECTS[effect].DURATION + (bonuses[effect] and bonuses[effect](aurae.EFFECTS[effect].DURATION) or 0)
+
 	if IsPlayer(unit) then
-		timer.END = timer.END + DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or aurae.EFFECTS[effect].DURATION)
+		timer.END = timer.END + DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or duration)
 	else
-		timer.END = timer.END + aurae.EFFECTS[effect].DURATION
+		timer.END = timer.END + duration
 	end
 
 	if aurae.EFFECTS[effect].COMBO then
@@ -915,58 +912,56 @@ do
 		return rank
 	end
 
-	function LoadVariables()
-		local _, class = UnitClass'player'
-		if class == 'ROGUE' then
-			bonuses = {
-				["Gouge"] = function(t)
-					return t + rank(2, 1) * .5
-				end,
-				["Garrote"] = function(t)
-					return t + rank(3, 8) * 3
-				end,
-			}
-		elseif class == "WARLOCK" then
-			bonuses = {
-				["Shadow Word: Pain"] = function(t)
-					return t + rank(2, 7) * 1.5
-				end,
-			}
-		elseif class == 'HUNTER' then
-			bonuses = {
-				["Freezing Trap Effect"] = function(t)
-					return t * (1 + rank(3, 7) * .15)
-				end,
-			}
-		elseif class == 'PRIEST' then
-			bonuses = {
-				["Shadow Word: Pain"] = function(t)
-					return t + rank(3, 4) * 3
-				end,
-			}
-		elseif class == 'MAGE' then
-			bonuses = {
-				["Cone of Cold"] = function(t)
-					return t + min(1, rank(3, 2)) * .5 + rank(3, 2) * .5
-				end,
-				["Frostbolt"] = function(t)
-					return t + min(1, rank(3, 2)) * .5 + rank(3, 2) * .5
-				end,
-				["Polymorph"] = function(t)
-					if aurae_settings.arcanist then
-						return t + 15
-					end
-				end,
-			}
-		elseif class == 'DRUID' then
-			bonuses = {
-				["Pounce"] = function(t)
-					return t + rank(2, 4) * .5
-				end,
-				["Bash"] = function(t)
-					return t + rank(2, 4) * .5
-				end,
-			}
-		end
+	local _, class = UnitClass'player'
+	if class == 'ROGUE' then
+		bonuses = {
+			["Gouge"] = function()
+				return rank(2, 1) * .5
+			end,
+			["Garrote"] = function()
+				return rank(3, 8) * 3
+			end,
+		}
+	elseif class == "WARLOCK" then
+		bonuses = {
+			["Shadow Word: Pain"] = function()
+				return rank(2, 7) * 1.5
+			end,
+		}
+	elseif class == 'HUNTER' then
+		bonuses = {
+			["Freezing Trap Effect"] = function(t)
+				return t * rank(3, 7) * .15
+			end,
+		}
+	elseif class == 'PRIEST' then
+		bonuses = {
+			["Shadow Word: Pain"] = function()
+				return rank(3, 4) * 3
+			end,
+		}
+	elseif class == 'MAGE' then
+		bonuses = {
+			["Cone of Cold"] = function()
+				return min(1, rank(3, 2)) * .5 + rank(3, 2) * .5
+			end,
+			["Frostbolt"] = function()
+				return min(1, rank(3, 2)) * .5 + rank(3, 2) * .5
+			end,
+			["Polymorph"] = function()
+				if aurae_settings.arcanist then
+					return 15
+				end
+			end,
+		}
+	elseif class == 'DRUID' then
+		bonuses = {
+			["Pounce"] = function()
+				return rank(2, 4) * .5
+			end,
+			["Bash"] = function()
+				return rank(2, 4) * .5
+			end,
+		}
 	end
 end
