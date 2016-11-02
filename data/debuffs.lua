@@ -1,5 +1,3 @@
-function aurae_ConfigDebuff()
-
 -- Rogue
 
 aurae.EFFECTS["Rupture"] = {
@@ -385,5 +383,3 @@ aurae.EFFECTS["Stormstrike"] = {
 }
 
 -- Misc
-
-end

@@ -1,5 +1,3 @@
-function aurae_ConfigCC()
-
 -- Rogue
 
 aurae.EFFECTS["Gouge"] = {
@@ -342,5 +340,3 @@ aurae.EFFECTS["Reckless Charge"] = {
 	ETYPE = ETYPE_CC,
 	DURATION = 30,
 }
-
-end

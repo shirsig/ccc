@@ -1,5 +1,3 @@
-function aurae_ConfigBuff()
-
 -- Rogue
 
 aurae.EFFECTS["Adrenaline Rush"] = {
@@ -8,18 +6,21 @@ aurae.EFFECTS["Adrenaline Rush"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 15,
 }
+
 aurae.EFFECTS["Sprint"] = {
 	ICON = 'Ability_Rogue_Sprint',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_BUFF,
 	DURATION = 15,
 }
+
 aurae.EFFECTS["Evasion"] = {
 	ICON = 'Spell_Shadow_ShadowWard',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_BUFF,
 	DURATION = 15,
 }
+
 aurae.EFFECTS["Blade Flurry"] = {
 	ICON = 'Ability_GhoulFrenzy',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
@@ -35,6 +36,7 @@ aurae.EFFECTS["Shadow Word: Shield"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 30,
 }
+
 aurae.EFFECTS["Renew"] = {
 	ICON = 'Spell_Holy_Renew',
 	SCHOOL = aurae_SCHOOL.HOLY,
@@ -80,6 +82,7 @@ aurae.EFFECTS["Nature's Grasp"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 45,
 }
+
 aurae.EFFECTS["Rejuvenation"] = {
 	ICON = 'Spell_Nature_Rejuvenation',
 	SCHOOL = aurae_SCHOOL.NATURE,
@@ -92,6 +95,7 @@ aurae.EFFECTS["Regrowth"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 21,
 }
+
 aurae.EFFECTS["Dash"] = {
 	ICON = 'Ability_Druid_Dash',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
@@ -104,6 +108,7 @@ aurae.EFFECTS["Innervate"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 20,
 }
+
 aurae.EFFECTS["Barkskin"] = {
 	ICON = 'Spell_Nature_StoneClawTotem',
 	SCHOOL = aurae_SCHOOL.NATURE,
@@ -125,6 +130,7 @@ aurae.EFFECTS["Deterrence"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 10,
 }
+
 aurae.EFFECTS["Rapid Fire"] = {
 	ICON = 'Ability_Hunter_RunningShot',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
@@ -140,12 +146,14 @@ aurae.EFFECTS["Divine Shield"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 12,
 }
+
 aurae.EFFECTS["Blessing of Protection"] = {
 	ICON = 'Spell_Holy_SealOfProtection',
 	SCHOOL = aurae_SCHOOL.HOLY,
 	ETYPE = ETYPE_BUFF,
 	DURATION = 10,
 }
+
 aurae.EFFECTS["Blessing of Freedom"] = {
 	ICON = 'Spell_Holy_SealOfValor',
 	SCHOOL = aurae_SCHOOL.HOLY,
@@ -161,6 +169,7 @@ aurae.EFFECTS["Sacrifice"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 30,
 }
+
 aurae.EFFECTS["Spellstone"] = {
 	ICON = 'INV_Misc_Gem_Sapphire_01',
 	SCHOOL = aurae_SCHOOL.SHADOW,
@@ -176,36 +185,42 @@ aurae.EFFECTS["Berserker Rage"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 10,
 }
+
 aurae.EFFECTS["Bloodrage"] = {
 	ICON = 'Ability_Racial_BloodRage',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_BUFF,
 	DURATION = 10,
 }
+
 aurae.EFFECTS["Last Stand"] = {
 	ICON = 'Spell_Holy_AshesToAshes',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_BUFF,
 	DURATION = 20,
 }
+
 aurae.EFFECTS["Retaliation"] = {
 	ICON = 'Ability_Warrior_Challange',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_BUFF,
 	DURATION = 15,
 }
+
 aurae.EFFECTS["Shield Wall"] = {
 	ICON = 'Ability_Warrior_ShieldWall',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_BUFF,
 	DURATION = 10,
 }
+
 aurae.EFFECTS["Recklessness"] = {
 	ICON = 'Ability_CriticalStrike',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
 	ETYPE = ETYPE_BUFF,
 	DURATION = 15,
 }
+
 aurae.EFFECTS["Death Wish"] = {
 	ICON = 'Spell_Shadow_DeathPact',
 	SCHOOL = aurae_SCHOOL.PHYSICAL,
@@ -228,5 +243,3 @@ aurae.EFFECTS["Perception"] = {
 	ETYPE = ETYPE_BUFF,
 	DURATION = 20,
 }
-
-end

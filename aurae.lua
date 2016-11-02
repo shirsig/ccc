@@ -283,11 +283,6 @@ do
 			elseif command == 'clear' then
 				aurae_settings = nil
 				LoadVariables()
-			elseif command == 'reload' then
-				aurae_ConfigCC()
-				aurae_ConfigDebuff()
-				aurae_ConfigBuff()
-				UpdateClassSpells()
 			elseif strsub(command, 1, 5) == "scale" then
 				local scale = tonumber(strsub(command, 7))
 				if scale then
@@ -322,7 +317,6 @@ end
 function Usage()
 	Print("Usage:")
 	Print("  lock | unlock")
-	Print("  reload")
 	Print("  invert")
 	Print("  alpha [0,1]")
 	Print("  color (school | progress | custom)")
@@ -915,111 +909,64 @@ do
 	Print('aurae loaded - /aurae')
 end
 
-function LoadVariables()
-	aurae_ConfigCC()
-	aurae_ConfigDebuff()
-	aurae_ConfigBuff()
-	UpdateClassSpells()
-end
-
-function UpdateImpGouge()
-	local talentname, texture, _, _, rank = GetTalentInfo(2, 1)
-	if texture then
-		aurae.EFFECTS["Gouge"].DURATION = 4 + rank * .5
-	elseif aurae.EFFECTS["Gouge"].DURATION == nil then
-		aurae.EFFECTS["Gouge"].DURATION = 4
+do
+	local function rank(i, j)
+		local _, _, _, _, rank = GetTalentInfo(i, j)
+		return rank
 	end
-end
 
-function UpdateImpGarotte()
-	local talentname, texture, _, _, rank = GetTalentInfo(3, 8)
-	if texture then
-		aurae.EFFECTS["Garrote"].DURATION = 18 + rank * 3
-	elseif aurae.EFFECTS["Garrote"].DURATION == nil then
-		aurae.EFFECTS["Garrote"].DURATION = 18
-	end
-end
-
-function UpdateKidneyShot()
-	local i = 1
-	while true do
-		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
-		if not name then
-			if aurae.EFFECTS["Kidney Shot"].DURATION == nil then
-				aurae.EFFECTS["Kidney Shot"].DURATION = 1
-			end
-			return
+	function LoadVariables()
+		local _, class = UnitClass'player'
+		if class == 'ROGUE' then
+			bonuses = {
+				["Gouge"] = function(t)
+					return t + rank(2, 1) * .5
+				end,
+				["Garrote"] = function(t)
+					return t + rank(3, 8) * 3
+				end,
+			}
+		elseif class == "WARLOCK" then
+			bonuses = {
+				["Shadow Word: Pain"] = function(t)
+					return t + rank(2, 7) * 1.5
+				end,
+			}
+		elseif class == 'HUNTER' then
+			bonuses = {
+				["Freezing Trap Effect"] = function(t)
+					return t * (1 + rank(3, 7) * .15)
+				end,
+			}
+		elseif class == 'PRIEST' then
+			bonuses = {
+				["Shadow Word: Pain"] = function(t)
+					return t + rank(3, 4) * 3
+				end,
+			}
+		elseif class == 'MAGE' then
+			bonuses = {
+				["Cone of Cold"] = function(t)
+					return t + min(1, rank(3, 2)) * .5 + rank(3, 2) * .5
+				end,
+				["Frostbolt"] = function(t)
+					return t + min(1, rank(3, 2)) * .5 + rank(3, 2) * .5
+				end,
+				["Polymorph"] = function(t)
+					if aurae_settings.arcanist then
+						return t + 15
+					end
+				end,
+			}
+		elseif class == 'DRUID' then
+			bonuses = {
+				["Pounce"] = function(t)
+					return t + rank(2, 4) * .5
+				end,
+				["Bash"] = function(t)
+					return t + rank(2, 4) * .5
+				end,
+			}
 		end
-		if name == "Kidney Shot" then
-			if strsub(rank, string.len(rank)) == "1" then
-				aurae.EFFECTS["Kidney Shot"].DURATION = 0
-			else
-				aurae.EFFECTS["Kidney Shot"].DURATION = 1
-			end
-			return
-		end
-		i = i + 1
-	end
-end
-
-function UpdateImpTrap()
-	local talentname, texture, _, _, rank = GetTalentInfo(3, 7)
-	if texture then
-		-- Freezing Trap is a true multi rank, hence already updated
-		aurae.EFFECTS["Freezing Trap Effect"].DURATION = aurae.EFFECTS["Freezing Trap Effect"].DURATION * (1 + rank * .15)
-	end
-end
-
-function UpdateImpSeduce()
-	local talentname, texture, _, _, rank = GetTalentInfo(2, 7)
-	if texture then
-		aurae.EFFECTS["Seduction"].DURATION = 15 + rank * 1.5
-	end
-end
-
-function UpdateBrutalImpact()
-	local talentname, texture, _, _, rank = GetTalentInfo(2, 4)
-	if texture then
-		-- Bash is a true multi rank, hence already updated
-		aurae.EFFECTS["Pounce"].DURATION = 2 + rank * .50
-		aurae.EFFECTS["Bash"].DURATION = aurae.EFFECTS["Bash"].DURATION + rank * .5
-	end
-end
-
-function UpdatePermafrost()
-	local talentname, texture, _, _, rank = GetTalentInfo(3, 2)
-	if texture then
-		-- Frostbolt is a true multi rank, hence already updated
-		aurae.EFFECTS["Cone of Cold"].DURATION = 8 + .5 + rank * .5
-		aurae.EFFECTS["Frostbolt"].DURATION = aurae.EFFECTS["Frostbolt"].DURATION + .5 + rank * .5
-	end
-end
-
-function UpdateImpShadowWordPain()
-	local talentname, texture, _, _, rank = GetTalentInfo(3, 4)
-	if texture then
-		aurae.EFFECTS["Shadow Word: Pain"].DURATION = 18 + rank * 3
-	end
-end
-
-function UpdateClassSpells()
-	local _, eclass = UnitClass'player'
-	if eclass == 'ROGUE' then
-		UpdateImpGouge()
-		UpdateKidneyShot()
-		UpdateImpGarotte()
-	elseif eclass == "WARLOCK" then
-		UpdateImpSeduce()
-	elseif eclass == 'HUNTER' then
-		UpdateImpTrap()
-	elseif eclass == 'PRIEST' then
-		UpdateImpShadowWordPain()
-	elseif eclass == 'MAGE' then
-		UpdatePermafrost()
-		if aurae_settings.arcanist then
-			aurae.EFFECTS["Polymorph"].DURATION = aurae.EFFECTS["Polymorph"].DURATION + 15
-		end
-	elseif eclass == 'DRUID' then
-		UpdateBrutalImpact()
 	end
 end

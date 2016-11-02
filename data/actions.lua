@@ -86,6 +86,11 @@ aurae_RANKS["Corruption"] = {
 }
 
 -- Rogue
+
 aurae_RANKS["Sap"] = {
 	DURATION = {25, 35, 45},
+}
+
+aurae_RANKS["Kidney Shot"] = {
+	DURATION = {0, 1},
 }
