@@ -1,10 +1,13 @@
 local _G, _M, _F = getfenv(0), {}, CreateFrame'Frame'
 setfenv(1, setmetatable(_M, {__index=_G}))
+
 _F:SetScript('OnUpdate', function() _M.UPDATE() end)
+
 _F:SetScript('OnEvent', function()
 	_M[event](this)
 end)
 _F:RegisterEvent'ADDON_LOADED'
+
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
 
 function Print(msg)
