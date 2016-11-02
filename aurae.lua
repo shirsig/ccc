@@ -12,6 +12,14 @@ CreateFrame'Frame':SetScript('OnUpdate', function()
 	this:SetScript('OnUpdate', nil)
 end)
 
+function QuickLocalize(str)
+	-- just remove $1 & $2 args because we *know that the order is not changed*.
+	-- not fail proof if ever it occurs (should be a more clever function, and return found arguments order)
+	str = string.gsub(str, '.%$', '')
+	str = string.gsub(str, '%%s', '(.+)')
+	return str
+end
+
 WIDTH = 170
 HEIGHT = 16
 MAXBARS = 10
@@ -22,14 +30,6 @@ _G.ETYPE_BUFF = 4
 
 --_G.aurae_ARCANIST_ON = "Arcanist' Set activated (+15 sec to ".."Polymorph".." spell)"
 --_G.aurae_ARCANIST_OFF = "Arcanist' Set off"
-
-function QuickLocalize(str)
-	-- just remove $1 & $2 args because we *know that the order is not changed*.
-	-- not fail proof if ever it occurs (should be a more clever function, and return found arguments order)
-	str = string.gsub(str, ".%$", "")
-	str = string.gsub(str, "%%s", "\(.+\)")
-	return str
-end
 
 _G.aurae_settings = {}
 
@@ -53,44 +53,44 @@ _G.aurae_SCHOOL = {
 	ARCANE = {1, .5, 1},
 }
 
+DR_CLASS = {
+	["Bash"] = 1,
+	["Hammer of Justice"] = 1,
+	["Cheap Shot"] = 1,
+	["Charge Stun"] = 1,
+	["Intercept Stun"] = 1,
+	["Concussion Blow"] = 1,
+
+	["Fear"] = 2,
+	["Howl of Terror"] = 2,
+	["Seduction"] = 2,
+	["Intimidating Shout"] = 2,
+	["Psychic Scream"] = 2,
+
+	["Polymorph"] = 3,
+	["Sap"] = 3,
+	["Gouge"] = 3,
+
+	["Entangling Roots"] = 4,
+	["Frost Nova"] = 4,
+
+	["Freezing Trap"] = 5,
+	["Wyvern String"] = 5,
+
+	["Blind"] = 6,
+
+	["Hibernate"] = 7,
+
+	["Mind Control"] = 8,
+
+	["Kidney Shot"] = 9,
+
+	["Death Coil"] = 10,
+
+	["Frost Shock"] = 11,
+}
+
 do
-	DR_CLASS = {
-		["Bash"] = 1,
-		["Hammer of Justice"] = 1,
-		["Cheap Shot"] = 1,
-		["Charge Stun"] = 1,
-		["Intercept Stun"] = 1,
-		["Concussion Blow"] = 1,
-
-		["Fear"] = 2,
-		["Howl of Terror"] = 2,
-		["Seduction"] = 2,
-		["Intimidating Shout"] = 2,
-		["Psychic Scream"] = 2,
-
-		["Polymorph"] = 3,
-		["Sap"] = 3,
-		["Gouge"] = 3,
-
-		["Entangling Roots"] = 4,
-		["Frost Nova"] = 4,
-
-		["Freezing Trap"] = 5,
-		["Wyvern String"] = 5,
-
-		["Blind"] = 6,
-
-		["Hibernate"] = 7,
-
-		["Mind Control"] = 8,
-
-		["Kidney Shot"] = 9,
-
-		["Death Coil"] = 10,
-
-		["Frost Shock"] = 11,
-	}
-
 	local dr = {}
 
 	local factor = {1, 1/2, 1/4, 0}
@@ -213,12 +213,6 @@ local function format_time(t)
 	end
 end
 
---	if aurae_settings.WarnSelf then
---		local info = ChatTypeInfo.RAID_WARNING
---		RaidWarningFrame:AddMessage(msg, info.r, info.g, info.b, 1)
---		PlaySound'RaidWarning'
---	end
-
 function UnlockBars()
 	aurae.LOCKED = false
 	for _, type in {'CC', 'Buff', 'Debuff'} do
@@ -250,71 +244,73 @@ function LockBars()
 	end
 end
 
-function tokenize(str)
-	local tokens = {}
-	for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
-	return tokens
-end
+do
+	local function tokenize(str)
+		local tokens = {}
+		for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
+		return tokens
+	end
 
-function SlashCommandHandler(msg)
-	if msg then
-		local args = tokenize(msg)
-		local command = strlower(msg)
-		if command == "unlock" then
-			UnlockBars()
-			Print('Bars unlocked.')
-		elseif command == "lock" then
-			LockBars()
-			Print('Bars locked.')
-		elseif command == "invert" then
-			aurae_settings.invert = not aurae_settings.invert
-			aurae_settings.invert = aurae_settings.invert
-			if aurae_settings.invert then
-				Print('Bar inversion on.')
-			else
-				Print('Bar inversion off.')
-			end
-		elseif args[1] == 'color' and (args[2] == 'school' or args[2] == 'progress' or args[2] == 'custom') then
-			aurae_settings.color = args[2]
-			Print('Color: ' .. args[2])
-		elseif args[1] == "customcolor" and tonumber(args[2]) and tonumber(args[3]) and tonumber(args[4]) and args[5] and aurae.EFFECTS[args[5]] then
-			local effect = gsub(msg, '%s*%S+%s*', '', 4)
-			aurae_settings.colors[effect] = {tonumber(args[2])/255, tonumber(args[3])/255, tonumber(args[4])/255 }
-			print('Custom color: ' .. color_code(unpack(aurae_settings.colors[effect])) .. effect .. '|r')
-		elseif command == 'clear' then
-			aurae_settings = nil
-			LoadVariables()
-		elseif command == 'reload' then
-			aurae_ConfigCC()
-			aurae_ConfigDebuff()
-			aurae_ConfigBuff()
-			UpdateClassSpells(true)
-		elseif strsub(command, 1, 5) == "scale" then
-			local scale = tonumber(strsub(command, 7))
-			if scale then
-				scale = max(.25, min(3, scale))
-				aurae_settings.scale = scale
-				auraeCC:SetScale(scale)
-				auraeDebuff:SetScale(scale)
-				auraeBuff:SetScale(scale)
-				Print('Scale: ' .. scale)
+	function SlashCommandHandler(msg)
+		if msg then
+			local args = tokenize(msg)
+			local command = strlower(msg)
+			if command == "unlock" then
+				UnlockBars()
+				Print('Bars unlocked.')
+			elseif command == "lock" then
+				LockBars()
+				Print('Bars locked.')
+			elseif command == "invert" then
+				aurae_settings.invert = not aurae_settings.invert
+				aurae_settings.invert = aurae_settings.invert
+				if aurae_settings.invert then
+					Print('Bar inversion on.')
+				else
+					Print('Bar inversion off.')
+				end
+			elseif args[1] == 'color' and (args[2] == 'school' or args[2] == 'progress' or args[2] == 'custom') then
+				aurae_settings.color = args[2]
+				Print('Color: ' .. args[2])
+			elseif args[1] == "customcolor" and tonumber(args[2]) and tonumber(args[3]) and tonumber(args[4]) and args[5] and aurae.EFFECTS[args[5]] then
+				local effect = gsub(msg, '%s*%S+%s*', '', 4)
+				aurae_settings.colors[effect] = {tonumber(args[2])/255, tonumber(args[3])/255, tonumber(args[4])/255 }
+				print('Custom color: ' .. color_code(unpack(aurae_settings.colors[effect])) .. effect .. '|r')
+			elseif command == 'clear' then
+				aurae_settings = nil
+				LoadVariables()
+			elseif command == 'reload' then
+				aurae_ConfigCC()
+				aurae_ConfigDebuff()
+				aurae_ConfigBuff()
+				UpdateClassSpells(true)
+			elseif strsub(command, 1, 5) == "scale" then
+				local scale = tonumber(strsub(command, 7))
+				if scale then
+					scale = max(.25, min(3, scale))
+					aurae_settings.scale = scale
+					auraeCC:SetScale(scale)
+					auraeDebuff:SetScale(scale)
+					auraeBuff:SetScale(scale)
+					Print('Scale: ' .. scale)
+				else
+					Usage()
+				end
+			elseif strsub(command, 1, 5) == "alpha" then
+				local alpha = tonumber(strsub(command, 7))
+				if alpha then
+					alpha = max(0, min(1, alpha))
+					aurae_settings.alpha = alpha
+					auraeCC:SetAlpha(alpha)
+					auraeDebuff:SetAlpha(alpha)
+					auraeBuff:SetAlpha(alpha)
+					Print('Alpha: ' .. alpha)
+				else
+					Usage()
+				end
 			else
 				Usage()
 			end
-		elseif strsub(command, 1, 5) == "alpha" then
-			local alpha = tonumber(strsub(command, 7))
-			if alpha then
-				alpha = max(0, min(1, alpha))
-				aurae_settings.alpha = alpha
-				auraeCC:SetAlpha(alpha)
-				auraeDebuff:SetAlpha(alpha)
-				auraeBuff:SetAlpha(alpha)
-				Print('Alpha: ' .. alpha)
-			else
-				Usage()
-			end
-		else
-			Usage()
 		end
 	end
 end
@@ -340,6 +336,13 @@ do
 	end
 end
 
+function SetActionRank(name, rank)
+	local _, _, rank = strfind(rank or '', 'Rank (%d+)')
+	if rank and _G.aurae_RANKS[name] then
+		_G.aurae.EFFECTS[_G.aurae_RANKS[name].EFFECT or name].DURATION = _G.aurae_RANKS[name].DURATION[tonumber(rank)]
+	end
+end
+
 do
 	local casting = {}
 	local last_cast
@@ -350,8 +353,11 @@ do
 		function _G.UseAction(slot, clicked, onself)
 			if HasAction(slot) and not GetActionText(slot) then
 				aurae_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+				aurae_TooltipTextRight1:SetText()
 				aurae_Tooltip:SetAction(slot)
-				casting[aurae_TooltipTextLeft1:GetText()] = TargetID()
+				local name = aurae_TooltipTextLeft1:GetText()
+				casting[name] = TargetID()
+				SetActionRank(name, aurae_TooltipTextRight1:GetText())
 			end
 			return orig(slot, clicked, onself)
 		end
@@ -360,7 +366,9 @@ do
 	do
 		local orig = CastSpell
 		function _G.CastSpell(index, booktype)
-			casting[GetSpellName(index, booktype)] = TargetID()
+			local name, rank = GetSpellName(index, booktype)
+			casting[name] = TargetID()
+			SetActionRank(name, rank)
 			return orig(index, booktype)
 		end
 	end
@@ -387,7 +395,7 @@ do
 				if pending[effect] then
 					last_cast = nil
 				else
-					pending[effect] = {target=target, time=GetTime() + .5 + (_G.aurae_ACTIONS[effect] and _G.aurae_ACTIONS[effect].DELAY or 0)}
+					pending[effect] = {target=target, time=GetTime() + (_G.aurae_RANKS[effect] and _G.aurae_DELAYS[effect] or 0)}
 					last_cast = effect
 				end
 			end
@@ -397,8 +405,8 @@ do
 
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for effect, info in pending do
-			if GetTime() >= info.time and (IsPlayer(info.target) or TargetID() ~= info.target or UnitDebuffs'target'[effect]) then
-				StartTimer(effect, info.target, GetTime() - .5)
+			if GetTime() >= info.time + .5 and (IsPlayer(info.target) or TargetID() ~= info.target or UnitDebuffs'target'[effect]) then
+				StartTimer(effect, info.target, info.time)
 				pending[effect] = nil
 			end
 		end
@@ -996,75 +1004,24 @@ function UpdateImpShadowWordPain()
 	end
 end
 
-function GetSpellRank(spellname, spelleffect)
-	local i = 1
-	local gotone = false
-	local maxrank = getn(_G.aurae_ACTIONS[spellname].DURATION)
-
-	while true do
-		local name, rank = GetSpellName(i, BOOKTYPE_SPELL)
-
-		if not name then
-			if not gotone then
-				if aurae.EFFECTS[spelleffect].DURATION == nil then
-					aurae.EFFECTS[spelleffect].DURATION = _G.aurae_ACTIONS[spellname].DURATION[maxrank]
-				end
-			end
-			return
-		end
-
-		if name == spellname then
-			local currank = 1
-			while currank <= maxrank do
-				if tonumber(strsub(rank,string.len(rank))) == currank then
-					aurae.EFFECTS[spelleffect].DURATION = _G.aurae_ACTIONS[spellname].DURATION[currank]
-					gotone = true
-				end
-				currank = currank + 1
-			end
-		end
-
-		i = i + 1
-	end
-end
-
 function UpdateClassSpells()
 	local _, eclass = UnitClass'player'
 	if eclass == 'ROGUE' then
-		GetSpellRank("Sap", "Sap")
 		UpdateImpGouge()
 		UpdateKidneyShot()
 		UpdateImpGarotte()
-	elseif eclass == 'WARRIOR' then
-		GetSpellRank("Rend", "Rend")
 	elseif eclass == "WARLOCK" then
-		GetSpellRank("Fear", "Fear")
-		GetSpellRank("Howl of Terror", "Howl of Terror")
-		GetSpellRank("Banish", "Banish")
-		GetSpellRank("Corruption", "Corruption")
 		UpdateImpSeduce()
-	elseif eclass == 'PALADIN' then
-		GetSpellRank("Hammer of Justice", "Hammer of Justice")
-		GetSpellRank("Divine Shield", "Divine Shield")
 	elseif eclass == 'HUNTER' then
-		GetSpellRank("Freezing Trap", "Freezing Trap Effect")
-		GetSpellRank("Scare Beast", "Scare Beast")
 		UpdateImpTrap()
 	elseif eclass == 'PRIEST' then
-		GetSpellRank("Shackle Undead", "Shackle Undead")
 		UpdateImpShadowWordPain()
 	elseif eclass == 'MAGE' then
-		GetSpellRank("Polymorph", "Polymorph")
-		GetSpellRank("Frostbolt", "Frostbolt")
-		GetSpellRank("Fireball", "Fireball")
 		UpdatePermafrost()
 		if aurae_settings.arcanist then
 			aurae.EFFECTS["Polymorph"].DURATION = aurae.EFFECTS["Polymorph"].DURATION + 15
 		end
 	elseif eclass == 'DRUID' then
-		GetSpellRank("Entangling Roots", "Entangling Roots")
-		GetSpellRank("Hibernate", "Hibernate")
-		GetSpellRank("Bash", "Bash")
 		UpdateBrutalImpact()
 	end
 end
