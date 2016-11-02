@@ -966,5 +966,7 @@ do
 				return rank(2, 4) * .5
 			end,
 		}
+	else
+		bonuses = {}
 	end
 end
