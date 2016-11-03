@@ -327,7 +327,7 @@ do
 	function TargetID()
 		local name = UnitName'target'
 		if name then
-			return UnitIsPlayer'target' and name or name .. ' (' .. UnitLevel'target' .. (gender[UnitSex'target'] or '') .. ')'
+			return UnitIsPlayer'target' and name or '[' .. UnitLevel'target' .. (gender[UnitSex'target'] or '') .. '] ' .. name
 		end
 	end
 end
