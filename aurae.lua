@@ -809,8 +809,6 @@ do
 						r, g, b = 1, 1, 1
 					end
 				end
-				bar.statusbar:SetStatusBarColor(r, g, b)
-				bar.statusbar:SetBackdropColor(r, g, b, .3)
 			else
 				bar.statusbar:SetValue(1)
 				bar.spark:Hide()
@@ -828,9 +826,9 @@ do
 						r, g, b = 1, 1, 1
 					end
 				end
-				bar.statusbar:SetStatusBarColor(r, g, b)
-				bar.statusbar:SetBackdropColor(r, g, b, .3)
 			end
+			bar.statusbar:SetStatusBarColor(r, g, b)
+			bar.statusbar:SetBackdropColor(r, g, b, .3)
 		end
 	end
 end
