@@ -784,11 +784,11 @@ do
 			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 			bar.text:SetText((timer.DR and dr_prefix[timer.DR] or '') .. timer.UNIT)
 
-			local r, g, b
+			local fraction
 			if timer.START then
 				local duration = timer.END - timer.START
 				local remaining = timer.END - GetTime()
-				local fraction = remaining / duration
+				fraction = remaining / duration
 
 				bar.statusbar:SetValue(aurae_settings.invert and 1 - fraction or fraction)
 
@@ -797,33 +797,22 @@ do
 				bar.spark:SetPoint('CENTER', bar.statusbar, aurae_settings.invert and 'RIGHT' or 'LEFT', aurae_settings.invert and -sparkPosition or sparkPosition, 0)
 
 				bar.timertext:SetText(format_time(remaining))
-
-				if aurae_settings.color == 'school' then
-					r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
-				elseif aurae_settings.color == 'progress' then
-					r, g, b = 1 - fraction, fraction, 0
-				elseif aurae_settings.color == 'custom' then
-					if aurae_settings.colors[timer.EFFECT] then
-						r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
-					else
-						r, g, b = 1, 1, 1
-					end
-				end
 			else
+				fraction = 1
 				bar.statusbar:SetValue(1)
 				bar.spark:Hide()
-				bar.timertext:SetText('')
-
-				if aurae_settings.color == 'school' then
-					r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
-				elseif aurae_settings.color == 'progress' then
-					r, g, b = 0, 1, 0
-				elseif aurae_settings.color == 'custom' then
-					if aurae_settings.colors[timer.EFFECT] then
-						r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
-					else
-						r, g, b = 1, 1, 1
-					end
+				bar.timertext:SetText()
+			end
+			local r, g, b
+			if aurae_settings.color == 'school' then
+				r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
+			elseif aurae_settings.color == 'progress' then
+				r, g, b = 1 - fraction, fraction, 0
+			elseif aurae_settings.color == 'custom' then
+				if aurae_settings.colors[timer.EFFECT] then
+					r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
+				else
+					r, g, b = 1, 1, 1
 				end
 			end
 			bar.statusbar:SetStatusBarColor(r, g, b)
