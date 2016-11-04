@@ -784,6 +784,7 @@ do
 			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 			bar.text:SetText((timer.DR and dr_prefix[timer.DR] or '') .. timer.UNIT)
 
+			local r, g, b
 			if timer.START then
 				local duration = timer.END - timer.START
 				local remaining = timer.END - GetTime()
@@ -797,7 +798,6 @@ do
 
 				bar.timertext:SetText(format_time(remaining))
 
-				local r, g, b
 				if aurae_settings.color == 'school' then
 					r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
 				elseif aurae_settings.color == 'progress' then
@@ -814,7 +814,6 @@ do
 				bar.spark:Hide()
 				bar.timertext:SetText('')
 
-				local r, g, b
 				if aurae_settings.color == 'school' then
 					r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
 				elseif aurae_settings.color == 'progress' then
