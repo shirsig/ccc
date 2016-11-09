@@ -830,7 +830,7 @@ do
 
 		local dummyTimer = {stopped=0}
 		GROUPS = {}
-		for i, etype in ipairs{'BUFF', 'DEBUFF', 'CC'} do
+		for i, etype in ipairs{'DEBUFF', 'CC', 'BUFF'} do
 			local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
 			local f = CreateFrame('Frame', nil, UIParent)
 			GROUPS[strupper(etype)] = f
