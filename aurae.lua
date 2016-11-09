@@ -22,27 +22,16 @@ function QuickLocalize(str)
 	return str
 end
 
-WIDTH = 170
-HEIGHT = 16
-MAXBARS = 10
-
-_G.ETYPE_CC = 1
-_G.ETYPE_DEBUFF = 2
-_G.ETYPE_BUFF = 4
-
---_G.aurae_ARCANIST_ON = "Arcanist' Set activated (+15 sec to ".."Polymorph".." spell)"
---_G.aurae_ARCANIST_OFF = "Arcanist' Set off"
-
 _G.aurae_settings = {}
 
 _G.aurae = {}
 aurae.EFFECTS = {}
-aurae.COMBO = 0
 
--- effect groups for each bar
-aurae.GROUPSCC = {}
-aurae.GROUPSDEBUFF = {}
-aurae.GROUPSBUFF = {}
+local WIDTH = 170
+local HEIGHT = 16
+local MAXBARS = 10
+
+local COMBO = 0
 
 _G.aurae_SCHOOL = {
 	NONE = {1, 1, 1},
@@ -216,16 +205,16 @@ local function format_time(t)
 end
 
 function UnlockBars()
-	aurae.LOCKED = false
-	for _, type in {'CC', 'Buff', 'Debuff'} do
-		_G['aurae' .. type]:EnableMouse(1)
+	LOCKED = false
+	for etype, group in GROUPS do
+		group:EnableMouse(1)
 		for i = 1, MAXBARS do
-			local f = getglobal('auraeBar' .. type .. i)
+			local f = group[i]
 			f:SetAlpha(1)
 			f.statusbar:SetStatusBarColor(1, 1, 1)
 			f.statusbar:SetValue(1)
 			f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
-			f.text:SetText('aurae ' .. type .. ' Bar ' .. i)
+			f.text:SetText('aurae ' .. strlower(etype) .. ' bar ' .. (aurae_settings.growth == 'up' and i or MAXBARS - i + 1))
 			f.timertext:SetText''
 			f.spark:Hide()
 			-- getglobal(barname.."StatusBarSpark"):SetPoint("CENTER", barname.."StatusBar", "LEFT", 0, 0)
@@ -234,15 +223,12 @@ function UnlockBars()
 end
 
 function LockBars()
-	aurae.LOCKED = true
-	auraeCC:EnableMouse(0)
-	auraeDebuff:EnableMouse(0)
-	auraeBuff:EnableMouse(0)
-
-	for i = 1, MAXBARS do
-		getglobal('auraeBarCC' .. i):SetAlpha(0)
-		getglobal('auraeBarDebuff' .. i):SetAlpha(0)
-		getglobal('auraeBarBuff' .. i):SetAlpha(0)
+	LOCKED = true
+	for _, group in GROUPS do
+		group:EnableMouse(0)
+		for i = 1, MAXBARS do
+			group[i]:SetAlpha(0)
+		end
 	end
 end
 
@@ -265,11 +251,38 @@ do
 				Print('Bars locked.')
 			elseif command == "invert" then
 				aurae_settings.invert = not aurae_settings.invert
-				aurae_settings.invert = aurae_settings.invert
 				if aurae_settings.invert then
 					Print('Bar inversion on.')
 				else
 					Print('Bar inversion off.')
+				end
+			elseif args[1] == 'growth' and (args[2] == 'up' or args[2] == 'down') then
+				aurae_settings.growth = args[2]
+				Print('Growth: ' .. args[2])
+				if not LOCKED then UnlockBars() end
+			elseif strsub(command, 1, 5) == "scale" then
+				local scale = tonumber(strsub(command, 7))
+				if scale then
+					scale = max(.5, min(3, scale))
+					aurae_settings.scale = scale
+					for _, group in GROUPS do
+						group:SetScale(scale)
+					end
+					Print('Scale: ' .. scale)
+				else
+					Usage()
+				end
+			elseif strsub(command, 1, 5) == "alpha" then
+				local alpha = tonumber(strsub(command, 7))
+				if alpha then
+					alpha = max(0, min(1, alpha))
+					aurae_settings.alpha = alpha
+					for _, group in GROUPS do
+						group:SetAlpha(alpha)
+					end
+					Print('Alpha: ' .. alpha)
+				else
+					Usage()
 				end
 			elseif args[1] == 'color' and (args[2] == 'school' or args[2] == 'progress' or args[2] == 'custom') then
 				aurae_settings.color = args[2]
@@ -281,29 +294,12 @@ do
 			elseif command == 'clear' then
 				aurae_settings = nil
 				LoadVariables()
-			elseif strsub(command, 1, 5) == "scale" then
-				local scale = tonumber(strsub(command, 7))
-				if scale then
-					scale = max(.25, min(3, scale))
-					aurae_settings.scale = scale
-					auraeCC:SetScale(scale)
-					auraeDebuff:SetScale(scale)
-					auraeBuff:SetScale(scale)
-					Print('Scale: ' .. scale)
+			elseif command == "arcanist" then
+				aurae_settings.arcanist = not aurae_settings.arcanist
+				if aurae_settings.invert then
+					Print('Arcanist on.')
 				else
-					Usage()
-				end
-			elseif strsub(command, 1, 5) == "alpha" then
-				local alpha = tonumber(strsub(command, 7))
-				if alpha then
-					alpha = max(0, min(1, alpha))
-					aurae_settings.alpha = alpha
-					auraeCC:SetAlpha(alpha)
-					auraeDebuff:SetAlpha(alpha)
-					auraeBuff:SetAlpha(alpha)
-					Print('Alpha: ' .. alpha)
-				else
-					Usage()
+					Print('Arcanist off.')
 				end
 			else
 				Usage()
@@ -316,9 +312,12 @@ function Usage()
 	Print("Usage:")
 	Print("  lock | unlock")
 	Print("  invert")
+	Print("  growth (up | down)")
+	Print("  scale [0.5,3]")
 	Print("  alpha [0,1]")
 	Print("  color (school | progress | custom)")
 	Print("  customcolor [1,255] [1,255] [1,255] <effect>")
+	Print("  arcanist")
 end
 
 do
@@ -387,7 +386,7 @@ do
 
 	function SPELLCAST_STOP()
 		for effect, target in casting do
-			if (EffectActive(effect, target) or not IsPlayer(target) and aurae.EFFECTS[effect]) and aurae.EFFECTS[effect].ETYPE ~= ETYPE_BUFF then
+			if (EffectActive(effect, target) or not IsPlayer(target) and aurae.EFFECTS[effect]) and aurae.EFFECTS[effect].ETYPE ~= 'BUFF' then
 				if pending[effect] then
 					last_cast = nil
 				else
@@ -517,7 +516,7 @@ end
 
 function UNIT_COMBAT()
 	if GetComboPoints() > 0 then
-		aurae.COMBO = GetComboPoints()
+		COMBO = GetComboPoints()
 	end
 end
 
@@ -527,18 +526,12 @@ end
 
 timers = {}
 
-local function place_timers()
+local function placeTimers()
 	for _, timer in timers do
 		if timer.shown and not timer.visible then
-			local group
-			if aurae.EFFECTS[timer.EFFECT].ETYPE == ETYPE_BUFF then
-				group = aurae.GROUPSBUFF
-			elseif aurae.EFFECTS[timer.EFFECT].ETYPE == ETYPE_DEBUFF then
-				group = aurae.GROUPSDEBUFF
-			else
-				group = aurae.GROUPSCC
-			end
-			for i = 1, MAXBARS do
+			local group = GROUPS[aurae.EFFECTS[timer.EFFECT].ETYPE]
+			local up = aurae_settings.growth == 'up'
+			for i = (up and 1 or MAXBARS), (up and MAXBARS or 1), (up and 1 or -1) do
 				if group[i].TIMER.stopped then
 					group[i].TIMER = timer
 					timer.visible = true
@@ -585,11 +578,11 @@ function StartTimer(effect, unit, start)
 	end
 
 	if aurae.EFFECTS[effect].COMBO then
-		timer.END = timer.END + aurae.EFFECTS[effect].A * aurae.COMBO
+		timer.END = timer.END + aurae.EFFECTS[effect].A * COMBO
 	end
 
 	timer.stopped = nil
-	place_timers()
+	placeTimers()
 end
 
 function StartDR(effect, unit)
@@ -607,7 +600,7 @@ function StartDR(effect, unit)
 		timer.shown = timer.shown or IsShown(unit)
 		timer.DR = min(3, (timer.DR or 0) + 1)
 
-		place_timers()
+		placeTimers()
 	end
 end
 
@@ -624,7 +617,7 @@ function StopTimer(key)
 	if timers[key] then
 		timers[key].stopped = GetTime()
 		timers[key] = nil
-		place_timers()
+		placeTimers()
 	end
 end
 
@@ -635,7 +628,7 @@ function UnitDied(unit)
 			StopTimer(k)
 		end
 	end
-	place_timers()
+	placeTimers()
 end
 
 do
@@ -663,7 +656,7 @@ do
 				timer.shown = true
 			end
 		end
-		place_timers()
+		placeTimers()
 	end
 
 	local function unit_changed(unitID)
@@ -746,16 +739,16 @@ end
 
 function UPDATE()
 	UpdateTimers()
-	if not aurae.LOCKED then
+	if not LOCKED then
 		return
 	end
 	UpdateBars()
 end
 
 function UpdateBars()
-	for _, group in {aurae.GROUPSBUFF, aurae.GROUPSDEBUFF, aurae.GROUPSCC} do
-		for _, bar in group do
-			UpdateBar(bar)
+	for _, group in GROUPS do
+		for i = 1, MAXBARS do
+			UpdateBar(group[i])
 		end
 	end
 end
@@ -767,7 +760,7 @@ do
 		color_code(1, 0, 0) .. 'DR: 0|r - ',
 	}
 	function UpdateBar(bar)
-		if not aurae.LOCKED then
+		if not LOCKED then
 			return
 		end
 
@@ -822,9 +815,10 @@ do
 end
 
 do
-	local default_settings = {
+	local defaultSettings = {
 		colors = {},
 		invert = false,
+		growth = 'up',
 		color = 'school',
 		scale = 1,
 		alpha = 1,
@@ -834,10 +828,12 @@ do
 	function ADDON_LOADED()
 		if arg1 ~= 'aurae' then return end
 
-		local dummy_timer = {stopped=0}
-		for i, etype in {'Debuff', 'CC', 'Buff'} do
+		local dummyTimer = {stopped=0}
+		GROUPS = {}
+		for i, etype in ipairs{'BUFF', 'DEBUFF', 'CC'} do
 			local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
-			local f = CreateFrame('Frame', 'aurae' .. etype, UIParent)
+			local f = CreateFrame('Frame', nil, UIParent)
+			GROUPS[strupper(etype)] = f
 			f:SetWidth(WIDTH + HEIGHT)
 			f:SetHeight(height)
 			f:SetMovable(true)
@@ -853,13 +849,12 @@ do
 			f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
 			for i = 1, MAXBARS do
 				local bar = create_bar()
-				bar:SetParent(getglobal('aurae' .. etype))
+				bar:SetParent(f)
 				local offset = 20 * (i - 1)
 				bar:SetPoint('BOTTOMLEFT', 0, offset)
 				bar:SetPoint('BOTTOMRIGHT', 0, offset)
-				_G['auraeBar' .. etype .. i] = bar
-				bar.TIMER = dummy_timer
-				tinsert(aurae['GROUPS' .. strupper(etype)], bar)
+				bar.TIMER = dummyTimer
+				tinsert(f, bar)
 			end
 		end
 
@@ -872,19 +867,16 @@ do
 			'PLAYER_TARGET_CHANGED', 'UPDATE_MOUSEOVER_UNIT', 'UPDATE_BATTLEFIELD_SCORE',
 		} do _F:RegisterEvent(event) end
 
-		for k, v in default_settings do
+		for k, v in defaultSettings do
 			if aurae_settings[k] == nil then
 				aurae_settings[k] = v
 			end
 		end
 
-		auraeCC:SetScale(aurae_settings.scale)
-		auraeDebuff:SetScale(aurae_settings.scale)
-		auraeBuff:SetScale(aurae_settings.scale)
-
-		auraeCC:SetAlpha(aurae_settings.alpha)
-		auraeDebuff:SetAlpha(aurae_settings.alpha)
-		auraeBuff:SetAlpha(aurae_settings.alpha)
+		for _, group in GROUPS do
+			group:SetScale(aurae_settings.scale)
+			group:SetAlpha(aurae_settings.alpha)
+		end
 
 		_G.SLASH_AURAE1 = '/aurae'
 		SlashCmdList.AURAE = SlashCommandHandler
