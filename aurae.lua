@@ -832,7 +832,7 @@ do
 		GROUPS = {}
 		for i, etype in ipairs{'DEBUFF', 'CC', 'BUFF'} do
 			local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
-			local f = CreateFrame('Frame', nil, UIParent)
+			local f = CreateFrame('Frame', 'aurae_' .. etype, UIParent)
 			GROUPS[strupper(etype)] = f
 			f:SetWidth(WIDTH + HEIGHT)
 			f:SetHeight(height)
