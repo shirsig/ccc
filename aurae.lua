@@ -389,7 +389,7 @@ do
 
 	function SPELLCAST_STOP()
 		for effect, target in casting do
-			if (EffectActive(effect, target) or not IsPlayer(target) and aurae.EFFECTS[effect]) and aurae.EFFECTS[effect].ETYPE ~= 'BUFF' then
+			if aurae.EFFECTS[effect] and aurae.EFFECTS[effect].ETYPE ~= 'BUFF' and (not IsPlayer(target) or EffectActive(effect, target)) then
 				if pending[effect] then
 					last_cast = nil
 				else
@@ -403,8 +403,10 @@ do
 
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for effect, info in pending do
-			if GetTime() >= info.time + .5 and (IsPlayer(info.target) or TargetID() ~= info.target or UnitDebuffs'target'[effect]) then
-				StartTimer(effect, info.target, info.time)
+			if GetTime() >= info.time + .5 then
+				if (IsPlayer(info.target) or TargetID() ~= info.target or UnitDebuffs'target'[effect]) then
+					StartTimer(effect, info.target, info.time)
+				end
 				pending[effect] = nil
 			end
 		end
