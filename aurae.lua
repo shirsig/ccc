@@ -1,12 +1,21 @@
-local _G, _M, _F = getfenv(0), {}, CreateFrame'Frame'
+local _G, _M = getfenv(0), {}
 setfenv(1, setmetatable(_M, {__index=_G}))
 
-_F:SetScript('OnUpdate', function() _M.UPDATE() end)
-
-_F:SetScript('OnEvent', function()
-	_M[event](this)
-end)
-_F:RegisterEvent'ADDON_LOADED'
+do
+	local f = CreateFrame'Frame'
+	f:SetScript('OnEvent', function()
+		_M[event](this)
+	end)
+	for _, event in {
+		'ADDON_LOADED',
+		'UNIT_COMBAT',
+		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
+		'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
+		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
+		'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
+		'PLAYER_TARGET_CHANGED', 'UPDATE_MOUSEOVER_UNIT', 'UPDATE_BATTLEFIELD_SCORE',
+	} do f:RegisterEvent(event) end
+end
 
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
 
@@ -17,8 +26,8 @@ end
 function QuickLocalize(str)
 	-- just remove $1 & $2 args because we *know that the order is not changed*.
 	-- not fail proof if ever it occurs (should be a more clever function, and return found arguments order)
-	str = string.gsub(str, '.%$', '')
-	str = string.gsub(str, '%%s', '(.+)')
+	str = gsub(str, '.%$', '')
+	str = gsub(str, '%%s', '(.+)')
 	return str
 end
 
@@ -82,13 +91,7 @@ DR_CLASS = {
 }
 
 do
-	local dr = {}
-
 	local factor = {1, 1/2, 1/4, 0}
-
-	local function diminish(key, seconds)
-		return factor[dr[key].level] * seconds
-	end
 
 	function DiminishedDuration(unit, effect, full_duration)
 		local class = DR_CLASS[effect]
@@ -737,13 +740,13 @@ do
 	end
 end
 
-function UPDATE()
+CreateFrame'Frame':SetScript('OnUpdate', function()
 	UpdateTimers()
 	if not LOCKED then
 		return
 	end
 	UpdateBars()
-end
+end)
 
 function UpdateBars()
 	for _, group in GROUPS do
@@ -857,15 +860,6 @@ do
 				tinsert(f, bar)
 			end
 		end
-
-		for _, event in {
-			'UNIT_COMBAT',
-			'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
-			'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
-			'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
-			'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
-			'PLAYER_TARGET_CHANGED', 'UPDATE_MOUSEOVER_UNIT', 'UPDATE_BATTLEFIELD_SCORE',
-		} do _F:RegisterEvent(event) end
 
 		for k, v in defaultSettings do
 			if aurae_settings[k] == nil then
