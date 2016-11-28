@@ -187,7 +187,7 @@ local function fade_bar(bar)
 		bar:SetAlpha(0)
 	else
 		local t = bar.fadetime - bar.fadeelapsed
-		local a = t / bar.fadetime
+		local a = t / bar.fadetime * aurae_settings.alpha
 		bar:SetAlpha(a)
 	end
 end
@@ -213,7 +213,7 @@ function UnlockBars()
 		group:EnableMouse(1)
 		for i = 1, MAXBARS do
 			local f = group[i]
-			f:SetAlpha(1)
+			f:SetAlpha(aurae_settings.alpha)
 			f.statusbar:SetStatusBarColor(1, 1, 1)
 			f.statusbar:SetValue(1)
 			f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
@@ -280,9 +280,7 @@ do
 				if alpha then
 					alpha = max(0, min(1, alpha))
 					aurae_settings.alpha = alpha
-					for _, group in GROUPS do
-						group:SetAlpha(alpha)
-					end
+					if not LOCKED then UnlockBars() end
 					Print('Alpha: ' .. alpha)
 				else
 					Usage()
@@ -292,7 +290,7 @@ do
 				Print('Color: ' .. args[2])
 			elseif args[1] == "customcolor" and tonumber(args[2]) and tonumber(args[3]) and tonumber(args[4]) and args[5] and aurae.EFFECTS[args[5]] then
 				local effect = gsub(msg, '%s*%S+%s*', '', 4)
-				aurae_settings.colors[effect] = {tonumber(args[2])/255, tonumber(args[3])/255, tonumber(args[4])/255 }
+				aurae_settings.colors[effect] = {tonumber(args[2])/255, tonumber(args[3])/255, tonumber(args[4])/255}
 				print('Custom color: ' .. color_code(unpack(aurae_settings.colors[effect])) .. effect .. '|r')
 			elseif command == 'clear' then
 				aurae_settings = nil
@@ -778,7 +776,7 @@ do
 				fade_bar(bar)
 			end
 		else
-			bar:SetAlpha(1)
+			bar:SetAlpha(aurae_settings.alpha)
 			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 			bar.text:SetText((timer.DR and dr_prefix[timer.DR] or '') .. timer.UNIT)
 
@@ -826,7 +824,7 @@ do
 		growth = 'up',
 		color = 'school',
 		scale = 1,
-		alpha = 1,
+		alpha = .85,
 		arcanist = false,
 	}
 
@@ -855,6 +853,7 @@ do
 			for i = 1, MAXBARS do
 				local bar = create_bar()
 				bar:SetParent(f)
+				bar:SetAlpha(aurae_settings.alpha)
 				local offset = 20 * (i - 1)
 				bar:SetPoint('BOTTOMLEFT', 0, offset)
 				bar:SetPoint('BOTTOMRIGHT', 0, offset)
@@ -871,7 +870,6 @@ do
 
 		for _, group in GROUPS do
 			group:SetScale(aurae_settings.scale)
-			group:SetAlpha(aurae_settings.alpha)
 		end
 
 		_G.SLASH_AURAE1 = '/aurae'
