@@ -756,6 +756,7 @@ do
 		color_code(1, .5, 0) .. 'DR: ¼|r - ',
 		color_code(1, 0, 0) .. 'DR: 0|r - ',
 	}
+	
 	function UpdateBar(bar)
 		if not LOCKED then
 			return
