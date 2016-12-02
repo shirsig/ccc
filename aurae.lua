@@ -826,6 +826,12 @@ do
 	function ADDON_LOADED()
 		if arg1 ~= 'aurae' then return end
 
+		for k, v in defaultSettings do
+			if aurae_settings[k] == nil then
+				aurae_settings[k] = v
+			end
+		end
+		
 		local dummyTimer = {stopped=0}
 		GROUPS = {}
 		for i, etype in ipairs{'DEBUFF', 'CC', 'BUFF'} do
@@ -854,12 +860,6 @@ do
 				bar:SetPoint('BOTTOMRIGHT', 0, offset)
 				bar.TIMER = dummyTimer
 				tinsert(f, bar)
-			end
-		end
-
-		for k, v in defaultSettings do
-			if aurae_settings[k] == nil then
-				aurae_settings[k] = v
 			end
 		end
 
