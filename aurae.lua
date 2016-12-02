@@ -23,14 +23,6 @@ function Print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
 end
 
-function QuickLocalize(str)
-	-- just remove $1 & $2 args because we *know that the order is not changed*.
-	-- not fail proof if ever it occurs (should be a more clever function, and return found arguments order)
-	str = gsub(str, '.%$', '')
-	str = gsub(str, '%%s', '(.+)')
-	return str
-end
-
 _G.aurae_settings = {}
 
 _G.aurae = {}
@@ -456,13 +448,15 @@ do
 end
 
 function CHAT_MSG_SPELL_AURA_GONE_OTHER()
-	for effect, unit in string.gfind(arg1, QuickLocalize(AURAREMOVEDOTHER)) do
+	for effect, unit in string.gfind(arg1, '(.+) fades from (.+)%.') do
+
 		AuraGone(unit, effect)
 	end
 end
 
 function CHAT_MSG_SPELL_BREAK_AURA()
-	for unit, effect in string.gfind(arg1, QuickLocalize(AURADISPELOTHER)) do
+	for unit, effect in string.gfind(arg1, "(.+)'s (.+) is removed%.") do
+		p(unit, effect)
 		AuraGone(unit, effect)
 	end
 end
@@ -698,7 +692,7 @@ do
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 		if player[hostile_player(arg1)] == nil then player[hostile_player(arg1)] = true end -- wrong for pets
-		for unit, effect in string.gfind(arg1, QuickLocalize(AURAADDEDOTHERHELPFUL)) do
+		for unit, effect in string.gfind(arg1, '(.+) gains (.+)%.') do
 			if IsPlayer(unit) and aurae.EFFECTS[effect] then
 				StartTimer(effect, unit, GetTime())
 			end
@@ -707,7 +701,7 @@ do
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostile_player(arg1)] == nil then player[hostile_player(arg1)] = true end -- wrong for pets
-		for unit, effect in string.gfind(arg1, QuickLocalize(AURAADDEDOTHERHARMFUL)) do
+		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
 			if IsPlayer(unit) and aurae.EFFECTS[effect] then
 				StartTimer(effect, unit, GetTime())
 			end
@@ -757,7 +751,7 @@ function UpdateBars()
 end
 
 do
-	local dr_prefix = {
+	local drPrefix = {
 		color_code(1, 1, 0) .. 'DR: ½|r - ',
 		color_code(1, .5, 0) .. 'DR: ¼|r - ',
 		color_code(1, 0, 0) .. 'DR: 0|r - ',
@@ -778,7 +772,7 @@ do
 		else
 			bar:SetAlpha(aurae_settings.alpha)
 			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
-			bar.text:SetText((timer.DR and dr_prefix[timer.DR] or '') .. timer.UNIT)
+			bar.text:SetText((timer.DR and drPrefix[timer.DR] or '') .. timer.UNIT)
 
 			local fraction
 			if timer.START then
