@@ -199,10 +199,9 @@ function UnlockBars()
 			f.statusbar:SetStatusBarColor(1, 1, 1)
 			f.statusbar:SetValue(1)
 			f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
-			f.text:SetText('aurae ' .. strlower(etype) .. ' bar ' .. (aurae_settings.growth == 'up' and i or MAXBARS - i + 1))
-			f.timertext:SetText''
+			f.text:SetText('aurae ' .. strlower(etype))
+			f.timertext:SetText((aurae_settings.growth == 'up' and i or MAXBARS - i + 1))
 			f.spark:Hide()
-			-- getglobal(barname.."StatusBarSpark"):SetPoint("CENTER", barname.."StatusBar", "LEFT", 0, 0)
 		end
 	end
 end
