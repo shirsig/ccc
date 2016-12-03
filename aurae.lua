@@ -82,6 +82,8 @@ local DR_CLASS = {
 	["Frost Shock"] = 11,
 }
 
+local GROUPS = {}
+
 do
 	local factor = {1, 1/2, 1/4, 0}
 
@@ -816,7 +818,6 @@ do
 		end
 		
 		local dummyTimer = {stopped=0}
-		GROUPS = {}
 		for i, etype in ipairs{'DEBUFF', 'CC', 'BUFF'} do
 			local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
 			local f = CreateFrame('Frame', 'aurae_' .. etype, UIParent)
