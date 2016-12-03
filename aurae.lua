@@ -19,6 +19,10 @@ end
 
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
 
+local function colorCode(r, g, b)
+	return format('|cFF%02X%02X%02X', r*255, g*255, b*255)
+end
+
 function Print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
 end
@@ -83,32 +87,6 @@ local DR_CLASS = {
 }
 
 local GROUPS, timers = {}, {}
-
-do
-	local factor = {1, 1/2, 1/4, 0}
-
-	function DiminishedDuration(unit, effect, full_duration)
-		local class = DR_CLASS[effect]
-		if class then
-			StartDR(effect, unit)
-			return full_duration * factor[timers[class .. '@' .. unit].DR]
-		else
-			return full_duration
-		end
-	end
-end
-
-function UnitDebuffs(unit)
-	local debuffs = {}
-	local i = 1
-	while UnitDebuff(unit, i) do
-		aurae_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-		aurae_Tooltip:SetUnitDebuff(unit, i)
-		debuffs[aurae_TooltipTextLeft1:GetText()] = true
-		i = i + 1
-	end
-	return debuffs
-end
 
 function CreateBar()
 
@@ -176,6 +154,91 @@ function FadeBar(bar)
 	end
 end
 
+function UpdateBars()
+	for _, group in GROUPS do
+		for i = 1, MAXBARS do
+			UpdateBar(group[i])
+		end
+	end
+end
+
+do
+	local drPrefix = {
+		colorCode(1, 1, 0) .. 'DR: ½|r - ',
+		colorCode(1, .5, 0) .. 'DR: ¼|r - ',
+		colorCode(1, 0, 0) .. 'DR: 0|r - ',
+	}
+
+	local function formatTime(t)
+		local h = floor(t / 3600)
+		local m = floor((t - h * 3600) / 60)
+		local s = t - (h * 3600 + m * 60)
+		if h > 0 then
+			return format('%d:%02d:02d', h, m, s)
+		elseif m > 0 then
+			return format('%d:%02d', m, s)
+		elseif s < 10 then
+			return format('%.1f', s)
+		else
+			return format('%.0f', s)
+		end
+	end
+
+	function UpdateBar(bar)
+		if not LOCKED then
+			return
+		end
+
+		local timer = bar.TIMER
+
+		if timer.stopped then
+			if bar:GetAlpha() > 0 then
+				bar.spark:Hide()
+				bar.fadeelapsed = GetTime() - timer.stopped
+				FadeBar(bar)
+			end
+		else
+			bar:SetAlpha(aurae_settings.alpha)
+			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
+			bar.text:SetText((timer.DR and drPrefix[timer.DR] or '') .. gsub(timer.UNIT, ':.*', ''))
+
+			local fraction
+			if timer.START then
+				local duration = timer.END - timer.START
+				local remaining = timer.END - GetTime()
+				fraction = remaining / duration
+
+				bar.statusbar:SetValue(aurae_settings.invert and 1 - fraction or fraction)
+
+				local sparkPosition = WIDTH * fraction
+				bar.spark:Show()
+				bar.spark:SetPoint('CENTER', bar.statusbar, aurae_settings.invert and 'RIGHT' or 'LEFT', aurae_settings.invert and -sparkPosition or sparkPosition, 0)
+
+				bar.timertext:SetText(formatTime(remaining))
+			else
+				fraction = 1
+				bar.statusbar:SetValue(1)
+				bar.spark:Hide()
+				bar.timertext:SetText()
+			end
+			local r, g, b
+			if aurae_settings.color == 'school' then
+				r, g, b = unpack(SCHOOL_COLOR[aurae.EFFECTS[timer.EFFECT].SCHOOL])
+			elseif aurae_settings.color == 'progress' then
+				r, g, b = 1 - fraction, fraction, 0
+			elseif aurae_settings.color == 'custom' then
+				if aurae_settings.colors[timer.EFFECT] then
+					r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
+				else
+					r, g, b = 1, 1, 1
+				end
+			end
+			bar.statusbar:SetStatusBarColor(r, g, b)
+			bar.statusbar:SetBackdropColor(r, g, b, .3)
+		end
+	end
+end
+
 function UnlockBars()
 	LOCKED = false
 	for etype, group in GROUPS do
@@ -204,89 +267,29 @@ function LockBars()
 end
 
 do
-	local function tokenize(str)
-		local tokens = {}
-		for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
-		return tokens
-	end
+	local factor = {1, 1/2, 1/4, 0}
 
-	function SlashCommandHandler(msg)
-		if msg then
-			local args = tokenize(msg)
-			local command = strlower(msg)
-			if command == "unlock" then
-				UnlockBars()
-				Print('Bars unlocked.')
-			elseif command == "lock" then
-				LockBars()
-				Print('Bars locked.')
-			elseif command == "invert" then
-				aurae_settings.invert = not aurae_settings.invert
-				if aurae_settings.invert then
-					Print('Bar inversion on.')
-				else
-					Print('Bar inversion off.')
-				end
-			elseif args[1] == 'growth' and (args[2] == 'up' or args[2] == 'down') then
-				aurae_settings.growth = args[2]
-				Print('Growth: ' .. args[2])
-				if not LOCKED then UnlockBars() end
-			elseif strsub(command, 1, 5) == "scale" then
-				local scale = tonumber(strsub(command, 7))
-				if scale then
-					scale = max(.5, min(3, scale))
-					aurae_settings.scale = scale
-					for _, group in GROUPS do
-						group:SetScale(scale)
-					end
-					Print('Scale: ' .. scale)
-				else
-					Usage()
-				end
-			elseif strsub(command, 1, 5) == "alpha" then
-				local alpha = tonumber(strsub(command, 7))
-				if alpha then
-					alpha = max(0, min(1, alpha))
-					aurae_settings.alpha = alpha
-					if not LOCKED then UnlockBars() end
-					Print('Alpha: ' .. alpha)
-				else
-					Usage()
-				end
-			elseif args[1] == 'color' and (args[2] == 'school' or args[2] == 'progress' or args[2] == 'custom') then
-				aurae_settings.color = args[2]
-				Print('Color: ' .. args[2])
-			elseif args[1] == "customcolor" and tonumber(args[2]) and tonumber(args[3]) and tonumber(args[4]) and args[5] and aurae.EFFECTS[args[5]] then
-				local effect = gsub(msg, '%s*%S+%s*', '', 4)
-				aurae_settings.colors[effect] = {tonumber(args[2])/255, tonumber(args[3])/255, tonumber(args[4])/255}
-				print('Custom color: ' .. ColorCode(unpack(aurae_settings.colors[effect])) .. effect .. '|r')
-			elseif command == 'clear' then
-				aurae_settings = nil
-				LoadVariables()
-			elseif command == "arcanist" then
-				aurae_settings.arcanist = not aurae_settings.arcanist
-				if aurae_settings.invert then
-					Print('Arcanist on.')
-				else
-					Print('Arcanist off.')
-				end
-			else
-				Usage()
-			end
+	function DiminishedDuration(unit, effect, full_duration)
+		local class = DR_CLASS[effect]
+		if class then
+			StartDR(effect, unit)
+			return full_duration * factor[timers[class .. '@' .. unit].DR]
+		else
+			return full_duration
 		end
 	end
 end
 
-function Usage()
-	Print("Usage:")
-	Print("  lock | unlock")
-	Print("  invert")
-	Print("  growth (up | down)")
-	Print("  scale [0.5,3]")
-	Print("  alpha [0,1]")
-	Print("  color (school | progress | custom)")
-	Print("  customcolor [1,255] [1,255] [1,255] <effect>")
-	Print("  arcanist")
+function UnitDebuffs(unit)
+	local debuffs = {}
+	local i = 1
+	while UnitDebuff(unit, i) do
+		aurae_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+		aurae_Tooltip:SetUnitDebuff(unit, i)
+		debuffs[aurae_TooltipTextLeft1:GetText()] = true
+		i = i + 1
+	end
+	return debuffs
 end
 
 function TargetID()
@@ -485,10 +488,6 @@ function UNIT_COMBAT()
 	if GetComboPoints() > 0 then
 		COMBO = GetComboPoints()
 	end
-end
-
-function ColorCode(r, g, b)
-	return format('|cFF%02X%02X%02X', r*255, g*255, b*255)
 end
 
 function PlaceTimers()
@@ -710,91 +709,6 @@ CreateFrame'Frame':SetScript('OnUpdate', function()
 	UpdateBars()
 end)
 
-function UpdateBars()
-	for _, group in GROUPS do
-		for i = 1, MAXBARS do
-			UpdateBar(group[i])
-		end
-	end
-end
-
-do
-	local drPrefix = {
-		ColorCode(1, 1, 0) .. 'DR: ½|r - ',
-		ColorCode(1, .5, 0) .. 'DR: ¼|r - ',
-		ColorCode(1, 0, 0) .. 'DR: 0|r - ',
-	}
-
-	local function formatTime(t)
-		local h = floor(t / 3600)
-		local m = floor((t - h * 3600) / 60)
-		local s = t - (h * 3600 + m * 60)
-		if h > 0 then
-			return format('%d:%02d:02d', h, m, s)
-		elseif m > 0 then
-			return format('%d:%02d', m, s)
-		elseif s < 10 then
-			return format('%.1f', s)
-		else
-			return format('%.0f', s)
-		end
-	end
-	
-	function UpdateBar(bar)
-		if not LOCKED then
-			return
-		end
-
-		local timer = bar.TIMER
-
-		if timer.stopped then
-			if bar:GetAlpha() > 0 then
-				bar.spark:Hide()
-				bar.fadeelapsed = GetTime() - timer.stopped
-				FadeBar(bar)
-			end
-		else
-			bar:SetAlpha(aurae_settings.alpha)
-			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
-			bar.text:SetText((timer.DR and drPrefix[timer.DR] or '') .. gsub(timer.UNIT, ':.*', ''))
-
-			local fraction
-			if timer.START then
-				local duration = timer.END - timer.START
-				local remaining = timer.END - GetTime()
-				fraction = remaining / duration
-
-				bar.statusbar:SetValue(aurae_settings.invert and 1 - fraction or fraction)
-
-				local sparkPosition = WIDTH * fraction
-				bar.spark:Show()
-				bar.spark:SetPoint('CENTER', bar.statusbar, aurae_settings.invert and 'RIGHT' or 'LEFT', aurae_settings.invert and -sparkPosition or sparkPosition, 0)
-
-				bar.timertext:SetText(formatTime(remaining))
-			else
-				fraction = 1
-				bar.statusbar:SetValue(1)
-				bar.spark:Hide()
-				bar.timertext:SetText()
-			end
-			local r, g, b
-			if aurae_settings.color == 'school' then
-				r, g, b = unpack(SCHOOL_COLOR[aurae.EFFECTS[timer.EFFECT].SCHOOL])
-			elseif aurae_settings.color == 'progress' then
-				r, g, b = 1 - fraction, fraction, 0
-			elseif aurae_settings.color == 'custom' then
-				if aurae_settings.colors[timer.EFFECT] then
-					r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
-				else
-					r, g, b = 1, 1, 1
-				end
-			end
-			bar.statusbar:SetStatusBarColor(r, g, b)
-			bar.statusbar:SetBackdropColor(r, g, b, .3)
-		end
-	end
-end
-
 do
 	local defaultSettings = {
 		colors = {},
@@ -856,6 +770,92 @@ do
 	end
 
 	Print('aurae loaded - /aurae')
+end
+
+do
+	local function tokenize(str)
+		local tokens = {}
+		for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
+		return tokens
+	end
+
+	function SlashCommandHandler(msg)
+		if msg then
+			local args = tokenize(msg)
+			local command = strlower(msg)
+			if command == "unlock" then
+				UnlockBars()
+				Print('Bars unlocked.')
+			elseif command == "lock" then
+				LockBars()
+				Print('Bars locked.')
+			elseif command == "invert" then
+				aurae_settings.invert = not aurae_settings.invert
+				if aurae_settings.invert then
+					Print('Bar inversion on.')
+				else
+					Print('Bar inversion off.')
+				end
+			elseif args[1] == 'growth' and (args[2] == 'up' or args[2] == 'down') then
+				aurae_settings.growth = args[2]
+				Print('Growth: ' .. args[2])
+				if not LOCKED then UnlockBars() end
+			elseif strsub(command, 1, 5) == "scale" then
+				local scale = tonumber(strsub(command, 7))
+				if scale then
+					scale = max(.5, min(3, scale))
+					aurae_settings.scale = scale
+					for _, group in GROUPS do
+						group:SetScale(scale)
+					end
+					Print('Scale: ' .. scale)
+				else
+					Usage()
+				end
+			elseif strsub(command, 1, 5) == "alpha" then
+				local alpha = tonumber(strsub(command, 7))
+				if alpha then
+					alpha = max(0, min(1, alpha))
+					aurae_settings.alpha = alpha
+					if not LOCKED then UnlockBars() end
+					Print('Alpha: ' .. alpha)
+				else
+					Usage()
+				end
+			elseif args[1] == 'color' and (args[2] == 'school' or args[2] == 'progress' or args[2] == 'custom') then
+				aurae_settings.color = args[2]
+				Print('Color: ' .. args[2])
+			elseif args[1] == "customcolor" and tonumber(args[2]) and tonumber(args[3]) and tonumber(args[4]) and args[5] and aurae.EFFECTS[args[5]] then
+				local effect = gsub(msg, '%s*%S+%s*', '', 4)
+				aurae_settings.colors[effect] = {tonumber(args[2])/255, tonumber(args[3])/255, tonumber(args[4])/255}
+				print('Custom color: ' .. colorCode(unpack(aurae_settings.colors[effect])) .. effect .. '|r')
+			elseif command == 'clear' then
+				aurae_settings = nil
+				LoadVariables()
+			elseif command == "arcanist" then
+				aurae_settings.arcanist = not aurae_settings.arcanist
+				if aurae_settings.invert then
+					Print('Arcanist on.')
+				else
+					Print('Arcanist off.')
+				end
+			else
+				Usage()
+			end
+		end
+	end
+end
+
+function Usage()
+	Print("Usage:")
+	Print("  lock | unlock")
+	Print("  invert")
+	Print("  growth (up | down)")
+	Print("  scale [0.5,3]")
+	Print("  alpha [0,1]")
+	Print("  color (school | progress | custom)")
+	Print("  customcolor [1,255] [1,255] [1,255] <effect>")
+	Print("  arcanist")
 end
 
 do
