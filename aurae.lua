@@ -114,7 +114,7 @@ local function create_bar()
 	local font, _, style = GameFontHighlight:GetFont()
 	local fontsize = 11
 
-	local f = CreateFrame('Button', nil, UIParent)
+	local f = CreateFrame('Frame', nil, UIParent)
 
 	f.fadetime = .5
 
@@ -160,16 +160,6 @@ local function create_bar()
 	f.timertext:SetPoint('BOTTOMRIGHT', -2, 0)
 	f.timertext:SetJustifyH'RIGHT'
 	f.timertext:SetText''
-
-	f:EnableMouse(false)
-	f:RegisterForClicks()
-
---	f:SetScript('OnUpdate', function()
---		f:EnableMouse(IsControlKeyDown())
---	end)
---	f:SetScript('OnClick', function()
---		TargetByName(this.TIMER.UNIT, true)
---	end)
 
 	return f
 end
