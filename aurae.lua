@@ -302,14 +302,10 @@ function Usage()
 	Print("  arcanist")
 end
 
-do
-	local gender = {[2]='M', [3]='F'}
-
-	function TargetID()
-		local name = UnitName'target'
-		if name then
-			return UnitIsPlayer'target' and name or '[' .. UnitLevel'target' .. (gender[UnitSex'target'] or '') .. '] ' .. name
-		end
+function TargetID()
+	local name = UnitName'target'
+	if name then
+		return UnitIsPlayer'target' and name or name .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target'
 	end
 end
 
@@ -760,7 +756,7 @@ do
 		else
 			bar:SetAlpha(aurae_settings.alpha)
 			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
-			bar.text:SetText((timer.DR and drPrefix[timer.DR] or '') .. timer.UNIT)
+			bar.text:SetText((timer.DR and drPrefix[timer.DR] or '') .. gsub(timer.UNIT, ':.*', ''))
 
 			local fraction
 			if timer.START then
