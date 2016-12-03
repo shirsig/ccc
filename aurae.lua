@@ -449,7 +449,6 @@ end
 
 function CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, unit in string.gfind(arg1, '(.+) fades from (.+)%.') do
-
 		AuraGone(unit, effect)
 	end
 end
