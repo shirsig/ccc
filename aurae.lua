@@ -82,7 +82,7 @@ local DR_CLASS = {
 	["Frost Shock"] = 11,
 }
 
-local GROUPS = {}
+local GROUPS, timers = {}, {}
 
 do
 	local factor = {1, 1/2, 1/4, 0}
@@ -110,7 +110,7 @@ function UnitDebuffs(unit)
 	return debuffs
 end
 
-local function create_bar()
+function CreateBar()
 
 	local texture = [[Interface\Addons\aurae\bar]]
 	local font, _, style = GameFontHighlight:GetFont()
@@ -166,28 +166,13 @@ local function create_bar()
 	return f
 end
 
-local function fade_bar(bar)
+function FadeBar(bar)
 	if bar.fadeelapsed > bar.fadetime then
 		bar:SetAlpha(0)
 	else
 		local t = bar.fadetime - bar.fadeelapsed
 		local a = t / bar.fadetime * aurae_settings.alpha
 		bar:SetAlpha(a)
-	end
-end
-
-local function format_time(t)
-	local h = floor(t / 3600)
-	local m = floor((t - h * 3600) / 60)
-	local s = t - (h * 3600 + m * 60)
-	if h > 0 then
-		return format('%d:%02d:02d', h, m, s)
-	elseif m > 0 then
-		return format('%d:%02d', m, s)
-	elseif s < 10 then
-		return format('%.1f', s)
-	else
-		return format('%.0f', s)
 	end
 end
 
@@ -506,9 +491,7 @@ function color_code(r, g, b)
 	return format('|cFF%02X%02X%02X', r*255, g*255, b*255)
 end
 
-timers = {}
-
-local function placeTimers()
+function PlaceTimers()
 	for _, timer in timers do
 		if timer.shown and not timer.visible then
 			local group = GROUPS[aurae.EFFECTS[timer.EFFECT].ETYPE]
@@ -564,7 +547,7 @@ function StartTimer(effect, unit, start)
 	end
 
 	timer.stopped = nil
-	placeTimers()
+	PlaceTimers()
 end
 
 function StartDR(effect, unit)
@@ -582,7 +565,7 @@ function StartDR(effect, unit)
 		timer.shown = timer.shown or IsShown(unit)
 		timer.DR = min(3, (timer.DR or 0) + 1)
 
-		placeTimers()
+		PlaceTimers()
 	end
 end
 
@@ -599,7 +582,7 @@ function StopTimer(key)
 	if timers[key] then
 		timers[key].stopped = GetTime()
 		timers[key] = nil
-		placeTimers()
+		PlaceTimers()
 	end
 end
 
@@ -610,19 +593,19 @@ function UnitDied(unit)
 			StopTimer(k)
 		end
 	end
-	placeTimers()
+	PlaceTimers()
 end
 
 do
 	local f = CreateFrame'Frame'
 	local player, current, recent = {}, {}, {}
 
-	local function hostile_player(msg)
+	local function hostilePlayer(msg)
 		local _, _, name = strfind(arg1, "^([^%s']*)")
 		return name
 	end
 
-	local function add_recent(unit)
+	local function addRecent(unit)
 		local t = GetTime()
 
 		recent[unit] = t
@@ -638,19 +621,19 @@ do
 				timer.shown = true
 			end
 		end
-		placeTimers()
+		PlaceTimers()
 	end
 
-	local function unit_changed(unitID)
+	local function unitChanged(unitID)
 		local unit = UnitName(unitID)
 		if unit then
 			player[unit] = UnitIsPlayer(unitID) and true or false
 
 			if player[unit] then
-				add_recent(unit)
+				addRecent(unit)
 			end
 			if player[current[unitID]] and current[unitID] then
-				add_recent(current[unitID])
+				addRecent(current[unitID])
 			end
 			current[unitID] = unit
 		end
@@ -667,7 +650,7 @@ do
 
 	f:SetScript('OnEvent', function()
 		if strfind(arg1, '. You ') or strfind(arg1, ' you') then
-			add_recent(hostile_player(arg1)) -- TODO make sure this happens before the other handlers
+			addRecent(hostilePlayer(arg1)) -- TODO make sure this happens before the other handlers
 		end
 	end)
 
@@ -676,7 +659,7 @@ do
 	end)
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
-		if player[hostile_player(arg1)] == nil then player[hostile_player(arg1)] = true end -- wrong for pets
+		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) gains (.+)%.') do
 			if IsPlayer(unit) and aurae.EFFECTS[effect] then
 				StartTimer(effect, unit, GetTime())
@@ -685,7 +668,7 @@ do
 	end
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
-		if player[hostile_player(arg1)] == nil then player[hostile_player(arg1)] = true end -- wrong for pets
+		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
 			if IsPlayer(unit) and aurae.EFFECTS[effect] then
 				StartTimer(effect, unit, GetTime())
@@ -694,11 +677,11 @@ do
 	end
 
 	function PLAYER_TARGET_CHANGED()
-		unit_changed'target'
+		unitChanged'target'
 	end
 
 	function UPDATE_MOUSEOVER_UNIT()
-		unit_changed'mouseover'
+		unitChanged'mouseover'
 	end
 
 	function UPDATE_BATTLEFIELD_SCORE()
@@ -741,6 +724,21 @@ do
 		color_code(1, .5, 0) .. 'DR: ¼|r - ',
 		color_code(1, 0, 0) .. 'DR: 0|r - ',
 	}
+
+	local function formatTime(t)
+		local h = floor(t / 3600)
+		local m = floor((t - h * 3600) / 60)
+		local s = t - (h * 3600 + m * 60)
+		if h > 0 then
+			return format('%d:%02d:02d', h, m, s)
+		elseif m > 0 then
+			return format('%d:%02d', m, s)
+		elseif s < 10 then
+			return format('%.1f', s)
+		else
+			return format('%.0f', s)
+		end
+	end
 	
 	function UpdateBar(bar)
 		if not LOCKED then
@@ -753,7 +751,7 @@ do
 			if bar:GetAlpha() > 0 then
 				bar.spark:Hide()
 				bar.fadeelapsed = GetTime() - timer.stopped
-				fade_bar(bar)
+				FadeBar(bar)
 			end
 		else
 			bar:SetAlpha(aurae_settings.alpha)
@@ -772,7 +770,7 @@ do
 				bar.spark:Show()
 				bar.spark:SetPoint('CENTER', bar.statusbar, aurae_settings.invert and 'RIGHT' or 'LEFT', aurae_settings.invert and -sparkPosition or sparkPosition, 0)
 
-				bar.timertext:SetText(format_time(remaining))
+				bar.timertext:SetText(formatTime(remaining))
 			else
 				fraction = 1
 				bar.statusbar:SetValue(1)
@@ -836,7 +834,7 @@ do
 			end)
 			f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
 			for i = 1, MAXBARS do
-				local bar = create_bar()
+				local bar = CreateBar()
 				bar:SetParent(f)
 				bar:SetAlpha(aurae_settings.alpha)
 				local offset = 20 * (i - 1)
