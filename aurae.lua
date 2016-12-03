@@ -315,8 +315,8 @@ end
 
 function SetActionRank(name, rank)
 	local _, _, rank = strfind(rank or '', 'Rank (%d+)')
-	if rank and _G.aurae_RANKS[name] then
-		_G.aurae.EFFECTS[_G.aurae_RANKS[name].EFFECT or name].DURATION = _G.aurae_RANKS[name].DURATION[tonumber(rank)]
+	if rank and aurae_RANKS[name] then
+		aurae.EFFECTS[aurae_RANKS[name].EFFECT or name].DURATION = aurae_RANKS[name].DURATION[tonumber(rank)]
 	end
 end
 
@@ -372,7 +372,7 @@ do
 				if pending[effect] then
 					last_cast = nil
 				else
-					pending[effect] = {target=target, time=GetTime() + (_G.aurae_RANKS[effect] and _G.aurae_DELAYS[effect] or 0)}
+					pending[effect] = {target=target, time=GetTime() + (aurae_RANKS[effect] and aurae_DELAYS[effect] or 0)}
 					last_cast = effect
 				end
 			end

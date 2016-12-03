@@ -1,20 +1,18 @@
-aurae_ACTION_EFFECTS = {
-
-}
-
 aurae_DELAYS = {
-	["Fireball"] = .5,
-	["Frostbolt"] = .5,
+	["Fireball"] = 1,
+	["Frostbolt"] = 1,
 }
 
 aurae_RANKS = {}
 
 -- Warrior
+
 aurae_RANKS["Rend"] = {
 	DURATION = {9, 12, 15, 18, 21, 21, 21},
 }
 
 -- Mage
+
 aurae_RANKS["Polymorph"] = {
 	DURATION = {20, 30, 40, 50},
 }
@@ -28,11 +26,13 @@ aurae_RANKS["Frostbolt"] = {
 }
 
 -- Priest
+
 aurae_RANKS["Shackle Undead"] = {
 	DURATION = {30, 40, 50},
 }
 
 -- Druid
+
 aurae_RANKS["Entangling Roots"] = {
 	DURATION = {12, 15, 18, 21, 24, 27},
 }
@@ -46,6 +46,7 @@ aurae_RANKS["Hibernate"] = {
 }
 
 -- Hunter
+
 aurae_RANKS["Freezing Trap"] = {
 	DURATION = {10, 15, 20},
 	EFFECT = "Freezing Trap Effect",
@@ -56,6 +57,7 @@ aurae_RANKS["Scare Beast"] = {
 }
 
 -- Paladin
+
 aurae_RANKS["Hammer of Justice"] = {
 	DURATION = {3, 4, 5, 6},
 }
@@ -69,6 +71,7 @@ aurae_RANKS["Divine Shield"] = {
 }
 
 -- Warlock
+
 aurae_RANKS["Fear"] = {
 	DURATION = {10, 15, 20},
 }
