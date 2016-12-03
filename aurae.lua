@@ -693,7 +693,7 @@ do
 		return not player[unit]
 				or UnitName'target' == unit
 				or UnitName'mouseover' == unit
-				or recent[unit] and GetTime() - recent[unit] <= 30
+				or recent[unit] and GetTime() - recent[unit] <= 20
 	end
 
 	function IsPlayer(unit)
