@@ -456,7 +456,6 @@ end
 
 function CHAT_MSG_SPELL_BREAK_AURA()
 	for unit, effect in string.gfind(arg1, "(.+)'s (.+) is removed%.") do
-		p(unit, effect)
 		AuraGone(unit, effect)
 	end
 end
