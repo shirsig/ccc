@@ -34,7 +34,7 @@ local MAXBARS = 10
 
 local COMBO = 0
 
-_G.aurae_SCHOOL = {
+local SCHOOL_COLOR = {
 	NONE = {1, 1, 1},
 	PHYSICAL = {1, 1, 0},
 	HOLY = {1, .9, .5},
@@ -45,7 +45,7 @@ _G.aurae_SCHOOL = {
 	ARCANE = {1, .5, 1},
 }
 
-DR_CLASS = {
+local DR_CLASS = {
 	["Bash"] = 1,
 	["Hammer of Justice"] = 1,
 	["Cheap Shot"] = 1,
@@ -794,7 +794,7 @@ do
 			end
 			local r, g, b
 			if aurae_settings.color == 'school' then
-				r, g, b = unpack(aurae.EFFECTS[timer.EFFECT].SCHOOL or {1, 0, 1})
+				r, g, b = unpack(SCHOOL_COLOR[aurae.EFFECTS[timer.EFFECT].SCHOOL])
 			elseif aurae_settings.color == 'progress' then
 				r, g, b = 1 - fraction, fraction, 0
 			elseif aurae_settings.color == 'custom' then
