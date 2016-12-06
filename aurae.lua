@@ -595,8 +595,9 @@ function UnitDied(unit)
 	PlaceTimers()
 end
 
+CreateFrame'Frame':SetScript('OnUpdate', RequestBattlefieldScoreData)
+
 do
-	local f = CreateFrame'Frame'
 	local player, current, recent = {}, {}, {}
 
 	local function hostilePlayer(msg)
@@ -637,25 +638,6 @@ do
 			current[unitID] = unit
 		end
 	end
-
-	for _, event in {
-		'CHAT_MSG_COMBAT_HOSTILEPLAYER_HITS',
-		'CHAT_MSG_COMBAT_HOSTILEPLAYER_MISSES',
-		'CHAT_MSG_SPELL_HOSTILEPLAYER_DAMAGE',
-		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
-		'CHAT_MSG_SPELL_HOSTILEPLAYER_BUFF',
-		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
-	} do f:RegisterEvent(event) end
-
-	f:SetScript('OnEvent', function()
-		if strfind(arg1, '. You ') or strfind(arg1, ' you') then
-			addRecent(hostilePlayer(arg1)) -- TODO make sure this happens before the other handlers
-		end
-	end)
-
-	f:SetScript('OnUpdate', function()
-		RequestBattlefieldScoreData()
-	end)
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
