@@ -19,10 +19,6 @@ end
 
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
 
-local function colorCode(r, g, b)
-	return format('|cFF%02X%02X%02X', r*255, g*255, b*255)
-end
-
 function Print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
 end
@@ -37,17 +33,6 @@ local HEIGHT = 16
 local MAXBARS = 10
 
 local COMBO = 0
-
-local SCHOOL_COLOR = {
-	NONE = {1, 1, 1},
-	PHYSICAL = {1, 1, 0},
-	HOLY = {1, .9, .5},
-	FIRE = {1, .5, 0},
-	NATURE = {.3, 1, .3},
-	FROST = {.5, 1, 1},
-	SHADOW = {.5, .5, 1},
-	ARCANE = {1, .5, 1},
-}
 
 local DR_CLASS = {
 	["Bash"] = 1,
@@ -225,17 +210,6 @@ do
 			else
 				r, g, b = .3, 1, .3
 			end
-			-- if aurae_settings.color == 'school' then
-			-- 	r, g, b = unpack(SCHOOL_COLOR[aurae.EFFECTS[timer.EFFECT].SCHOOL])
-			-- elseif aurae_settings.color == 'progress' then
-			-- 	r, g, b = 1 - fraction, fraction, 0
-			-- elseif aurae_settings.color == 'custom' then
-			-- 	if aurae_settings.colors[timer.EFFECT] then
-			-- 		r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
-			-- 	else
-			-- 		r, g, b = 1, 1, 1
-			-- 	end
-			-- end
 			bar.statusbar:SetStatusBarColor(r, g, b)
 			bar.statusbar:SetBackdropColor(r, g, b, .3)
 		end
@@ -694,7 +668,6 @@ do
 		colors = {},
 		invert = false,
 		growth = 'up',
-		color = 'school',
 		scale = 1,
 		alpha = .85,
 		arcanist = false,
@@ -802,13 +775,6 @@ do
 				else
 					Usage()
 				end
-			elseif args[1] == 'color' and (args[2] == 'school' or args[2] == 'progress' or args[2] == 'custom') then
-				aurae_settings.color = args[2]
-				Print('Color: ' .. args[2])
-			elseif args[1] == "customcolor" and tonumber(args[2]) and tonumber(args[3]) and tonumber(args[4]) and args[5] and aurae.EFFECTS[args[5]] then
-				local effect = gsub(msg, '%s*%S+%s*', '', 4)
-				aurae_settings.colors[effect] = {tonumber(args[2])/255, tonumber(args[3])/255, tonumber(args[4])/255}
-				print('Custom color: ' .. colorCode(unpack(aurae_settings.colors[effect])) .. effect .. '|r')
 			elseif command == 'clear' then
 				aurae_settings = nil
 				LoadVariables()
@@ -833,8 +799,6 @@ function Usage()
 	Print("  growth (up | down)")
 	Print("  scale [0.5,3]")
 	Print("  alpha [0,1]")
-	Print("  color (school | progress | custom)")
-	Print("  customcolor [1,255] [1,255] [1,255] <effect>")
 	Print("  arcanist")
 end
 
