@@ -198,7 +198,7 @@ do
 				FadeBar(bar)
 			end
 		else
-			bar:SetAlpha(aurae_settings.alpha)
+			bar:SetAlpha((timer.UNIT == TARGET_ID and 1 or .5) * aurae_settings.alpha)
 			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 			bar.text:SetText((timer.DR and drPrefix[timer.DR] or '') .. gsub(timer.UNIT, ':.*', ''))
 
@@ -292,13 +292,6 @@ function UnitDebuffs(unit)
 	return debuffs
 end
 
-function TargetID()
-	local name = UnitName'target'
-	if name then
-		return UnitIsPlayer'target' and name or name .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target'
-	end
-end
-
 function SetActionRank(name, rank)
 	local _, _, rank = strfind(rank or '', 'Rank (%d+)')
 	if rank and aurae_RANKS[name] then
@@ -319,7 +312,7 @@ do
 				aurae_TooltipTextRight1:SetText()
 				aurae_Tooltip:SetAction(slot)
 				local name = aurae_TooltipTextLeft1:GetText()
-				casting[name] = TargetID()
+				casting[name] = TARGET_ID
 				SetActionRank(name, aurae_TooltipTextRight1:GetText())
 			end
 			return orig(slot, clicked, onself)
@@ -330,7 +323,7 @@ do
 		local orig = CastSpell
 		function _G.CastSpell(index, booktype)
 			local name, rank = GetSpellName(index, booktype)
-			casting[name] = TargetID()
+			casting[name] = TARGET_ID
 			SetActionRank(name, rank)
 			return orig(index, booktype)
 		end
@@ -340,7 +333,7 @@ do
 		local orig = CastSpellByName
 		function _G.CastSpellByName(text, onself)
 			if not onself then
-				casting[text] = TargetID()
+				casting[text] = TARGET_ID
 			end
 			return orig(text, onself)
 		end
@@ -369,7 +362,7 @@ do
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for effect, info in pending do
 			if GetTime() >= info.time + .5 then
-				if (IsPlayer(info.target) or TargetID() ~= info.target or UnitDebuffs'target'[effect]) then
+				if (IsPlayer(info.target) or TARGET_ID ~= info.target or UnitDebuffs'target'[effect]) then
 					StartTimer(effect, info.target, info.time)
 				end
 				pending[effect] = nil
@@ -457,7 +450,7 @@ function AuraGone(unit, effect)
 			end
 		elseif unit == UnitName'target' then
 			-- TODO pet target (in other places too)
-			local unit = TargetID()
+			local unit = TARGET_ID
 			local debuffs = UnitDebuffs'target'
 			for k, timer in timers do
 				if timer.UNIT == unit and not debuffs[timer.EFFECT] then
@@ -473,7 +466,7 @@ function CHAT_MSG_COMBAT_HOSTILE_DEATH()
 		if IsPlayer(unit) then
 			UnitDied(unit)
 		elseif unit == UnitName'target' and UnitIsDead'target' then
-			UnitDied(TargetID())
+			UnitDied(TARGET_ID)
 		end
 	end
 end
@@ -658,6 +651,8 @@ do
 	end
 
 	function PLAYER_TARGET_CHANGED()
+		local name = UnitName'target'
+		TARGET_ID = name and (UnitIsPlayer'target' and name or name .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
 		unitChanged'target'
 	end
 
