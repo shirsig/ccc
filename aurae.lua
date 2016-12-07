@@ -134,7 +134,7 @@ function FadeBar(bar)
 		bar:SetAlpha(0)
 	else
 		local t = bar.fadetime - bar.fadeelapsed
-		local a = t / bar.fadetime * aurae_settings.alpha
+		local a = t / bar.fadetime * (timer.UNIT == TARGET_ID and 1 or .5) * aurae_settings.alpha
 		bar:SetAlpha(a)
 	end
 end
