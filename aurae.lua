@@ -665,7 +665,6 @@ end)
 
 do
 	local defaultSettings = {
-		colors = {},
 		invert = false,
 		growth = 'up',
 		scale = 1,
