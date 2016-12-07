@@ -163,12 +163,6 @@ function UpdateBars()
 end
 
 do
-	local drPrefix = {
-		colorCode(1, 1, 0) .. 'DR: ½|r - ',
-		colorCode(1, .5, 0) .. 'DR: ¼|r - ',
-		colorCode(1, 0, 0) .. 'DR: 0|r - ',
-	}
-
 	local function formatTime(t)
 		local h = floor(t / 3600)
 		local m = floor((t - h * 3600) / 60)
@@ -200,7 +194,7 @@ do
 		else
 			bar:SetAlpha((timer.UNIT == TARGET_ID and 1 or .5) * aurae_settings.alpha)
 			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
-			bar.text:SetText((timer.DR and drPrefix[timer.DR] or '') .. gsub(timer.UNIT, ':.*', ''))
+			bar.text:SetText(gsub(timer.UNIT, ':.*', ''))
 
 			local fraction
 			if timer.START then
@@ -222,17 +216,26 @@ do
 				bar.timertext:SetText()
 			end
 			local r, g, b
-			if aurae_settings.color == 'school' then
-				r, g, b = unpack(SCHOOL_COLOR[aurae.EFFECTS[timer.EFFECT].SCHOOL])
-			elseif aurae_settings.color == 'progress' then
-				r, g, b = 1 - fraction, fraction, 0
-			elseif aurae_settings.color == 'custom' then
-				if aurae_settings.colors[timer.EFFECT] then
-					r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
-				else
-					r, g, b = 1, 1, 1
-				end
+			if timer.DR == 1 then
+				r, g, b = 1, 1, .3
+			elseif timer.DR == 2 then
+				r, g, b = 1, .6, 0
+			elseif timer.DR == 3 then
+				r, g, b = 1, .3, .3
+			else
+				r, g, b = .3, 1, .3
 			end
+			-- if aurae_settings.color == 'school' then
+			-- 	r, g, b = unpack(SCHOOL_COLOR[aurae.EFFECTS[timer.EFFECT].SCHOOL])
+			-- elseif aurae_settings.color == 'progress' then
+			-- 	r, g, b = 1 - fraction, fraction, 0
+			-- elseif aurae_settings.color == 'custom' then
+			-- 	if aurae_settings.colors[timer.EFFECT] then
+			-- 		r, g, b = unpack(aurae_settings.colors[timer.EFFECT])
+			-- 	else
+			-- 		r, g, b = 1, 1, 1
+			-- 	end
+			-- end
 			bar.statusbar:SetStatusBarColor(r, g, b)
 			bar.statusbar:SetBackdropColor(r, g, b, .3)
 		end
