@@ -134,7 +134,7 @@ function FadeBar(bar)
 		bar:SetAlpha(0)
 	else
 		local t = bar.fadetime - bar.fadeelapsed
-		local a = t / bar.fadetime * (bar.TIMER.UNIT == TARGET_ID and 1 or .5) * aurae_settings.alpha
+		local a = t / bar.fadetime * (bar.TIMER.UNIT == TARGET_ID and 1 or .7) * aurae_settings.alpha
 		bar:SetAlpha(a)
 	end
 end
@@ -177,7 +177,7 @@ do
 				FadeBar(bar)
 			end
 		else
-			bar:SetAlpha((timer.UNIT == TARGET_ID and 1 or .5) * aurae_settings.alpha)
+			bar:SetAlpha((timer.UNIT == TARGET_ID and 1 or .7) * aurae_settings.alpha)
 			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 			bar.text:SetText(gsub(timer.UNIT, ':.*', ''))
 
@@ -209,6 +209,9 @@ do
 				r, g, b = 1, .3, .3
 			else
 				r, g, b = .3, 1, .3
+			end
+			if timer.UNIT ~= TARGET_ID then
+				r, g, b = .5 * r + .2, .5 * g + .2, .5 * b + .2
 			end
 			bar.statusbar:SetStatusBarColor(r, g, b)
 			bar.statusbar:SetBackdropColor(r, g, b, .3)
