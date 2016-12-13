@@ -13,7 +13,7 @@ do
 		'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
 		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
 		'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
-		'PLAYER_TARGET_CHANGED', 'UPDATE_MOUSEOVER_UNIT', 'UPDATE_BATTLEFIELD_SCORE',
+		'PLAYER_TARGET_CHANGED', 'UPDATE_BATTLEFIELD_SCORE',
 	} do f:RegisterEvent(event) end
 end
 
@@ -571,7 +571,7 @@ end
 CreateFrame'Frame':SetScript('OnUpdate', RequestBattlefieldScoreData)
 
 do
-	local player, current, recent = {}, {}, {}
+	local player, recent = {}, {}
 
 	local function hostilePlayer(msg)
 		local _, _, name = strfind(arg1, "^([^%s']*)")
@@ -597,21 +597,6 @@ do
 		PlaceTimers()
 	end
 
-	local function unitChanged(unitID)
-		local unit = UnitName(unitID)
-		if unit then
-			player[unit] = UnitIsPlayer(unitID) and true or false
-
-			if player[unit] then
-				addRecent(unit)
-			end
-			if player[current[unitID]] and current[unitID] then
-				addRecent(current[unitID])
-			end
-			current[unitID] = unit
-		end
-	end
-
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) gains (.+)%.') do
@@ -630,14 +615,19 @@ do
 		end
 	end
 
-	function PLAYER_TARGET_CHANGED()
-		local name = UnitName'target'
-		TARGET_ID = name and (UnitIsPlayer'target' and name or name .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
-		unitChanged'target'
-	end
-
-	function UPDATE_MOUSEOVER_UNIT()
-		unitChanged'mouseover'
+	do
+		local current
+		function PLAYER_TARGET_CHANGED()
+			local unit = UnitName'target'
+			TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
+			if unit then
+				player[unit] = UnitIsPlayer'target' and true or false
+				if current and player[current] then
+					addRecent(current)
+				end
+				current = unit
+			end
+		end
 	end
 
 	function UPDATE_BATTLEFIELD_SCORE()
@@ -649,7 +639,6 @@ do
 	function IsShown(unit)
 		return not player[unit]
 				or UnitName'target' == unit
-				or UnitName'mouseover' == unit
 				or recent[unit] and GetTime() - recent[unit] <= 10
 	end
 
