@@ -187,11 +187,13 @@ do
 				local remaining = timer.END - GetTime()
 				fraction = remaining / duration
 
-				bar.statusbar:SetValue(aurae_settings.invert and 1 - fraction or fraction)
+				local invert = aurae_settings.invert and not timer.DR
+				
+				bar.statusbar:SetValue( invert and 1 - fraction or fraction)
 
 				local sparkPosition = WIDTH * fraction
 				bar.spark:Show()
-				bar.spark:SetPoint('CENTER', bar.statusbar, aurae_settings.invert and 'RIGHT' or 'LEFT', aurae_settings.invert and -sparkPosition or sparkPosition, 0)
+				bar.spark:SetPoint('CENTER', bar.statusbar, invert and 'RIGHT' or 'LEFT', invert and -sparkPosition or sparkPosition, 0)
 
 				bar.timertext:SetText(formatTime(remaining))
 			else
@@ -727,13 +729,13 @@ do
 		if msg then
 			local args = tokenize(msg)
 			local command = strlower(msg)
-			if command == "unlock" then
+			if command == 'unlock' then
 				UnlockBars()
 				Print('Bars unlocked.')
-			elseif command == "lock" then
+			elseif command == 'lock' then
 				LockBars()
 				Print('Bars locked.')
-			elseif command == "invert" then
+			elseif command == 'invert' then
 				aurae_settings.invert = not aurae_settings.invert
 				if aurae_settings.invert then
 					Print('Bar inversion on.')
@@ -744,7 +746,7 @@ do
 				aurae_settings.growth = args[2]
 				Print('Growth: ' .. args[2])
 				if not LOCKED then UnlockBars() end
-			elseif strsub(command, 1, 5) == "scale" then
+			elseif strsub(command, 1, 5) == 'scale' then
 				local scale = tonumber(strsub(command, 7))
 				if scale then
 					scale = max(.5, min(3, scale))
@@ -756,7 +758,7 @@ do
 				else
 					Usage()
 				end
-			elseif strsub(command, 1, 5) == "alpha" then
+			elseif strsub(command, 1, 5) == 'alpha' then
 				local alpha = tonumber(strsub(command, 7))
 				if alpha then
 					alpha = max(0, min(1, alpha))
@@ -769,13 +771,9 @@ do
 			elseif command == 'clear' then
 				aurae_settings = nil
 				LoadVariables()
-			elseif command == "arcanist" then
+			elseif command == 'arcanist' then
 				aurae_settings.arcanist = not aurae_settings.arcanist
-				if aurae_settings.invert then
-					Print('Arcanist on.')
-				else
-					Print('Arcanist off.')
-				end
+				Print('Arcanist ' .. (aurae_settings.arcanist and 'on.' or 'off.'))
 			else
 				Usage()
 			end
