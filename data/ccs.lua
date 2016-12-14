@@ -66,7 +66,7 @@ aurae.EFFECTS["Polymorph"] = {
 }
 
 aurae.EFFECTS["Frost Nova"] = {
-	ICON = 'Spell_Frost_FreezingBreath',
+	ICON = 'Spell_Frost_FrostNova',
 	ETYPE = 'CC',
 	DURATION = 8,
 }
