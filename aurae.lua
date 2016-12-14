@@ -333,7 +333,7 @@ do
 				if pending[effect] then
 					last_cast = nil
 				else
-					pending[effect] = {target=target, time=GetTime() + (aurae_RANKS[effect] and aurae_DELAYS[effect] or 0)}
+					pending[effect] = {target=target, time=GetTime() + aurae_DELAYS[effect] or 0}
 					last_cast = effect
 				end
 			end
