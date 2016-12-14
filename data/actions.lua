@@ -2,9 +2,9 @@ aurae_DELAYS = {
 	["Fireball"] = 1,
 	["Frostbolt"] = 1,
 	["Concussive Shot"] = 1,
-	["Viper String"] = 1,
-	["Serpent String"] = 1,
-	["Wyvern String"] = 1,
+	["Viper Sting"] = 1,
+	["Serpent Sting"] = 1,
+	["Wyvern Sting"] = 1,
 }
 
 aurae_RANKS = {}
