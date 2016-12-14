@@ -184,6 +184,12 @@ aurae.EFFECTS["Viper Sting"] = {
 	DURATION = 8,
 }
 
+aurae.EFFECTS["Concussive Shot"] = {
+	ICON = 'Spell_Frost_Stun',
+	ETYPE = 'DEBUFF',
+	DURATION = 4,
+}
+
 -- Paladin
 
 -- Warlock
