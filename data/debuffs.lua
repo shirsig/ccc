@@ -190,6 +190,12 @@ aurae.EFFECTS["Concussive Shot"] = {
 	DURATION = 4,
 }
 
+aurae.EFFECTS["Wing Clip"] = {
+	ICON = 'Ability_Rogue_Trip',
+	ETYPE = 'DEBUFF',
+	DURATION = 10,
+}
+
 -- Paladin
 
 -- Warlock

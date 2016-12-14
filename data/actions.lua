@@ -4,6 +4,7 @@ aurae_DELAYS = {
 	["Concussive Shot"] = 1,
 	["Viper String"] = 1,
 	["Serpent String"] = 1,
+	["Wyvern String"] = 1,
 }
 
 aurae_RANKS = {}

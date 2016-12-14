@@ -153,13 +153,13 @@ aurae.EFFECTS["Counterattack"] = {
 	DURATION = 5,
 }
 
-aurae.EFFECTS["Improved Wingclip"] = {
+aurae.EFFECTS["Improved Wing Clip"] = {
 	ICON = 'Ability_Rogue_Trip',
 	ETYPE = 'CC',
 	DURATION = 5,
 }
 
-aurae.EFFECTS["Wyvernsting"] = {
+aurae.EFFECTS["Wyvern Sting"] = {
 	ICON = 'INV_Spear_02',
 	ETYPE = 'CC',
 	DURATION = 12,
