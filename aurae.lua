@@ -25,12 +25,9 @@ end
 
 _G.aurae_settings = {}
 
-_G.aurae = {}
-aurae.EFFECTS = {}
-
 local WIDTH = 170
 local HEIGHT = 16
-local MAXBARS = 10
+local MAXBARS = 11
 
 local COMBO = 0
 
@@ -71,10 +68,9 @@ local DR_CLASS = {
 	["Frost Shock"] = 11,
 }
 
-local GROUPS, timers = {}, {}
+local BARS, timers = {}, {}
 
 function CreateBar()
-
 	local texture = [[Interface\Addons\aurae\bar]]
 	local font, _, style = GameFontHighlight:GetFont()
 	local fontsize = 11
@@ -140,10 +136,8 @@ function FadeBar(bar)
 end
 
 function UpdateBars()
-	for _, group in GROUPS do
-		for i = 1, MAXBARS do
-			UpdateBar(group[i])
-		end
+	for i = 1, MAXBARS do
+		UpdateBar(BARS[i])
 	end
 end
 
@@ -178,7 +172,7 @@ do
 			end
 		else
 			bar:SetAlpha((timer.UNIT == TARGET_ID and 1 or .7) * aurae_settings.alpha)
-			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae.EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
+			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae_EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 			bar.text:SetText(gsub(timer.UNIT, ':.*', ''))
 
 			local fraction
@@ -223,28 +217,24 @@ end
 
 function UnlockBars()
 	LOCKED = false
-	for etype, group in GROUPS do
-		group:EnableMouse(1)
-		for i = 1, MAXBARS do
-			local f = group[i]
-			f:SetAlpha(aurae_settings.alpha)
-			f.statusbar:SetStatusBarColor(1, 1, 1)
-			f.statusbar:SetValue(1)
-			f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
-			f.text:SetText('aurae ' .. strlower(etype))
-			f.timertext:SetText((aurae_settings.growth == 'up' and i or MAXBARS - i + 1))
-			f.spark:Hide()
-		end
+	BARS:EnableMouse(1)
+	for i = 1, MAXBARS do
+		local f = BARS[i]
+		f:SetAlpha(aurae_settings.alpha)
+		f.statusbar:SetStatusBarColor(1, 1, 1)
+		f.statusbar:SetValue(1)
+		f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
+		f.text:SetText('aurae bar')
+		f.timertext:SetText((aurae_settings.growth == 'up' and i or MAXBARS - i + 1))
+		f.spark:Hide()
 	end
 end
 
 function LockBars()
 	LOCKED = true
-	for _, group in GROUPS do
-		group:EnableMouse(0)
-		for i = 1, MAXBARS do
-			group[i]:SetAlpha(0)
-		end
+	BARS:EnableMouse(0)
+	for i = 1, MAXBARS do
+		BARS[i]:SetAlpha(0)
 	end
 end
 
@@ -277,7 +267,7 @@ end
 function SetActionRank(name, rank)
 	local _, _, rank = strfind(rank or '', 'Rank (%d+)')
 	if rank and aurae_RANKS[name] then
-		aurae.EFFECTS[aurae_RANKS[name].EFFECT or name].DURATION = aurae_RANKS[name].DURATION[tonumber(rank)]
+		aurae_EFFECTS[aurae_RANKS[name].EFFECT or name].DURATION = aurae_RANKS[name].DURATION[tonumber(rank)]
 	end
 end
 
@@ -322,19 +312,22 @@ do
 	end
 
 	function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
-		for effect in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
-			casting[effect] = nil
+		for action in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
+			casting[action] = nil
 		end
 	end
 
 	function SPELLCAST_STOP()
-		for effect, target in casting do
-			if aurae.EFFECTS[effect] and aurae.EFFECTS[effect].ETYPE ~= 'BUFF' and (not IsPlayer(target) or EffectActive(effect, target)) then
-				if pending[effect] then
-					last_cast = nil
-				else
-					pending[effect] = {target=target, time=GetTime() + (aurae_DELAYS[effect] or 0)}
-					last_cast = effect
+		for action, target in casting do
+			if aurae_ACTIONS[action] then
+				local effect = aurae_ACTIONS[action] == true and action or aurae_ACTIONS[action]
+				if (not IsPlayer(target) or EffectActive(effect, target)) then
+					if pending[effect] then
+						last_cast = nil
+					else
+						pending[effect] = {target=target, time=GetTime() + (aurae_DELAYS[effect] or 0)}
+						last_cast = effect
+					end
 				end
 			end
 		end
@@ -423,7 +416,7 @@ function ActivateDRTimer(effect, unit)
 end
 
 function AuraGone(unit, effect)
-	if aurae.EFFECTS[effect] then
+	if aurae_EFFECTS[effect] then
 		if IsPlayer(unit) then
 			AbortCast(effect, unit)
 			StopTimer(effect .. '@' .. unit)
@@ -468,11 +461,10 @@ end
 function PlaceTimers()
 	for _, timer in timers do
 		if timer.shown and not timer.visible then
-			local group = GROUPS[aurae.EFFECTS[timer.EFFECT].ETYPE]
 			local up = aurae_settings.growth == 'up'
 			for i = (up and 1 or MAXBARS), (up and MAXBARS or 1), (up and 1 or -1) do
-				if group[i].TIMER.stopped then
-					group[i].TIMER = timer
+				if BARS[i].TIMER.stopped then
+					BARS[i].TIMER = timer
 					timer.visible = true
 					break
 				end
@@ -508,16 +500,16 @@ function StartTimer(effect, unit, start)
 	timer.shown = IsShown(unit)
 	timer.END = timer.START
 
-	local duration = aurae.EFFECTS[effect].DURATION + (bonuses[effect] and bonuses[effect](aurae.EFFECTS[effect].DURATION) or 0)
+	local duration = aurae_EFFECTS[effect].DURATION + (bonuses[effect] and bonuses[effect](aurae_EFFECTS[effect].DURATION) or 0)
 
 	if IsPlayer(unit) then
-		timer.END = timer.END + DiminishedDuration(unit, effect, aurae.EFFECTS[effect].PVP_DURATION or duration)
+		timer.END = timer.END + DiminishedDuration(unit, effect, aurae_PVP_DURATION[effect] or duration)
 	else
 		timer.END = timer.END + duration
 	end
 
-	if aurae.EFFECTS[effect].COMBO then
-		timer.END = timer.END + aurae.EFFECTS[effect].A * COMBO
+	if aurae_EFFECTS[effect].COMBO then
+		timer.END = timer.END + aurae_EFFECTS[effect].A * COMBO
 	end
 
 	timer.stopped = nil
@@ -602,7 +594,7 @@ do
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) gains (.+)%.') do
-			if IsPlayer(unit) and aurae.EFFECTS[effect] then
+			if IsPlayer(unit) and aurae_EFFECTS[effect] then
 				StartTimer(effect, unit, GetTime())
 			end
 		end
@@ -611,7 +603,7 @@ do
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
-			if IsPlayer(unit) and aurae.EFFECTS[effect] then
+			if IsPlayer(unit) and aurae_EFFECTS[effect] then
 				StartTimer(effect, unit, GetTime())
 			end
 		end
@@ -676,38 +668,33 @@ do
 		end
 		
 		local dummyTimer = {stopped=0}
-		for i, etype in ipairs{'DEBUFF', 'CC', 'BUFF'} do
-			local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
-			local f = CreateFrame('Frame', 'aurae_' .. etype, UIParent)
-			GROUPS[strupper(etype)] = f
-			f:SetWidth(WIDTH + HEIGHT)
-			f:SetHeight(height)
-			f:SetMovable(true)
-			f:SetUserPlaced(true)
-			f:SetClampedToScreen(true)
-			f:RegisterForDrag('LeftButton')
-			f:SetScript('OnDragStart', function()
-				this:StartMoving()
-			end)
-			f:SetScript('OnDragStop', function()
-				this:StopMovingOrSizing()
-			end)
-			f:SetPoint('CENTER', -210 + (i - 1) * 210, 150)
-			for i = 1, MAXBARS do
-				local bar = CreateBar()
-				bar:SetParent(f)
-				bar:SetAlpha(aurae_settings.alpha)
-				local offset = 20 * (i - 1)
-				bar:SetPoint('BOTTOMLEFT', 0, offset)
-				bar:SetPoint('BOTTOMRIGHT', 0, offset)
-				bar.TIMER = dummyTimer
-				tinsert(f, bar)
-			end
+		local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
+		BARS = CreateFrame('Frame', 'aurae', UIParent)
+		BARS:SetWidth(WIDTH + HEIGHT)
+		BARS:SetHeight(height)
+		BARS:SetMovable(true)
+		BARS:SetUserPlaced(true)
+		BARS:SetClampedToScreen(true)
+		BARS:RegisterForDrag('LeftButton')
+		BARS:SetScript('OnDragStart', function()
+			this:StartMoving()
+		end)
+		BARS:SetScript('OnDragStop', function()
+			this:StopMovingOrSizing()
+		end)
+		BARS:SetPoint('CENTER', 0, 150)
+		for i = 1, MAXBARS do
+			local bar = CreateBar()
+			bar:SetParent(BARS)
+			bar:SetAlpha(aurae_settings.alpha)
+			local offset = 20 * (i - 1)
+			bar:SetPoint('BOTTOMLEFT', 0, offset)
+			bar:SetPoint('BOTTOMRIGHT', 0, offset)
+			bar.TIMER = dummyTimer
+			tinsert(BARS, bar)
 		end
 
-		for _, group in GROUPS do
-			group:SetScale(aurae_settings.scale)
-		end
+		BARS:SetScale(aurae_settings.scale)
 
 		_G.SLASH_AURAE1 = '/aurae'
 		SlashCmdList.AURAE = SlashCommandHandler
@@ -751,9 +738,7 @@ do
 				if scale then
 					scale = max(.5, min(3, scale))
 					aurae_settings.scale = scale
-					for _, group in GROUPS do
-						group:SetScale(scale)
-					end
+					BARS:SetScale(scale)
 					Print('Scale: ' .. scale)
 				else
 					Usage()
