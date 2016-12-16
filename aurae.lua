@@ -317,7 +317,7 @@ do
 				else
 					local duration
 					if info.rank and aurae_RANKS[effect] then
-						duration = aurae_RANKS[effect].DURATION[info.rank]
+						duration = aurae_RANKS[effect][info.rank]
 					else
 						duration = aurae_EFFECTS[effect].DURATION
 					end
