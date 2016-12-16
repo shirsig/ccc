@@ -11,7 +11,7 @@ do
 		'UNIT_COMBAT',
 		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
 		'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
-		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS',
+		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
 		'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
 		'PLAYER_TARGET_CHANGED', 'UPDATE_BATTLEFIELD_SCORE',
 	} do f:RegisterEvent(event) end
@@ -130,7 +130,7 @@ function FadeBar(bar)
 		bar:SetAlpha(0)
 	else
 		local t = bar.fadetime - bar.fadeelapsed
-		local a = t / bar.fadetime * (bar.TIMER.UNIT == TARGET_ID and 1 or .7) * aurae_settings.alpha
+		local a = t / bar.fadetime * aurae_settings.alpha
 		bar:SetAlpha(a)
 	end
 end
@@ -171,7 +171,7 @@ do
 				FadeBar(bar)
 			end
 		else
-			bar:SetAlpha((timer.UNIT == TARGET_ID and 1 or .7) * aurae_settings.alpha)
+			bar:SetAlpha(aurae_settings.alpha)
 			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae_EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
 			bar.text:SetText(gsub(timer.UNIT, ':.*', ''))
 
@@ -205,9 +205,6 @@ do
 				r, g, b = 1, .3, .3
 			else
 				r, g, b = .3, 1, .3
-			end
-			if timer.UNIT ~= TARGET_ID then
-				r, g, b = .5 * r + .2, .5 * g + .2, .5 * b + .2
 			end
 			bar.statusbar:SetStatusBarColor(r, g, b)
 			bar.statusbar:SetBackdropColor(r, g, b, .3)
@@ -325,7 +322,6 @@ do
 				if pending[effect] then
 					last_cast = nil
 				else
-					p.action(effect)
 					pending[effect] = {target=target, time=GetTime() + (aurae_DELAYS[effect] or 0)}
 					last_cast = effect
 				end
@@ -595,24 +591,11 @@ do
 		PlaceTimers()
 	end
 
-	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
-		-- if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
-		-- for unit, effect in string.gfind(arg1, '(.+) gains (.+)%.') do
-		-- 	if IsPlayer(unit) and aurae_EFFECTS[effect] then
-		-- 		StartTimer(effect, unit, GetTime())
-		-- 	end
-		-- end
-	end
-
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
-			p(effect)
-			if not pending[effect] then
-				return
-			end
-			pending[effect] = nil
-			if IsPlayer(unit) and aurae_EFFECTS[effect] then
+			if IsPlayer(unit) and pending[effect] and aurae_EFFECTS[effect] then
+				pending[effect] = nil
 				StartTimer(effect, unit, GetTime())
 			end
 		end
