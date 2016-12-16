@@ -3,13 +3,17 @@ aurae_PVP_DURATION = {
 	["Polymorph"] = 15,
 }
 
+aurae_COMBO = {
+	["Rupture"] = 2,
+	["Kidney Shot"] = 1,
+
+}
+
 aurae_EFFECTS = {}
 
 aurae_EFFECTS["Rupture"] = {
 	ICON = 'Ability_Rogue_Rupture',
 	DURATION = 6,
-	COMBO = true,
-	A = 2, -- f(x) = A * x + DURATION
 }
 
 aurae_EFFECTS["Garrote"] = {
@@ -300,8 +304,6 @@ aurae_EFFECTS["Sap"] = {
 aurae_EFFECTS["Kidney Shot"] = {
 	ICON = 'Ability_Rogue_KidneyShot',
 	DURATION = 1,
-	COMBO = true,
-	A = 1, -- f(x) = A * x + DURATION => 1 point = 2 sec, 5 point = 6 sec
 }
 
 aurae_EFFECTS["Cheap Shot"] = {

@@ -500,16 +500,20 @@ function StartTimer(effect, unit, start)
 	timer.shown = IsShown(unit)
 	timer.END = timer.START
 
-	local duration = aurae_EFFECTS[effect].DURATION + (bonuses[effect] and bonuses[effect](aurae_EFFECTS[effect].DURATION) or 0)
+	local duration = aurae_EFFECTS[effect].DURATION
+
+	if aurae_COMBO[effect] then
+		duration = duration + aurae_COMBO[effect] * COMBO
+	end
+
+	if bonuses[effect] then
+		duration = duration + bonuses[effect](duration)
+	end
 
 	if IsPlayer(unit) then
 		timer.END = timer.END + DiminishedDuration(unit, effect, aurae_PVP_DURATION[effect] or duration)
 	else
 		timer.END = timer.END + duration
-	end
-
-	if aurae_EFFECTS[effect].COMBO then
-		timer.END = timer.END + aurae_EFFECTS[effect].A * COMBO
 	end
 
 	timer.stopped = nil
