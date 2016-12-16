@@ -271,10 +271,11 @@ function SetActionRank(name, rank)
 	end
 end
 
+pending = {}
 do
 	local casting = {}
 	local last_cast
-	local pending = {}
+	-- local pending = {}
 
 	do
 		local orig = UseAction
@@ -321,13 +322,12 @@ do
 		for action, target in casting do
 			if aurae_ACTIONS[action] then
 				local effect = aurae_ACTIONS[action] == true and action or aurae_ACTIONS[action]
-				if (not IsPlayer(target) or EffectActive(effect, target)) then
-					if pending[effect] then
-						last_cast = nil
-					else
-						pending[effect] = {target=target, time=GetTime() + (aurae_DELAYS[effect] or 0)}
-						last_cast = effect
-					end
+				if pending[effect] then
+					last_cast = nil
+				else
+					p.action(effect)
+					pending[effect] = {target=target, time=GetTime() + (aurae_DELAYS[effect] or 0)}
+					last_cast = effect
 				end
 			end
 		end
@@ -596,17 +596,22 @@ do
 	end
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
-		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
-		for unit, effect in string.gfind(arg1, '(.+) gains (.+)%.') do
-			if IsPlayer(unit) and aurae_EFFECTS[effect] then
-				StartTimer(effect, unit, GetTime())
-			end
-		end
+		-- if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
+		-- for unit, effect in string.gfind(arg1, '(.+) gains (.+)%.') do
+		-- 	if IsPlayer(unit) and aurae_EFFECTS[effect] then
+		-- 		StartTimer(effect, unit, GetTime())
+		-- 	end
+		-- end
 	end
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
+			p(effect)
+			if not pending[effect] then
+				return
+			end
+			pending[effect] = nil
 			if IsPlayer(unit) and aurae_EFFECTS[effect] then
 				StartTimer(effect, unit, GetTime())
 			end
@@ -823,9 +828,7 @@ do
 				return min(1, rank(3, 2)) * .5 + rank(3, 2) * .5
 			end,
 			["Polymorph"] = function()
-				if aurae_settings.arcanist then
-					return 15
-				end
+				return aurae_settings.arcanist and 15 or 0
 			end,
 		}
 	elseif class == 'DRUID' then
