@@ -7,9 +7,9 @@ aurae_EFFECTS = {}
 
 aurae_EFFECTS["Rupture"] = {
 	ICON = 'Ability_Rogue_Rupture',
-	DURATION = 2,
+	DURATION = 6,
 	COMBO = true,
-	A = 4, -- f(x) = A * x + DURATION
+	A = 2, -- f(x) = A * x + DURATION
 }
 
 aurae_EFFECTS["Garrote"] = {
