@@ -749,18 +749,12 @@ do
 				return rank(3, 8) * 3
 			end,
 		}
-	elseif class == "WARLOCK" then
-		bonuses = {
-			["Shadow Word: Pain"] = function()
-				return rank(2, 7) * 1.5
-			end,
-		}
-	elseif class == 'HUNTER' then
-		bonuses = {
-			["Freezing Trap Effect"] = function(t)
-				return t * rank(3, 7) * .15
-			end,
-		}
+	-- elseif class == "WARLOCK" then
+	-- 	bonuses = {
+	-- 		["Seduce"] = function()
+	-- 			return rank(2, 7) * 1.5
+	-- 		end,
+	-- 	}
 	elseif class == 'PRIEST' then
 		bonuses = {
 			["Shadow Word: Pain"] = function()
