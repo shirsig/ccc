@@ -11,7 +11,7 @@ do
 		'UNIT_COMBAT',
 		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
 		'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
-		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
+		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
 		'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
 		'PLAYER_TARGET_CHANGED', 'UPDATE_BATTLEFIELD_SCORE',
 	} do f:RegisterEvent(event) end
@@ -68,7 +68,7 @@ local DR_CLASS = {
 	["Frost Shock"] = 11,
 }
 
-local BARS, timers = {}, {}
+local BARS, timers, pending = {}, {}, {}
 
 function CreateBar()
 	local texture = [[Interface\Addons\aurae\bar]]
@@ -236,13 +236,12 @@ function LockBars()
 end
 
 do
-	local factor = {1, 1/2, 1/4, 0}
+	local factor = {1/2, 1/4, 0}
 
 	function DiminishedDuration(unit, effect, full_duration)
 		local class = DR_CLASS[effect]
-		if class then
-			StartDR(effect, unit)
-			return full_duration * factor[timers[class .. '@' .. unit].DR]
+		if class and timers[class .. '@' .. unit] then
+			return full_duration * factor[timers[class .. '@' .. unit].DR or 1]
 		else
 			return full_duration
 		end
@@ -268,11 +267,9 @@ function SetActionRank(name, rank)
 	end
 end
 
-pending = {}
 do
 	local casting = {}
 	local last_cast
-	-- local pending = {}
 
 	do
 		local orig = UseAction
@@ -282,8 +279,7 @@ do
 				aurae_TooltipTextRight1:SetText()
 				aurae_Tooltip:SetAction(slot)
 				local name = aurae_TooltipTextLeft1:GetText()
-				casting[name] = TARGET_ID
-				SetActionRank(name, aurae_TooltipTextRight1:GetText())
+				casting[name] = {unit=TARGET_ID, rank=aurae_TooltipTextRight1:GetText()}
 			end
 			return orig(slot, clicked, onself)
 		end
@@ -293,8 +289,7 @@ do
 		local orig = CastSpell
 		function _G.CastSpell(index, booktype)
 			local name, rank = GetSpellName(index, booktype)
-			casting[name] = TARGET_ID
-			SetActionRank(name, rank)
+			casting[name] = {unit=TARGET_ID, rank=rank}
 			return orig(index, booktype)
 		end
 	end
@@ -303,7 +298,7 @@ do
 		local orig = CastSpellByName
 		function _G.CastSpellByName(text, onself)
 			if not onself then
-				casting[text] = TARGET_ID
+				casting[text] = {unit=TARGET_ID}
 			end
 			return orig(text, onself)
 		end
@@ -316,72 +311,85 @@ do
 	end
 
 	function SPELLCAST_STOP()
-		for action, target in casting do
+		for action, info in casting do
 			if aurae_ACTIONS[action] then
 				local effect = aurae_ACTIONS[action] == true and action or aurae_ACTIONS[action]
 				if pending[effect] then
 					last_cast = nil
 				else
-					pending[effect] = {target=target, time=GetTime() + (aurae_DELAYS[effect] or 0)}
+					local duration = aurae_EFFECTS[effect].DURATION
+					if aurae_COMBO[effect] then
+						duration = duration + aurae_COMBO[effect] * COMBO
+					end
+					if bonuses[effect] then
+						duration = duration + bonuses[effect](duration)
+					end
+					if IsPlayer(info.unit) then
+						duration = DiminishedDuration(info.unit, effect, aurae_PVP_DURATION[effect] or duration)
+					end
+
+					info.duration = duration
+					info.time = GetTime() + (aurae_DELAYS[effect] or 0)
+					pending[effect] = info
 					last_cast = effect
 				end
 			end
 		end
 		casting = {}
 	end
+end
 
-	CreateFrame'Frame':SetScript('OnUpdate', function()
-		for effect, info in pending do
-			if GetTime() >= info.time + .5 then
-				if (IsPlayer(info.target) or TARGET_ID ~= info.target or UnitDebuffs'target'[effect]) then
-					StartTimer(effect, info.target, info.time)
-				end
+CreateFrame'Frame':SetScript('OnUpdate', function()
+	for effect, info in pending do
+		if GetTime() >= info.time + .5 then
+			if (IsPlayer(info.unit) or TARGET_ID ~= info.unit or UnitDebuffs'target'[effect]) then
+				StartTimer(effect, info.unit, info.time, info.duration)
+			end
+			pending[effect] = nil
+		end
+	end
+end)
+
+function SPELLCAST_INTERRUPTED()
+	if last_cast then
+		pending[last_cast] = nil
+	end
+end
+
+do
+	local patterns = {
+		'is immune to your (.*)%.',
+		'Your (.*) missed',
+		'Your (.*) was resisted',
+		'Your (.*) was evaded',
+		'Your (.*) was dodged',
+		'Your (.*) was deflected',
+		'Your (.*) is reflected',
+		'Your (.*) is parried'
+	}
+	function CHAT_MSG_SPELL_SELF_DAMAGE()
+		for _, pattern in patterns do
+			local _, _, effect = strfind(arg1, pattern)
+			if effect then
 				pending[effect] = nil
-			end
-		end
-	end)
-
-	function AbortCast(effect, unit)
-		for k, v in pending do
-			if k == effect and v.target == unit then
-				pending[k] = nil
+				return
 			end
 		end
 	end
+end
 
-	function AbortUnitCasts(unit)
-		for k, v in pending do
-			if v.target == unit or not unit and not IsPlayer(v.target) then
-				pending[k] = nil
-			end
+function AbortCast(effect, unit)
+	for k, v in pending do
+		if k == effect and v.unit == unit then
+			pending[k] = nil
 		end
 	end
+end
 
-	function SPELLCAST_INTERRUPTED()
-		if last_cast then
-			pending[last_cast] = nil
-		end
-	end
-
-	do
-		local patterns = {
-			'is immune to your (.*)%.',
-			'Your (.*) missed',
-			'Your (.*) was resisted',
-			'Your (.*) was evaded',
-			'Your (.*) was dodged',
-			'Your (.*) was deflected',
-			'Your (.*) is reflected',
-			'Your (.*) is parried'
-		}
-		function CHAT_MSG_SPELL_SELF_DAMAGE()
-			for _, pattern in patterns do
-				local _, _, effect = strfind(arg1, pattern)
-				if effect then
-					pending[effect] = nil
-					return
-				end
-			end
+function AbortUnitCasts(unit)
+	for k, v in pending do
+		if v.unit == unit or not unit and not IsPlayer(v.unit) then
+			pending[k] = nil
 		end
 	end
 end
@@ -485,7 +493,7 @@ function EffectActive(effect, unit)
 	return timers[effect .. '@' .. unit] and true or false
 end
 
-function StartTimer(effect, unit, start)
+function StartTimer(effect, unit, start, duration)
 	local key = effect .. '@' .. unit
 	local timer = timers[key] or {}
 	timers[key] = timer
@@ -493,22 +501,10 @@ function StartTimer(effect, unit, start)
 	timer.EFFECT = effect
 	timer.UNIT = unit
 	timer.START = start
-	timer.END = timer.START
-
-	local duration = aurae_EFFECTS[effect].DURATION
-
-	if aurae_COMBO[effect] then
-		duration = duration + aurae_COMBO[effect] * COMBO
-	end
-
-	if bonuses[effect] then
-		duration = duration + bonuses[effect](duration)
-	end
+	timer.END = timer.START + duration
 
 	if IsPlayer(unit) then
-		timer.END = timer.END + DiminishedDuration(unit, effect, aurae_PVP_DURATION[effect] or duration)
-	else
-		timer.END = timer.END + duration
+		StartDR(effect, unit)
 	end
 
 	timer.stopped = nil
@@ -570,12 +566,16 @@ do
 		return name
 	end
 
+	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
+		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
+	end
+
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
-			if IsPlayer(unit) and pending[effect] and aurae_EFFECTS[effect] then
+			if IsPlayer(unit) and pending[effect] and pending[effect].unit == unit then
+				StartTimer(effect, unit, GetTime(), pending[effect].duration)
 				pending[effect] = nil
-				StartTimer(effect, unit, GetTime())
 			end
 		end
 	end
