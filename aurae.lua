@@ -456,7 +456,7 @@ end
 
 function PlaceTimers()
 	for _, timer in timers do
-		if timer.shown and not timer.visible then
+		if not timer.visible then
 			local up = aurae_settings.growth == 'up'
 			for i = (up and 1 or MAXBARS), (up and MAXBARS or 1), (up and 1 or -1) do
 				if BARS[i].TIMER.stopped then
@@ -493,7 +493,6 @@ function StartTimer(effect, unit, start)
 	timer.EFFECT = effect
 	timer.UNIT = unit
 	timer.START = start
-	timer.shown = IsShown(unit)
 	timer.END = timer.START
 
 	local duration = aurae_EFFECTS[effect].DURATION
@@ -528,7 +527,6 @@ function StartDR(effect, unit)
 		timer.UNIT = unit
 		timer.START = nil
 		timer.END = nil
-		timer.shown = timer.shown or IsShown(unit)
 		timer.DR = min(3, (timer.DR or 0) + 1)
 
 		PlaceTimers()
@@ -565,30 +563,11 @@ end
 CreateFrame'Frame':SetScript('OnUpdate', RequestBattlefieldScoreData)
 
 do
-	local player, recent = {}, {}
+	local player = {}
 
 	local function hostilePlayer(msg)
 		local _, _, name = strfind(arg1, "^([^%s']*)")
 		return name
-	end
-
-	local function addRecent(unit)
-		local t = GetTime()
-
-		recent[unit] = t
-
-		for k, v in recent do
-			if t - v > 30 then
-				recent[k] = nil
-			end
-		end
-
-		for _, timer in timers do
-			if timer.UNIT == unit then
-				timer.shown = true
-			end
-		end
-		PlaceTimers()
 	end
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
@@ -601,18 +580,11 @@ do
 		end
 	end
 
-	do
-		local current
-		function PLAYER_TARGET_CHANGED()
-			local unit = UnitName'target'
-			TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
-			if unit then
-				player[unit] = UnitIsPlayer'target' and true or false
-				if current and player[current] then
-					addRecent(current)
-				end
-				current = unit
-			end
+	function PLAYER_TARGET_CHANGED()
+		local unit = UnitName'target'
+		TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
+		if unit then
+			player[unit] = UnitIsPlayer'target' and true or false
 		end
 	end
 
@@ -620,12 +592,6 @@ do
 		for i = 1, GetNumBattlefieldScores() do
 			player[GetBattlefieldScore(i)] = true
 		end
-	end
-
-	function IsShown(unit)
-		return not player[unit]
-				or UnitName'target' == unit
-				or recent[unit] and GetTime() - recent[unit] <= 10
 	end
 
 	function IsPlayer(unit)
@@ -716,11 +682,7 @@ do
 				Print('Bars locked.')
 			elseif command == 'invert' then
 				aurae_settings.invert = not aurae_settings.invert
-				if aurae_settings.invert then
-					Print('Bar inversion on.')
-				else
-					Print('Bar inversion off.')
-				end
+				Print('Bar inversion ' .. (aurae_settings.invert and 'on.' or 'off.'))
 			elseif args[1] == 'growth' and (args[2] == 'up' or args[2] == 'down') then
 				aurae_settings.growth = args[2]
 				Print('Growth: ' .. args[2])
