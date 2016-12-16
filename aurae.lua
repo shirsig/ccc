@@ -248,12 +248,12 @@ do
 	end
 end
 
-function UnitDebuffs(unit)
+function TargetDebuffs()
 	local debuffs = {}
 	local i = 1
-	while UnitDebuff(unit, i) do
+	while UnitDebuff('target', i) do
 		aurae_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-		aurae_Tooltip:SetUnitDebuff(unit, i)
+		aurae_Tooltip:SetUnitDebuff('target', i)
 		debuffs[aurae_TooltipTextLeft1:GetText()] = true
 		i = i + 1
 	end
@@ -340,24 +340,24 @@ do
 		end
 		casting = {}
 	end
+
+	function SPELLCAST_INTERRUPTED()
+		if last_cast then
+			pending[last_cast] = nil
+		end
+	end
 end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for effect, info in pending do
 		if GetTime() >= info.time + .5 then
-			if (IsPlayer(info.unit) or TARGET_ID ~= info.unit or UnitDebuffs'target'[effect]) then
+			if (IsPlayer(info.unit) or TARGET_ID ~= info.unit or TargetDebuffs()[effect]) then
 				StartTimer(effect, info.unit, info.time, info.duration)
 			end
 			pending[effect] = nil
 		end
 	end
 end)
-
-function SPELLCAST_INTERRUPTED()
-	if last_cast then
-		pending[last_cast] = nil
-	end
-end
 
 do
 	local patterns = {
@@ -433,7 +433,7 @@ function AuraGone(unit, effect)
 		elseif unit == UnitName'target' then
 			-- TODO pet target (in other places too)
 			local unit = TARGET_ID
-			local debuffs = UnitDebuffs'target'
+			local debuffs = TargetDebuffs()
 			for k, timer in timers do
 				if timer.UNIT == unit and not debuffs[timer.EFFECT] then
 					StopTimer(timer.EFFECT .. '@' .. timer.UNIT)
