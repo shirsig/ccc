@@ -260,16 +260,14 @@ function UnitDebuffs(unit)
 	return debuffs
 end
 
-function SetActionRank(name, rank)
-	local _, _, rank = strfind(rank or '', 'Rank (%d+)')
-	if rank and aurae_RANKS[name] then
-		aurae_EFFECTS[aurae_RANKS[name].EFFECT or name].DURATION = aurae_RANKS[name].DURATION[tonumber(rank)]
-	end
-end
-
 do
 	local casting = {}
 	local last_cast
+
+	local function extractRank(str)
+		local _, _, rank = strfind(str or '', 'Rank (%d+)')
+		return tonumber(rank)
+	end
 
 	do
 		local orig = UseAction
@@ -279,7 +277,7 @@ do
 				aurae_TooltipTextRight1:SetText()
 				aurae_Tooltip:SetAction(slot)
 				local name = aurae_TooltipTextLeft1:GetText()
-				casting[name] = {unit=TARGET_ID, rank=aurae_TooltipTextRight1:GetText()}
+				casting[name] = {unit=TARGET_ID, rank=extractRank(aurae_TooltipTextRight1:GetText())}
 			end
 			return orig(slot, clicked, onself)
 		end
@@ -288,8 +286,8 @@ do
 	do
 		local orig = CastSpell
 		function _G.CastSpell(index, booktype)
-			local name, rank = GetSpellName(index, booktype)
-			casting[name] = {unit=TARGET_ID, rank=rank}
+			local name, rankText = GetSpellName(index, booktype)
+			casting[name] = {unit=TARGET_ID, rank=extractRank(rankText)}
 			return orig(index, booktype)
 		end
 	end
@@ -317,7 +315,12 @@ do
 				if pending[effect] then
 					last_cast = nil
 				else
-					local duration = aurae_EFFECTS[effect].DURATION
+					local duration
+					if info.rank and aurae_RANKS[effect] then
+						duration = aurae_RANKS[effect].DURATION[info.rank]
+					else
+						duration = aurae_EFFECTS[effect].DURATION
+					end
 					if aurae_COMBO[effect] then
 						duration = duration + aurae_COMBO[effect] * COMBO
 					end
@@ -501,9 +504,9 @@ function StartTimer(effect, unit, start, duration)
 	timer.EFFECT = effect
 	timer.UNIT = unit
 	timer.START = start
-	timer.END = timer.START + duration
+	timer.END = timer.END and max(timer.END, timer.START + duration) or timer.START + duration
 
-	if IsPlayer(unit) then
+	if IsPlayer(unit) and DR_CLASS[effect] then
 		StartDR(effect, unit)
 	end
 
