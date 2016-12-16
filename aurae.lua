@@ -332,7 +332,7 @@ do
 					end
 
 					info.duration = duration
-					info.time = GetTime() + (aurae_DELAYS[effect] or 0)
+					info.time = GetTime() + (aurae_DELAY[effect] and 1.5 or 0)
 					pending[effect] = info
 					last_cast = effect
 				end

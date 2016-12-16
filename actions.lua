@@ -1,11 +1,11 @@
-aurae_DELAYS = {
-	["Fireball"] = 1,
-	["Frostbolt"] = 1,
-	["Concussive Shot"] = 1,
-	["Scorpid Sting"] = 1,
-	["Viper Sting"] = 1,
-	["Serpent Sting"] = 1,
-	["Wyvern Sting"] = 1,
+aurae_DELAY = {
+	["Fireball"] = true,
+	["Frostbolt"] = true,
+	["Concussive Shot"] = true,
+	["Scorpid Sting"] = true,
+	["Viper Sting"] = true,
+	["Serpent Sting"] = true,
+	["Wyvern Sting"] = true,
 }
 
 aurae_RANKS = {}
