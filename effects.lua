@@ -6,7 +6,6 @@ aurae_PVP_DURATION = {
 aurae_COMBO = {
 	["Rupture"] = 2,
 	["Kidney Shot"] = 1,
-
 }
 
 aurae_EFFECTS = {}
