@@ -52,7 +52,7 @@ local DR_CLASS = {
 	["Entangling Roots"] = 4,
 	["Frost Nova"] = 4,
 
-	["Freezing Trap"] = 5,
+	-- ["Freezing Trap"] = 5,
 	["Wyvern String"] = 5,
 
 	["Blind"] = 6,
