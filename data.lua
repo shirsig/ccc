@@ -350,11 +350,11 @@ aurae_EFFECTS = {
 		ICON = 'Spell_Shadow_Cripple',
 		DURATION = 20,
 	},
-	["Charge"] = {
+	["Charge Stun"] = {
 		ICON = 'Spell_Frost_Stun',
 		DURATION = 10,
 	},
-	["Intercept"] = {
+	["Intercept Stun"] = {
 		ICON = 'Ability_Rogue_Sprint',
 		DURATION = 3,
 	},
