@@ -19,7 +19,7 @@ aurae_DR_CLASS = {
 	["Entangling Roots"] = 4,
 	["Frost Nova"] = 4,
 
-	-- ["Freezing Trap"] = 5,
+	["Freezing Trap Effect"] = 5,
 	["Wyvern String"] = 5,
 
 	["Blind"] = 6,
@@ -36,19 +36,42 @@ aurae_DR_CLASS = {
 }
 
 aurae_DELAY = {
-	["Fireball"] = true,
 	["Frostbolt"] = true,
 	["Concussive Shot"] = true,
-	["Scorpid Sting"] = true,
-	["Viper Sting"] = true,
-	["Serpent Sting"] = true,
 	["Wyvern Sting"] = true,
 }
 
+local function talentRank(i, j)
+	local _, _, _, _, rank = GetTalentInfo(i, j)
+	return rank
+end
+
+aurae_BONUS = {
+	["Gouge"] = function()
+		return talentRank(2, 1) * .5
+	end,
+	["Shadow Word: Pain"] = function()
+		return talentRank(3, 4) * 3
+	end,
+	["Cone of Cold"] = function()
+		return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
+	end,
+	["Frostbolt"] = function()
+		return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
+	end,
+	["Polymorph"] = function()
+		return aurae_settings.arcanist and 15 or 0
+	end,
+	["Pounce"] = function()
+		return talentRank(2, 4) * .5
+	end,
+	["Bash"] = function()
+		return talentRank(2, 4) * .5
+	end,
+}
+
 aurae_RANKS = {
-	["Rend"] = {9, 12, 15, 18, 21, 21, 21},
 	["Polymorph"] = {20, 30, 40, 50},
-	["Fireball"] = {4, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8},
 	["Frostbolt"] = {5, 6, 6, 7, 7, 8, 8, 9, 9, 9},
 	["Shackle Undead"] = {30, 40, 50},
 	["Entangling Roots"] = {12, 15, 18, 21, 24, 27},
@@ -57,7 +80,6 @@ aurae_RANKS = {
 	["Scare Beast"] = {10, 15, 20},
 	["Hammer of Justice"] = {3, 4, 5, 6},
 	["Turn Undead"] = {10, 15, 20},
-	["Divine Shield"] = {10, 12},
 	["Fear"] = {10, 15, 20},
 	["Howl of Terror"] = {10, 15},
 	["Banish"] = {20, 30},
@@ -72,24 +94,67 @@ aurae_PVP_DURATION = {
 }
 
 aurae_COMBO = {
-	["Rupture"] = 2,
 	["Kidney Shot"] = 1,
 }
 
-aurae_ACTIONS = {
-	["Charge"] = "Charge Stun",
-	["Intercept"] = "Intercept Stun",
+aurae_ACTION = {
+	["Riposte"] = true,
+	["Shadow Word: Pain"] = true,
+	["Vampiric Embrace"] = true,
+	["Frostbolt"] = true,
+	["Cone of Cold"] = true,
+	["Blast Wave"] = true,
+	["Faerie Fire"] = true,
+	["Faerie Fire (Feral)"] = true,
+	["Concussive Shot"] = true,
+	["Wing Clip"] = true,
+	["Immolate"] = true,
+	["Corruption"] = true,
+	["Curse of Agony"] = true,
+	["Curse of Exhaustion"] = true,
+	["Curse of the Elements"] = true,
+	["Curse of Shadow"] = true,
+	["Curse of Tongues"] = true,
+	["Curse of Weakness"] = true,
+	["Curse of Recklessness"] = true,
+	["Curse of Doom"] = true,
+	["Disarm"] = true,
+	["Mortal Strike"] = true,
+	["Hamstring"] = true,
+	["Piercing Howl"] = true,
+	["Frost Shock"] = true,
+	["Gouge"] = true,
+	["Blind"] = true,
+	["Sap"] = true,
+	["Kidney Shot"] = true,
+	["Cheap Shot"] = true,
+	["Shackle Undead"] = true,
+	["Psychic Scream"] = true,
+	["Polymorph"] = true,
+	["Frost Nova"] = true,
+	["Entangling Roots"] = true,
+	["Hibernate"] = true,
+	["Feral Charge"] = true,
+	["Pounce"] = true,
+	["Bash"] = true,
+	["Scare Beast"] = true,
+	["Scatter Shot"] = true,
+	["Wyvern Sting"] = true,
+	["Counterattack"] = true,
+	["Hammer of Justice"] = true,
+	["Repentance"] = true,
+	["Turn Undead"] = true,
+	["Fear"] = true,
+	["Howl of Terror"] = true,
+	["Death Coil"] = true,
+	["Banish"] = true,
+	["Hamstring"] = true,
+	["Intimidating Shout"] = true,
+	["Concussion Blow"] = true,
+	["War Stomp"] = true,	
 }
 
 aurae_EFFECTS = {
-	["Rupture"] = {
-		ICON = 'Ability_Rogue_Rupture',
-		DURATION = 6,
-	},
-		["Garrote"] = {
-		ICON = 'Ability_Rogue_Garrote',
-		DURATION = 18,
-	},
 	["Riposte"] = {
 		ICON = 'Ability_Warrior_Challange',
 		DURATION = 6,
@@ -98,21 +163,9 @@ aurae_EFFECTS = {
 		ICON = 'Spell_Shadow_ShadowWordPain',
 		DURATION = 18,
 	},
-	["Devouring Plague"] = {
-		ICON = 'Spell_Shadow_BlackPlague',
-		DURATION = 24,
-	},
 	["Vampiric Embrace"] = {
 		ICON = 'Spell_Shadow_UnsummonBuilding',
 		DURATION = 60,
-	},
-	["Holy Fire"] = {
-		ICON = 'Spell_Holy_SearingLight',
-		DURATION = 10,
-	},
-	["Detect Magic"] = {
-		ICON = 'Spell_Holy_Dizzy',
-		DURATION = 120,
 	},
 	["Frostbolt"] = {
 		ICON = 'Spell_Frost_FrostBolt02',
@@ -120,18 +173,6 @@ aurae_EFFECTS = {
 	},
 	["Cone of Cold"] = {
 		ICON = 'Spell_Frost_Glacier',
-		DURATION = 8,
-	},
-	["Fireball"] = {
-		ICON = 'Spell_Fire_FlameBolt',
-		DURATION = 4,
-	},
-	["Pyroblast"] = {
-		ICON = 'Spell_Fire_Fireball02',
-		DURATION = 12,
-	},
-	["Flamestrike"] = {
-		ICON = 'Spell_Fire_SelfDestruct',
 		DURATION = 8,
 	},
 	["Blast Wave"] = {
@@ -146,22 +187,6 @@ aurae_EFFECTS = {
 		ICON = 'Spell_Nature_FaerieFire',
 		DURATION = 40,
 	},
-	["Moonfire"] = {
-		ICON = 'Spell_Nature_StarFall',
-		DURATION = 8,
-	},
-	["Scorpid Sting"] = {
-		ICON = 'Ability_Hunter_CriticalShot',
-		DURATION = 20,
-	},
-	["Serpent Sting"] = {
-		ICON = 'Ability_Hunter_Quickshot',
-		DURATION = 15,
-	},
-	["Viper Sting"] = {
-		ICON = 'Ability_Hunter_AimedShot',
-		DURATION = 8,
-	},
 	["Concussive Shot"] = {
 		ICON = 'Spell_Frost_Stun',
 		DURATION = 4,
@@ -169,10 +194,6 @@ aurae_EFFECTS = {
 	["Wing Clip"] = {
 		ICON = 'Ability_Rogue_Trip',
 		DURATION = 10,
-	},
-	['Shadowburn'] = {
-		ICON = 'Spell_Shadow_ScourgeBuild',
-		DURATION = 5,
 	},
 	["Immolate"] = {
 		ICON = 'Spell_Fire_Immolation',
@@ -214,10 +235,6 @@ aurae_EFFECTS = {
 		ICON = 'Spell_Shadow_AuraOfDarkness',
 		DURATION = 60,
 	},
-	["Siphon Life"] = {
-		ICON = 'Spell_Shadow_Requiem',
-		DURATION = 30,
-	},
 	["Disarm"] = {
 		ICON = 'Ability_Warrior_Disarm',
 		DURATION = 10,
@@ -225,10 +242,6 @@ aurae_EFFECTS = {
 	["Mortal Strike"] = {
 		ICON = 'Ability_Warrior_SavageBlow',
 		DURATION = 10,
-	},
-	["Rend"] = {
-		ICON = 'Ability_Gouge',
-		DURATION = 21,
 	},
 	["Hamstring"] = {
 		ICON = 'Ability_ShockWave',
@@ -241,14 +254,6 @@ aurae_EFFECTS = {
 	["Frost Shock"] = {
 		ICON = 'Spell_Frost_FrostShock',
 		DURATION = 8,
-	},
-	["Flame Shock"] = {
-		ICON = 'Spell_Fire_FlameShock',
-		DURATION = 12,
-	},
-	["Stormstrike"] = {
-		ICON = 'Spell_Holy_SealOfMight',
-		DURATION = 12,
 	},
 	["Gouge"] = {
 		ICON = 'Ability_Gouge',
@@ -350,14 +355,6 @@ aurae_EFFECTS = {
 		ICON = 'Spell_Shadow_Cripple',
 		DURATION = 20,
 	},
-	["Charge Stun"] = {
-		ICON = 'Spell_Frost_Stun',
-		DURATION = 10,
-	},
-	["Intercept Stun"] = {
-		ICON = 'Ability_Rogue_Sprint',
-		DURATION = 3,
-	},
 	["Hamstring"] = {
 		ICON = 'Ability_ShockWave',
 		DURATION = 15,
@@ -374,36 +371,198 @@ aurae_EFFECTS = {
 		ICON = 'Ability_WarStomp',
 		DURATION = 2,
 	},
--- aurae_EFFECTS["Spell Lock"] = {
--- 	ICON = 'Spell_Shadow_MindRot',
--- 	DURATION = 3,
--- }
 
--- aurae_EFFECTS["Intimidation"] = {
--- 	ICON = 'Ability_Devour',
--- 	DURATION = 3,
--- }
+	["Seduction"] = {
+		ICON = 'Spell_Shadow_MindSteal',
+		DURATION = 15,
+	},
 
--- aurae_EFFECTS["Seduction"] = {
--- 	ICON = 'Spell_Shadow_MindSteal',
+	["Freezing Trap Effect"] = {
+		ICON = 'Spell_Frost_ChainsOfIce',
+		DURATION = 10,
+	},
+
+-- -- Green Whelp Armour
+-- ["Sleep"] = {
+-- 	ICON = 'Spell_Holy_MindVision',
+-- 	DURATION = 30,
+-- },
+
+-- -- Net O Matic
+-- ["Net-o-Matic"] = {
+-- 	ICON = 'INV_Misc_Net_01',
+-- 	DURATION = 10,
+-- },
+
+-- -- Rocket Helm
+-- ["Reckless Charge"] = {
+-- 	ICON = 'INV_Helmet_49',
+-- 	DURATION = 30,
+-- },
+
+
+-- aurae_EFFECTS["Adrenaline Rush"] = {
+-- 	ICON = 'Spell_Shadow_ShadowWordDominate',
 -- 	DURATION = 15,
 -- }
 
--- -- Green Whelp Armour
--- aurae_EFFECTS["Sleep"] = {
--- 	ICON = 'Spell_Holy_MindVision',
+-- aurae_EFFECTS["Sprint"] = {
+-- 	ICON = 'Ability_Rogue_Sprint',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Evasion"] = {
+-- 	ICON = 'Spell_Shadow_ShadowWard',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Blade Flurry"] = {
+-- 	ICON = 'Ability_GhoulFrenzy',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Shadow Word: Shield"] = {
+-- 	ICON = 'Spell_Holy_PowerWordShield',
 -- 	DURATION = 30,
 -- }
 
--- -- Net O Matic
--- aurae_EFFECTS["Net-o-Matic"] = {
--- 	ICON = 'INV_Misc_Net_01',
+-- aurae_EFFECTS["Renew"] = {
+-- 	ICON = 'Spell_Holy_Renew',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Power Infusion"] = {
+-- 	ICON = 'Spell_Holy_PowerInfusion',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Arcane Power"] = {
+-- 	ICON = 'Spell_Nature_Lightning',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Evocation"] = {
+-- 	ICON = 'Spell_Nature_Purge',
+-- 	DURATION = 8,
+-- }
+
+-- aurae_EFFECTS["Ice Block"] = {
+-- 	ICON = 'Spell_Frost_Frost',
 -- 	DURATION = 10,
 -- }
 
--- -- Rocket Helm
--- aurae_EFFECTS["Reckless Charge"] = {
--- 	ICON = 'INV_Helmet_49',
+-- aurae_EFFECTS["Nature's Grasp"] = {
+-- 	ICON = 'Spell_Nature_NaturesWrath',
+-- 	DURATION = 45,
+-- }
+
+-- aurae_EFFECTS["Rejuvenation"] = {
+-- 	ICON = 'Spell_Nature_Rejuvenation',
+-- 	DURATION = 12,
+-- }
+
+-- aurae_EFFECTS["Regrowth"] = {
+-- 	ICON = 'Spell_Nature_ResistNature',
+-- 	DURATION = 21,
+-- }
+
+-- aurae_EFFECTS["Dash"] = {
+-- 	ICON = 'Ability_Druid_Dash',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Innervate"] = {
+-- 	ICON = 'Spell_Nature_Lightning',
+-- 	DURATION = 20,
+-- }
+
+-- aurae_EFFECTS["Barkskin"] = {
+-- 	ICON = 'Spell_Nature_StoneClawTotem',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Frenzied Regeneration"] = {
+-- 	ICON = 'Ability_BullRush',
+-- 	DURATION = 10,
+-- }
+
+-- aurae_EFFECTS["Deterrence"] = {
+-- 	ICON = 'Ability_Whirlwind',
+-- 	DURATION = 10,
+-- }
+
+-- aurae_EFFECTS["Rapid Fire"] = {
+-- 	ICON = 'Ability_Hunter_RunningShot',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Divine Shield"] = {
+-- 	ICON = 'Spell_Holy_DivineIntervention',
+-- 	DURATION = 12,
+-- }
+
+-- aurae_EFFECTS["Blessing of Protection"] = {
+-- 	ICON = 'Spell_Holy_SealOfProtection',
+-- 	DURATION = 10,
+-- }
+
+-- aurae_EFFECTS["Blessing of Freedom"] = {
+-- 	ICON = 'Spell_Holy_SealOfValor',
+-- 	DURATION = 10,
+-- }
+
+-- aurae_EFFECTS["Sacrifice"] = {
+-- 	ICON = 'Spell_Shadow_SacrificialShield',
 -- 	DURATION = 30,
+-- }
+
+-- aurae_EFFECTS["Spellstone"] = {
+-- 	ICON = 'INV_Misc_Gem_Sapphire_01',
+-- 	DURATION = 45,
+-- }
+
+-- aurae_EFFECTS["Berserker Rage"] = {
+-- 	ICON = 'Spell_Nature_AncestralGuardian',
+-- 	DURATION = 10,
+-- }
+
+-- aurae_EFFECTS["Bloodrage"] = {
+-- 	ICON = 'Ability_Racial_BloodRage',
+-- 	DURATION = 10,
+-- }
+
+-- aurae_EFFECTS["Last Stand"] = {
+-- 	ICON = 'Spell_Holy_AshesToAshes',
+-- 	DURATION = 20,
+-- }
+
+-- aurae_EFFECTS["Retaliation"] = {
+-- 	ICON = 'Ability_Warrior_Challange',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Shield Wall"] = {
+-- 	ICON = 'Ability_Warrior_ShieldWall',
+-- 	DURATION = 10,
+-- }
+
+-- aurae_EFFECTS["Recklessness"] = {
+-- 	ICON = 'Ability_CriticalStrike',
+-- 	DURATION = 15,
+-- }
+
+-- aurae_EFFECTS["Death Wish"] = {
+-- 	ICON = 'Spell_Shadow_DeathPact',
+-- 	DURATION = 30,
+-- }
+
+-- aurae_EFFECTS["Will of the Forsaken"] = {
+-- 	ICON = 'Spell_Shadow_RaiseDead',
+-- 	DURATION = 5,
+-- }
+
+-- aurae_EFFECTS["Perception"] = {
+-- 	ICON = 'Spell_Nature_Sleep',
+-- 	DURATION = 20,
 -- }
 }

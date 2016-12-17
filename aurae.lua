@@ -19,10 +19,6 @@ end
 
 CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
 
-function Print(msg)
-	DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
-end
-
 _G.aurae_settings = {}
 
 local WIDTH = 170
@@ -32,6 +28,10 @@ local MAXBARS = 11
 local COMBO = 0
 
 local BARS, timers, pending = {}, {}, {}
+
+function Print(msg)
+	DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
+end
 
 function CreateBar()
 	local texture = [[Interface\Addons\aurae\bar]]
@@ -266,18 +266,17 @@ do
 	end
 
 	function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
-		for action in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
-			casting[action] = nil
+		for effect in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
+			casting[effect] = nil
 		end
 	end
 
 	function SPELLCAST_STOP()
-		for action, info in casting do
-			if aurae_EFFECTS[action] then
-				local effect = aurae_ACTIONS[action] or action
+		for effect, info in casting do
+			if aurae_EFFECTS[effect] then
 				if pending[effect] then
 					last_cast = nil
-				else
+				elseif aurae_ACTION[effect] then
 					local duration
 					if info.rank and aurae_RANKS[effect] then
 						duration = aurae_RANKS[effect][info.rank]
@@ -287,8 +286,8 @@ do
 					if aurae_COMBO[effect] then
 						duration = duration + aurae_COMBO[effect] * COMBO
 					end
-					if bonuses[effect] then
-						duration = duration + bonuses[effect](duration)
+					if aurae_BONUS[effect] then
+						duration = duration + aurae_BONUS[effect]()
 					end
 					if IsPlayer(info.unit) then
 						duration = DiminishedDuration(info.unit, effect, aurae_PVP_DURATION[effect] or duration)
@@ -534,14 +533,27 @@ do
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
+		-- TODO gains (blue?)
 	end
 
+	local function talentRank(i, j)
+		local _, _, _, _, rank = GetTalentInfo(i, j)
+		return rank
+	end
+	
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
 			if IsPlayer(unit) and pending[effect] and pending[effect].unit == unit then
 				StartTimer(effect, unit, GetTime(), pending[effect].duration)
 				pending[effect] = nil
+			elseif unit == UnitName'target' then -- TODO recent
+				local _, class = UnitClass'player'
+				if effect == "Freezing Trap Effect" and class == 'HUNTER' then
+					StartTimer(effect, unit, GetTime(), 20 + 20 * talentRank(3, 7) * .15) -- TODO spell rank
+				elseif effect == "Seduction" and class == 'WARLOCK' then
+					StartTimer(effect, unit, GetTime(), 15 + talentRank(2, 7) * 1.5)
+				end
 			end
 		end
 	end
@@ -694,58 +706,4 @@ function Usage()
 	Print("  scale [0.5,3]")
 	Print("  alpha [0,1]")
 	Print("  arcanist")
-end
-
-do
-	local function rank(i, j)
-		local _, _, _, _, rank = GetTalentInfo(i, j)
-		return rank
-	end
-
-	local _, class = UnitClass'player'
-	if class == 'ROGUE' then
-		bonuses = {
-			["Gouge"] = function()
-				return rank(2, 1) * .5
-			end,
-			["Garrote"] = function()
-				return rank(3, 8) * 3
-			end,
-		}
-	-- elseif class == "WARLOCK" then
-	-- 	bonuses = {
-	-- 		["Seduce"] = function()
-	-- 			return rank(2, 7) * 1.5
-	-- 		end,
-	-- 	}
-	elseif class == 'PRIEST' then
-		bonuses = {
-			["Shadow Word: Pain"] = function()
-				return rank(3, 4) * 3
-			end,
-		}
-	elseif class == 'MAGE' then
-		bonuses = {
-			["Cone of Cold"] = function()
-				return min(1, rank(3, 2)) * .5 + rank(3, 2) * .5
-			end,
-			["Frostbolt"] = function()
-				return min(1, rank(3, 2)) * .5 + rank(3, 2) * .5
-			end,
-			["Polymorph"] = function()
-				return aurae_settings.arcanist and 15 or 0
-			end,
-		}
-	elseif class == 'DRUID' then
-		bonuses = {
-			["Pounce"] = function()
-				return rank(2, 4) * .5
-			end,
-			["Bash"] = function()
-				return rank(2, 4) * .5
-			end,
-		}
-	else
-		bonuses = {}
-	end
 end
