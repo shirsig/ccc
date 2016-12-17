@@ -36,6 +36,7 @@ aurae_DR_CLASS = {
 aurae_DELAY = {
 	["Frostbolt"] = true,
 	["Wyvern Sting"] = true,
+	["Concussive Shot"] = true,
 }
 
 local function talentRank(i, j)
@@ -118,6 +119,7 @@ aurae_ACTION = {
 	["Scare Beast"] = true,
 	["Scatter Shot"] = true,
 	["Wyvern Sting"] = true,
+	["Concussive Shot"] = true,
 	["Counterattack"] = true,
 	["Hammer of Justice"] = true,
 	["Repentance"] = true,
@@ -296,6 +298,10 @@ aurae_EFFECTS = {
 	["Wyvern Sting"] = {
 		ICON = 'INV_Spear_02',
 		DURATION = {12},
+	},
+	["Concussive Shot"] = {
+		ICON = 'Spell_Frost_Stun',
+		DURATION = {4},
 	},
 	["Counterattack"] = {
 		ICON = 'Ability_Warrior_Challange',
