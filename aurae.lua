@@ -544,11 +544,11 @@ do
 			if IsPlayer(unit) and pending[effect] and pending[effect].unit == unit then
 				StartTimer(effect, unit, GetTime(), pending[effect].duration)
 				pending[effect] = nil
-			elseif unit == UnitName'target' then -- TODO recent
+			else
 				local _, class = UnitClass'player'
-				if effect == "Freezing Trap Effect" and class == 'HUNTER' then
+				if effect == "Freezing Trap Effect" and class == 'HUNTER' and unit == UnitName'target' then -- TODO recent
 					StartTimer(effect, unit, GetTime(), 20 + 20 * talentRank(3, 7) * .15) -- TODO spell rank
-				elseif effect == "Seduction" and class == 'WARLOCK' then
+				elseif effect == "Seduction" and class == 'WARLOCK' and unit == UnitName'pettarget' then
 					StartTimer(effect, unit, GetTime(), 15 + talentRank(2, 7) * 1.5)
 				end
 			end
