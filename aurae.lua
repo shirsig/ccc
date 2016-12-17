@@ -276,12 +276,7 @@ do
 			if pending[effect] then
 				last_cast = nil
 			elseif aurae_ACTION[effect] then
-				local duration
-				if info.rank and aurae_RANKS[effect] then
-					duration = aurae_RANKS[effect][info.rank]
-				else
-					duration = aurae_EFFECTS[effect].DURATION
-				end
+				local duration = aurae_EFFECTS[effect].DURATION[min(info.rank, getn(aurae_EFFECTS[effect].DURATION))]
 				if aurae_COMBO[effect] then
 					duration = duration + aurae_COMBO[effect] * COMBO
 				end
@@ -291,7 +286,6 @@ do
 				if IsPlayer(info.unit) then
 					duration = DiminishedDuration(info.unit, effect, aurae_PVP_DURATION[effect] or duration)
 				end
-
 				info.duration = duration
 				info.time = GetTime() + (aurae_DELAY[effect] and 1.5 or 0)
 				pending[effect] = info
