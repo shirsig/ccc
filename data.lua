@@ -371,12 +371,10 @@ aurae_EFFECTS = {
 		ICON = 'Ability_WarStomp',
 		DURATION = 2,
 	},
-
 	["Seduction"] = {
 		ICON = 'Spell_Shadow_MindSteal',
 		DURATION = 15,
 	},
-
 	["Freezing Trap Effect"] = {
 		ICON = 'Spell_Frost_ChainsOfIce',
 		DURATION = 10,

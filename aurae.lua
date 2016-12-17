@@ -273,31 +273,29 @@ do
 
 	function SPELLCAST_STOP()
 		for effect, info in casting do
-			if aurae_EFFECTS[effect] then
-				if pending[effect] then
-					last_cast = nil
-				elseif aurae_ACTION[effect] then
-					local duration
-					if info.rank and aurae_RANKS[effect] then
-						duration = aurae_RANKS[effect][info.rank]
-					else
-						duration = aurae_EFFECTS[effect].DURATION
-					end
-					if aurae_COMBO[effect] then
-						duration = duration + aurae_COMBO[effect] * COMBO
-					end
-					if aurae_BONUS[effect] then
-						duration = duration + aurae_BONUS[effect]()
-					end
-					if IsPlayer(info.unit) then
-						duration = DiminishedDuration(info.unit, effect, aurae_PVP_DURATION[effect] or duration)
-					end
-
-					info.duration = duration
-					info.time = GetTime() + (aurae_DELAY[effect] and 1.5 or 0)
-					pending[effect] = info
-					last_cast = effect
+			if pending[effect] then
+				last_cast = nil
+			elseif aurae_ACTION[effect] then
+				local duration
+				if info.rank and aurae_RANKS[effect] then
+					duration = aurae_RANKS[effect][info.rank]
+				else
+					duration = aurae_EFFECTS[effect].DURATION
 				end
+				if aurae_COMBO[effect] then
+					duration = duration + aurae_COMBO[effect] * COMBO
+				end
+				if aurae_BONUS[effect] then
+					duration = duration + aurae_BONUS[effect]()
+				end
+				if IsPlayer(info.unit) then
+					duration = DiminishedDuration(info.unit, effect, aurae_PVP_DURATION[effect] or duration)
+				end
+
+				info.duration = duration
+				info.time = GetTime() + (aurae_DELAY[effect] and 1.5 or 0)
+				pending[effect] = info
+				last_cast = effect
 			end
 		end
 		casting = {}
@@ -540,7 +538,7 @@ do
 		local _, _, _, _, rank = GetTalentInfo(i, j)
 		return rank
 	end
-	
+
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
