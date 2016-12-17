@@ -2,8 +2,6 @@ aurae_DR_CLASS = {
 	["Bash"] = 1,
 	["Hammer of Justice"] = 1,
 	["Cheap Shot"] = 1,
-	["Charge Stun"] = 1,
-	["Intercept Stun"] = 1,
 	["Concussion Blow"] = 1,
 
 	["Fear"] = 2,
@@ -37,7 +35,6 @@ aurae_DR_CLASS = {
 
 aurae_DELAY = {
 	["Frostbolt"] = true,
-	["Concussive Shot"] = true,
 	["Wyvern Sting"] = true,
 }
 
@@ -106,7 +103,6 @@ aurae_ACTION = {
 	["Blast Wave"] = true,
 	["Faerie Fire"] = true,
 	["Faerie Fire (Feral)"] = true,
-	["Concussive Shot"] = true,
 	["Wing Clip"] = true,
 	["Immolate"] = true,
 	["Corruption"] = true,
@@ -186,10 +182,6 @@ aurae_EFFECTS = {
 	["Faerie Fire (Feral)"] = {
 		ICON = 'Spell_Nature_FaerieFire',
 		DURATION = 40,
-	},
-	["Concussive Shot"] = {
-		ICON = 'Spell_Frost_Stun',
-		DURATION = 4,
 	},
 	["Wing Clip"] = {
 		ICON = 'Ability_Rogue_Trip',
