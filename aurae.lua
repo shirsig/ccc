@@ -392,10 +392,9 @@ function AuraGone(unit, effect)
 			end
 		elseif unit == UnitName'target' then
 			-- TODO pet target (in other places too)
-			local unit = TARGET_ID
 			local debuffs = TargetDebuffs()
 			for k, timer in timers do
-				if timer.UNIT == unit and not debuffs[timer.EFFECT] then
+				if timer.UNIT == TARGET_ID and not debuffs[timer.EFFECT] then
 					StopTimer(timer.EFFECT .. '@' .. timer.UNIT)
 				end
 			end
