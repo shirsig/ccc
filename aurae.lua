@@ -31,43 +31,6 @@ local MAXBARS = 11
 
 local COMBO = 0
 
-local DR_CLASS = {
-	["Bash"] = 1,
-	["Hammer of Justice"] = 1,
-	["Cheap Shot"] = 1,
-	["Charge Stun"] = 1,
-	["Intercept Stun"] = 1,
-	["Concussion Blow"] = 1,
-
-	["Fear"] = 2,
-	["Howl of Terror"] = 2,
-	["Seduction"] = 2,
-	["Intimidating Shout"] = 2,
-	["Psychic Scream"] = 2,
-
-	["Polymorph"] = 3,
-	["Sap"] = 3,
-	["Gouge"] = 3,
-
-	["Entangling Roots"] = 4,
-	["Frost Nova"] = 4,
-
-	-- ["Freezing Trap"] = 5,
-	["Wyvern String"] = 5,
-
-	["Blind"] = 6,
-
-	["Hibernate"] = 7,
-
-	["Mind Control"] = 8,
-
-	["Kidney Shot"] = 9,
-
-	["Death Coil"] = 10,
-
-	["Frost Shock"] = 11,
-}
-
 local BARS, timers, pending = {}, {}, {}
 
 function CreateBar()
@@ -239,7 +202,7 @@ do
 	local factor = {1/2, 1/4, 0}
 
 	function DiminishedDuration(unit, effect, full_duration)
-		local class = DR_CLASS[effect]
+		local class = aurae_DR_CLASS[effect]
 		if class and timers[class .. '@' .. unit] then
 			return full_duration * factor[timers[class .. '@' .. unit].DR or 1]
 		else
@@ -310,8 +273,8 @@ do
 
 	function SPELLCAST_STOP()
 		for action, info in casting do
-			if aurae_ACTIONS[action] then
-				local effect = aurae_ACTIONS[action] == true and action or aurae_ACTIONS[action]
+			if aurae_EFFECTS[action] then
+				local effect = aurae_ACTIONS[action] or action
 				if pending[effect] then
 					last_cast = nil
 				else
@@ -410,12 +373,12 @@ function CHAT_MSG_SPELL_BREAK_AURA()
 end
 
 function ActivateDRTimer(effect, unit)
-	for k, v in DR_CLASS do
-		if v == DR_CLASS[effect] and EffectActive(k, unit) then
+	for k, v in aurae_DR_CLASS do
+		if v == aurae_DR_CLASS[effect] and EffectActive(k, unit) then
 			return
 		end
 	end
-	local timer = timers[DR_CLASS[effect] .. '@' .. unit]
+	local timer = timers[aurae_DR_CLASS[effect] .. '@' .. unit]
 	if timer then
 		timer.START = GetTime()
 		timer.END = timer.START + 15
@@ -427,7 +390,7 @@ function AuraGone(unit, effect)
 		if IsPlayer(unit) then
 			AbortCast(effect, unit)
 			StopTimer(effect .. '@' .. unit)
-			if DR_CLASS[effect] then
+			if aurae_DR_CLASS[effect] then
 				ActivateDRTimer(effect, unit)
 			end
 		elseif unit == UnitName'target' then
@@ -485,7 +448,7 @@ function UpdateTimers()
 	for k, timer in timers do
 		if timer.END and t > timer.END then
 			StopTimer(k)
-			if DR_CLASS[timer.EFFECT] and not timer.DR then
+			if aurae_DR_CLASS[timer.EFFECT] and not timer.DR then
 				ActivateDRTimer(timer.EFFECT, timer.UNIT)
 			end
 		end
@@ -506,7 +469,7 @@ function StartTimer(effect, unit, start, duration)
 	timer.START = start
 	timer.END = timer.END and max(timer.END, timer.START + duration) or timer.START + duration
 
-	if IsPlayer(unit) and DR_CLASS[effect] then
+	if IsPlayer(unit) and aurae_DR_CLASS[effect] then
 		StartDR(effect, unit)
 	end
 
@@ -516,7 +479,7 @@ end
 
 function StartDR(effect, unit)
 
-	local key = DR_CLASS[effect] .. '@' .. unit
+	local key = aurae_DR_CLASS[effect] .. '@' .. unit
 	local timer = timers[key] or {}
 
 	if not timer.DR or timer.DR < 3 then
