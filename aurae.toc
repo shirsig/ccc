@@ -3,6 +3,5 @@
 ## Notes: Progress bars for enemy buffs, debuffs and DRs
 ## Author: shirsig
 ## SavedVariablesPerCharacter: aurae_settings
-effects.lua
-actions.lua
+data.lua
 aurae.lua
