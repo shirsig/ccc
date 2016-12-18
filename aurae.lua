@@ -276,7 +276,7 @@ do
 			if pending[effect] then
 				last_cast = nil
 			elseif aurae_ACTION[effect] then
-				local duration = aurae_EFFECTS[effect].DURATION[min(info.rank, getn(aurae_EFFECTS[effect].DURATION))]
+				local duration = aurae_EFFECTS[effect].DURATION[min(info.rank or 1, getn(aurae_EFFECTS[effect].DURATION))]
 				if aurae_COMBO[effect] then
 					duration = duration + aurae_COMBO[effect] * COMBO
 				end
