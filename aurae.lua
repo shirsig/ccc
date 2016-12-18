@@ -562,7 +562,7 @@ do
 
 	function PLAYER_TARGET_CHANGED()
 		local unit = UnitName'target'
-		TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
+		TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target') or ''
 		if unit then
 			player[unit] = UnitIsPlayer'target' and true or false
 		end
