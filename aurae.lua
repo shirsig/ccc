@@ -305,9 +305,10 @@ end
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for effect, info in pending do
 		if GetTime() >= info.time + .5 then
-			if (IsPlayer(info.unit) or TARGET_ID ~= info.unit or TargetDebuffs()[effect]) then
+			-- TODO temporary nostlag fix
+			-- if TARGET_ID ~= info.unit or TargetDebuffs()[effect] then
 				StartTimer(effect, info.unit, info.time, info.duration)
-			end
+			-- end
 			pending[effect] = nil
 		end
 	end
