@@ -11,7 +11,7 @@ do
 		'UNIT_COMBAT',
 		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
 		'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
-		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
+		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE',
 		'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
 		'PLAYER_TARGET_CHANGED', 'UPDATE_BATTLEFIELD_SCORE',
 	} do f:RegisterEvent(event) end
@@ -532,20 +532,30 @@ do
 		return rank
 	end
 
+	local function specialEvents(effect, unit)
+		local _, class = UnitClass'player'
+		if effect == "Freezing Trap Effect" and class == 'HUNTER' and unit == UnitName'target' then -- TODO recent
+			StartTimer(effect, unit, GetTime(), 20 + 20 * talentRank(3, 7) * .15) -- TODO spell rank
+		elseif effect == "Seduction" and class == 'WARLOCK' and unit == UnitName'target' then -- TODO pettarget nostbug
+			StartTimer(effect, unit, GetTime(), 15 + talentRank(2, 7) * 1.5)
+		end
+	end
+
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
-			if IsPlayer(unit) and pending[effect] and pending[effect].unit == unit then
+			if pending[effect] and pending[effect].unit == unit then
 				StartTimer(effect, unit, GetTime(), pending[effect].duration)
 				pending[effect] = nil
 			else
-				local _, class = UnitClass'player'
-				if effect == "Freezing Trap Effect" and class == 'HUNTER' and unit == UnitName'target' then -- TODO recent
-					StartTimer(effect, unit, GetTime(), 20 + 20 * talentRank(3, 7) * .15) -- TODO spell rank
-				elseif effect == "Seduction" and class == 'WARLOCK' and unit == UnitName'pettarget' then
-					StartTimer(effect, unit, GetTime(), 15 + talentRank(2, 7) * 1.5)
-				end
+				specialEvents(effect, unit)
 			end
+		end
+	end
+
+	function CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
+		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
+			specialEvents(effect, unit)
 		end
 	end
 
