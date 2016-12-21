@@ -265,6 +265,18 @@ do
 		end
 	end
 
+	do
+		local orig = CastSpellByName
+		function _G.CastSpellByName(text, onself)
+			if not onself then
+				local _, _, name, rank = strfind(text, '(.*)%([Rr][Aa][Nn][Kk] (%d+)%)')
+				name = name or text
+				casting[name] = {unit=TARGET_ID, rank=tonumber(rank)}
+			end
+			return orig(text, onself)
+		end
+	end
+
 	function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
 		for effect in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
 			casting[effect] = nil
