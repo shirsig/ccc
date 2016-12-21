@@ -149,7 +149,7 @@ aurae_EFFECTS = {
 	},
 	["Frostbolt"] = {
 		ICON = 'Spell_Frost_FrostBolt02',
-		DURATION = {5, 6, 6, 7, 7, 8, 8, 9, 9, 9},
+		DURATION = {5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9},
 	},
 	["Cone of Cold"] = {
 		ICON = 'Spell_Frost_Glacier',
