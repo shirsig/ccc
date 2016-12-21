@@ -639,7 +639,7 @@ do
 		LockBars()
 	end
 
-	Print('aurae loaded - /aurae')
+	Print('loaded - /aurae')
 end
 
 do
