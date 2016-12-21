@@ -259,7 +259,7 @@ do
 		local orig = CastSpellByName
 		function _G.CastSpellByName(text, onself)
 			if not onself then
-				local _, _, name, rank = strfind(text, '(.*)%([Rr][Aa][Nn][Kk] (%d+)%)')
+				local _, _, name, rank = strfind(text, '(.*)%([Rr][Aa][Nn][Kk] ([1-9]%d*)%)')
 				name = name or text
 				casting[name] = {unit=TARGET_ID, rank=tonumber(rank)}
 			end
