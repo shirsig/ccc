@@ -88,6 +88,7 @@ aurae_ACTION = {
 	["Faerie Fire (Feral)"] = true,
 	["Wing Clip"] = true,
 	["Immolate"] = true,
+	["Siphon Life"] = true,
 	["Corruption"] = true,
 	["Curse of Agony"] = true,
 	["Curse of Exhaustion"] = true,
@@ -174,6 +175,10 @@ aurae_EFFECTS = {
 	["Immolate"] = {
 		ICON = 'Spell_Fire_Immolation',
 		DURATION = {15},
+	},
+	["Siphon Life"] = {
+		ICON = 'Spell_Shadow_Requiem',
+		DURATION = {30},
 	},
 	["Corruption"] = {
 		ICON = 'Spell_Shadow_AbominationExplosion',
