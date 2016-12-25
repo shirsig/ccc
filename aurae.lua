@@ -234,8 +234,8 @@ do
 
 	do
 		local orig = UseAction
-		function _G.UseAction(slot, clicked, onself)
-			if HasAction(slot) and not GetActionText(slot) then
+		function _G.UseAction(slot, clicked, onself) -- TODO onself bug?
+			if TARGET_ID and HasAction(slot) and not GetActionText(slot) then
 				aurae_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 				aurae_TooltipTextRight1:SetText()
 				aurae_Tooltip:SetAction(slot)
@@ -249,8 +249,10 @@ do
 	do
 		local orig = CastSpell
 		function _G.CastSpell(index, booktype)
-			local name, rankText = GetSpellName(index, booktype)
-			casting[name] = {unit=TARGET_ID, rank=extractRank(rankText)}
+			if TARGET_ID then
+				local name, rankText = GetSpellName(index, booktype)
+				casting[name] = {unit=TARGET_ID, rank=extractRank(rankText)}
+			end
 			return orig(index, booktype)
 		end
 	end
@@ -258,7 +260,7 @@ do
 	do
 		local orig = CastSpellByName
 		function _G.CastSpellByName(text, onself)
-			if not onself then
+			if TARGET_ID and not onself then
 				local _, _, name, rank = strfind(text, '(.*)%([Rr][Aa][Nn][Kk] ([1-9]%d*)%)')
 				name = name or text
 				casting[name] = {unit=TARGET_ID, rank=tonumber(rank)}
@@ -563,7 +565,7 @@ do
 
 	function PLAYER_TARGET_CHANGED()
 		local unit = UnitName'target'
-		TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target') or ''
+		TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
 		if unit then
 			player[unit] = UnitIsPlayer'target' and true or false
 		end
