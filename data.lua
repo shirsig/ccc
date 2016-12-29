@@ -11,6 +11,8 @@ aurae_DR_CLASS = {
 	["Psychic Scream"] = 2,
 
 	["Polymorph"] = 3,
+	["Polymorph: Turtle"] = 3,
+	["Polymorph: Pig"] = 3,
 	["Sap"] = 3,
 	["Gouge"] = 3,
 
@@ -33,10 +35,23 @@ aurae_DR_CLASS = {
 	["Frost Shock"] = 11,
 }
 
-aurae_DELAY = {
+aurae_PROJECTILE = {
 	["Frostbolt"] = true,
 	["Wyvern Sting"] = true,
 	["Concussive Shot"] = true,
+}
+
+aurae_UNIQUENESS_CLASS = {
+	["Polymorph"] = 1,
+	["Polymorph: Turtle"] = 1,
+	["Polymorph: Pig"] = 1,
+	["Fear"] = 2,
+	["Sap"] = 3,
+	["Entangling Roots"] = 4,
+	["Hibernate"] = 5,
+	["Turn Undead"] = 6,
+	["Shackle Undead"] = 7,
+	["Blind"] = 8,
 }
 
 local function talentRank(i, j)
@@ -60,6 +75,12 @@ aurae_BONUS = {
 	["Polymorph"] = function()
 		return aurae_settings.arcanist and 15 or 0
 	end,
+	["Polymorph: Turtle"] = function()
+		return aurae_settings.arcanist and 15 or 0
+	end,
+	["Polymorph: Pig"] = function()
+		return aurae_settings.arcanist and 15 or 0
+	end,
 	["Pounce"] = function()
 		return talentRank(2, 4) * .5
 	end,
@@ -71,6 +92,8 @@ aurae_BONUS = {
 aurae_PVP_DURATION = {
 	["Sap"] = 15,
 	["Polymorph"] = 15,
+	["Polymorph: Turtle"] = 15,
+	["Polymorph: Pig"] = 15,
 }
 
 aurae_COMBO = {
@@ -111,6 +134,8 @@ aurae_ACTION = {
 	["Shackle Undead"] = true,
 	["Psychic Scream"] = true,
 	["Polymorph"] = true,
+	["Polymorph: Turtle"] = true,
+	["Polymorph: Pig"] = true,
 	["Frost Nova"] = true,
 	["Entangling Roots"] = true,
 	["Hibernate"] = true,
@@ -267,6 +292,14 @@ aurae_EFFECTS = {
 	["Polymorph"] = {
 		ICON = 'Spell_Nature_Polymorph', -- Spell_Magic_PolymorphPig, TODO Ability_Hunter_Pet_Turtle
 		DURATION = {20, 30, 40, 50},
+	},
+	["Polymorph: Turtle"] = {
+		ICON = "Ability_Hunter_Pet_Turtle",
+		DURATION = {50},
+	},
+	["Polymorph: Pig"] = {
+		ICON = "Spell_Magic_PolymorphPig",
+		DURATION = {50},
 	},
 	["Frost Nova"] = {
 		ICON = 'Spell_Frost_FrostNova',

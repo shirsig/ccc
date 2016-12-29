@@ -291,7 +291,7 @@ do
 					duration = DiminishedDuration(info.unit, effect, aurae_PVP_DURATION[effect] or duration)
 				end
 				info.duration = duration
-				info.time = GetTime() + (aurae_DELAY[effect] and 1.5 or 0)
+				info.time = GetTime() + (aurae_PROJECTILE[effect] and 1.5 or 0)
 				pending[effect] = info
 				last_cast = effect
 			end
@@ -456,6 +456,15 @@ end
 function StartTimer(effect, unit, start, duration)
 	local key = effect .. '@' .. unit
 	local timer = timers[key] or {}
+
+	if aurae_UNIQUENESS_CLASS[effect] then
+		for k, v in timers do
+			if not v.DR and aurae_UNIQUENESS_CLASS[v.EFFECT] == aurae_UNIQUENESS_CLASS[effect] then
+				StopTimer(k)
+			end
+		end
+	end
+
 	timers[key] = timer
 
 	timer.EFFECT = effect
