@@ -60,6 +60,12 @@ local function talentRank(i, j)
 end
 
 aurae_BONUS = {
+	["Freezing Trap"] = function()
+		return 20 * talentRank(3, 7) * .15
+	end,
+	["Seduction"] = function()
+		return talentRank(2, 7) * 1.5
+	end,
 	["Gouge"] = function()
 		return talentRank(2, 1) * .5
 	end,
@@ -90,6 +96,8 @@ aurae_BONUS = {
 }
 
 aurae_HEARTBEAT = {
+	["Freezing Trap"] = true,
+	["Seduction"] = true,
 	["Fear"] = true,
 	["Sap"] = true,
 	["Polymorph"] = true,

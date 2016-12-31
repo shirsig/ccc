@@ -284,12 +284,6 @@ do
 				if aurae_COMBO[effect] then
 					duration = duration + aurae_COMBO[effect] * COMBO
 				end
-				if aurae_BONUS[effect] then
-					duration = duration + aurae_BONUS[effect]()
-				end
-				if IsPlayer(info.unit) then
-					duration = DiminishedDuration(info.unit, effect, aurae_HEARTBEAT[effect] and min(15, duration) or duration)
-				end
 				info.duration = duration
 				info.time = GetTime() + (aurae_PROJECTILE[effect] and 1.5 or 0)
 				pending[effect] = info
@@ -465,6 +459,13 @@ function StartTimer(effect, unit, start, duration)
 		end
 	end
 
+	if aurae_BONUS[effect] then
+		duration = duration + aurae_BONUS[effect]()
+	end
+	if IsPlayer(info.unit) then
+		duration = DiminishedDuration(info.unit, effect, aurae_HEARTBEAT[effect] and min(15, duration) or duration)
+	end
+
 	timers[key] = timer
 
 	timer.EFFECT = effect
@@ -548,9 +549,9 @@ do
 	local function specialEvents(effect, unit)
 		local _, class = UnitClass'player'
 		if effect == "Freezing Trap Effect" and class == 'HUNTER' and unit == UnitName'target' then -- TODO recent
-			StartTimer(effect, unit, GetTime(), 20 + 20 * talentRank(3, 7) * .15) -- TODO spell rank
+			StartTimer(effect, unit, GetTime(), 20) -- TODO spell rank
 		elseif effect == "Seduction" and class == 'WARLOCK' and unit == UnitName'target' then -- TODO pettarget nostbug
-			StartTimer(effect, unit, GetTime(), 15 + talentRank(2, 7) * 1.5)
+			StartTimer(effect, unit, GetTime(), 15)
 		end
 	end
 
