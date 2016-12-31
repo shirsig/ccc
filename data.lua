@@ -35,12 +35,6 @@ aurae_DR_CLASS = {
 	["Frost Shock"] = 11,
 }
 
-aurae_PROJECTILE = {
-	["Frostbolt"] = true,
-	["Wyvern Sting"] = true,
-	["Concussive Shot"] = true,
-}
-
 aurae_UNIQUENESS_CLASS = {
 	["Polymorph"] = 1,
 	["Polymorph: Turtle"] = 1,
@@ -51,6 +45,12 @@ aurae_UNIQUENESS_CLASS = {
 	["Hibernate"] = 5,
 	["Turn Undead"] = 6,
 	["Shackle Undead"] = 7,
+}
+
+aurae_PROJECTILE = {
+	["Frostbolt"] = true,
+	["Wyvern Sting"] = true,
+	["Concussive Shot"] = true,
 }
 
 local function talentRank(i, j)
@@ -92,16 +92,6 @@ aurae_BONUS = {
 	["Bash"] = function()
 		return talentRank(2, 4) * .5
 	end,
-}
-
-aurae_HEARTBEAT = {
-	["Freezing Trap"] = true,
-	["Seduction"] = true,
-	["Fear"] = true,
-	["Sap"] = true,
-	["Polymorph"] = true,
-	["Polymorph: Turtle"] = true,
-	["Polymorph: Pig"] = true,
 }
 
 aurae_COMBO = {

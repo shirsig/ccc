@@ -199,15 +199,14 @@ function LockBars()
 end
 
 do
-	local factor = {1/2, 1/4, 0}
+	local factor = {[0] = 1, 1/2, 1/4, 0}
+	local limit = {[0] = 15, 10, 5, 0}
 
 	function DiminishedDuration(unit, effect, full_duration)
 		local class = aurae_DR_CLASS[effect]
-		if class and TIMERS[class .. '@' .. unit] then
-			return full_duration * factor[TIMERS[class .. '@' .. unit].DR or 1]
-		else
-			return full_duration
-		end
+		local timer = class and TIMERS[class .. '@' .. unit]
+		local DR = timer and timer.DR or 0
+		return class and min(limit[DR], full_duration * factor[DR]) or full_duration * factor[DR]
 	end
 end
 
@@ -463,7 +462,7 @@ function StartTimer(effect, unit, start, rank, combo)
 		duration = duration + aurae_BONUS[effect]()
 	end
 	if IsPlayer(unit) then
-		duration = DiminishedDuration(unit, effect, aurae_HEARTBEAT[effect] and min(15, duration) or duration)
+		duration = DiminishedDuration(unit, effect, duration)
 	end
 
 	TIMERS[key] = timer
@@ -538,12 +537,7 @@ do
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
-		-- TODO gains (blue?)
-	end
-
-	local function talentRank(i, j)
-		local _, _, _, _, rank = GetTalentInfo(i, j)
-		return rank
+		-- TODO gains (blue bars?)
 	end
 
 	local function specialEvents(effect, unit)
