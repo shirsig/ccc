@@ -94,6 +94,16 @@ aurae_BONUS = {
 	end,
 }
 
+aurae_HEARTBEAT = {
+	["Freezing Trap"] = true,
+	["Seduction"] = true,
+	["Fear"] = true,
+	["Sap"] = true,
+	["Polymorph"] = true,
+	["Polymorph: Turtle"] = true,
+	["Polymorph: Pig"] = true,
+}
+
 aurae_COMBO = {
 	["Kidney Shot"] = 1,
 }

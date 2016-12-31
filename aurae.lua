@@ -206,7 +206,7 @@ do
 		local class = aurae_DR_CLASS[effect]
 		local timer = class and TIMERS[class .. '@' .. unit]
 		local DR = timer and timer.DR or 0
-		return class and min(limit[DR], full_duration * factor[DR]) or full_duration * factor[DR]
+		return aurae_HEARTBEAT[effect] and min(limit[DR], full_duration * factor[DR]) or full_duration * factor[DR]
 	end
 end
 
