@@ -288,7 +288,7 @@ do
 					duration = duration + aurae_BONUS[effect]()
 				end
 				if IsPlayer(info.unit) then
-					duration = DiminishedDuration(info.unit, effect, aurae_PVP_DURATION[effect] or duration)
+					duration = DiminishedDuration(info.unit, effect, aurae_HEARTBEAT[effect] and min(15, duration) or duration)
 				end
 				info.duration = duration
 				info.time = GetTime() + (aurae_PROJECTILE[effect] and 1.5 or 0)

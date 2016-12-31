@@ -89,11 +89,12 @@ aurae_BONUS = {
 	end,
 }
 
-aurae_PVP_DURATION = {
-	["Sap"] = 15,
-	["Polymorph"] = 15,
-	["Polymorph: Turtle"] = 15,
-	["Polymorph: Pig"] = 15,
+aurae_HEARTBEAT = {
+	["Fear"] = true,
+	["Sap"] = true,
+	["Polymorph"] = true,
+	["Polymorph: Turtle"] = true,
+	["Polymorph: Pig"] = true,
 }
 
 aurae_COMBO = {
