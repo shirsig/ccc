@@ -51,7 +51,6 @@ aurae_UNIQUENESS_CLASS = {
 	["Hibernate"] = 5,
 	["Turn Undead"] = 6,
 	["Shackle Undead"] = 7,
-	["Blind"] = 8,
 }
 
 local function talentRank(i, j)
