@@ -125,7 +125,7 @@ do
 			return
 		end
 
-		local timer = bar.TIMER
+		local timer = bar.timer
 
 		if timer.stopped then
 			if bar:GetAlpha() > 0 then
@@ -135,13 +135,13 @@ do
 			end
 		else
 			bar:SetAlpha(aurae_settings.alpha)
-			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae_EFFECTS[timer.EFFECT].ICON or 'INV_Misc_QuestionMark'))
-			bar.text:SetText(gsub(timer.UNIT, ':.*', ''))
+			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae_EFFECTS[timer.effect].ICON or 'INV_Misc_QuestionMark'))
+			bar.text:SetText(gsub(timer.unit, ':.*', ''))
 
 			local fraction
-			if timer.START then
-				local duration = timer.END - timer.START
-				local remaining = timer.END - GetTime()
+			if timer.start then
+				local duration = timer.expiration - timer.start
+				local remaining = timer.expiration - GetTime()
 				fraction = remaining / duration
 
 				local invert = aurae_settings.invert and not timer.DR
@@ -365,8 +365,8 @@ function ActivateDRTimer(effect, unit)
 	end
 	local timer = TIMERS[aurae_DR_CLASS[effect] .. '@' .. unit]
 	if timer then
-		timer.START = GetTime()
-		timer.END = timer.START + 15
+		timer.start = GetTime()
+		timer.expiration = timer.start + 15
 	end
 end
 
@@ -382,8 +382,8 @@ function AuraGone(unit, effect)
 			-- TODO pet target (in other places too)
 			local debuffs = TargetDebuffs()
 			for k, timer in TIMERS do
-				if timer.UNIT == TARGET_ID and not debuffs[timer.EFFECT] then
-					StopTimer(timer.EFFECT .. '@' .. timer.UNIT)
+				if timer.unit == TARGET_ID and not debuffs[timer.effect] then
+					StopTimer(timer.effect .. '@' .. timer.unit)
 				end
 			end
 		end
@@ -417,8 +417,8 @@ function PlaceTimers()
 		if not timer.visible then
 			local up = aurae_settings.growth == 'up'
 			for i = (up and 1 or MAXBARS), (up and MAXBARS or 1), (up and 1 or -1) do
-				if BARS[i].TIMER.stopped then
-					BARS[i].TIMER = timer
+				if BARS[i].timer.stopped then
+					BARS[i].timer = timer
 					timer.visible = true
 					break
 				end
@@ -430,10 +430,10 @@ end
 function UpdateTimers()
 	local t = GetTime()
 	for k, timer in TIMERS do
-		if timer.END and t > timer.END then
+		if timer.expiration and t > timer.expiration then
 			StopTimer(k)
-			if aurae_DR_CLASS[timer.EFFECT] and not timer.DR then
-				ActivateDRTimer(timer.EFFECT, timer.UNIT)
+			if aurae_DR_CLASS[timer.effect] and not timer.DR then
+				ActivateDRTimer(timer.effect, timer.unit)
 			end
 		end
 	end
@@ -449,7 +449,7 @@ function StartTimer(effect, unit, start, rank, combo)
 
 	if aurae_UNIQUENESS_CLASS[effect] then
 		for k, v in TIMERS do
-			if not v.DR and aurae_UNIQUENESS_CLASS[v.EFFECT] == aurae_UNIQUENESS_CLASS[effect] then
+			if not v.DR and aurae_UNIQUENESS_CLASS[v.effect] == aurae_UNIQUENESS_CLASS[effect] then
 				StopTimer(k)
 			end
 		end
@@ -468,10 +468,10 @@ function StartTimer(effect, unit, start, rank, combo)
 
 	TIMERS[key] = timer
 
-	timer.EFFECT = effect
-	timer.UNIT = unit
-	timer.START = start
-	timer.END = timer.START + duration
+	timer.effect = effect
+	timer.unit = unit
+	timer.start = start
+	timer.expiration = timer.start + duration
 
 	if IsPlayer(unit) and aurae_DR_CLASS[effect] then
 		StartDR(effect, unit)
@@ -489,10 +489,10 @@ function StartDR(effect, unit)
 	if not timer.DR or timer.DR < 3 then
 		TIMERS[key] = timer
 
-		timer.EFFECT = effect
-		timer.UNIT = unit
-		timer.START = nil
-		timer.END = nil
+		timer.effect = effect
+		timer.unit = unit
+		timer.start = nil
+		timer.expiration = nil
 		timer.DR = min(3, (timer.DR or 0) + 1)
 
 		PlaceTimers()
@@ -502,7 +502,7 @@ end
 function PLAYER_REGEN_ENABLED()
 	AbortUnitCasts()
 	for k, timer in TIMERS do
-		if not IsPlayer(timer.UNIT) then
+		if not IsPlayer(timer.unit) then
 			StopTimer(k)
 		end
 	end
@@ -519,7 +519,7 @@ end
 function UnitDied(unit)
 	AbortUnitCasts(unit)
 	for k, timer in TIMERS do
-		if timer.UNIT == unit then
+		if timer.unit == unit then
 			StopTimer(k)
 		end
 	end
@@ -641,7 +641,7 @@ do
 			local offset = 20 * (i - 1)
 			bar:SetPoint('BOTTOMLEFT', 0, offset)
 			bar:SetPoint('BOTTOMRIGHT', 0, offset)
-			bar.TIMER = dummyTimer
+			bar.timer = dummyTimer
 			tinsert(BARS, bar)
 		end
 
