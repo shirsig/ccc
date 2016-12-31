@@ -403,7 +403,7 @@ aurae_EFFECTS = {
 	},
 	["Freezing Trap Effect"] = {
 		ICON = 'Spell_Frost_ChainsOfIce',
-		DURATION = {10},
+		DURATION = {20},
 	},
 
 -- -- Green Whelp Armour

@@ -462,8 +462,8 @@ function StartTimer(effect, unit, start, duration)
 	if aurae_BONUS[effect] then
 		duration = duration + aurae_BONUS[effect]()
 	end
-	if IsPlayer(info.unit) then
-		duration = DiminishedDuration(info.unit, effect, aurae_HEARTBEAT[effect] and min(15, duration) or duration)
+	if IsPlayer(unit) then
+		duration = DiminishedDuration(unit, effect, aurae_HEARTBEAT[effect] and min(15, duration) or duration)
 	end
 
 	timers[key] = timer
