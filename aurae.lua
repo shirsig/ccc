@@ -471,7 +471,7 @@ function StartTimer(effect, unit, start, duration)
 	timer.EFFECT = effect
 	timer.UNIT = unit
 	timer.START = start
-	timer.END = timer.END and max(timer.END, timer.START + duration) or timer.START + duration
+	timer.END = timer.START + duration
 
 	if IsPlayer(unit) and aurae_DR_CLASS[effect] then
 		StartDR(effect, unit)
