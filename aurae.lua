@@ -27,7 +27,7 @@ local MAXBARS = 11
 
 local COMBO = 0
 
-local BARS, timers, pending = {}, {}, {}
+local BARS, TIMERS, PENDING = {}, {}, {}
 
 function Print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
@@ -203,8 +203,8 @@ do
 
 	function DiminishedDuration(unit, effect, full_duration)
 		local class = aurae_DR_CLASS[effect]
-		if class and timers[class .. '@' .. unit] then
-			return full_duration * factor[timers[class .. '@' .. unit].DR or 1]
+		if class and TIMERS[class .. '@' .. unit] then
+			return full_duration * factor[TIMERS[class .. '@' .. unit].DR or 1]
 		else
 			return full_duration
 		end
@@ -277,16 +277,12 @@ do
 
 	function SPELLCAST_STOP()
 		for effect, info in casting do
-			if pending[effect] then
+			if PENDING[effect] then
 				last_cast = nil
 			elseif aurae_ACTION[effect] then
-				local duration = aurae_EFFECTS[effect].DURATION[min(info.rank or 1, getn(aurae_EFFECTS[effect].DURATION))]
-				if aurae_COMBO[effect] then
-					duration = duration + aurae_COMBO[effect] * COMBO
-				end
-				info.duration = duration
+				info.combo = COMBO
 				info.time = GetTime() + (aurae_PROJECTILE[effect] and 1.5 or 0)
-				pending[effect] = info
+				PENDING[effect] = info
 				last_cast = effect
 			end
 		end
@@ -295,18 +291,18 @@ do
 
 	function SPELLCAST_INTERRUPTED()
 		if last_cast then
-			pending[last_cast] = nil
+			PENDING[last_cast] = nil
 		end
 	end
 end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
-	for effect, info in pending do
+	for effect, info in PENDING do
 		if GetTime() >= info.time + .5 then
 			if TARGET_ID ~= info.unit or TargetDebuffs()[effect] then
-				StartTimer(effect, info.unit, info.time, info.duration)
+				StartTimer(effect, info.unit, info.time, info.rank, info.combo)
 			end
-			pending[effect] = nil
+			PENDING[effect] = nil
 		end
 	end
 end)
@@ -326,7 +322,7 @@ do
 		for _, pattern in patterns do
 			local _, _, effect = strfind(arg1, pattern)
 			if effect then
-				pending[effect] = nil
+				PENDING[effect] = nil
 				return
 			end
 		end
@@ -334,17 +330,17 @@ do
 end
 
 function AbortCast(effect, unit)
-	for k, v in pending do
+	for k, v in PENDING do
 		if k == effect and v.unit == unit then
-			pending[k] = nil
+			PENDING[k] = nil
 		end
 	end
 end
 
 function AbortUnitCasts(unit)
-	for k, v in pending do
+	for k, v in PENDING do
 		if v.unit == unit or not unit and not IsPlayer(v.unit) then
-			pending[k] = nil
+			PENDING[k] = nil
 		end
 	end
 end
@@ -367,7 +363,7 @@ function ActivateDRTimer(effect, unit)
 			return
 		end
 	end
-	local timer = timers[aurae_DR_CLASS[effect] .. '@' .. unit]
+	local timer = TIMERS[aurae_DR_CLASS[effect] .. '@' .. unit]
 	if timer then
 		timer.START = GetTime()
 		timer.END = timer.START + 15
@@ -385,7 +381,7 @@ function AuraGone(unit, effect)
 		elseif unit == UnitName'target' then
 			-- TODO pet target (in other places too)
 			local debuffs = TargetDebuffs()
-			for k, timer in timers do
+			for k, timer in TIMERS do
 				if timer.UNIT == TARGET_ID and not debuffs[timer.EFFECT] then
 					StopTimer(timer.EFFECT .. '@' .. timer.UNIT)
 				end
@@ -417,7 +413,7 @@ function UNIT_COMBAT()
 end
 
 function PlaceTimers()
-	for _, timer in timers do
+	for _, timer in TIMERS do
 		if not timer.visible then
 			local up = aurae_settings.growth == 'up'
 			for i = (up and 1 or MAXBARS), (up and MAXBARS or 1), (up and 1 or -1) do
@@ -433,7 +429,7 @@ end
 
 function UpdateTimers()
 	local t = GetTime()
-	for k, timer in timers do
+	for k, timer in TIMERS do
 		if timer.END and t > timer.END then
 			StopTimer(k)
 			if aurae_DR_CLASS[timer.EFFECT] and not timer.DR then
@@ -444,21 +440,25 @@ function UpdateTimers()
 end
 
 function EffectActive(effect, unit)
-	return timers[effect .. '@' .. unit] and true or false
+	return TIMERS[effect .. '@' .. unit] and true or false
 end
 
-function StartTimer(effect, unit, start, duration)
+function StartTimer(effect, unit, start, rank, combo)
 	local key = effect .. '@' .. unit
-	local timer = timers[key] or {}
+	local timer = TIMERS[key] or {}
 
 	if aurae_UNIQUENESS_CLASS[effect] then
-		for k, v in timers do
+		for k, v in TIMERS do
 			if not v.DR and aurae_UNIQUENESS_CLASS[v.EFFECT] == aurae_UNIQUENESS_CLASS[effect] then
 				StopTimer(k)
 			end
 		end
 	end
 
+	local duration = aurae_EFFECTS[effect].DURATION[min(rank or 1, getn(aurae_EFFECTS[effect].DURATION))]
+	if aurae_COMBO[effect] then
+		duration = duration + aurae_COMBO[effect] * combo
+	end
 	if aurae_BONUS[effect] then
 		duration = duration + aurae_BONUS[effect]()
 	end
@@ -466,7 +466,7 @@ function StartTimer(effect, unit, start, duration)
 		duration = DiminishedDuration(unit, effect, aurae_HEARTBEAT[effect] and min(15, duration) or duration)
 	end
 
-	timers[key] = timer
+	TIMERS[key] = timer
 
 	timer.EFFECT = effect
 	timer.UNIT = unit
@@ -484,10 +484,10 @@ end
 function StartDR(effect, unit)
 
 	local key = aurae_DR_CLASS[effect] .. '@' .. unit
-	local timer = timers[key] or {}
+	local timer = TIMERS[key] or {}
 
 	if not timer.DR or timer.DR < 3 then
-		timers[key] = timer
+		TIMERS[key] = timer
 
 		timer.EFFECT = effect
 		timer.UNIT = unit
@@ -501,7 +501,7 @@ end
 
 function PLAYER_REGEN_ENABLED()
 	AbortUnitCasts()
-	for k, timer in timers do
+	for k, timer in TIMERS do
 		if not IsPlayer(timer.UNIT) then
 			StopTimer(k)
 		end
@@ -509,16 +509,16 @@ function PLAYER_REGEN_ENABLED()
 end
 
 function StopTimer(key)
-	if timers[key] then
-		timers[key].stopped = GetTime()
-		timers[key] = nil
+	if TIMERS[key] then
+		TIMERS[key].stopped = GetTime()
+		TIMERS[key] = nil
 		PlaceTimers()
 	end
 end
 
 function UnitDied(unit)
 	AbortUnitCasts(unit)
-	for k, timer in timers do
+	for k, timer in TIMERS do
 		if timer.UNIT == unit then
 			StopTimer(k)
 		end
@@ -549,18 +549,18 @@ do
 	local function specialEvents(effect, unit)
 		local _, class = UnitClass'player'
 		if effect == "Freezing Trap Effect" and class == 'HUNTER' and unit == UnitName'target' then -- TODO recent
-			StartTimer(effect, unit, GetTime(), 20) -- TODO spell rank
+			StartTimer(effect, unit, GetTime(), 3) -- TODO spell rank
 		elseif effect == "Seduction" and class == 'WARLOCK' and unit == UnitName'target' then -- TODO pettarget nostbug
-			StartTimer(effect, unit, GetTime(), 15)
+			StartTimer(effect, unit, GetTime())
 		end
 	end
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
-			if pending[effect] and pending[effect].unit == unit then
-				StartTimer(effect, unit, GetTime(), pending[effect].duration)
-				pending[effect] = nil
+			if PENDING[effect] and PENDING[effect].unit == unit then
+				StartTimer(effect, unit, GetTime(), PENDING[effect].rank)
+				PENDING[effect] = nil
 			else
 				specialEvents(effect, unit)
 			end
