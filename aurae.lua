@@ -167,7 +167,7 @@ do
 			elseif timer.DR == 3 then
 				r, g, b = .9, .3, .3
 			else
-				r, g, b = .4, .9, .4
+				r, g, b = .3, .9, .3
 			end
 			bar.statusbar:SetStatusBarColor(r, g, b)
 			bar.statusbar:SetBackdropColor(r, g, b, .3)
