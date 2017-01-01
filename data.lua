@@ -45,6 +45,7 @@ aurae_UNIQUENESS_CLASS = {
 	["Hibernate"] = 5,
 	["Turn Undead"] = 6,
 	["Shackle Undead"] = 7,
+	["Banish"] = 8,
 }
 
 aurae_PROJECTILE = {
