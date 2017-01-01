@@ -587,7 +587,7 @@ do
 	end
 
 	function IsPlayer(unit)
-		return true -- player[unit]
+		return player[unit]
 	end
 end
 
