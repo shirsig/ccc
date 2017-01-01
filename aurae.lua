@@ -161,13 +161,13 @@ do
 			end
 			local r, g, b
 			if timer.DR == 1 then
-				r, g, b = 1, 1, .3
+				r, g, b = .9, .9, .3
 			elseif timer.DR == 2 then
-				r, g, b = 1, .6, 0
+				r, g, b = .9, .6, 0
 			elseif timer.DR == 3 then
-				r, g, b = 1, .3, .3
+				r, g, b = .9, .3, .3
 			else
-				r, g, b = .3, 1, .3
+				r, g, b = .4, .9, .4
 			end
 			bar.statusbar:SetStatusBarColor(r, g, b)
 			bar.statusbar:SetBackdropColor(r, g, b, .3)
@@ -443,16 +443,6 @@ function EffectActive(effect, unit)
 end
 
 function StartTimer(effect, unit, start, rank, combo)
-	local key = effect .. '@' .. unit
-	local timer = TIMERS[key] or {}
-
-	if aurae_UNIQUENESS_CLASS[effect] then
-		for k, v in TIMERS do
-			if not v.DR and aurae_UNIQUENESS_CLASS[v.effect] == aurae_UNIQUENESS_CLASS[effect] then
-				StopTimer(k)
-			end
-		end
-	end
 
 	local duration = aurae_EFFECTS[effect].DURATION[min(rank or 1, getn(aurae_EFFECTS[effect].DURATION))]
 	if aurae_COMBO[effect] then
@@ -463,6 +453,21 @@ function StartTimer(effect, unit, start, rank, combo)
 	end
 	if IsPlayer(unit) then
 		duration = DiminishedDuration(unit, effect, duration)
+	end
+
+	if duration == 0 then
+		return
+	end
+
+	local key = effect .. '@' .. unit
+	local timer = TIMERS[key] or {}
+
+	if aurae_UNIQUENESS_CLASS[effect] then
+		for k, v in TIMERS do
+			if not v.DR and aurae_UNIQUENESS_CLASS[v.effect] == aurae_UNIQUENESS_CLASS[effect] then
+				StopTimer(k)
+			end
+		end
 	end
 
 	TIMERS[key] = timer
@@ -537,7 +542,7 @@ do
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
-		-- TODO gains (blue bars?)
+		-- TODO gains?
 	end
 
 	local function specialEvents(effect, unit)
@@ -582,7 +587,7 @@ do
 	end
 
 	function IsPlayer(unit)
-		return player[unit]
+		return true -- player[unit]
 	end
 end
 
