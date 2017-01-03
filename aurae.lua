@@ -223,8 +223,13 @@ function TargetDebuffs()
 end
 
 do
-	local casting = {}
-	local last_cast
+	local action, last_action
+
+	local function startAction(name, rank)
+		if not action and TARGET_ID then
+			action = {name=name, rank=rank, unit=TARGET_ID}
+		end
+	end
 
 	local function extractRank(str)
 		local _, _, rank = strfind(str or '', 'Rank (%d+)')
@@ -234,12 +239,11 @@ do
 	do
 		local orig = UseAction
 		function _G.UseAction(slot, clicked, onself) -- TODO onself bug?
-			if TARGET_ID and HasAction(slot) and not GetActionText(slot) then
+			if HasAction(slot) and not GetActionText(slot) then
 				aurae_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 				aurae_TooltipTextRight1:SetText()
 				aurae_Tooltip:SetAction(slot)
-				local name = aurae_TooltipTextLeft1:GetText()
-				casting[name] = {unit=TARGET_ID, rank=extractRank(aurae_TooltipTextRight1:GetText())}
+				startAction(aurae_TooltipTextLeft1:GetText(), extractRank(aurae_TooltipTextRight1:GetText()))
 			end
 			return orig(slot, clicked, onself)
 		end
@@ -248,10 +252,8 @@ do
 	do
 		local orig = CastSpell
 		function _G.CastSpell(index, booktype)
-			if TARGET_ID then
-				local name, rankText = GetSpellName(index, booktype)
-				casting[name] = {unit=TARGET_ID, rank=extractRank(rankText)}
-			end
+			local name, rankText = GetSpellName(index, booktype)
+			startAction(name, extractRank(rankText))
 			return orig(index, booktype)
 		end
 	end
@@ -259,38 +261,39 @@ do
 	do
 		local orig = CastSpellByName
 		function _G.CastSpellByName(text, onself)
-			if TARGET_ID and not onself then
+			if not onself then
 				local _, _, name, rank = strfind(text, '(.*)%([Rr][Aa][Nn][Kk] ([1-9]%d*)%)')
-				name = name or text
-				casting[name] = {unit=TARGET_ID, rank=tonumber(rank)}
+				startAction(name or text, tonumber(rank))
 			end
 			return orig(text, onself)
 		end
 	end
 
 	function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
-		for effect in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
-			casting[effect] = nil
+		for name in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
+			if action and name == action.name then
+				action = nil
+			end
 		end
 	end
 
 	function SPELLCAST_STOP()
-		for effect, info in casting do
-			if PENDING[effect] then
-				last_cast = nil
-			elseif aurae_ACTION[effect] then
-				info.combo = COMBO
-				info.time = GetTime() + (aurae_PROJECTILE[effect] and 1.5 or 0)
-				PENDING[effect] = info
-				last_cast = effect
+		if action then
+			if PENDING[action.name] then
+				last_action = nil
+			elseif aurae_ACTION[action.name] then
+				action.combo = COMBO
+				action.time = GetTime() + (aurae_PROJECTILE[action.name] and 1.5 or 0)
+				PENDING[action.name] = action
+				last_action = action.name
 			end
 		end
-		casting = {}
+		action = nil
 	end
 
 	function SPELLCAST_INTERRUPTED()
-		if last_cast then
-			PENDING[last_cast] = nil
+		if last_action then
+			PENDING[last_action] = nil
 		end
 	end
 end
