@@ -407,7 +407,13 @@ aurae_EFFECTS = {
 		DURATION = {20},
 	},
 
--- -- Green Whelp Armour
+-- -- Tidal Charm
+-- ["Tidal Charm"] = {
+-- 	ICON = 'Spell_Frost_SummonWaterElemental',
+-- 	DURATION = {3},
+-- },
+
+-- -- Magic Dust
 -- ["Sleep"] = {
 -- 	ICON = 'Spell_Holy_MindVision',
 -- 	DURATION = {30},
