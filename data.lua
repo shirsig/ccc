@@ -67,9 +67,6 @@ ccwatch_BONUS = {
 	["Gouge"] = function()
 		return talentRank(2, 1) * .5
 	end,
-	["Shadow Word: Pain"] = function()
-		return talentRank(3, 4) * 3
-	end,
 	["Cone of Cold"] = function()
 		return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
 	end,
