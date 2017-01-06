@@ -17,9 +17,9 @@ do
 	} do f:RegisterEvent(event) end
 end
 
-CreateFrame('GameTooltip', 'aurae_Tooltip', nil, 'GameTooltipTemplate')
+CreateFrame('GameTooltip', 'ccwatch_Tooltip', nil, 'GameTooltipTemplate')
 
-_G.aurae_settings = {}
+_G.ccwatch_settings = {}
 
 local WIDTH = 170
 local HEIGHT = 16
@@ -30,11 +30,11 @@ local COMBO = 0
 local BARS, TIMERS, PENDING = {}, {}, {}
 
 function Print(msg)
-	DEFAULT_CHAT_FRAME:AddMessage('<aurae> ' .. msg)
+	DEFAULT_CHAT_FRAME:AddMessage('<ccwatch> ' .. msg)
 end
 
 function CreateBar()
-	local texture = [[Interface\Addons\aurae\bar]]
+	local texture = [[Interface\Addons\ccwatch\bar]]
 	local font, _, style = GameFontHighlight:GetFont()
 	local fontsize = 11
 
@@ -93,7 +93,7 @@ function FadeBar(bar)
 		bar:SetAlpha(0)
 	else
 		local t = bar.fadetime - bar.fadeelapsed
-		local a = t / bar.fadetime * aurae_settings.alpha
+		local a = t / bar.fadetime * ccwatch_settings.alpha
 		bar:SetAlpha(a)
 	end
 end
@@ -134,8 +134,8 @@ do
 				FadeBar(bar)
 			end
 		else
-			bar:SetAlpha(aurae_settings.alpha)
-			bar.icon:SetTexture([[Interface\Icons\]] .. (aurae_EFFECTS[timer.effect].ICON or 'INV_Misc_QuestionMark'))
+			bar:SetAlpha(ccwatch_settings.alpha)
+			bar.icon:SetTexture([[Interface\Icons\]] .. (ccwatch_EFFECTS[timer.effect].ICON or 'INV_Misc_QuestionMark'))
 			bar.text:SetText(gsub(timer.unit, ':.*', ''))
 
 			local fraction
@@ -144,7 +144,7 @@ do
 				local remaining = timer.expiration - GetTime()
 				fraction = remaining / duration
 
-				local invert = aurae_settings.invert and not timer.DR
+				local invert = ccwatch_settings.invert and not timer.DR
 				
 				bar.statusbar:SetValue( invert and 1 - fraction or fraction)
 
@@ -180,12 +180,12 @@ function UnlockBars()
 	BARS:EnableMouse(1)
 	for i = 1, MAXBARS do
 		local f = BARS[i]
-		f:SetAlpha(aurae_settings.alpha)
+		f:SetAlpha(ccwatch_settings.alpha)
 		f.statusbar:SetStatusBarColor(1, 1, 1)
 		f.statusbar:SetValue(1)
 		f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
-		f.text:SetText('aurae bar')
-		f.timertext:SetText((aurae_settings.growth == 'up' and i or MAXBARS - i + 1))
+		f.text:SetText('ccwatch bar')
+		f.timertext:SetText((ccwatch_settings.growth == 'up' and i or MAXBARS - i + 1))
 		f.spark:Hide()
 	end
 end
@@ -203,10 +203,10 @@ do
 	local limit = {[0] = 15, 10, 5, 0}
 
 	function DiminishedDuration(unit, effect, full_duration)
-		local class = aurae_DR_CLASS[effect]
+		local class = ccwatch_DR_CLASS[effect]
 		local timer = class and TIMERS[class .. '@' .. unit]
 		local DR = timer and timer.DR or 0
-		return aurae_HEARTBEAT[effect] and min(limit[DR], full_duration * factor[DR]) or full_duration * factor[DR]
+		return ccwatch_HEARTBEAT[effect] and min(limit[DR], full_duration * factor[DR]) or full_duration * factor[DR]
 	end
 end
 
@@ -214,9 +214,9 @@ function TargetDebuffs()
 	local debuffs = {}
 	local i = 1
 	while UnitDebuff('target', i) do
-		aurae_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-		aurae_Tooltip:SetUnitDebuff('target', i)
-		debuffs[aurae_TooltipTextLeft1:GetText()] = true
+		ccwatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+		ccwatch_Tooltip:SetUnitDebuff('target', i)
+		debuffs[ccwatch_TooltipTextLeft1:GetText()] = true
 		i = i + 1
 	end
 	return debuffs
@@ -240,10 +240,10 @@ do
 		local orig = UseAction
 		function _G.UseAction(slot, clicked, onself) -- TODO onself bug?
 			if HasAction(slot) and not GetActionText(slot) then
-				aurae_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-				aurae_TooltipTextRight1:SetText()
-				aurae_Tooltip:SetAction(slot)
-				startAction(aurae_TooltipTextLeft1:GetText(), extractRank(aurae_TooltipTextRight1:GetText()))
+				ccwatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+				ccwatch_TooltipTextRight1:SetText()
+				ccwatch_Tooltip:SetAction(slot)
+				startAction(ccwatch_TooltipTextLeft1:GetText(), extractRank(ccwatch_TooltipTextRight1:GetText()))
 			end
 			return orig(slot, clicked, onself)
 		end
@@ -281,9 +281,9 @@ do
 		if action then
 			if PENDING[action.name] then
 				last_action = nil
-			elseif aurae_ACTION[action.name] then
+			elseif ccwatch_ACTION[action.name] then
 				action.combo = COMBO
-				action.time = GetTime() + (aurae_PROJECTILE[action.name] and 1.5 or 0)
+				action.time = GetTime() + (ccwatch_PROJECTILE[action.name] and 1.5 or 0)
 				PENDING[action.name] = action
 				last_action = action.name
 			end
@@ -360,12 +360,12 @@ function CHAT_MSG_SPELL_BREAK_AURA()
 end
 
 function ActivateDRTimer(effect, unit)
-	for k, v in aurae_DR_CLASS do
-		if v == aurae_DR_CLASS[effect] and EffectActive(k, unit) then
+	for k, v in ccwatch_DR_CLASS do
+		if v == ccwatch_DR_CLASS[effect] and EffectActive(k, unit) then
 			return
 		end
 	end
-	local timer = TIMERS[aurae_DR_CLASS[effect] .. '@' .. unit]
+	local timer = TIMERS[ccwatch_DR_CLASS[effect] .. '@' .. unit]
 	if timer then
 		timer.start = GetTime()
 		timer.expiration = timer.start + 15
@@ -373,11 +373,11 @@ function ActivateDRTimer(effect, unit)
 end
 
 function AuraGone(unit, effect)
-	if aurae_EFFECTS[effect] then
+	if ccwatch_EFFECTS[effect] then
 		if IsPlayer(unit) then
 			AbortCast(effect, unit)
 			StopTimer(effect .. '@' .. unit)
-			if aurae_DR_CLASS[effect] then
+			if ccwatch_DR_CLASS[effect] then
 				ActivateDRTimer(effect, unit)
 			end
 		elseif unit == UnitName'target' then
@@ -417,7 +417,7 @@ end
 function PlaceTimers()
 	for _, timer in TIMERS do
 		if not timer.visible then
-			local up = aurae_settings.growth == 'up'
+			local up = ccwatch_settings.growth == 'up'
 			for i = (up and 1 or MAXBARS), (up and MAXBARS or 1), (up and 1 or -1) do
 				if BARS[i].timer.stopped then
 					BARS[i].timer = timer
@@ -434,7 +434,7 @@ function UpdateTimers()
 	for k, timer in TIMERS do
 		if timer.expiration and t > timer.expiration then
 			StopTimer(k)
-			if aurae_DR_CLASS[timer.effect] and not timer.DR then
+			if ccwatch_DR_CLASS[timer.effect] and not timer.DR then
 				ActivateDRTimer(timer.effect, timer.unit)
 			end
 		end
@@ -447,12 +447,12 @@ end
 
 function StartTimer(effect, unit, start, rank, combo)
 
-	local duration = aurae_EFFECTS[effect].DURATION[min(rank or 1, getn(aurae_EFFECTS[effect].DURATION))]
-	if aurae_COMBO[effect] then
-		duration = duration + aurae_COMBO[effect] * combo
+	local duration = ccwatch_EFFECTS[effect].DURATION[min(rank or 1, getn(ccwatch_EFFECTS[effect].DURATION))]
+	if ccwatch_COMBO[effect] then
+		duration = duration + ccwatch_COMBO[effect] * combo
 	end
-	if aurae_BONUS[effect] then
-		duration = duration + aurae_BONUS[effect]()
+	if ccwatch_BONUS[effect] then
+		duration = duration + ccwatch_BONUS[effect]()
 	end
 	if IsPlayer(unit) then
 		duration = DiminishedDuration(unit, effect, duration)
@@ -465,9 +465,9 @@ function StartTimer(effect, unit, start, rank, combo)
 	local key = effect .. '@' .. unit
 	local timer = TIMERS[key] or {}
 
-	if aurae_UNIQUENESS_CLASS[effect] then
+	if ccwatch_UNIQUENESS_CLASS[effect] then
 		for k, v in TIMERS do
-			if not v.DR and aurae_UNIQUENESS_CLASS[v.effect] == aurae_UNIQUENESS_CLASS[effect] then
+			if not v.DR and ccwatch_UNIQUENESS_CLASS[v.effect] == ccwatch_UNIQUENESS_CLASS[effect] then
 				StopTimer(k)
 			end
 		end
@@ -480,7 +480,7 @@ function StartTimer(effect, unit, start, rank, combo)
 	timer.start = start
 	timer.expiration = timer.start + duration
 
-	if IsPlayer(unit) and aurae_DR_CLASS[effect] then
+	if IsPlayer(unit) and ccwatch_DR_CLASS[effect] then
 		StartDR(effect, unit)
 	end
 
@@ -490,7 +490,7 @@ end
 
 function StartDR(effect, unit)
 
-	local key = aurae_DR_CLASS[effect] .. '@' .. unit
+	local key = ccwatch_DR_CLASS[effect] .. '@' .. unit
 	local timer = TIMERS[key] or {}
 
 	if not timer.DR or timer.DR < 3 then
@@ -611,17 +611,17 @@ do
 	}
 
 	function ADDON_LOADED()
-		if arg1 ~= 'aurae' then return end
+		if arg1 ~= 'ccwatch' then return end
 
 		for k, v in defaultSettings do
-			if aurae_settings[k] == nil then
-				aurae_settings[k] = v
+			if ccwatch_settings[k] == nil then
+				ccwatch_settings[k] = v
 			end
 		end
 		
 		local dummyTimer = {stopped=0}
 		local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
-		BARS = CreateFrame('Frame', 'aurae', UIParent)
+		BARS = CreateFrame('Frame', 'ccwatch', UIParent)
 		BARS:SetWidth(WIDTH + HEIGHT)
 		BARS:SetHeight(height)
 		BARS:SetMovable(true)
@@ -638,7 +638,7 @@ do
 		for i = 1, MAXBARS do
 			local bar = CreateBar()
 			bar:SetParent(BARS)
-			bar:SetAlpha(aurae_settings.alpha)
+			bar:SetAlpha(ccwatch_settings.alpha)
 			local offset = 20 * (i - 1)
 			bar:SetPoint('BOTTOMLEFT', 0, offset)
 			bar:SetPoint('BOTTOMRIGHT', 0, offset)
@@ -646,15 +646,15 @@ do
 			tinsert(BARS, bar)
 		end
 
-		BARS:SetScale(aurae_settings.scale)
+		BARS:SetScale(ccwatch_settings.scale)
 
-		_G.SLASH_AURAE1 = '/aurae'
-		SlashCmdList.AURAE = SlashCommandHandler
+		_G.SLASH_CCWATCH1 = '/ccwatch'
+		SlashCmdList.CCWATCH = SlashCommandHandler
 
 		LockBars()
 	end
 
-	Print('loaded - /aurae')
+	Print('loaded - /ccwatch')
 end
 
 do
@@ -675,17 +675,17 @@ do
 				LockBars()
 				Print('Bars locked.')
 			elseif command == 'invert' then
-				aurae_settings.invert = not aurae_settings.invert
-				Print('Bar inversion ' .. (aurae_settings.invert and 'on.' or 'off.'))
+				ccwatch_settings.invert = not ccwatch_settings.invert
+				Print('Bar inversion ' .. (ccwatch_settings.invert and 'on.' or 'off.'))
 			elseif args[1] == 'growth' and (args[2] == 'up' or args[2] == 'down') then
-				aurae_settings.growth = args[2]
+				ccwatch_settings.growth = args[2]
 				Print('Growth: ' .. args[2])
 				if not LOCKED then UnlockBars() end
 			elseif strsub(command, 1, 5) == 'scale' then
 				local scale = tonumber(strsub(command, 7))
 				if scale then
 					scale = max(.5, min(3, scale))
-					aurae_settings.scale = scale
+					ccwatch_settings.scale = scale
 					BARS:SetScale(scale)
 					Print('Scale: ' .. scale)
 				else
@@ -695,18 +695,18 @@ do
 				local alpha = tonumber(strsub(command, 7))
 				if alpha then
 					alpha = max(0, min(1, alpha))
-					aurae_settings.alpha = alpha
+					ccwatch_settings.alpha = alpha
 					if not LOCKED then UnlockBars() end
 					Print('Alpha: ' .. alpha)
 				else
 					Usage()
 				end
 			elseif command == 'clear' then
-				aurae_settings = nil
+				ccwatch_settings = nil
 				LoadVariables()
 			elseif command == 'arcanist' then
-				aurae_settings.arcanist = not aurae_settings.arcanist
-				Print('Arcanist ' .. (aurae_settings.arcanist and 'on.' or 'off.'))
+				ccwatch_settings.arcanist = not ccwatch_settings.arcanist
+				Print('Arcanist ' .. (ccwatch_settings.arcanist and 'on.' or 'off.'))
 			else
 				Usage()
 			end

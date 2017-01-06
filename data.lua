@@ -1,4 +1,4 @@
-aurae_DR_CLASS = {
+ccwatch_DR_CLASS = {
 	["Bash"] = 1,
 	["Hammer of Justice"] = 1,
 	["Cheap Shot"] = 1,
@@ -26,8 +26,6 @@ aurae_DR_CLASS = {
 
 	["Hibernate"] = 7,
 
-	["Mind Control"] = 8,
-
 	["Kidney Shot"] = 9,
 
 	["Death Coil"] = 10,
@@ -35,7 +33,7 @@ aurae_DR_CLASS = {
 	["Frost Shock"] = 11,
 }
 
-aurae_UNIQUENESS_CLASS = {
+ccwatch_UNIQUENESS_CLASS = {
 	["Polymorph"] = 1,
 	["Polymorph: Turtle"] = 1,
 	["Polymorph: Pig"] = 1,
@@ -48,7 +46,7 @@ aurae_UNIQUENESS_CLASS = {
 	["Banish"] = 8,
 }
 
-aurae_PROJECTILE = {
+ccwatch_PROJECTILE = {
 	["Frostbolt"] = true,
 	["Wyvern Sting"] = true,
 	["Concussive Shot"] = true,
@@ -59,7 +57,7 @@ local function talentRank(i, j)
 	return rank
 end
 
-aurae_BONUS = {
+ccwatch_BONUS = {
 	["Freezing Trap"] = function()
 		return 20 * talentRank(3, 7) * .15
 	end,
@@ -79,13 +77,13 @@ aurae_BONUS = {
 		return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
 	end,
 	["Polymorph"] = function()
-		return aurae_settings.arcanist and 15 or 0
+		return ccwatch_settings.arcanist and 15 or 0
 	end,
 	["Polymorph: Turtle"] = function()
-		return aurae_settings.arcanist and 15 or 0
+		return ccwatch_settings.arcanist and 15 or 0
 	end,
 	["Polymorph: Pig"] = function()
-		return aurae_settings.arcanist and 15 or 0
+		return ccwatch_settings.arcanist and 15 or 0
 	end,
 	["Pounce"] = function()
 		return talentRank(2, 4) * .5
@@ -95,7 +93,7 @@ aurae_BONUS = {
 	end,
 }
 
-aurae_HEARTBEAT = {
+ccwatch_HEARTBEAT = {
 	["Freezing Trap"] = true,
 	["Seduction"] = true,
 	["Fear"] = true,
@@ -105,31 +103,18 @@ aurae_HEARTBEAT = {
 	["Polymorph: Pig"] = true,
 }
 
-aurae_COMBO = {
+ccwatch_COMBO = {
 	["Kidney Shot"] = 1,
 }
 
-aurae_ACTION = {
+ccwatch_ACTION = {
 	["Riposte"] = true,
-	["Shadow Word: Pain"] = true,
-	["Vampiric Embrace"] = true,
 	["Frostbolt"] = true,
 	["Cone of Cold"] = true,
 	["Blast Wave"] = true,
-	["Faerie Fire"] = true,
-	["Faerie Fire (Feral)"] = true,
 	["Wing Clip"] = true,
-	["Immolate"] = true,
-	["Siphon Life"] = true,
-	["Corruption"] = true,
-	["Curse of Agony"] = true,
 	["Curse of Exhaustion"] = true,
-	["Curse of the Elements"] = true,
-	["Curse of Shadow"] = true,
 	["Curse of Tongues"] = true,
-	["Curse of Weakness"] = true,
-	["Curse of Recklessness"] = true,
-	["Curse of Doom"] = true,
 	["Disarm"] = true,
 	["Mortal Strike"] = true,
 	["Hamstring"] = true,
@@ -169,18 +154,10 @@ aurae_ACTION = {
 	["War Stomp"] = true,	
 }
 
-aurae_EFFECTS = {
+ccwatch_EFFECTS = {
 	["Riposte"] = {
 		ICON = 'Ability_Warrior_Challange',
 		DURATION = {6},
-	},
-	["Shadow Word: Pain"] = {
-		ICON = 'Spell_Shadow_ShadowWordPain',
-		DURATION = {18},
-	},
-	["Vampiric Embrace"] = {
-		ICON = 'Spell_Shadow_UnsummonBuilding',
-		DURATION = {60},
 	},
 	["Frostbolt"] = {
 		ICON = 'Spell_Frost_FrostBolt02',
@@ -194,61 +171,17 @@ aurae_EFFECTS = {
 		ICON = 'Spell_Holy_Excorcism_02',
 		DURATION = {6},
 	},
-	["Faerie Fire"] = {
-		ICON = 'Spell_Nature_FaerieFire',
-		DURATION = {40},
-	},
-	["Faerie Fire (Feral)"] = {
-		ICON = 'Spell_Nature_FaerieFire',
-		DURATION = {40},
-	},
 	["Wing Clip"] = {
 		ICON = 'Ability_Rogue_Trip',
 		DURATION = {10},
-	},
-	["Immolate"] = {
-		ICON = 'Spell_Fire_Immolation',
-		DURATION = {15},
-	},
-	["Siphon Life"] = {
-		ICON = 'Spell_Shadow_Requiem',
-		DURATION = {30},
-	},
-	["Corruption"] = {
-		ICON = 'Spell_Shadow_AbominationExplosion',
-		DURATION = {12, 15, 18, 18, 18, 18, 18},
-	},
-	["Curse of Agony"] = {
-		ICON = 'Spell_Shadow_CurseOfSargeras',
-		DURATION = {24},
 	},
 	["Curse of Exhaustion"] = {
 		ICON = 'Spell_Shadow_GrimWard',
 		DURATION = {12},
 	},
-	["Curse of the Elements"] = {
-		ICON = 'Spell_Shadow_ChillTouch',
-		DURATION = {300},
-	},
-	["Curse of Shadow"] = {
-		ICON = 'Spell_Shadow_CurseOfAchimonde',
-		DURATION = {300},
-	},
 	["Curse of Tongues"] = {
 		ICON = 'Spell_Shadow_CurseOfTounges',
 		DURATION = {30},
-	},
-	["Curse of Weakness"] = {
-		ICON = 'Spell_Shadow_CurseOfMannoroth',
-		DURATION = {120},
-	},
-	["Curse of Recklessness"] = {
-		ICON = 'Spell_Shadow_UnholyStrength',
-		DURATION = {120},
-	},
-	["Curse of Doom"] = {
-		ICON = 'Spell_Shadow_AuraOfDarkness',
-		DURATION = {60},
 	},
 	["Disarm"] = {
 		ICON = 'Ability_Warrior_Disarm',
@@ -299,7 +232,7 @@ aurae_EFFECTS = {
 		DURATION = {8},
 	},
 	["Polymorph"] = {
-		ICON = 'Spell_Nature_Polymorph', -- Spell_Magic_PolymorphPig, TODO Ability_Hunter_Pet_Turtle
+		ICON = 'Spell_Nature_Polymorph',
 		DURATION = {20, 30, 40, 50},
 	},
 	["Polymorph: Turtle"] = {
@@ -406,6 +339,11 @@ aurae_EFFECTS = {
 		ICON = 'Spell_Frost_ChainsOfIce',
 		DURATION = {20},
 	},
+
+-- ["Intercept Stun"] = {
+-- 	ICON = 'Spell_Frost_Stun',
+-- 	DURATION = {3},
+-- },
 
 -- -- Tidal Charm
 -- ["Tidal Charm"] = {
