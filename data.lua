@@ -42,6 +42,7 @@ ccwatch_UNIQUENESS_CLASS = {
 	["Turn Undead"] = 6,
 	["Shackle Undead"] = 7,
 	["Banish"] = 8,
+	["Scare Beast"] = 9,
 }
 
 ccwatch_PROJECTILE = {
