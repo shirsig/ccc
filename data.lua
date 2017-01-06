@@ -9,6 +9,7 @@ ccwatch_DR_CLASS = {
 	["Seduction"] = 2,
 	["Intimidating Shout"] = 2,
 	["Psychic Scream"] = 2,
+	["Scare Beast"] = 2,
 
 	["Polymorph"] = 3,
 	["Polymorph: Turtle"] = 3,
