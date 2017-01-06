@@ -28,8 +28,6 @@ ccwatch_DR_CLASS = {
 
 	["Kidney Shot"] = 9,
 
-	["Death Coil"] = 10,
-
 	["Frost Shock"] = 11,
 }
 
@@ -92,6 +90,7 @@ ccwatch_BONUS = {
 
 ccwatch_HEARTBEAT = {
 	["Freezing Trap"] = true,
+	["Entangling Roots"] = true,
 	["Seduction"] = true,
 	["Fear"] = true,
 	["Sap"] = true,
