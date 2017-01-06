@@ -530,7 +530,6 @@ function UnitDied(unit)
 			StopTimer(k)
 		end
 	end
-	PlaceTimers()
 end
 
 CreateFrame'Frame':SetScript('OnUpdate', RequestBattlefieldScoreData)
