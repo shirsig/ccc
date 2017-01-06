@@ -89,6 +89,7 @@ ccwatch_BONUS = {
 }
 
 ccwatch_HEARTBEAT = {
+	["Scare Beast"] = true,
 	["Freezing Trap"] = true,
 	["Entangling Roots"] = true,
 	["Hibernate"] = true,
