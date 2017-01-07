@@ -47,6 +47,7 @@ ccwatch_UNIQUENESS_CLASS = {
 }
 
 ccwatch_PROJECTILE = {
+	["Death Coil"] = true,
 	["Frostbolt"] = true,
 	["Wyvern Sting"] = true,
 	["Concussive Shot"] = true,
