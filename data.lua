@@ -1,35 +1,33 @@
 ccwatch_DR_CLASS = {
-	["Bash"] = 1,
-	["Hammer of Justice"] = 1,
-	["Cheap Shot"] = 1,
-	["Concussion Blow"] = 1,
+	["Fear"] = 1,
+	["Howl of Terror"] = 1,
+	["Seduction"] = 1,
 
-	["Fear"] = 2,
-	["Howl of Terror"] = 2,
-	["Seduction"] = 2,
-	["Intimidating Shout"] = 2,
-	["Psychic Scream"] = 2,
-	["Scare Beast"] = 2,
+	["Polymorph"] = 2,
+	["Polymorph: Turtle"] = 2,
+	["Polymorph: Pig"] = 2,
 
-	["Polymorph"] = 3,
-	["Polymorph: Turtle"] = 3,
-	["Polymorph: Pig"] = 3,
-	["Sap"] = 3,
-	["Gouge"] = 3,
+	["Freezing Trap Effect"] = 3,
+	["Wyvern String"] = 3,
 
-	["Entangling Roots"] = 4,
-	["Frost Nova"] = 4,
+	["Sap"] = 4,
+	["Gouge"] = 4,
 
-	["Freezing Trap Effect"] = 5,
-	["Wyvern String"] = 5,
+	["Scare Beast"] = 5,
 
-	["Blind"] = 6,
+	["Entangling Roots"] = 6,
 
-	["Hibernate"] = 7,
+	["Frost Nova"] = 7,
+
+	["Cheap Shot"] = 8,
 
 	["Kidney Shot"] = 9,
 
-	["Frost Shock"] = 11,
+	["Blind"] = 10,
+
+	["Hibernate"] = 11,
+
+	["Frost Shock"] = 12,
 }
 
 ccwatch_UNIQUENESS_CLASS = {
