@@ -72,15 +72,6 @@ ccwatch_BONUS = {
 	["Frostbolt"] = function()
 		return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
 	end,
-	["Polymorph"] = function()
-		return ccwatch_settings.arcanist and 15 or 0
-	end,
-	["Polymorph: Turtle"] = function()
-		return ccwatch_settings.arcanist and 15 or 0
-	end,
-	["Polymorph: Pig"] = function()
-		return ccwatch_settings.arcanist and 15 or 0
-	end,
 	["Pounce"] = function()
 		return talentRank(2, 4) * .5
 	end,

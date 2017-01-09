@@ -607,7 +607,6 @@ do
 		growth = 'up',
 		scale = 1,
 		alpha = .85,
-		arcanist = false,
 	}
 
 	function ADDON_LOADED()
@@ -704,9 +703,6 @@ do
 			elseif command == 'clear' then
 				ccwatch_settings = nil
 				LoadVariables()
-			elseif command == 'arcanist' then
-				ccwatch_settings.arcanist = not ccwatch_settings.arcanist
-				Print('Arcanist ' .. (ccwatch_settings.arcanist and 'on.' or 'off.'))
 			else
 				Usage()
 			end
@@ -721,5 +717,4 @@ function Usage()
 	Print("  growth (up | down)")
 	Print("  scale [0.5,3]")
 	Print("  alpha [0,1]")
-	Print("  arcanist")
 end
