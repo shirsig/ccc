@@ -13,7 +13,7 @@ do
 		'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
 		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE',
 		'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
-		'PLAYER_TARGET_CHANGED', 'UPDATE_BATTLEFIELD_SCORE',
+		'UNIT_AURA', 'PLAYER_TARGET_CHANGED', 'UPDATE_BATTLEFIELD_SCORE',
 	} do f:RegisterEvent(event) end
 end
 
@@ -536,6 +536,7 @@ CreateFrame'Frame':SetScript('OnUpdate', RequestBattlefieldScoreData)
 
 do
 	local player = {}
+	local targetEffects
 
 	local function hostilePlayer(msg)
 		local _, _, name = strfind(arg1, "^([^%s']*)")
@@ -574,7 +575,22 @@ do
 		end
 	end
 
+	function UNIT_AURA()
+		if arg1 ~= 'target' then return end
+		local effects = TargetDebuffs()
+		for effect in effects do
+			if not targetEffects[effect] and PENDING[effect] and PENDING[effect].unit == TARGET_ID then
+				StartTimer(effect, TARGET_ID, GetTime(), PENDING[effect].rank)
+				PENDING[effect] = nil
+			-- else
+			-- 	specialEvents(effect, unit)
+			end
+		end
+		targetEffects = effects
+	end
+
 	function PLAYER_TARGET_CHANGED()
+		targetEffects = TargetDebuffs()
 		local unit = UnitName'target'
 		TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
 		if unit then
