@@ -11,7 +11,7 @@ do
 		'UNIT_COMBAT',
 		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
 		'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
-		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE',
+		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
 		'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
 		'UNIT_AURA', 'PLAYER_TARGET_CHANGED', 'UPDATE_BATTLEFIELD_SCORE',
 	} do f:RegisterEvent(event) end
@@ -548,30 +548,13 @@ do
 		-- TODO gains?
 	end
 
-	local function specialEvents(effect, unit)
-		local _, class = UnitClass'player'
-		if effect == "Freezing Trap Effect" and class == 'HUNTER' and unit == UnitName'target' then -- TODO recent
-			StartTimer(effect, unit, GetTime(), 3) -- TODO spell rank
-		elseif effect == "Seduction" and class == 'WARLOCK' and unit == UnitName'target' then -- TODO pettarget nostbug
-			StartTimer(effect, unit, GetTime())
-		end
-	end
-
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
 			if PENDING[effect] and PENDING[effect].unit == unit then
 				StartTimer(effect, unit, GetTime(), PENDING[effect].rank)
 				PENDING[effect] = nil
-			else
-				specialEvents(effect, unit)
 			end
-		end
-	end
-
-	function CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE()
-		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
-			specialEvents(effect, unit)
 		end
 	end
 
@@ -579,11 +562,17 @@ do
 		if arg1 ~= 'target' then return end
 		local effects = TargetDebuffs()
 		for effect in effects do
-			if not targetEffects[effect] and PENDING[effect] and PENDING[effect].unit == TARGET_ID then
-				StartTimer(effect, TARGET_ID, GetTime(), PENDING[effect].rank)
-				PENDING[effect] = nil
-			-- else
-			-- 	specialEvents(effect, unit)
+			if not targetEffects[effect] then
+				if PENDING[effect] and PENDING[effect].unit == TARGET_ID then
+					StartTimer(effect, TARGET_ID, GetTime(), PENDING[effect].rank)
+					PENDING[effect] = nil
+				end
+				local _, class = UnitClass'player'
+				if effect == "Freezing Trap Effect" and class == 'HUNTER' then -- TODO recent
+					StartTimer(effect, TARGET_ID, GetTime(), 3) -- TODO spell rank
+				elseif effect == "Seduction" and class == 'WARLOCK' then -- TODO pettarget nostbug
+					StartTimer(effect, TARGET_ID, GetTime())
+				end
 			end
 		end
 		targetEffects = effects
