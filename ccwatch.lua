@@ -166,8 +166,6 @@ do
 				r, g, b = .9, .6, 0
 			elseif timer.DR == 3 then
 				r, g, b = .9, .3, .3
-			elseif ccwatch_GAIN[timer.effect] then
-				r, g, b = .3, .3, .9
 			else
 				r, g, b = .3, .9, .3
 			end
@@ -549,11 +547,6 @@ do
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
-		for unit, effect in string.gfind(arg1, '(.+) gains (.+)%.') do
-			if unit == TARGET_ID and ccwatch_GAIN[effect] then
-				StartTimer(effect, unit, GetTime())
-			end
-		end
 	end
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
