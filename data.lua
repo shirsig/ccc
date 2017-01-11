@@ -360,145 +360,121 @@ ccwatch_EFFECTS = {
 		DURATION = {20},
 	},
 
--- ["Intercept Stun"] = {
--- 	ICON = 'Spell_Frost_Stun',
--- 	DURATION = {3},
--- },
-
--- -- Tidal Charm
--- ["Tidal Charm"] = {
--- 	ICON = 'Spell_Frost_SummonWaterElemental',
--- 	DURATION = {3},
--- },
-
--- -- Magic Dust
--- ["Sleep"] = {
--- 	ICON = 'Spell_Holy_MindVision',
--- 	DURATION = {30},
--- },
-
--- -- Net O Matic
--- ["Net-o-Matic"] = {
--- 	ICON = 'INV_Misc_Net_01',
--- 	DURATION = {10},
--- },
-
--- -- Rocket Helm
--- ["Reckless Charge"] = {
--- 	ICON = 'INV_Helmet_49',
--- 	DURATION = {30},
--- },
+	-- ["Intercept Stun"] = {
+	-- 	ICON = 'Spell_Frost_Stun',
+	-- 	DURATION = {3},
+	-- },
 
 	["Adrenaline Rush"] = {
 		ICON = 'Spell_Shadow_ShadowWordDominate',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Sprint"] = {
 		ICON = 'Ability_Rogue_Sprint',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Evasion"] = {
 		ICON = 'Spell_Shadow_ShadowWard',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Blade Flurry"] = {
 		ICON = 'Ability_GhoulFrenzy',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Power Word: Shield"] = {
 		ICON = 'Spell_Holy_PowerWordShield',
-		DURATION = 30,
+		DURATION = {30},
 	},
 	["Power Infusion"] = {
 		ICON = 'Spell_Holy_PowerInfusion',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Arcane Power"] = {
 		ICON = 'Spell_Nature_Lightning',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Ice Block"] = {
 		ICON = 'Spell_Frost_Frost',
-		DURATION = 10,
+		DURATION = {10},
 	},
 	["Nature's Grasp"] = {
 		ICON = 'Spell_Nature_NaturesWrath',
-		DURATION = 45,
+		DURATION = {45},
 	},
 	["Dash"] = {
 		ICON = 'Ability_Druid_Dash',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Barkskin"] = {
 		ICON = 'Spell_Nature_StoneClawTotem',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Tiger's Fury"] = {
 		ICON = 'Ability_Mount_JungleTiger',
-		DURATION = 6,
+		DURATION = {6},
 	},
 	["Deterrence"] = {
 		ICON = 'Ability_Whirlwind',
-		DURATION = 10,
+		DURATION = {10},
 	},
 	["Rapid Fire"] = {
 		ICON = 'Ability_Hunter_RunningShot',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Divine Shield"] = {
 		ICON = 'Spell_Holy_DivineIntervention',
-		DURATION = 12,
+		DURATION = {12},
 	},
 	["Blessing of Protection"] = {
 		ICON = 'Spell_Holy_SealOfProtection',
-		DURATION = 10,
+		DURATION = {10},
 	},
 	["Blessing of Freedom"] = {
 		ICON = 'Spell_Holy_SealOfValor',
-		DURATION = 10,
+		DURATION = {10},
 	},
 	["Sacrifice"] = {
 		ICON = 'Spell_Shadow_SacrificialShield',
-		DURATION = 30,
+		DURATION = {30},
 	},
 	["Berserker Rage"] = {
 		ICON = 'Spell_Nature_AncestralGuardian',
-		DURATION = 10,
+		DURATION = {10},
 	},
 	["Bloodrage"] = {
 		ICON = 'Ability_Racial_BloodRage',
-		DURATION = 10,
+		DURATION = {10},
 	},
 	["Sweeping Strikes"] = {
 		ICON = 'Ability_Rogue_SliceDice',
-		DURATION = 20,
+		DURATION = {20},
 	},
 	["Last Stand"] = {
 		ICON = 'Spell_Holy_AshesToAshes',
-		DURATION = 20,
+		DURATION = {20},
 	},
 	["Retaliation"] = {
 		ICON = 'Ability_Warrior_Challange',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Shield Wall"] = {
 		ICON = 'Ability_Warrior_ShieldWall',
-		DURATION = 10,
+		DURATION = {10},
 	},
 	["Recklessness"] = {
 		ICON = 'Ability_CriticalStrike',
-		DURATION = 15,
+		DURATION = {15},
 	},
 	["Death Wish"] = {
 		ICON = 'Spell_Shadow_DeathPact',
-		DURATION = 30,
+		DURATION = {30},
 	},
 	["Will of the Forsaken"] = {
 		ICON = 'Spell_Shadow_RaiseDead',
-		DURATION = 5,
+		DURATION = {5},
 	},
 	["Perception"] = {
 		ICON = 'Spell_Nature_Sleep',
-		DURATION = 20,
+		DURATION = {20},
 	},
 }

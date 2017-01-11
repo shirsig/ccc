@@ -225,10 +225,10 @@ function TargetDebuffs()
 end
 
 do
-	local action, last_action
+	local casting, action, last_action
 
 	local function startAction(name, rank)
-		if not action and TARGET_ID then
+		if not casting and TARGET_ID and ccwatch_ACTION[name] then
 			action = {name=name, rank=rank, unit=TARGET_ID}
 		end
 	end
@@ -279,11 +279,16 @@ do
 		end
 	end
 
+	function SPELLCAST_START()
+		casting = true
+	end
+
 	function SPELLCAST_STOP()
+		casting = false
 		if action then
 			if PENDING[action.name] then
 				last_action = nil
-			elseif ccwatch_ACTION[action.name] then
+			else
 				action.combo = COMBO
 				action.time = GetTime() + (ccwatch_PROJECTILE[action.name] and 1.5 or 0)
 				PENDING[action.name] = action
