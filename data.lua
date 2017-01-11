@@ -143,6 +143,37 @@ ccwatch_ACTION = {
 	["War Stomp"] = true,	
 }
 
+ccwatch_GAIN = {
+	["Adrenaline Rush"] = true,
+	["Sprint"] = true,
+	["Evasion"] = true,
+	["Blade Flurry"] = true,
+	["Power Word: Shield"] = true,
+	["Power Infusion"] = true,
+	["Arcane Power"] = true,
+	["Ice Block"] = true,
+	["Nature's Grasp"] = true,
+	["Dash"] = true,
+	["Barkskin"] = true,
+	["Tiger's Fury"] = true,
+	["Deterrence"] = true,
+	["Rapid Fire"] = true,
+	["Divine Shield"] = true,
+	["Blessing of Protection"] = true,
+	["Blessing of Freedom"] = true,
+	["Sacrifice"] = true,
+	["Berserker Rage"] = true,
+	["Bloodrage"] = true,
+	["Sweeping Strikes"] = true,
+	["Last Stand"] = true,
+	["Retaliation"] = true,
+	["Shield Wall"] = true,
+	["Recklessness"] = true,
+	["Death Wish"] = true,
+	["Will of the Forsaken"] = true,
+	["Perception"] = true,
+}
+
 ccwatch_EFFECTS = {
 	["Riposte"] = {
 		ICON = 'Ability_Warrior_Challange',
@@ -357,4 +388,117 @@ ccwatch_EFFECTS = {
 -- 	ICON = 'INV_Helmet_49',
 -- 	DURATION = {30},
 -- },
+
+	["Adrenaline Rush"] = {
+		ICON = 'Spell_Shadow_ShadowWordDominate',
+		DURATION = 15,
+	},
+	["Sprint"] = {
+		ICON = 'Ability_Rogue_Sprint',
+		DURATION = 15,
+	},
+	["Evasion"] = {
+		ICON = 'Spell_Shadow_ShadowWard',
+		DURATION = 15,
+	},
+	["Blade Flurry"] = {
+		ICON = 'Ability_GhoulFrenzy',
+		DURATION = 15,
+	},
+	["Power Word: Shield"] = {
+		ICON = 'Spell_Holy_PowerWordShield',
+		DURATION = 30,
+	},
+	["Power Infusion"] = {
+		ICON = 'Spell_Holy_PowerInfusion',
+		DURATION = 15,
+	},
+	["Arcane Power"] = {
+		ICON = 'Spell_Nature_Lightning',
+		DURATION = 15,
+	},
+	["Ice Block"] = {
+		ICON = 'Spell_Frost_Frost',
+		DURATION = 10,
+	},
+	["Nature's Grasp"] = {
+		ICON = 'Spell_Nature_NaturesWrath',
+		DURATION = 45,
+	},
+	["Dash"] = {
+		ICON = 'Ability_Druid_Dash',
+		DURATION = 15,
+	},
+	["Barkskin"] = {
+		ICON = 'Spell_Nature_StoneClawTotem',
+		DURATION = 15,
+	},
+	["Tiger's Fury"] = {
+		ICON = 'Ability_Mount_JungleTiger',
+		DURATION = 6,
+	},
+	["Deterrence"] = {
+		ICON = 'Ability_Whirlwind',
+		DURATION = 10,
+	},
+	["Rapid Fire"] = {
+		ICON = 'Ability_Hunter_RunningShot',
+		DURATION = 15,
+	},
+	["Divine Shield"] = {
+		ICON = 'Spell_Holy_DivineIntervention',
+		DURATION = 12,
+	},
+	["Blessing of Protection"] = {
+		ICON = 'Spell_Holy_SealOfProtection',
+		DURATION = 10,
+	},
+	["Blessing of Freedom"] = {
+		ICON = 'Spell_Holy_SealOfValor',
+		DURATION = 10,
+	},
+	["Sacrifice"] = {
+		ICON = 'Spell_Shadow_SacrificialShield',
+		DURATION = 30,
+	},
+	["Berserker Rage"] = {
+		ICON = 'Spell_Nature_AncestralGuardian',
+		DURATION = 10,
+	},
+	["Bloodrage"] = {
+		ICON = 'Ability_Racial_BloodRage',
+		DURATION = 10,
+	},
+	["Sweeping Strikes"] = {
+		ICON = 'Ability_Rogue_SliceDice',
+		DURATION = 20,
+	},
+	["Last Stand"] = {
+		ICON = 'Spell_Holy_AshesToAshes',
+		DURATION = 20,
+	},
+	["Retaliation"] = {
+		ICON = 'Ability_Warrior_Challange',
+		DURATION = 15,
+	},
+	["Shield Wall"] = {
+		ICON = 'Ability_Warrior_ShieldWall',
+		DURATION = 10,
+	},
+	["Recklessness"] = {
+		ICON = 'Ability_CriticalStrike',
+		DURATION = 15,
+	},
+	["Death Wish"] = {
+		ICON = 'Spell_Shadow_DeathPact',
+		DURATION = 30,
+	},
+	["Will of the Forsaken"] = {
+		ICON = 'Spell_Shadow_RaiseDead',
+		DURATION = 5,
+	},
+	["Perception"] = {
+		ICON = 'Spell_Nature_Sleep',
+		DURATION = 20,
+	},
 }

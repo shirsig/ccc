@@ -166,6 +166,8 @@ do
 				r, g, b = .9, .6, 0
 			elseif timer.DR == 3 then
 				r, g, b = .9, .3, .3
+			elseif ccwatch_GAIN[timer.effect] then
+				r, g, b = .3, .3, .9
 			else
 				r, g, b = .3, .9, .3
 			end
@@ -373,20 +375,18 @@ function ActivateDRTimer(effect, unit)
 end
 
 function AuraGone(unit, effect)
-	if ccwatch_EFFECTS[effect] then
-		if IsPlayer(unit) then
-			AbortCast(effect, unit)
-			StopTimer(effect .. '@' .. unit)
-			if ccwatch_DR_CLASS[effect] then
-				ActivateDRTimer(effect, unit)
-			end
-		elseif unit == UnitName'target' then
-			-- TODO pet target (in other places too)
-			local debuffs = TargetDebuffs()
-			for k, timer in TIMERS do
-				if timer.unit == TARGET_ID and not debuffs[timer.effect] then
-					StopTimer(timer.effect .. '@' .. timer.unit)
-				end
+	if IsPlayer(unit) then
+		AbortCast(effect, unit)
+		StopTimer(effect .. '@' .. unit)
+		if ccwatch_DR_CLASS[effect] then
+			ActivateDRTimer(effect, unit)
+		end
+	elseif unit == UnitName'target' then
+		-- TODO pet target (in other places too)
+		local debuffs = TargetDebuffs()
+		for k, timer in TIMERS do
+			if timer.unit == TARGET_ID and not debuffs[timer.effect] then
+				StopTimer(timer.effect .. '@' .. timer.unit)
 			end
 		end
 	end
@@ -446,7 +446,6 @@ function EffectActive(effect, unit)
 end
 
 function StartTimer(effect, unit, start, rank, combo)
-
 	local duration = ccwatch_EFFECTS[effect].DURATION[min(rank or 1, getn(ccwatch_EFFECTS[effect].DURATION))]
 	if ccwatch_COMBO[effect] then
 		duration = duration + ccwatch_COMBO[effect] * combo
@@ -545,7 +544,11 @@ do
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
-		-- TODO gains?
+		for unit, effect in string.gfind(arg1, '(.+) gains (.+)%.') do
+			if unit == TARGET_ID and ccwatch_GAIN[effect] then
+				StartTimer(effect, unit, GetTime())
+			end
+		end
 	end
 
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
@@ -568,9 +571,9 @@ do
 					PENDING[effect] = nil
 				end
 				local _, class = UnitClass'player'
-				if effect == "Freezing Trap Effect" and class == 'HUNTER' then -- TODO recent
+				if effect == "Freezing Trap Effect" and class == 'HUNTER' then
 					StartTimer(effect, TARGET_ID, GetTime(), 3) -- TODO spell rank
-				elseif effect == "Seduction" and class == 'WARLOCK' then -- TODO pettarget nostbug
+				elseif effect == "Seduction" and class == 'WARLOCK' then
 					StartTimer(effect, TARGET_ID, GetTime())
 				end
 			end
