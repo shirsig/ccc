@@ -272,6 +272,7 @@ do
 	function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
 		for name in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
 			if action and name == action.name then
+				casting = false
 				action = nil
 			end
 		end
