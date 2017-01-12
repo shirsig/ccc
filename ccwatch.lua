@@ -223,7 +223,7 @@ function TargetDebuffs()
 end
 
 do
-	local casting, action, last_action
+	local casting, action, interruptable
 
 	local function startAction(name, rank)
 		if not casting and TARGET_ID and ccwatch_ACTION[name] then
@@ -283,68 +283,72 @@ do
 
 	function SPELLCAST_STOP()
 		casting = false
-		last_action = nil
+		interruptable = false
 		if action then
-			last_action = not PENDING[action.name] and action.name
 			action.combo = COMBO
 			action.time = GetTime() + (ccwatch_PROJECTILE[action.name] and 1.5 or 0)
-			PENDING[action.name] = action
+			tinsert(PENDING, action)
+			interruptable = true
 		end
 		action = nil
 	end
 
 	function SPELLCAST_INTERRUPTED()
-		if last_action then
-			PENDING[last_action] = nil
+		if interruptable then
+			tremove(PENDING)
 		end
 	end
 end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
-	for effect, info in PENDING do
-		if GetTime() >= info.time + .5 then
-			if TARGET_ID ~= info.unit or TargetDebuffs()[effect] then
-				StartTimer(effect, info.unit, info.time, info.rank, info.combo)
+	for i = getn(PENDING), 1, -1 do
+		if GetTime() >= PENDING[i].time + .5 then
+			if TARGET_ID ~= PENDING[i].unit or TargetDebuffs()[PENDING[i].name] then
+				StartTimer(PENDING[i].name, PENDING[i].unit, PENDING[i].time, PENDING[i].rank, PENDING[i].combo)
 			end
-			PENDING[effect] = nil
+			tremove(PENDING, i)
 		end
 	end
 end)
 
 do
 	local patterns = {
-		'is immune to your (.*)%.',
-		'Your (.*) missed',
-		'Your (.*) was resisted',
-		'Your (.*) was evaded',
-		'Your (.*) was dodged',
-		'Your (.*) was deflected',
-		'Your (.*) is reflected',
-		'Your (.*) is parried'
+		'(.*) is immune to your (.*)%.',
+		'Your (.*) missed (.*)%.',
+		'Your (.*) was resisted by (.*)%.',
+		'Your (.*) was evaded by (.*)%.',
+		'Your (.*) was dodged by (.*)%.',
+		'Your (.*) was deflected by (.*)%.',
+		'Your (.*) is reflected back by (.*)%.',
+		'Your (.*) is parried by (.*)%.'
 	}
 	function CHAT_MSG_SPELL_SELF_DAMAGE()
-		for _, pattern in patterns do
-			local _, _, effect = strfind(arg1, pattern)
-			if effect then
-				PENDING[effect] = nil
-				return
+		for i, pattern in patterns do
+			local _, _, effect, unit = strfind(arg1, pattern)
+			if i == 1 then
+				effect, unit = unit, effect
+			end
+			for i = getn(PENDING), 1, -1 do
+				if PENDING[i].name == effect and PENDING[i].unit == unit then
+					tremove(PENDING, i)
+				end
 			end
 		end
 	end
 end
 
 function AbortCast(effect, unit)
-	for k, v in PENDING do
-		if k == effect and v.unit == unit then
-			PENDING[k] = nil
+	for i = getn(PENDING), 1, -1 do
+		if PENDING[i].name == effect and PENDING[i].unit == unit then
+			tremove(PENDING, i)
 		end
 	end
 end
 
 function AbortUnitCasts(unit)
-	for k, v in PENDING do
-		if v.unit == unit or not unit and not IsPlayer(v.unit) then
-			PENDING[k] = nil
+	for i = getn(PENDING), 1, -1 do
+		if PENDING[i].unit == unit or not unit and not IsPlayer(PENDING[i].unit) then
+			tremove(PENDING, i)
 		end
 	end
 end
@@ -549,9 +553,12 @@ do
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
-			if PENDING[effect] and PENDING[effect].unit == unit then
-				StartTimer(effect, unit, GetTime(), PENDING[effect].rank)
-				PENDING[effect] = nil
+			for i = 1, getn(PENDING) do
+				if PENDING[i].name == effect and PENDING[i].unit == unit then
+					StartTimer(effect, unit, GetTime(), PENDING[i].rank)
+					tremove(PENDING, i)
+					break
+				end
 			end
 		end
 	end
@@ -561,9 +568,12 @@ do
 		local effects = TargetDebuffs()
 		for effect in effects do
 			if not targetEffects[effect] then
-				if PENDING[effect] and PENDING[effect].unit == TARGET_ID then
-					StartTimer(effect, TARGET_ID, GetTime(), PENDING[effect].rank)
-					PENDING[effect] = nil
+				for i = 1, getn(PENDING) do
+					if PENDING[i].name == effect and PENDING[i].unit == TARGET_ID then
+						StartTimer(effect, TARGET_ID, GetTime(), PENDING[i].rank)
+						tremove(PENDING, i)
+						break
+					end
 				end
 				local _, class = UnitClass'player'
 				if effect == "Freezing Trap Effect" and class == 'HUNTER' then
