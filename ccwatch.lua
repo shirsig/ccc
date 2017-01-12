@@ -283,15 +283,12 @@ do
 
 	function SPELLCAST_STOP()
 		casting = false
+		last_action = nil
 		if action then
-			if PENDING[action.name] then
-				last_action = nil
-			else
-				action.combo = COMBO
-				action.time = GetTime() + (ccwatch_PROJECTILE[action.name] and 1.5 or 0)
-				PENDING[action.name] = action
-				last_action = action.name
-			end
+			last_action = not PENDING[action.name] and action.name
+			action.combo = COMBO
+			action.time = GetTime() + (ccwatch_PROJECTILE[action.name] and 1.5 or 0)
+			PENDING[action.name] = action
 		end
 		action = nil
 	end
