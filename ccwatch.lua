@@ -328,9 +328,10 @@ do
 			if i == 1 then
 				effect, unit = unit, effect
 			end
-			for i = getn(PENDING), 1, -1 do
+			for i = 1, getn(PENDING) do
 				if PENDING[i].name == effect and PENDING[i].unit == unit then
 					tremove(PENDING, i)
+					break
 				end
 			end
 		end
