@@ -237,7 +237,7 @@ do
 
 	do
 		local orig = UseAction
-		function _G.UseAction(slot, clicked, onself) -- TODO onself bug?
+		function _G.UseAction(slot, clicked, onself)
 			if HasAction(slot) and not GetActionText(slot) then
 				ccwatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 				ccwatch_TooltipTextRight1:SetText()
@@ -260,10 +260,8 @@ do
 	do
 		local orig = CastSpellByName
 		function _G.CastSpellByName(text, onself)
-			if not onself then
-				local _, _, name, rank = strfind(text, '(.*)%([Rr][Aa][Nn][Kk] ([1-9]%d*)%)')
-				startAction(name or text, tonumber(rank))
-			end
+			local _, _, name, rank = strfind(text, '(.*)%([Rr][Aa][Nn][Kk] ([1-9]%d*)%)')
+			startAction(name or text, tonumber(rank))
 			return orig(text, onself)
 		end
 	end
