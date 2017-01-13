@@ -8,7 +8,6 @@ do
 	end)
 	for _, event in {
 		'ADDON_LOADED',
-		'UNIT_COMBAT',
 		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
 		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
 		'SPELLCAST_START', 'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
@@ -23,8 +22,6 @@ _G.ccwatch_settings = {}
 local WIDTH = 170
 local HEIGHT = 16
 local MAXBARS = 11
-
-local COMBO = 0
 
 local BARS, TIMERS, PENDING = {}, {}, {}
 
@@ -283,7 +280,7 @@ do
 		casting = false
 		interruptable = false
 		if action then
-			action.combo = COMBO
+			action.combo = GetComboPoints()
 			action.time = GetTime() + (ccwatch_PROJECTILE[action.name] and 1.5 or 0)
 			tinsert(PENDING, action)
 			interruptable = true
@@ -408,12 +405,6 @@ end
 function CHAT_MSG_COMBAT_HONOR_GAIN()
 	for unit in string.gfind(arg1, '(.+) dies') do
 		UnitDied(unit)
-	end
-end
-
-function UNIT_COMBAT()
-	if GetComboPoints() > 0 then
-		COMBO = GetComboPoints()
 	end
 end
 
