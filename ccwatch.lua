@@ -10,10 +10,9 @@ do
 		'ADDON_LOADED',
 		'UNIT_COMBAT',
 		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
-		'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
-		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS', 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
+		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
 		'SPELLCAST_START', 'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
-		'UNIT_AURA', 'PLAYER_TARGET_CHANGED', 'UPDATE_BATTLEFIELD_SCORE',
+		'UNIT_AURA', 'PLAYER_TARGET_CHANGED',
 	} do f:RegisterEvent(event) end
 end
 
@@ -388,7 +387,6 @@ function AuraGone(unit, effect)
 			ActivateDRTimer(effect, unit)
 		end
 	elseif unit == UnitName'target' then
-		-- TODO pet target (in other places too)
 		local debuffs = TargetDebuffs()
 		for k, timer in TIMERS do
 			if timer.unit == TARGET_ID and not debuffs[timer.effect] then
@@ -537,8 +535,6 @@ function UnitDied(unit)
 	end
 end
 
-CreateFrame'Frame':SetScript('OnUpdate', RequestBattlefieldScoreData)
-
 do
 	local player = {}
 	local targetEffects
@@ -548,12 +544,7 @@ do
 		return name
 	end
 
-	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_BUFFS()
-		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
-	end
-
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
-		if player[hostilePlayer(arg1)] == nil then player[hostilePlayer(arg1)] = true end -- wrong for pets
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
 			for i = 1, getn(PENDING) do
 				if PENDING[i].name == effect and PENDING[i].unit == unit then
@@ -593,13 +584,7 @@ do
 		local unit = UnitName'target'
 		TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
 		if unit then
-			player[unit] = UnitIsPlayer'target' and true or false
-		end
-	end
-
-	function UPDATE_BATTLEFIELD_SCORE()
-		for i = 1, GetNumBattlefieldScores() do
-			player[GetBattlefieldScore(i)] = true
+			player[unit] = UnitIsPlayer'target' and true
 		end
 	end
 
