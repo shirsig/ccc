@@ -311,7 +311,8 @@ end)
 
 do
 	local patterns = {
-		'(.*) is immune to your (.*)%.',
+		'(.*) is immune to your (.*)%.', -- TODO does it exist?
+		'Your (.*) failed. (.*) is immune.',
 		'Your (.*) missed (.*)%.',
 		'Your (.*) was resisted by (.*)%.',
 		'Your (.*) was evaded by (.*)%.',
