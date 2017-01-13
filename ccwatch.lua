@@ -538,7 +538,7 @@ do
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
 			for i = 1, getn(PENDING) do
 				if PENDING[i].name == effect and PENDING[i].unit == unit then
-					StartTimer(effect, unit, GetTime(), PENDING[i].rank)
+					StartTimer(effect, unit, GetTime(), PENDING[i].rank, PENDING[i].combo)
 					tremove(PENDING, i)
 					break
 				end
@@ -553,7 +553,7 @@ do
 			if not targetEffects[effect] then
 				for i = 1, getn(PENDING) do
 					if PENDING[i].name == effect and PENDING[i].unit == TARGET_ID then
-						StartTimer(effect, TARGET_ID, GetTime(), PENDING[i].rank)
+						StartTimer(effect, TARGET_ID, GetTime(), PENDING[i].rank, PENDING[i].combo)
 						tremove(PENDING, i)
 						break
 					end
