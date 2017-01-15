@@ -344,7 +344,7 @@ function AbortCast(effect, unit)
 	end
 end
 
-function AbortUnitCasts(unit)
+function AbortCasts(unit)
 	for i = getn(PENDING), 1, -1 do
 		if PENDING[i].unit == unit or not unit and not IsPlayer(PENDING[i].unit) then
 			tremove(PENDING, i)
@@ -384,13 +384,9 @@ function AuraGone(unit, effect)
 		if ccwatch_DR_CLASS[effect] then
 			ActivateDRTimer(effect, unit)
 		end
-	elseif unit == UnitName'target' then
-		local debuffs = TargetDebuffs()
-		for k, timer in TIMERS do
-			if timer.unit == TARGET_ID and not debuffs[timer.effect] then
-				StopTimer(timer.effect .. '@' .. timer.unit)
-			end
-		end
+	elseif unit == UnitName'target' and not TargetDebuffs()[effect] then
+		AbortCast(effect, TARGET_ID)
+		StopTimer(effect .. '@' .. TARGET_ID)
 	end
 end
 
@@ -502,7 +498,7 @@ function StartDR(effect, unit)
 end
 
 function PLAYER_REGEN_ENABLED()
-	AbortUnitCasts()
+	AbortCasts()
 	for k, timer in TIMERS do
 		if not IsPlayer(timer.unit) then
 			StopTimer(k)
@@ -519,7 +515,7 @@ function StopTimer(key)
 end
 
 function UnitDied(unit)
-	AbortUnitCasts(unit)
+	AbortCasts(unit)
 	for k, timer in TIMERS do
 		if timer.unit == unit then
 			StopTimer(k)
