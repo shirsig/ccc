@@ -272,7 +272,7 @@ do
 	do
 		local orig = UseInventoryItem
 		function _G.UseInventoryItem(slot)
-			local _, _, name = strfind(GetInventoryItemLink('player', slot), '%[(.*)%]')
+			local _, _, name = strfind(GetInventoryItemLink('player', slot) or '', '%[(.*)%]')
 			startAction(name)
 			return orig(slot)
 		end
@@ -281,7 +281,7 @@ do
 	do
 		local orig = UseContainerItem
 		function _G.UseContainerItem(bag, slot, onself)
-			local _, _, name = strfind(GetContainerItemLink(bag, slot), '%[(.*)%]')
+			local _, _, name = strfind(GetContainerItemLink(bag, slot) or '', '%[(.*)%]')
 			startAction(name)
 			return orig(bag, slot, onself)
 		end
