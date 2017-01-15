@@ -51,6 +51,16 @@ ccwatch_PROJECTILE = {
 	["Concussive Shot"] = true,
 }
 
+ccwatch_AOE = {
+	["Cone of Cold"] = true,
+	["Blast Wave"] = true,
+	["Piercing Howl"] = true,
+	["Psychic Scream"] = true,
+	["Frost Nova"] = true,
+	["Howl of Terror"] = true,
+	["War Stomp"] = true,
+}
+
 local function talentRank(i, j)
 	local _, _, _, _, rank = GetTalentInfo(i, j)
 	return rank

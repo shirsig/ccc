@@ -300,7 +300,7 @@ end
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
 		if GetTime() >= PENDING[i].time + DELAY then
-			if TARGET_ID ~= PENDING[i].unit or TargetDebuffs()[PENDING[i].name] then
+			if not ccwatch_AOE[PENDING[i].name] then
 				StartTimer(PENDING[i].name, PENDING[i].unit, PENDING[i].time, PENDING[i].rank, PENDING[i].combo)
 			end
 			tremove(PENDING, i)
