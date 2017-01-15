@@ -10,7 +10,7 @@ do
 		'ADDON_LOADED',
 		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
 		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
-		'SPELLCAST_START', 'SPELLCAST_STOP', 'SPELLCAST_INTERRUPTED', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
+		'SPELLCAST_START', 'SPELLCAST_STOP', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
 		'UNIT_AURA', 'PLAYER_TARGET_CHANGED',
 	} do f:RegisterEvent(event) end
 end
@@ -267,9 +267,18 @@ do
 
 	function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
 		for name in string.gfind(arg1, 'You fail to %a+ (.*):.*') do
-			if action and name == action.name then
-				casting = false
-				action = nil
+			if action then
+				if name == action.name then
+					casting = false
+					action = nil
+				end
+			else
+				for i = getn(PENDING), 1, -1 do
+					if PENDING[i].name == name then
+						tremove(PENDING, i)
+						break
+					end
+				end
 			end
 		end
 	end
@@ -280,20 +289,12 @@ do
 
 	function SPELLCAST_STOP()
 		casting = false
-		interruptable = false
 		if action then
 			action.combo = GetComboPoints()
 			action.time = GetTime() + (ccwatch_PROJECTILE[action.name] and 1.5 or 0)
 			tinsert(PENDING, action)
-			interruptable = true
 		end
 		action = nil
-	end
-
-	function SPELLCAST_INTERRUPTED()
-		if interruptable then
-			tremove(PENDING)
-		end
 	end
 end
 
