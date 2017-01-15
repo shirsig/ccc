@@ -364,7 +364,7 @@ ccwatch_EFFECTS = {
 	},
 	["Sleep"] = {
 		ICON = 'Spell_Holy_MindVision',
-		DURATION = {30},
+		DURATION = {20, 30},
 	},
 	["Net-o-Matic"] = {
 		ICON = 'INV_Misc_Net_01',
