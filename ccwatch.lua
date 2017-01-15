@@ -596,7 +596,7 @@ do
 		if unit then
 			if UnitIsPlayer'target' then
 				unitType[unit] = 1
-			elseif UnitIsPlayerControlled'target' then
+			elseif UnitPlayerControlled'target' then
 				unitType[unit] = 2
 			end
 		end
