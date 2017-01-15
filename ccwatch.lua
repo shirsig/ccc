@@ -553,7 +553,7 @@ do
 		for effect in effects do
 			if not targetEffects[effect] then
 				for i = 1, getn(PENDING) do
-					if PENDING[i].name == effect and PENDING[i].unit == TARGET_ID then
+					if PENDING[i].name == effect and (PENDING[i].unit == TARGET_ID or ccwatch_AOE[effect]) then
 						StartTimer(effect, TARGET_ID, GetTime(), PENDING[i].rank, PENDING[i].combo)
 						tremove(PENDING, i)
 						break
