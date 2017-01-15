@@ -384,9 +384,6 @@ function AuraGone(unit, effect)
 		if ccwatch_DR_CLASS[effect] then
 			ActivateDRTimer(effect, unit)
 		end
-	elseif unit == UnitName'target' and not TargetDebuffs()[effect] then
-		AbortCast(effect, TARGET_ID)
-		StopTimer(effect .. '@' .. TARGET_ID)
 	end
 end
 
@@ -547,6 +544,12 @@ do
 	function UNIT_AURA()
 		if arg1 ~= 'target' then return end
 		local effects = TargetDebuffs()
+		for effect in targetEffects do
+			if not effects[effect] then
+				AbortCast(effect, TARGET_ID)
+				StopTimer(effect .. '@' .. TARGET_ID)
+			end
+		end
 		for effect in effects do
 			if not targetEffects[effect] then
 				for i = 1, getn(PENDING) do
