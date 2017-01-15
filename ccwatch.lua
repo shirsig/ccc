@@ -225,7 +225,9 @@ do
 	local cast
 
 	local function startAction(name, rank)
-		local name = ccwatch_ITEM_ACTION[name] or name
+		if ccwatch_ITEM_ACTION[name] then
+			name, rank = ccwatch_ITEM_ACTION[name].name, ccwatch_ITEM_ACTION[name].rank
+		end
 		if not cast then
 			ACTION = TARGET_ID and ccwatch_ACTION[name] and {name=name, effect=(ccwatch_ACTION_EFFECT[name] or name), rank=rank, unit=TARGET_ID}
 		end

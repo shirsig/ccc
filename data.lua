@@ -111,11 +111,13 @@ ccwatch_COMBO = {
 }
 
 ccwatch_ITEM_ACTION = {
-	["Goblin Rocket Helmet"] = "Reckless Charge",
-	["Magic Dust"] = "Sleep",
-	["Gnomish Net-o-Matic Projector"] = "Net-o-Matic",
-	["Large Rope Net"] = "Trap",
-	["Really Sticky Glue"] = "Trap",
+	["Goblin Rocket Helmet"] = {name="Reckless Charge"},
+	["Horned Viking Helmet"] = {name="Reckless Charge"},
+	["Slumber Sand"] = {name="Sleep", rank=1},
+	["Magic Dust"] = {name="Sleep", rank=2},
+	["Gnomish Net-o-Matic Projector"] = {name="Net-o-Matic"},
+	["Large Rope Net"] = {name="Trap"},
+	["Really Sticky Glue"] = {name="Trap"},
 }
 
 ccwatch_ACTION = {
