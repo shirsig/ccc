@@ -202,10 +202,14 @@ do
 	local limit = {[0] = 15, 10, 5, 0}
 
 	function DiminishedDuration(unit, effect, full_duration)
-		local class = ccwatch_DR_CLASS[effect]
-		local timer = class and TIMERS[class .. '@' .. unit]
-		local DR = timer and timer.DR or 0
-		return ccwatch_HEARTBEAT[effect] and min(limit[DR], full_duration * factor[DR]) or full_duration * factor[DR]
+		if IsPlayer(unit) or IsPet(unit) then
+			local class = ccwatch_DR_CLASS[effect]
+			local timer = class and TIMERS[class .. '@' .. unit]
+			local DR = IsPlayer(unit) and timer and timer.DR or 0
+			return ccwatch_HEARTBEAT[effect] and min(limit[DR], full_duration * factor[DR]) or full_duration * factor[DR]
+		else
+			return full_duration
+		end
 	end
 end
 
@@ -368,7 +372,7 @@ end
 
 function AbortCasts(unit)
 	for i = getn(PENDING), 1, -1 do
-		if PENDING[i].unit == unit or not unit and not IsPlayer(PENDING[i].unit) then
+		if not unit or PENDING[i].unit == unit then
 			tremove(PENDING, i)
 		end
 	end
@@ -464,9 +468,8 @@ function StartTimer(effect, unit, start, rank, combo)
 	if ccwatch_BONUS[effect] then
 		duration = duration + ccwatch_BONUS[effect]()
 	end
-	if IsPlayer(unit) then
-		duration = DiminishedDuration(unit, effect, duration)
-	end
+
+	duration = DiminishedDuration(unit, effect, duration)
 
 	if duration == 0 then
 		return
@@ -519,7 +522,7 @@ end
 function PLAYER_REGEN_ENABLED()
 	AbortCasts()
 	for k, timer in TIMERS do
-		if not IsPlayer(timer.unit) then
+		if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
 			StopTimer(k)
 		end
 	end
@@ -542,61 +545,60 @@ function UnitDied(unit)
 	end
 end
 
-do
-	local player = {}
-
-	local function hostilePlayer(msg)
-		local _, _, name = strfind(arg1, "^([^%s']*)")
-		return name
+function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
+	for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
+		for i = 1, getn(PENDING) do
+			if PENDING[i].effect == effect and PENDING[i].unit == unit then
+				StartTimer(effect, unit, GetTime(), PENDING[i].rank, PENDING[i].combo)
+				tremove(PENDING, i)
+				break
+			end
+		end
 	end
+end
 
-	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
-		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
+function UNIT_AURA()
+	if arg1 ~= 'target' then return end
+	local effects = TargetDebuffs()
+	for effect in TARGET_DEBUFFS do
+		if not effects[effect] then
+			AbortCast(effect, TARGET_ID)
+			StopTimer(effect .. '@' .. TARGET_ID)
+		end
+	end
+	for effect in effects do
+		if not TARGET_DEBUFFS[effect] then
 			for i = 1, getn(PENDING) do
-				if PENDING[i].effect == effect and PENDING[i].unit == unit then
-					StartTimer(effect, unit, GetTime(), PENDING[i].rank, PENDING[i].combo)
+				if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_ID or ccwatch_AOE[effect]) then
+					StartTimer(effect, TARGET_ID, GetTime(), PENDING[i].rank, PENDING[i].combo)
 					tremove(PENDING, i)
 					break
 				end
 			end
+			local _, class = UnitClass'player'
+			if effect == "Freezing Trap Effect" and class == 'HUNTER' then
+				StartTimer(effect, TARGET_ID, GetTime(), 3) -- TODO spell rank
+			elseif effect == "Seduction" and class == 'WARLOCK' then
+				StartTimer(effect, TARGET_ID, GetTime())
+			end
 		end
 	end
+	TARGET_DEBUFFS = effects
+end
 
-	function UNIT_AURA()
-		if arg1 ~= 'target' then return end
-		local effects = TargetDebuffs()
-		for effect in TARGET_DEBUFFS do
-			if not effects[effect] then
-				AbortCast(effect, TARGET_ID)
-				StopTimer(effect .. '@' .. TARGET_ID)
-			end
-		end
-		for effect in effects do
-			if not TARGET_DEBUFFS[effect] then
-				for i = 1, getn(PENDING) do
-					if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_ID or ccwatch_AOE[effect]) then
-						StartTimer(effect, TARGET_ID, GetTime(), PENDING[i].rank, PENDING[i].combo)
-						tremove(PENDING, i)
-						break
-					end
-				end
-				local _, class = UnitClass'player'
-				if effect == "Freezing Trap Effect" and class == 'HUNTER' then
-					StartTimer(effect, TARGET_ID, GetTime(), 3) -- TODO spell rank
-				elseif effect == "Seduction" and class == 'WARLOCK' then
-					StartTimer(effect, TARGET_ID, GetTime())
-				end
-			end
-		end
-		TARGET_DEBUFFS = effects
-	end
+do
+	local unitType = {}
 
 	function PLAYER_TARGET_CHANGED()
 		TARGET_DEBUFFS = TargetDebuffs()
 		local unit = UnitName'target'
 		TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
 		if unit then
-			player[unit] = UnitIsPlayer'target' and true
+			if UnitIsPlayer'target' then
+				unitType[unit] = 1
+			elseif UnitIsPlayerControlled'target' then
+				unitType[unit] = 2
+			end
 		end
 		if ACTION then
 			ACTION.targetChanged = true
@@ -607,7 +609,11 @@ do
 	end
 
 	function IsPlayer(unit)
-		return player[unit]
+		return unitType[unit] == 1
+	end
+
+	function IsPet(unit)
+		return unitType[unit] == 2
 	end
 end
 
