@@ -370,14 +370,6 @@ function AbortCast(effect, unit)
 	end
 end
 
-function AbortCasts(unit)
-	for i = getn(PENDING), 1, -1 do
-		if not unit or PENDING[i].unit == unit then
-			tremove(PENDING, i)
-		end
-	end
-end
-
 function CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, unit in string.gfind(arg1, '(.+) fades from (.+)%.') do
 		AuraGone(unit, effect)
@@ -520,7 +512,11 @@ function StartDR(effect, unit)
 end
 
 function PLAYER_REGEN_ENABLED()
-	AbortCasts()
+	for i = getn(PENDING), 1, -1 do
+		if not IsPlayer(PENDING[i].unit) and not IsPet(PENDING[i].unit) then
+			tremove(PENDING, i)
+		end
+	end
 	for k, timer in TIMERS do
 		if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
 			StopTimer(k)
@@ -537,7 +533,11 @@ function StopTimer(key)
 end
 
 function UnitDied(unit)
-	AbortCasts(unit)
+	for i = getn(PENDING), 1, -1 do
+		if PENDING[i].unit == unit then
+			tremove(PENDING, i)
+		end
+	end
 	for k, timer in TIMERS do
 		if timer.unit == unit then
 			StopTimer(k)
