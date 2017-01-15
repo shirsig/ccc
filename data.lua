@@ -49,6 +49,8 @@ ccwatch_PROJECTILE = {
 	["Frostbolt"] = true,
 	["Wyvern Sting"] = true,
 	["Concussive Shot"] = true,
+	["Net-o-Matic"] = true,
+	["Trap"] = true,
 }
 
 ccwatch_AOE = {
@@ -100,10 +102,20 @@ ccwatch_HEARTBEAT = {
 	["Polymorph"] = true,
 	["Polymorph: Turtle"] = true,
 	["Polymorph: Pig"] = true,
+	["Reckless Charge"] = true,
+	["Sleep"] = true,
 }
 
 ccwatch_COMBO = {
 	["Kidney Shot"] = 1,
+}
+
+ccwatch_ITEM_ACTION = {
+	["Goblin Rocket Helmet"] = "Reckless Charge",
+	["Magic Dust"] = "Sleep",
+	["Gnomish Net-o-Matic Projector"] = "Net-o-Matic",
+	["Large Rope Net"] = "Trap",
+	["Really Sticky Glue"] = "Trap",
 }
 
 ccwatch_ACTION = {
@@ -150,7 +162,17 @@ ccwatch_ACTION = {
 	["Hamstring"] = true,
 	["Intimidating Shout"] = true,
 	["Concussion Blow"] = true,
-	["War Stomp"] = true,	
+	["War Stomp"] = true,
+	["Intercept"] = true,
+	["Reckless Charge"] = true,
+	["Sleep"] = true,
+	["Net-o-Matic"] = true,
+	["Large Rope Net"] = true,
+	["Tidal Charm"] = true,
+}
+
+ccwatch_ACTION_EFFECT = {
+	["Intercept"] = "Intercept Stun",
 }
 
 ccwatch_EFFECTS = {
@@ -330,6 +352,30 @@ ccwatch_EFFECTS = {
 		ICON = 'Ability_WarStomp',
 		DURATION = {2},
 	},
+	["Intercept Stun"] = {
+		ICON = 'Spell_Frost_Stun',
+		DURATION = {3},
+	},
+	["Tidal Charm"] = {
+		ICON = 'Spell_Frost_SummonWaterElemental',
+		DURATION = {3},
+	},
+	["Sleep"] = {
+		ICON = 'Spell_Holy_MindVision',
+		DURATION = {30},
+	},
+	["Net-o-Matic"] = {
+		ICON = 'INV_Misc_Net_01',
+		DURATION = {10},
+	},
+	["Trap"] = {
+		ICON = 'INV_Misc_Net_01',
+		DURATION = {10},
+	},
+	["Reckless Charge"] = {
+		ICON = 'Spell_Nature_AstralRecal',
+		DURATION = {30},
+	},
 	["Seduction"] = {
 		ICON = 'Spell_Shadow_MindSteal',
 		DURATION = {15},
@@ -338,9 +384,4 @@ ccwatch_EFFECTS = {
 		ICON = 'Spell_Frost_ChainsOfIce',
 		DURATION = {20},
 	},
-
-	-- ["Intercept Stun"] = {
-	-- 	ICON = 'Spell_Frost_Stun',
-	-- 	DURATION = {3},
-	-- },
 }

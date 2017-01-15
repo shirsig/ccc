@@ -224,8 +224,9 @@ do
 	local cast, action, interruptable
 
 	local function startAction(name, rank)
-		if not cast and TARGET_ID and ccwatch_ACTION[name] then
-			action = {name=name, rank=rank, unit=TARGET_ID}
+		local name = ccwatch_ITEM_ACTION[name] or name
+		if not cast then
+			action = TARGET_ID and ccwatch_ACTION[name] and {name=name, effect=(ccwatch_ACTION_EFFECT[name] or name), rank=rank, unit=TARGET_ID}
 		end
 	end
 
@@ -265,6 +266,24 @@ do
 		end
 	end
 
+	do
+		local orig = UseInventoryItem
+		function _G.UseInventoryItem(slot)
+			local _, _, name = strfind(GetInventoryItemLink('player', slot), '%[(.*)%]')
+			startAction(name)
+			return orig(slot)
+		end
+	end
+
+	do
+		local orig = UseContainerItem
+		function _G.UseContainerItem(bag, slot, onself)
+			local _, _, name = strfind(GetContainerItemLink(bag, slot), '%[(.*)%]')
+			startAction(name)
+			return orig(bag, slot, onself)
+		end
+	end
+
 	function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
 		for name, reason in string.gfind(arg1, 'You fail to %a+ (.*): (.*)') do
 			if name == cast and reason ~= 'Another action is in progress.' then
@@ -301,7 +320,7 @@ CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
 		if GetTime() >= PENDING[i].time + DELAY then
 			if not ccwatch_AOE[PENDING[i].name] then
-				StartTimer(PENDING[i].name, PENDING[i].unit, PENDING[i].time, PENDING[i].rank, PENDING[i].combo)
+				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].time, PENDING[i].rank, PENDING[i].combo)
 			end
 			tremove(PENDING, i)
 		end
@@ -327,7 +346,7 @@ do
 				effect, unit = unit, effect
 			end
 			for i = 1, getn(PENDING) do
-				if PENDING[i].name == effect and PENDING[i].unit == unit then
+				if PENDING[i].effect == effect and PENDING[i].unit == unit then
 					tremove(PENDING, i)
 					break
 				end
@@ -338,7 +357,7 @@ end
 
 function AbortCast(effect, unit)
 	for i = getn(PENDING), 1, -1 do
-		if PENDING[i].name == effect and PENDING[i].unit == unit then
+		if PENDING[i].effect == effect and PENDING[i].unit == unit then
 			tremove(PENDING, i)
 		end
 	end
@@ -364,6 +383,16 @@ function CHAT_MSG_SPELL_BREAK_AURA()
 	end
 end
 
+function AuraGone(unit, effect)
+	if IsPlayer(unit) then
+		AbortCast(effect, unit)
+		StopTimer(effect .. '@' .. unit)
+		if ccwatch_DR_CLASS[effect] then
+			ActivateDRTimer(effect, unit)
+		end
+	end
+end
+
 function ActivateDRTimer(effect, unit)
 	for k, v in ccwatch_DR_CLASS do
 		if v == ccwatch_DR_CLASS[effect] and EffectActive(k, unit) then
@@ -374,16 +403,6 @@ function ActivateDRTimer(effect, unit)
 	if timer then
 		timer.start = GetTime()
 		timer.expiration = timer.start + 15
-	end
-end
-
-function AuraGone(unit, effect)
-	if IsPlayer(unit) then
-		AbortCast(effect, unit)
-		StopTimer(effect .. '@' .. unit)
-		if ccwatch_DR_CLASS[effect] then
-			ActivateDRTimer(effect, unit)
-		end
 	end
 end
 
@@ -532,7 +551,7 @@ do
 	function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 		for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
 			for i = 1, getn(PENDING) do
-				if PENDING[i].name == effect and PENDING[i].unit == unit then
+				if PENDING[i].effect == effect and PENDING[i].unit == unit then
 					StartTimer(effect, unit, GetTime(), PENDING[i].rank, PENDING[i].combo)
 					tremove(PENDING, i)
 					break
@@ -553,7 +572,7 @@ do
 		for effect in effects do
 			if not targetEffects[effect] then
 				for i = 1, getn(PENDING) do
-					if PENDING[i].name == effect and (PENDING[i].unit == TARGET_ID or ccwatch_AOE[effect]) then
+					if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_ID or ccwatch_AOE[effect]) then
 						StartTimer(effect, TARGET_ID, GetTime(), PENDING[i].rank, PENDING[i].combo)
 						tremove(PENDING, i)
 						break
