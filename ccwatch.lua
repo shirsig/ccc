@@ -26,6 +26,7 @@ local MAXBARS = 11
 local DELAY = .5
 
 local BARS, TIMERS, PENDING = {}, {}, {}
+local ACTION, TARGET_ID, TARGET_DEBUFFS
 
 function Print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage('<ccwatch> ' .. msg)
@@ -221,12 +222,12 @@ function TargetDebuffs()
 end
 
 do
-	local cast, action, interruptable
+	local cast
 
 	local function startAction(name, rank)
 		local name = ccwatch_ITEM_ACTION[name] or name
 		if not cast then
-			action = TARGET_ID and ccwatch_ACTION[name] and {name=name, effect=(ccwatch_ACTION_EFFECT[name] or name), rank=rank, unit=TARGET_ID}
+			ACTION = TARGET_ID and ccwatch_ACTION[name] and {name=name, effect=(ccwatch_ACTION_EFFECT[name] or name), rank=rank, unit=TARGET_ID}
 		end
 	end
 
@@ -288,9 +289,9 @@ do
 		for name, reason in string.gfind(arg1, 'You fail to %a+ (.*): (.*)') do
 			if name == cast and reason ~= 'Another action is in progress.' then
 				cast = nil
-				action = nil
+				ACTION = nil
 			end
-			if not action then
+			if not ACTION then
 				for i = getn(PENDING), 1, -1 do
 					if PENDING[i].name == name then
 						tremove(PENDING, i)
@@ -307,19 +308,19 @@ do
 
 	function SPELLCAST_STOP()
 		cast = nil
-		if action then
-			action.combo = GetComboPoints()
-			action.time = GetTime() + (ccwatch_PROJECTILE[action.name] and 1.5 or 0)
-			tinsert(PENDING, action)
+		if ACTION then
+			ACTION.combo = GetComboPoints()
+			ACTION.time = GetTime() + (ccwatch_PROJECTILE[ACTION.name] and 1.5 or 0)
+			tinsert(PENDING, ACTION)
 		end
-		action = nil
+		ACTION = nil
 	end
 end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
 		if GetTime() >= PENDING[i].time + DELAY then
-			if not ccwatch_AOE[PENDING[i].name] then
+			if not ccwatch_AOE[PENDING[i].name] and (PENDING[i].targetChanged or TARGET_DEBUFFS[PENDING[i].effect]) then
 				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].time, PENDING[i].rank, PENDING[i].combo)
 			end
 			tremove(PENDING, i)
@@ -541,7 +542,6 @@ end
 
 do
 	local player = {}
-	local targetEffects
 
 	local function hostilePlayer(msg)
 		local _, _, name = strfind(arg1, "^([^%s']*)")
@@ -563,14 +563,14 @@ do
 	function UNIT_AURA()
 		if arg1 ~= 'target' then return end
 		local effects = TargetDebuffs()
-		for effect in targetEffects do
+		for effect in TARGET_DEBUFFS do
 			if not effects[effect] then
 				AbortCast(effect, TARGET_ID)
 				StopTimer(effect .. '@' .. TARGET_ID)
 			end
 		end
 		for effect in effects do
-			if not targetEffects[effect] then
+			if not TARGET_DEBUFFS[effect] then
 				for i = 1, getn(PENDING) do
 					if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_ID or ccwatch_AOE[effect]) then
 						StartTimer(effect, TARGET_ID, GetTime(), PENDING[i].rank, PENDING[i].combo)
@@ -586,15 +586,21 @@ do
 				end
 			end
 		end
-		targetEffects = effects
+		TARGET_DEBUFFS = effects
 	end
 
 	function PLAYER_TARGET_CHANGED()
-		targetEffects = TargetDebuffs()
+		TARGET_DEBUFFS = TargetDebuffs()
 		local unit = UnitName'target'
 		TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
 		if unit then
 			player[unit] = UnitIsPlayer'target' and true
+		end
+		if ACTION then
+			ACTION.targetChanged = true
+		end
+		for _, action in PENDING do
+			action.targetChanged = true
 		end
 	end
 
