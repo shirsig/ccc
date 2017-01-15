@@ -221,10 +221,10 @@ function TargetDebuffs()
 end
 
 do
-	local casting, action, interruptable
+	local cast, action, interruptable
 
 	local function startAction(name, rank)
-		if not casting and TARGET_ID and ccwatch_ACTION[name] then
+		if not cast and TARGET_ID and ccwatch_ACTION[name] then
 			action = {name=name, rank=rank, unit=TARGET_ID}
 		end
 	end
@@ -267,12 +267,11 @@ do
 
 	function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
 		for name, reason in string.gfind(arg1, 'You fail to %a+ (.*): (.*)') do
-			if action then
-				if name == action.name and reason ~= 'Another action is in progress.' then
-					casting = false
-					action = nil
-				end
-			else
+			if name == cast and reason ~= 'Another action is in progress.' then
+				cast = nil
+				action = nil
+			end
+			if not action then
 				for i = getn(PENDING), 1, -1 do
 					if PENDING[i].name == name then
 						tremove(PENDING, i)
@@ -284,11 +283,11 @@ do
 	end
 
 	function SPELLCAST_START()
-		casting = true
+		cast = arg1
 	end
 
 	function SPELLCAST_STOP()
-		casting = false
+		cast = nil
 		if action then
 			action.combo = GetComboPoints()
 			action.time = GetTime() + (ccwatch_PROJECTILE[action.name] and 1.5 or 0)
