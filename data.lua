@@ -384,6 +384,6 @@ ccwatch_EFFECTS = {
 	},
 	["Freezing Trap Effect"] = {
 		ICON = 'Spell_Frost_ChainsOfIce',
-		DURATION = {20},
+		DURATION = {10, 15, 20},
 	},
 }

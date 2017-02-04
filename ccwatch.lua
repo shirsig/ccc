@@ -28,6 +28,8 @@ local DELAY = .5
 local BARS, TIMERS, PENDING = {}, {}, {}
 local ACTION, TARGET_ID, TARGET_DEBUFFS
 
+local FREEZING_TRAP_RANK
+
 function Print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage('<ccwatch> ' .. msg)
 end
@@ -231,6 +233,8 @@ do
 	local function startAction(name, rank)
 		if ccwatch_ITEM_ACTION[name] then
 			name, rank = ccwatch_ITEM_ACTION[name].name, ccwatch_ITEM_ACTION[name].rank
+		elseif name == 'Freezing Trap' then
+			FREEZING_TRAP_RANK = rank
 		end
 		if not cast then
 			ACTION = TARGET_ID and ccwatch_ACTION[name] and {name=name, effect=(ccwatch_ACTION_EFFECT[name] or name), rank=rank, unit=TARGET_ID}
@@ -576,8 +580,8 @@ function UNIT_AURA()
 				end
 			end
 			local _, class = UnitClass'player'
-			if effect == "Freezing Trap Effect" and class == 'HUNTER' then
-				StartTimer(effect, TARGET_ID, GetTime(), 3) -- TODO spell rank
+			if effect == "Freezing Trap Effect" and FREEZING_TRAP_RANK then
+				StartTimer(effect, TARGET_ID, GetTime(), FREEZING_TRAP_RANK)
 			elseif effect == "Seduction" and class == 'WARLOCK' then
 				StartTimer(effect, TARGET_ID, GetTime())
 			end
