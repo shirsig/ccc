@@ -1,5 +1,5 @@
 # ccwatch (/ccwatch for options)
-ccwatch is a new cc tracker for WoW 1.12.
+ccwatch is a new cc tracker for Vanilla WoW 1.12.
 
 The tracking correctly takes into account diminishing returns (including sharing), special PvP durations, spell ranks, talent bonuses and combo points.
 
