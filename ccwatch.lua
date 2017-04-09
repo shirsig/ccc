@@ -136,7 +136,7 @@ do
 			end
 		else
 			bar:SetAlpha(ccwatch_settings.alpha)
-			bar.icon:SetTexture([[Interface\Icons\]] .. (ccwatch_EFFECTS[timer.effect].ICON or 'INV_Misc_QuestionMark'))
+			bar.icon:SetTexture([[Interface\Icons\]] .. (ccwatch_ICON[timer.effect] or 'INV_Misc_QuestionMark'))
 			bar.text:SetText(gsub(timer.unit, ':.*', ''))
 
 			local fraction
@@ -230,20 +230,15 @@ end
 do
 	local cast
 
-	local function startAction(name, rank)
-		if ccwatch_ITEM_ACTION[name] then
-			name, rank = ccwatch_ITEM_ACTION[name].name, ccwatch_ITEM_ACTION[name].rank
-		elseif name == 'Freezing Trap' then
+	local function startAction(str)
+		local _, _, name, rank = strfind(str, '(.*)%([Rr][Aa][Nn][Kk] ([1-9]%d*)%)')
+		name, rank = strlower(name or str), tonumber(rank)
+		if name == 'freezing trap' then
 			FREEZING_TRAP_RANK = rank
 		end
 		if not cast then
-			ACTION = TARGET_ID and ccwatch_ACTION[name] and {name=name, effect=(ccwatch_ACTION_EFFECT[name] or name), rank=rank, unit=TARGET_ID}
+			ACTION = TARGET_ID and ccwatch_ACTION[name] and {name=name, rank=rank, unit=TARGET_ID}
 		end
-	end
-
-	local function extractRank(str)
-		local _, _, rank = strfind(str or '', 'Rank (%d+)')
-		return tonumber(rank)
 	end
 
 	do
@@ -253,7 +248,7 @@ do
 				ccwatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 				ccwatch_TooltipTextRight1:SetText()
 				ccwatch_Tooltip:SetAction(slot)
-				startAction(ccwatch_TooltipTextLeft1:GetText(), extractRank(ccwatch_TooltipTextRight1:GetText()))
+				startAction(ccwatch_TooltipTextLeft1:GetText() .. '(' .. (ccwatch_TooltipTextRight1:GetText() or 'rank 1') .. ')')
 			end
 			return orig(slot, clicked, onself)
 		end
@@ -263,17 +258,16 @@ do
 		local orig = CastSpell
 		function _G.CastSpell(index, booktype)
 			local name, rankText = GetSpellName(index, booktype)
-			startAction(name, extractRank(rankText))
+			startAction(name .. '(' .. (rankText ~= '' and rankText or 'rank 1') .. ')')
 			return orig(index, booktype)
 		end
 	end
 
 	do
 		local orig = CastSpellByName
-		function _G.CastSpellByName(text, onself)
-			local _, _, name, rank = strfind(text, '(.*)%([Rr][Aa][Nn][Kk] ([1-9]%d*)%)')
-			startAction(name or text, tonumber(rank))
-			return orig(text, onself)
+		function _G.CastSpellByName(str, onself)
+			startAction(str)
+			return orig(str, onself)
 		end
 	end
 
@@ -281,7 +275,7 @@ do
 		local orig = UseInventoryItem
 		function _G.UseInventoryItem(slot)
 			local _, _, name = strfind(GetInventoryItemLink('player', slot) or '', '%[(.*)%]')
-			startAction(name)
+			startAction(ccwatch_ITEM_ACTION[name] or name)
 			return orig(slot)
 		end
 	end
@@ -290,7 +284,7 @@ do
 		local orig = UseContainerItem
 		function _G.UseContainerItem(bag, slot, onself)
 			local _, _, name = strfind(GetContainerItemLink(bag, slot) or '', '%[(.*)%]')
-			startAction(name)
+			startAction(ccwatch_ITEM_ACTION[name] or name)
 			return orig(bag, slot, onself)
 		end
 	end
@@ -303,7 +297,7 @@ do
 			end
 			if not ACTION then
 				for i = getn(PENDING), 1, -1 do
-					if PENDING[i].name == name then
+					if PENDING[i].name == strlower(name) then
 						tremove(PENDING, i)
 						break
 					end
@@ -319,8 +313,15 @@ do
 	function SPELLCAST_STOP()
 		cast = nil
 		if ACTION then
-			ACTION.combo = GetComboPoints()
 			ACTION.time = GetTime() + (ccwatch_PROJECTILE[ACTION.name] and 1.5 or 0)
+			ACTION.effect = ccwatch_ACTION[ACTION.name].effect
+			ACTION.duration = ccwatch_ACTION[ACTION.name].duration[min(ACTION.rank or 1, getn(ccwatch_ACTION[ACTION.name].duration))]
+			if ccwatch_COMBO[ACTION.name] then
+				ACTION.duration = ACTION.duration + ccwatch_COMBO[ACTION.name] * GetComboPoints()
+			end
+			if ccwatch_BONUS[ACTION.name] then
+				ACTION.duration = ACTION.duration + ccwatch_BONUS[ACTION.name]()
+			end
 			tinsert(PENDING, ACTION)
 		end
 		ACTION = nil
@@ -331,7 +332,7 @@ CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
 		if GetTime() >= PENDING[i].time + DELAY then
 			if not ccwatch_AOE[PENDING[i].name] and (PENDING[i].targetChanged or TARGET_DEBUFFS[PENDING[i].effect]) then
-				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].time, PENDING[i].rank, PENDING[i].combo)
+				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].duration, PENDING[i].time)
 			end
 			tremove(PENDING, i)
 		end
@@ -456,15 +457,7 @@ function EffectActive(effect, unit)
 	return TIMERS[effect .. '@' .. unit] and true or false
 end
 
-function StartTimer(effect, unit, start, rank, combo)
-	local duration = ccwatch_EFFECTS[effect].DURATION[min(rank or 1, getn(ccwatch_EFFECTS[effect].DURATION))]
-	if ccwatch_COMBO[effect] then
-		duration = duration + ccwatch_COMBO[effect] * combo
-	end
-	if ccwatch_BONUS[effect] then
-		duration = duration + ccwatch_BONUS[effect]()
-	end
-
+function StartTimer(effect, unit, duration, start)
 	duration = DiminishedDuration(unit, effect, duration)
 
 	if duration == 0 then
@@ -486,7 +479,7 @@ function StartTimer(effect, unit, start, rank, combo)
 
 	timer.effect = effect
 	timer.unit = unit
-	timer.start = start
+	timer.start = start or GetTime()
 	timer.expiration = timer.start + duration
 
 	if IsPlayer(unit) and ccwatch_DR_CLASS[effect] then
@@ -553,7 +546,7 @@ function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
 	for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
 		for i = 1, getn(PENDING) do
 			if PENDING[i].effect == effect and PENDING[i].unit == unit then
-				StartTimer(effect, unit, GetTime(), PENDING[i].rank, PENDING[i].combo)
+				StartTimer(effect, unit, PENDING[i].duration)
 				tremove(PENDING, i)
 				break
 			end
@@ -573,17 +566,18 @@ function UNIT_AURA()
 	for effect in effects do
 		if not TARGET_DEBUFFS[effect] then
 			for i = 1, getn(PENDING) do
-				if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_ID or ccwatch_AOE[effect]) then
-					StartTimer(effect, TARGET_ID, GetTime(), PENDING[i].rank, PENDING[i].combo)
+				if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_ID or ccwatch_AOE[PENDING[i].name]) then
+					StartTimer(effect, TARGET_ID, PENDING[i].duration)
 					tremove(PENDING, i)
 					break
 				end
 			end
 			local _, class = UnitClass'player'
 			if effect == "Freezing Trap Effect" and FREEZING_TRAP_RANK then
-				StartTimer(effect, TARGET_ID, GetTime(), FREEZING_TRAP_RANK)
+				local _, _, _, _, rank = GetTalentInfo(3, 7)
+				StartTimer(effect, TARGET_ID, (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15))
 			elseif effect == "Seduction" and class == 'WARLOCK' then
-				StartTimer(effect, TARGET_ID, GetTime())
+				StartTimer(effect, TARGET_ID)
 			end
 		end
 	end
