@@ -89,12 +89,6 @@ local function talentRank(i, j)
 end
 
 ccwatch_BONUS = {
-	["freezing trap"] = function()
-		return 20 * talentRank(3, 7) * .15 -- TODO
-	end,
-	["seduction"] = function()
-		return talentRank(2, 7) * 1.5
-	end,
 	["gouge"] = function()
 		return talentRank(2, 1) * .5
 	end,

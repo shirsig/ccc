@@ -577,7 +577,8 @@ function UNIT_AURA()
 				local _, _, _, _, rank = GetTalentInfo(3, 7)
 				StartTimer(effect, TARGET_ID, (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15))
 			elseif effect == "Seduction" and class == 'WARLOCK' then
-				StartTimer(effect, TARGET_ID)
+				local _, _, _, _, rank = GetTalentInfo(2, 7)
+				StartTimer(effect, TARGET_ID, 15 * (1 + rank * .1))
 			end
 		end
 	end
