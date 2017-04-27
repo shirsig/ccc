@@ -171,7 +171,7 @@ ccwatch_DR_CLASS = {
 	["Polymorph: Pig"] = 2,
 
 	["Freezing Trap Effect"] = 3,
-	["Wyvern String"] = 3,
+	["Wyvern Sting"] = 3,
 
 	["Sap"] = 4,
 	["Gouge"] = 4,
