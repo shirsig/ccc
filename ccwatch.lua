@@ -377,23 +377,25 @@ end
 
 function CHAT_MSG_SPELL_AURA_GONE_OTHER()
 	for effect, unit in string.gfind(arg1, '(.+) fades from (.+)%.') do
-		AuraGone(unit, effect)
+		if IsPlayer(unit) then
+			AuraGone(unit, effect)
+		end
 	end
 end
 
 function CHAT_MSG_SPELL_BREAK_AURA()
 	for unit, effect in string.gfind(arg1, "(.+)'s (.+) is removed%.") do
-		AuraGone(unit, effect)
+		if IsPlayer(unit) then
+			AuraGone(unit, effect)
+		end
 	end
 end
 
 function AuraGone(unit, effect)
-	if IsPlayer(unit) then
-		AbortCast(effect, unit)
-		StopTimer(effect .. '@' .. unit)
-		if ccwatch_DR_CLASS[effect] then
-			ActivateDRTimer(effect, unit)
-		end
+	AbortCast(effect, unit)
+	StopTimer(effect .. '@' .. unit)
+	if ccwatch_DR_CLASS[effect] then
+		ActivateDRTimer(effect, unit)
 	end
 end
 
@@ -559,8 +561,7 @@ function UNIT_AURA()
 	local effects = TargetDebuffs()
 	for effect in TARGET_DEBUFFS do
 		if not effects[effect] then
-			AbortCast(effect, TARGET_ID)
-			StopTimer(effect .. '@' .. TARGET_ID)
+			AuraGone(effect, TARGET_ID)
 		end
 	end
 	for effect in effects do
@@ -608,7 +609,7 @@ do
 	end
 
 	function IsPlayer(unit)
-		return unitType[unit] == 1
+		return true
 	end
 
 	function IsPet(unit)
