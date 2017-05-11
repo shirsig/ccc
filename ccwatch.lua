@@ -232,7 +232,7 @@ do
 
 	local function startAction(str)
 		local _, _, name, rank = strfind(str or '', '(.*)%([Rr][Aa][Nn][Kk] ([1-9]%d*)%)')
-		name, rank = strlower(name or str), tonumber(rank)
+		name, rank = strlower(name or str or ''), tonumber(rank)
 		if name == 'freezing trap' then
 			FREEZING_TRAP_RANK = rank
 		end
