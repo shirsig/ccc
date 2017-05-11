@@ -609,7 +609,7 @@ do
 	end
 
 	function IsPlayer(unit)
-		return true
+		return unitType[unit] == 1
 	end
 
 	function IsPet(unit)
