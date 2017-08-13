@@ -159,6 +159,7 @@ ccwatch_ICON = {
 	["Reckless Charge"] = 'Spell_Nature_AstralRecal',
 	["Seduction"] = 'Spell_Shadow_MindSteal',
 	["Freezing Trap Effect"] = 'Spell_Frost_ChainsOfIce',
+	["Crippling Poison"] = 'Ability_PoisonSting',
 }
 
 ccwatch_DR_CLASS = {
