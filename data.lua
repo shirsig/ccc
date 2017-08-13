@@ -58,6 +58,9 @@ ccwatch_ACTION = {
 	["net-o-matic"] = {effect="Net-o-Matic", duration={10}},
 	["large rope net"] = {effect="Trap", duration={10}},
 	["tidal charm"] = {effect="Tidal Charm", duration={3}},
+	["silence"] = {effect="Silence", duration={5}},
+	["counterspell"] = {effect="Counterspell - Silenced", duration={4}},
+	["kick"] = {effect="Kick - Silenced", duration={2}},
 }
 
 ccwatch_PROJECTILE = {
@@ -160,6 +163,12 @@ ccwatch_ICON = {
 	["Seduction"] = 'Spell_Shadow_MindSteal',
 	["Freezing Trap Effect"] = 'Spell_Frost_ChainsOfIce',
 	["Crippling Poison"] = 'Ability_PoisonSting',
+	["Silence"] = 'Spell_Shadow_ImpPhaseShift',
+	["Counterspell - Silenced"] = 'Spell_Frost_IceShock',
+	["Kick - Silenced"] = 'Ability_Kick',
+	["Blackout"] = 'Spell_Shadow_GatherShadows',
+	["Impact"] = 'Spell_Fire_MeteorStorm',
+	["Aftermath"] = 'Spell_Fire_Fire',
 }
 
 ccwatch_DR_CLASS = {
