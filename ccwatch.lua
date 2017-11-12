@@ -746,10 +746,10 @@ do
 end
 
 function Usage()
-	Print("Usage:")
-	Print("  lock | unlock")
-	Print("  invert")
-	Print("  growth (up | down)")
-	Print("  scale [0.5,3]")
-	Print("  alpha [0,1]")
+	Print('Usage:')
+	Print('  lock | unlock')
+	Print('  invert')
+	Print('  growth (up | down)')
+	Print('  scale [0.5,3]')
+	Print('  alpha [0,1]')
 end
