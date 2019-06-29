@@ -3,14 +3,14 @@ setfenv(1, setmetatable(_M, {__index=_G}))
 
 do
 	local f = CreateFrame'Frame'
-	f:SetScript('OnEvent', function()
-		_M[event](this)
+	f:SetScript('OnEvent', function(self, event, ...)
+		_M[event](self, ...)
 	end)
-	for _, event in {
+	for _, event in pairs{
 		'ADDON_LOADED',
 		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
 		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
-		'SPELLCAST_START', 'SPELLCAST_STOP', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
+		'SPELLCAST_START', 'SPELLCAST_STOP', 'SPELLCAST_SUCCESS', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
 		'UNIT_AURA', 'PLAYER_TARGET_CHANGED',
 	} do f:RegisterEvent(event) end
 end
@@ -352,7 +352,7 @@ do
 		'Your (.*) is parried by (.*)%.'
 	}
 	function CHAT_MSG_SPELL_SELF_DAMAGE()
-		for i, pattern in patterns do
+		for i, pattern in pairs(patterns) do
 			local _, _, effect, unit = strfind(arg1, pattern)
 			if i == 1 then
 				effect, unit = unit, effect
@@ -400,7 +400,7 @@ function AuraGone(unit, effect)
 end
 
 function ActivateDRTimer(effect, unit)
-	for k, v in ccwatch_DR_CLASS do
+	for k, v in pairs(ccwatch_DR_CLASS) do
 		if v == ccwatch_DR_CLASS[effect] and EffectActive(k, unit) then
 			return
 		end
@@ -429,7 +429,7 @@ function CHAT_MSG_COMBAT_HONOR_GAIN()
 end
 
 function PlaceTimers()
-	for _, timer in TIMERS do
+	for _, timer in pairs(TIMERS) do
 		if not timer.visible then
 			local up = ccwatch_settings.growth == 'up'
 			for i = (up and 1 or MAXBARS), (up and MAXBARS or 1), (up and 1 or -1) do
@@ -445,7 +445,7 @@ end
 
 function UpdateTimers()
 	local t = GetTime()
-	for k, timer in TIMERS do
+	for k, timer in pairs(TIMERS) do
 		if timer.expiration and t > timer.expiration then
 			StopTimer(k)
 			if ccwatch_DR_CLASS[timer.effect] and not timer.DR then
@@ -470,7 +470,7 @@ function StartTimer(effect, unit, duration, start)
 	local timer = TIMERS[key] or {}
 
 	if ccwatch_UNIQUENESS_CLASS[effect] then
-		for k, v in TIMERS do
+		for k, v in pairs(TIMERS) do
 			if not v.DR and ccwatch_UNIQUENESS_CLASS[v.effect] == ccwatch_UNIQUENESS_CLASS[effect] then
 				StopTimer(k)
 			end
@@ -516,7 +516,7 @@ function PLAYER_REGEN_ENABLED()
 			tremove(PENDING, i)
 		end
 	end
-	for k, timer in TIMERS do
+	for k, timer in pairs(TIMERS) do
 		if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
 			StopTimer(k)
 		end
@@ -537,7 +537,7 @@ function UnitDied(unit)
 			tremove(PENDING, i)
 		end
 	end
-	for k, timer in TIMERS do
+	for k, timer in pairs(TIMERS) do
 		if timer.unit == unit then
 			StopTimer(k)
 		end
@@ -559,12 +559,12 @@ end
 function UNIT_AURA()
 	if arg1 ~= 'target' then return end
 	local effects = TargetDebuffs()
-	for effect in TARGET_DEBUFFS do
+	for effect in pairs(TARGET_DEBUFFS) do
 		if not effects[effect] then
 			AuraGone(effect, TARGET_ID)
 		end
 	end
-	for effect in effects do
+	for effect in pairs(effects) do
 		if not TARGET_DEBUFFS[effect] then
 			for i = 1, getn(PENDING) do
 				if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_ID or ccwatch_AOE[PENDING[i].name]) then
@@ -615,7 +615,7 @@ do
 		if ACTION then
 			ACTION.targetChanged = true
 		end
-		for _, action in PENDING do
+		for _, action in pairs(PENDING) do
 			action.targetChanged = true
 		end
 	end
@@ -648,7 +648,7 @@ do
 	function ADDON_LOADED()
 		if arg1 ~= 'ccwatch' then return end
 
-		for k, v in defaultSettings do
+		for k, v in pairs(defaultSettings) do
 			if ccwatch_settings[k] == nil then
 				ccwatch_settings[k] = v
 			end
