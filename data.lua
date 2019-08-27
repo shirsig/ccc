@@ -1,4 +1,6 @@
-ccwatch_ITEM_ACTION = {
+setfenv(1, setmetatable(select(2, ...), {__index=_G}))
+
+ITEM_ACTION = {
 	["Goblin Rocket Helmet"] = "reckless charge",
 	["Horned Viking Helmet"] = "reckless charge",
 	["Slumber Sand"] = "sleep(rank 1)",
@@ -8,7 +10,7 @@ ccwatch_ITEM_ACTION = {
 	["Really Sticky Glue"] = "trap",
 }
 
-ccwatch_ACTION = {
+ACTIONS = {
 	["riposte"] = {effect="Riposte", duration={6}},
 	["frostbolt"] = {effect="Frostbolt", duration={5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9}},
 	["cone of cold"] = {effect="Cone of Cold", duration={8}},
@@ -63,7 +65,7 @@ ccwatch_ACTION = {
 	["kick"] = {effect="Kick - Silenced", duration={2}},
 }
 
-ccwatch_PROJECTILE = {
+PROJECTILE = {
 	["death coil"] = true,
 	["frostbolt"] = true,
 	["wyvern sting"] = true,
@@ -72,7 +74,7 @@ ccwatch_PROJECTILE = {
 	["trap"] = true,
 }
 
-ccwatch_AOE = {
+AOE = {
 	["cone of cold"] = true,
 	["blast wave"] = true,
 	["piercing howl"] = true,
@@ -82,7 +84,7 @@ ccwatch_AOE = {
 	["war stomp"] = true,
 }
 
-ccwatch_COMBO = {
+COMBO = {
 	["kidney shot"] = 1,
 }
 
@@ -91,7 +93,7 @@ local function talentRank(i, j)
 	return rank
 end
 
-ccwatch_BONUS = {
+BONUS = {
 	["gouge"] = function()
 		return talentRank(2, 1) * .5
 	end,
@@ -109,7 +111,7 @@ ccwatch_BONUS = {
 	end,
 }
 
-ccwatch_ICON = {
+ICON = {
 	["Riposte"] = 'Ability_Warrior_Challange',
 	["Frostbolt"] = 'Spell_Frost_FrostBolt02',
 	["Cone of Cold"] = 'Spell_Frost_Glacier',
@@ -171,7 +173,7 @@ ccwatch_ICON = {
 	["Aftermath"] = 'Spell_Fire_Fire',
 }
 
-ccwatch_DR_CLASS = {
+DR_CLASS = {
 	["Fear"] = 1,
 	["Howl of Terror"] = 1,
 	["Seduction"] = 1,
@@ -203,7 +205,7 @@ ccwatch_DR_CLASS = {
 	["Frost Shock"] = 12,
 }
 
-ccwatch_UNIQUENESS_CLASS = {
+UNIQUENESS_CLASS = {
 	["Polymorph"] = 1,
 	["Polymorph: Turtle"] = 1,
 	["Polymorph: Pig"] = 1,
@@ -225,7 +227,7 @@ ccwatch_UNIQUENESS_CLASS = {
 	["Scare Beast"] = 9,
 }
 
-ccwatch_HEARTBEAT = {
+HEARTBEAT = {
 	["Scare Beast"] = true,
 	["Freezing Trap"] = true,
 	["Entangling Roots"] = true,

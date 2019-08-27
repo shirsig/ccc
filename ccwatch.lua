@@ -1,17 +1,26 @@
-local _G, _M = getfenv(0), {}
-setfenv(1, setmetatable(_M, {__index=_G}))
+setfenv(1, setmetatable(select(2, ...), {__index=_G}))
 
 do
 	local f = CreateFrame'Frame'
 	f:SetScript('OnEvent', function(self, event, ...)
-		_M[event](self, ...)
+		getfenv(1)[event](self, ...)
 	end)
 	for _, event in pairs{
 		'ADDON_LOADED',
-		'CHAT_MSG_COMBAT_HONOR_GAIN', 'CHAT_MSG_COMBAT_HOSTILE_DEATH', 'PLAYER_REGEN_ENABLED',
-		'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE', 'CHAT_MSG_SPELL_AURA_GONE_OTHER', 'CHAT_MSG_SPELL_BREAK_AURA',
-		'SPELLCAST_START', 'SPELLCAST_STOP', 'SPELLCAST_SUCCESS', 'CHAT_MSG_SPELL_SELF_DAMAGE', 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
-		'UNIT_AURA', 'PLAYER_TARGET_CHANGED',
+		'CHAT_MSG_COMBAT_HONOR_GAIN',
+		-- 'CHAT_MSG_COMBAT_HOSTILE_DEATH',
+		-- 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
+		'PLAYER_REGEN_ENABLED',
+		-- 'CHAT_MSG_SPELL_AURA_GONE_OTHER',
+		-- 'CHAT_MSG_SPELL_BREAK_AURA',
+		-- 'SPELLCAST_START',
+		-- 'SPELLCAST_STOP',
+		'UNIT_SPELLCAST_SUCCEEDED',
+		'COMBAT_LOG_EVENT_UNFILTERED',
+		-- 'CHAT_MSG_SPELL_SELF_DAMAGE',
+		-- 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
+		'UNIT_AURA',
+		'PLAYER_TARGET_CHANGED',
 	} do f:RegisterEvent(event) end
 end
 
@@ -136,7 +145,7 @@ do
 			end
 		else
 			bar:SetAlpha(ccwatch_settings.alpha)
-			bar.icon:SetTexture([[Interface\Icons\]] .. (ccwatch_ICON[timer.effect] or 'INV_Misc_QuestionMark'))
+			bar.icon:SetTexture([[Interface\Icons\]] .. (ICON[timer.effect] or 'INV_Misc_QuestionMark'))
 			bar.text:SetText(gsub(timer.unit, ':.*', ''))
 
 			local fraction
@@ -205,10 +214,10 @@ do
 
 	function DiminishedDuration(unit, effect, full_duration)
 		if IsPlayer(unit) or IsPet(unit) then
-			local class = ccwatch_DR_CLASS[effect]
+			local class = DR_CLASS[effect]
 			local timer = class and TIMERS[class .. '@' .. unit]
 			local DR = IsPlayer(unit) and timer and timer.DR or 0
-			return ccwatch_HEARTBEAT[effect] and min(limit[DR], full_duration * factor[DR]) or full_duration * factor[DR]
+			return HEARTBEAT[effect] and min(limit[DR], full_duration * factor[DR]) or full_duration * factor[DR]
 		else
 			return full_duration
 		end
@@ -237,7 +246,7 @@ do
 			FREEZING_TRAP_RANK = rank
 		end
 		if not cast then
-			ACTION = TARGET_ID and ccwatch_ACTION[name] and {name=name, rank=rank, unit=TARGET_ID}
+			ACTION = TARGET_ID and ACTIONS[name] and {name=name, rank=rank, unit=TARGET_ID}
 		end
 	end
 
@@ -275,7 +284,7 @@ do
 		local orig = UseInventoryItem
 		function _G.UseInventoryItem(slot)
 			local _, _, name = strfind(GetInventoryItemLink('player', slot) or '', '%[(.*)%]')
-			startAction(ccwatch_ITEM_ACTION[name] or name)
+			startAction(ITEM_ACTION[name] or name)
 			return orig(slot)
 		end
 	end
@@ -284,7 +293,7 @@ do
 		local orig = UseContainerItem
 		function _G.UseContainerItem(bag, slot, onself)
 			local _, _, name = strfind(GetContainerItemLink(bag, slot) or '', '%[(.*)%]')
-			startAction(ccwatch_ITEM_ACTION[name] or name)
+			startAction(ITEM_ACTION[name] or name)
 			return orig(bag, slot, onself)
 		end
 	end
@@ -313,14 +322,14 @@ do
 	function SPELLCAST_STOP()
 		cast = nil
 		if ACTION then
-			ACTION.time = GetTime() + (ccwatch_PROJECTILE[ACTION.name] and 1.5 or 0)
-			ACTION.effect = ccwatch_ACTION[ACTION.name].effect
-			ACTION.duration = ccwatch_ACTION[ACTION.name].duration[min(ACTION.rank or 1, getn(ccwatch_ACTION[ACTION.name].duration))]
-			if ccwatch_COMBO[ACTION.name] then
-				ACTION.duration = ACTION.duration + ccwatch_COMBO[ACTION.name] * GetComboPoints()
+			ACTION.time = GetTime() + (PROJECTILE[ACTION.name] and 1.5 or 0)
+			ACTION.effect = ACTIONS[ACTION.name].effect
+			ACTION.duration = ACTIONS[ACTION.name].duration[min(ACTION.rank or 1, getn(ACTIONS[ACTION.name].duration))]
+			if COMBO[ACTION.name] then
+				ACTION.duration = ACTION.duration + COMBO[ACTION.name] * GetComboPoints()
 			end
-			if ccwatch_BONUS[ACTION.name] then
-				ACTION.duration = ACTION.duration + ccwatch_BONUS[ACTION.name]()
+			if BONUS[ACTION.name] then
+				ACTION.duration = ACTION.duration + BONUS[ACTION.name]()
 			end
 			tinsert(PENDING, ACTION)
 		end
@@ -331,7 +340,7 @@ end
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
 		if GetTime() >= PENDING[i].time + DELAY then
-			if not ccwatch_AOE[PENDING[i].name] and (PENDING[i].targetChanged or TARGET_DEBUFFS[PENDING[i].effect]) then
+			if not AOE[PENDING[i].name] and (PENDING[i].targetChanged or TARGET_DEBUFFS[PENDING[i].effect]) then
 				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].duration, PENDING[i].time)
 			end
 			tremove(PENDING, i)
@@ -394,18 +403,18 @@ end
 function AuraGone(unit, effect)
 	AbortCast(effect, unit)
 	StopTimer(effect .. '@' .. unit)
-	if ccwatch_DR_CLASS[effect] then
+	if DR_CLASS[effect] then
 		ActivateDRTimer(effect, unit)
 	end
 end
 
 function ActivateDRTimer(effect, unit)
-	for k, v in pairs(ccwatch_DR_CLASS) do
-		if v == ccwatch_DR_CLASS[effect] and EffectActive(k, unit) then
+	for k, v in pairs(DR_CLASS) do
+		if v == DR_CLASS[effect] and EffectActive(k, unit) then
 			return
 		end
 	end
-	local timer = TIMERS[ccwatch_DR_CLASS[effect] .. '@' .. unit]
+	local timer = TIMERS[DR_CLASS[effect] .. '@' .. unit]
 	if timer then
 		timer.start = GetTime()
 		timer.expiration = timer.start + 15
@@ -448,7 +457,7 @@ function UpdateTimers()
 	for k, timer in pairs(TIMERS) do
 		if timer.expiration and t > timer.expiration then
 			StopTimer(k)
-			if ccwatch_DR_CLASS[timer.effect] and not timer.DR then
+			if DR_CLASS[timer.effect] and not timer.DR then
 				ActivateDRTimer(timer.effect, timer.unit)
 			end
 		end
@@ -469,9 +478,9 @@ function StartTimer(effect, unit, duration, start)
 	local key = effect .. '@' .. unit
 	local timer = TIMERS[key] or {}
 
-	if ccwatch_UNIQUENESS_CLASS[effect] then
+	if UNIQUENESS_CLASS[effect] then
 		for k, v in pairs(TIMERS) do
-			if not v.DR and ccwatch_UNIQUENESS_CLASS[v.effect] == ccwatch_UNIQUENESS_CLASS[effect] then
+			if not v.DR and UNIQUENESS_CLASS[v.effect] == UNIQUENESS_CLASS[effect] then
 				StopTimer(k)
 			end
 		end
@@ -484,7 +493,7 @@ function StartTimer(effect, unit, duration, start)
 	timer.start = start or GetTime()
 	timer.expiration = timer.start + duration
 
-	if IsPlayer(unit) and ccwatch_DR_CLASS[effect] then
+	if IsPlayer(unit) and DR_CLASS[effect] then
 		StartDR(effect, unit)
 	end
 
@@ -494,7 +503,7 @@ end
 
 function StartDR(effect, unit)
 
-	local key = ccwatch_DR_CLASS[effect] .. '@' .. unit
+	local key = DR_CLASS[effect] .. '@' .. unit
 	local timer = TIMERS[key] or {}
 
 	if not timer.DR or timer.DR < 3 then
@@ -567,7 +576,7 @@ function UNIT_AURA()
 	for effect in pairs(effects) do
 		if not TARGET_DEBUFFS[effect] then
 			for i = 1, getn(PENDING) do
-				if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_ID or ccwatch_AOE[PENDING[i].name]) then
+				if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_ID or AOE[PENDING[i].name]) then
 					StartTimer(effect, TARGET_ID, PENDING[i].duration)
 					tremove(PENDING, i)
 					break
@@ -662,11 +671,11 @@ do
 		BARS:SetMovable(true)
 		BARS:SetUserPlaced(true)
 		BARS:SetClampedToScreen(true)
-		BARS:SetScript('OnMouseDown', function()
-			this:StartMoving()
+		BARS:SetScript('OnMouseDown', function(self)
+			self:StartMoving()
 		end)
-		BARS:SetScript('OnMouseUp', function()
-			this:StopMovingOrSizing()
+		BARS:SetScript('OnMouseUp', function(self)
+			self:StopMovingOrSizing()
 		end)
 		BARS:SetPoint('CENTER', 0, 150)
 		for i = 1, MAXBARS do
