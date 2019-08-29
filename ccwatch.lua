@@ -7,24 +7,18 @@ do
 	end)
 	for _, event in pairs{
 		'ADDON_LOADED',
-		'CHAT_MSG_COMBAT_HONOR_GAIN',
+		-- 'CHAT_MSG_COMBAT_HONOR_GAIN',
 		-- 'CHAT_MSG_COMBAT_HOSTILE_DEATH',
-		-- 'CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE',
-		'PLAYER_REGEN_ENABLED',
+		'COMBAT_LOG_EVENT_UNFILTERED',
+		-- 'PLAYER_REGEN_ENABLED',
 		-- 'CHAT_MSG_SPELL_AURA_GONE_OTHER',
 		-- 'CHAT_MSG_SPELL_BREAK_AURA',
-		-- 'SPELLCAST_START',
-		-- 'SPELLCAST_STOP',
+		'UNIT_SPELLCAST_SENT',
 		'UNIT_SPELLCAST_SUCCEEDED',
-		-- 'COMBAT_LOG_EVENT_UNFILTERED',
-		-- 'CHAT_MSG_SPELL_SELF_DAMAGE',
-		-- 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
 		'UNIT_AURA',
-		-- 'PLAYER_TARGET_CHANGED',
+		'PLAYER_TARGET_CHANGED',
 	} do f:RegisterEvent(event) end
 end
-
-CreateFrame('GameTooltip', 'ccwatch_Tooltip', nil, 'GameTooltipTemplate')
 
 _G.ccwatch_settings = {}
 
@@ -32,11 +26,10 @@ local WIDTH = 170
 local HEIGHT = 16
 local MAXBARS = 11
 
-local DELAY = .5
+local DELAY = 4
 
 local BARS, TIMERS, PENDING = {}, {}, {}
-local TARGET_ID, TARGET_DEBUFFS
-TARGET_DEBUFFS = {} -- TODO retail
+local TARGET_GUID, TARGET_DEBUFFS
 
 local FREEZING_TRAP_RANK
 
@@ -147,7 +140,7 @@ do
 		else
 			bar:SetAlpha(ccwatch_settings.alpha)
 			bar.icon:SetTexture([[Interface\Icons\]] .. (ICON[timer.effect] or 'INV_Misc_QuestionMark'))
-			bar.text:SetText(gsub(timer.unit, ':.*', ''))
+			bar.text:SetText(timer.unit_name)
 
 			local fraction
 			if timer.start then
@@ -229,9 +222,10 @@ function TargetDebuffs()
 	local debuffs = {}
 	local i = 1
 	while UnitDebuff('target', i) do
-		ccwatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-		ccwatch_Tooltip:SetUnitDebuff('target', i)
-		debuffs[ccwatch_TooltipTextLeft1:GetText()] = true
+		local debuff, _, _, _, _, _, source = UnitDebuff('target', i)
+		if source == 'player' then
+			debuffs[debuff] = true
+		end
 		i = i + 1
 	end
 	return debuffs
@@ -255,87 +249,55 @@ end
 -- 	end
 -- end
 
--- function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
--- 	for name, reason in string.gmatch(arg1, 'You fail to %a+ (.*): (.*)') do
--- 		if name == cast and reason ~= 'Another action is in progress.' then
--- 			cast = nil
--- 			ACTION_OLD = nil
--- 		end
--- 		if not ACTION_OLD then
--- 			for i = getn(PENDING), 1, -1 do
--- 				if PENDING[i].name == strlower(name) then
--- 					tremove(PENDING, i)
--- 					break
--- 				end
--- 			end
--- 		end
--- 	end
--- end
+do
+	local TARGET = {}
+	local TARGET_NAME = {}
 
-function UNIT_SPELLCAST_SUCCEEDED(unit, _, spell)
-	local name = strlower(GetSpellInfo(spell))
-	if not ACTION[name] then
-		return
+	function UNIT_SPELLCAST_SENT(_, _, cast_guid)
+		TARGET[cast_guid] = TARGET_GUID
+		TARGET_NAME[cast_guid] = UnitName'target'
 	end
-	local _, _, rank = strfind(GetSpellSubtext(spell) or '', 'Rank ([1-9]%d*)')
-	if name == 'freezing trap' then
-		FREEZING_TRAP_RANK = rank
+	function UNIT_SPELLCAST_SUCCEEDED(unit, cast_guid, spell)
+		-- TODO only fires for unit player in classic?
+		local name = strlower(GetSpellInfo(spell))
+		if not ACTION[name] then
+			return
+		end
+		local _, _, rank = strfind(GetSpellSubtext(spell) or '', 'Rank ([1-9]%d*)')
+		if name == 'freezing trap' then
+			FREEZING_TRAP_RANK = rank
+		end
+		local duration = ACTION[name].duration[min(rank or 1, getn(ACTION[name].duration))]
+		if COMBO[name] then
+			duration = duration + COMBO[name] * GetComboPoints()
+		end
+		if BONUS[name] then
+			duration = duration + BONUS[name]()
+		end
+		local guid = TARGET[cast_guid]
+		TARGET[cast_guid] = nil -- TODO would also have to do this when it fails
+		tinsert(PENDING, {
+			name = name,
+			rank = rank,
+			unit = guid,
+			unit_name = TARGET_NAME[cast_guid],
+			time = GetTime() + (PROJECTILE[name] and 1.5 or 0),
+			effect = ACTION[name].effect,
+			duration = duration,
+		})
 	end
-	local duration = ACTION[name].duration[min(rank or 1, getn(ACTION[name].duration))]
-	if COMBO[name] then
-		duration = duration + COMBO[name] * GetComboPoints()
-	end
-	if BONUS[name] then
-		duration = duration + BONUS[name]()
-	end
-	tinsert(PENDING, {
-		name = name,
-		rank = rank,
-		unit = unit,
-		time = GetTime() + (PROJECTILE[name] and 1.5 or 0),
-		effect = ACTION[name].effect,
-		duration = duration,
-	})
 end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
 		if GetTime() >= PENDING[i].time + DELAY then
 			if not AOE[PENDING[i].name] then -- TODO retail and (PENDING[i].targetChanged or TARGET_DEBUFFS[PENDING[i].effect]) then
-				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].duration, PENDING[i].time)
+				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].unit_name, PENDING[i].duration, PENDING[i].time)
 			end
 			tremove(PENDING, i)
 		end
 	end
 end)
-
-do
-	local patterns = {
-		'(.*) is immune to your (.*)%.', -- TODO does it exist?
-		'Your (.*) failed. (.*) is immune.',
-		'Your (.*) missed (.*)%.',
-		'Your (.*) was resisted by (.*)%.',
-		'Your (.*) was evaded by (.*)%.',
-		'Your (.*) was dodged by (.*)%.',
-		'Your (.*) was deflected by (.*)%.',
-		'Your (.*) is reflected back by (.*)%.',
-		'Your (.*) is parried by (.*)%.'
-	}
-	function CHAT_MSG_SPELL_SELF_DAMAGE()
-		for i, pattern in pairs(patterns) do
-			local _, _, effect, unit = strfind(arg1, pattern)
-			if i == 1 then
-				effect, unit = unit, effect
-			end
-			for i = 1, getn(PENDING) do
-				if PENDING[i].effect == effect and PENDING[i].unit == unit then
-					tremove(PENDING, i)
-					break
-				end
-			end
-		end
-	end
-end
 
 function AbortCast(effect, unit)
 	for i = getn(PENDING), 1, -1 do
@@ -345,24 +307,24 @@ function AbortCast(effect, unit)
 	end
 end
 
-function CHAT_MSG_SPELL_AURA_GONE_OTHER()
-	for effect, unit in string.gmatch(arg1, '(.+) fades from (.+)%.') do
-		if IsPlayer(unit) then
-			AuraGone(unit, effect)
-		end
-	end
-end
+-- function CHAT_MSG_SPELL_AURA_GONE_OTHER()
+-- 	for effect, unit in string.gmatch(arg1, '(.+) fades from (.+)%.') do
+-- 		if IsPlayer(unit) then
+-- 			AuraGone(unit, effect)
+-- 		end
+-- 	end
+-- end
 
-function CHAT_MSG_SPELL_BREAK_AURA()
-	for unit, effect in string.gmatch(arg1, "(.+)'s (.+) is removed%.") do
-		if IsPlayer(unit) then
-			AuraGone(unit, effect)
-		end
-	end
-end
+-- function CHAT_MSG_SPELL_BREAK_AURA()
+-- 	for unit, effect in string.gmatch(arg1, "(.+)'s (.+) is removed%.") do
+-- 		if IsPlayer(unit) then
+-- 			AuraGone(unit, effect)
+-- 		end
+-- 	end
+-- end
 
 function AuraGone(unit, effect)
-	AbortCast(effect, unit)
+	-- AbortCast(effect, unit) TODO retail
 	StopTimer(effect .. '@' .. unit)
 	if DR_CLASS[effect] then
 		ActivateDRTimer(effect, unit)
@@ -387,7 +349,7 @@ function CHAT_MSG_COMBAT_HOSTILE_DEATH()
 		if IsPlayer(unit) then
 			UnitDied(unit)
 		elseif unit == UnitName'target' and UnitIsDead'target' then
-			UnitDied(TARGET_ID)
+			UnitDied(TARGET_GUID)
 		end
 	end
 end
@@ -429,8 +391,7 @@ function EffectActive(effect, unit)
 	return TIMERS[effect .. '@' .. unit] and true or false
 end
 
-function StartTimer(effect, unit, duration, start)
-	p.kek(effect, unit, duration, start)
+function StartTimer(effect, unit, unit_name, duration, start)
 	duration = DiminishedDuration(unit, effect, duration)
 
 	if duration == 0 then
@@ -452,6 +413,7 @@ function StartTimer(effect, unit, duration, start)
 
 	timer.effect = effect
 	timer.unit = unit
+	timer.unit_name = unit_name
 	timer.start = start or GetTime()
 	timer.expiration = timer.start + duration
 
@@ -515,31 +477,39 @@ function UnitDied(unit)
 	end
 end
 
-function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
-	for unit, effect in string.gmatch(arg1, '(.+) is afflicted by (.+)%.') do
+function COMBAT_LOG_EVENT_UNFILTERED()
+	local _, event, _, source_guid, _, _, _, guid, _, _, _, _, effect = CombatLogGetCurrentEventInfo()
+
+	if source_guid ~= UnitGUID'player' then
+		return
+	end
+
+	if event == 'UNIT_AURA_APPLIED' then
 		for i = 1, getn(PENDING) do
-			if PENDING[i].effect == effect and PENDING[i].unit == unit then
-				StartTimer(effect, unit, PENDING[i].duration)
+			if PENDING[i].effect == effect and PENDING[i].unit == guid then
+				StartTimer(effect, guid, PENDING[i].unit_name, PENDING[i].duration)
 				tremove(PENDING, i)
 				break
 			end
 		end
+	elseif event == 'UNIT_AURA_REMOVED' then
+		AuraGone(effect, guid)
 	end
 end
 
-function UNIT_AURA()
-	if arg1 ~= 'target' then return end
+function UNIT_AURA(unit)
+	if unit ~= 'target' then return end
 	local effects = TargetDebuffs()
 	for effect in pairs(TARGET_DEBUFFS) do
 		if not effects[effect] then
-			AuraGone(effect, TARGET_ID)
+			AuraGone(effect, TARGET_GUID)
 		end
 	end
 	for effect in pairs(effects) do
-		if not TARGET_DEBUFFS[effect] then
+		if not TARGET_DEBUFFS[effect] or TARGET_DEBUFFS[effect] ~= effects[effect] then
 			for i = 1, getn(PENDING) do
-				if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_ID or AOE[PENDING[i].name]) then
-					StartTimer(effect, TARGET_ID, PENDING[i].duration)
+				if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_GUID or AOE[PENDING[i].name]) then
+					StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, PENDING[i].duration)
 					tremove(PENDING, i)
 					break
 				end
@@ -547,22 +517,22 @@ function UNIT_AURA()
 			local _, class = UnitClass'player'
 			if effect == "Freezing Trap Effect" and FREEZING_TRAP_RANK then
 				local _, _, _, _, rank = GetTalentInfo(3, 7)
-				StartTimer(effect, TARGET_ID, (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15))
+				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15))
 			elseif effect == "Seduction" and class == 'WARLOCK' then
 				local _, _, _, _, rank = GetTalentInfo(2, 7)
-				StartTimer(effect, TARGET_ID, 15 * (1 + rank * .1))
+				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, 15 * (1 + rank * .1))
 			elseif effect == "Crippling Poison" and class == 'ROGUE' then
 				local _, _, _, _, rank = GetTalentInfo(2, 7)
-				StartTimer(effect, TARGET_ID, 12)
+				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, 12)
 			elseif effect == "Blackout" and class == 'PRIEST' then
 				local _, _, _, _, rank = GetTalentInfo(2, 7)
-				StartTimer(effect, TARGET_ID, 3)
+				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, 3)
 			elseif effect == "Impact" and class == 'MAGE' then
 				local _, _, _, _, rank = GetTalentInfo(2, 7)
-				StartTimer(effect, TARGET_ID, 2)
+				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, 2)
 			elseif effect == "Aftermath" and class == 'WARLOCK' then
 				local _, _, _, _, rank = GetTalentInfo(2, 7)
-				StartTimer(effect, TARGET_ID, 5)
+				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, 5)
 			end
 		end
 	end
@@ -572,24 +542,24 @@ end
 do
 	local unitType = {}
 
-	-- function PLAYER_TARGET_CHANGED()
-	-- 	TARGET_DEBUFFS = TargetDebuffs()
-	-- 	local unit = UnitName'target'
-	-- 	TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
-	-- 	if unit then
-	-- 		if UnitIsPlayer'target' then
-	-- 			unitType[unit] = 1
-	-- 		elseif UnitPlayerControlled'target' then
-	-- 			unitType[unit] = 2
-	-- 		end
-	-- 	end
-	-- 	if ACTION_OLD then
-	-- 		ACTION_OLD.targetChanged = true
-	-- 	end
-	-- 	for _, action in pairs(PENDING) do
-	-- 		action.targetChanged = true
-	-- 	end
-	-- end
+	function PLAYER_TARGET_CHANGED()
+		TARGET_DEBUFFS = TargetDebuffs()
+		local unit = UnitName'target'
+		TARGET_GUID = UnitGUID'target'
+		if unit then
+			if UnitIsPlayer'target' then
+				unitType[unit] = 1
+			elseif UnitPlayerControlled'target' then
+				unitType[unit] = 2
+			end
+		end
+		-- if ACTION_OLD then
+		-- 	ACTION_OLD.targetChanged = true
+		-- end
+		for _, action in pairs(PENDING) do
+			action.targetChanged = true
+		end
+	end
 
 	function IsPlayer(unit)
 		return unitType[unit] == 1
