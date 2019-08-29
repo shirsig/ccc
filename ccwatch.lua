@@ -181,7 +181,7 @@ end
 
 function UnlockBars()
 	LOCKED = false
-	BARS:EnableMouse(1)
+	BARS:EnableMouse(true)
 	for i = 1, MAXBARS do
 		local f = BARS[i]
 		f:SetAlpha(ccwatch_settings.alpha)
@@ -196,7 +196,7 @@ end
 
 function LockBars()
 	LOCKED = true
-	BARS:EnableMouse(0)
+	BARS:EnableMouse(false)
 	for i = 1, MAXBARS do
 		BARS[i]:SetAlpha(0)
 	end
