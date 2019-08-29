@@ -494,6 +494,13 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		end
 	elseif event == 'UNIT_AURA_REMOVED' then
 		AuraGone(effect, guid)
+	elseif event == 'SPELL_MISSED' then --TODO SPELL_ and not MISSED
+		for i = 1, getn(PENDING) do
+			if PENDING[i].effect == effect and PENDING[i].unit == guid then
+				tremove(PENDING, i)
+				break
+			end
+		end
 	end
 end
 
