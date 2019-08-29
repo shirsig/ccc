@@ -10,7 +10,7 @@ ITEM_ACTION = {
 	["Really Sticky Glue"] = "trap",
 }
 
-ACTIONS = {
+ACTION = {
 	["riposte"] = {effect="Riposte", duration={6}},
 	["frostbolt"] = {effect="Frostbolt", duration={5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9}},
 	["cone of cold"] = {effect="Cone of Cold", duration={8}},

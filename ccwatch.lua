@@ -3,7 +3,7 @@ setfenv(1, setmetatable(select(2, ...), {__index=_G}))
 do
 	local f = CreateFrame'Frame'
 	f:SetScript('OnEvent', function(self, event, ...)
-		getfenv(1)[event](self, ...)
+		getfenv(1)[event](...)
 	end)
 	for _, event in pairs{
 		'ADDON_LOADED',
@@ -16,11 +16,11 @@ do
 		-- 'SPELLCAST_START',
 		-- 'SPELLCAST_STOP',
 		'UNIT_SPELLCAST_SUCCEEDED',
-		'COMBAT_LOG_EVENT_UNFILTERED',
+		-- 'COMBAT_LOG_EVENT_UNFILTERED',
 		-- 'CHAT_MSG_SPELL_SELF_DAMAGE',
 		-- 'CHAT_MSG_SPELL_FAILED_LOCALPLAYER',
 		'UNIT_AURA',
-		'PLAYER_TARGET_CHANGED',
+		-- 'PLAYER_TARGET_CHANGED',
 	} do f:RegisterEvent(event) end
 end
 
@@ -35,7 +35,7 @@ local MAXBARS = 11
 local DELAY = .5
 
 local BARS, TIMERS, PENDING = {}, {}, {}
-local ACTION, TARGET_ID, TARGET_DEBUFFS
+local ACTION_OLD, TARGET_ID, TARGET_DEBUFFS
 
 local FREEZING_TRAP_RANK
 
@@ -236,105 +236,62 @@ function TargetDebuffs()
 	return debuffs
 end
 
-do
-	local cast
+-- do
+-- 	local orig = UseInventoryItem
+-- 	function _G.UseInventoryItem(slot)
+-- 		local _, _, name = strfind(GetInventoryItemLink('player', slot) or '', '%[(.*)%]')
+-- 		startAction(ITEM_ACTION[name] or name)
+-- 		return orig(slot)
+-- 	end
+-- end
 
-	local function startAction(str)
-		local _, _, name, rank = strfind(str or '', '(.*)%([Rr][Aa][Nn][Kk] ([1-9]%d*)%)')
-		name, rank = strlower(name or str or ''), tonumber(rank)
-		if name == 'freezing trap' then
-			FREEZING_TRAP_RANK = rank
-		end
-		if not cast then
-			ACTION = TARGET_ID and ACTIONS[name] and {name=name, rank=rank, unit=TARGET_ID}
-		end
-	end
+-- do
+-- 	local orig = UseContainerItem
+-- 	function _G.UseContainerItem(bag, slot, onself)
+-- 		local _, _, name = strfind(GetContainerItemLink(bag, slot) or '', '%[(.*)%]')
+-- 		startAction(ITEM_ACTION[name] or name)
+-- 		return orig(bag, slot, onself)
+-- 	end
+-- end
 
-	do
-		local orig = UseAction
-		function _G.UseAction(slot, clicked, onself)
-			if HasAction(slot) and not GetActionText(slot) then
-				ccwatch_Tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-				ccwatch_TooltipTextRight1:SetText()
-				ccwatch_Tooltip:SetAction(slot)
-				startAction(ccwatch_TooltipTextLeft1:GetText() .. '(' .. (ccwatch_TooltipTextRight1:GetText() or 'rank 1') .. ')')
-			end
-			return orig(slot, clicked, onself)
-		end
-	end
+-- function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
+-- 	for name, reason in string.gfind(arg1, 'You fail to %a+ (.*): (.*)') do
+-- 		if name == cast and reason ~= 'Another action is in progress.' then
+-- 			cast = nil
+-- 			ACTION_OLD = nil
+-- 		end
+-- 		if not ACTION_OLD then
+-- 			for i = getn(PENDING), 1, -1 do
+-- 				if PENDING[i].name == strlower(name) then
+-- 					tremove(PENDING, i)
+-- 					break
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
 
-	do
-		local orig = CastSpell
-		function _G.CastSpell(index, booktype)
-			local name, rankText = GetSpellName(index, booktype)
-			startAction(name .. '(' .. (rankText ~= '' and rankText or 'rank 1') .. ')')
-			return orig(index, booktype)
-		end
+function UNIT_SPELLCAST_SUCCEEDED(unit, _, spell)
+	local name, rank = GetSpellInfo(spell)
+	if name == 'freezing trap' then
+		FREEZING_TRAP_RANK = rank
 	end
-
-	do
-		local orig = CastSpellByName
-		function _G.CastSpellByName(str, onself)
-			startAction(str)
-			return orig(str, onself)
-		end
+	name = strlower(name)
+	local duration = ACTION[name].duration[min(rank, getn(ACTION[name].duration))]
+	if COMBO[name] then
+		duration = duration + COMBO[name] * GetComboPoints()
 	end
-
-	do
-		local orig = UseInventoryItem
-		function _G.UseInventoryItem(slot)
-			local _, _, name = strfind(GetInventoryItemLink('player', slot) or '', '%[(.*)%]')
-			startAction(ITEM_ACTION[name] or name)
-			return orig(slot)
-		end
+	if BONUS[name] then
+		duration = duration + BONUS[name]()
 	end
-
-	do
-		local orig = UseContainerItem
-		function _G.UseContainerItem(bag, slot, onself)
-			local _, _, name = strfind(GetContainerItemLink(bag, slot) or '', '%[(.*)%]')
-			startAction(ITEM_ACTION[name] or name)
-			return orig(bag, slot, onself)
-		end
-	end
-
-	function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
-		for name, reason in string.gfind(arg1, 'You fail to %a+ (.*): (.*)') do
-			if name == cast and reason ~= 'Another action is in progress.' then
-				cast = nil
-				ACTION = nil
-			end
-			if not ACTION then
-				for i = getn(PENDING), 1, -1 do
-					if PENDING[i].name == strlower(name) then
-						tremove(PENDING, i)
-						break
-					end
-				end
-			end
-		end
-	end
-
-	function SPELLCAST_START()
-		cast = arg1
-	end
-
-	function SPELLCAST_STOP()
-		cast = nil
-		if ACTION then
-			ACTION.time = GetTime() + (PROJECTILE[ACTION.name] and 1.5 or 0)
-			ACTION.effect = ACTIONS[ACTION.name].effect
-			ACTION.duration = ACTIONS[ACTION.name].duration[min(ACTION.rank or 1, getn(ACTIONS[ACTION.name].duration))]
-			if COMBO[ACTION.name] then
-				ACTION.duration = ACTION.duration + COMBO[ACTION.name] * GetComboPoints()
-			end
-			if BONUS[ACTION.name] then
-				ACTION.duration = ACTION.duration + BONUS[ACTION.name]()
-			end
-			tinsert(PENDING, ACTION)
-		end
-		ACTION = nil
-	end
+	tinsert(PENDING, {
+		name = name,
+		rank = rank,
+		unit = unit,
+		time = GetTime() + (PROJECTILE[name] and 1.5 or 0),
+		effect = ACTION[name].effect,
+		duration = duration,
+	})
 end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
@@ -610,24 +567,24 @@ end
 do
 	local unitType = {}
 
-	function PLAYER_TARGET_CHANGED()
-		TARGET_DEBUFFS = TargetDebuffs()
-		local unit = UnitName'target'
-		TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
-		if unit then
-			if UnitIsPlayer'target' then
-				unitType[unit] = 1
-			elseif UnitPlayerControlled'target' then
-				unitType[unit] = 2
-			end
-		end
-		if ACTION then
-			ACTION.targetChanged = true
-		end
-		for _, action in pairs(PENDING) do
-			action.targetChanged = true
-		end
-	end
+	-- function PLAYER_TARGET_CHANGED()
+	-- 	TARGET_DEBUFFS = TargetDebuffs()
+	-- 	local unit = UnitName'target'
+	-- 	TARGET_ID = unit and (UnitIsPlayer'target' and unit or unit .. ':' .. UnitLevel'target' .. ':' .. UnitSex'target')
+	-- 	if unit then
+	-- 		if UnitIsPlayer'target' then
+	-- 			unitType[unit] = 1
+	-- 		elseif UnitPlayerControlled'target' then
+	-- 			unitType[unit] = 2
+	-- 		end
+	-- 	end
+	-- 	if ACTION_OLD then
+	-- 		ACTION_OLD.targetChanged = true
+	-- 	end
+	-- 	for _, action in pairs(PENDING) do
+	-- 		action.targetChanged = true
+	-- 	end
+	-- end
 
 	function IsPlayer(unit)
 		return unitType[unit] == 1
@@ -654,7 +611,7 @@ do
 		alpha = .85,
 	}
 
-	function ADDON_LOADED()
+	function ADDON_LOADED(arg1)
 		if arg1 ~= 'ccwatch' then return end
 
 		for k, v in pairs(defaultSettings) do
