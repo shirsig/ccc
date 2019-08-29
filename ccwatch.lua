@@ -301,7 +301,7 @@ end
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
 		if GetTime() >= PENDING[i].time + DELAY then
-			if not AOE[PENDING[i].name] and (PENDING[i].targetChanged or TARGET_DEBUFFS[PENDING[i].effect]) then
+			if not AOE[PENDING[i].name] then -- TODO retail and (PENDING[i].targetChanged or TARGET_DEBUFFS[PENDING[i].effect]) then
 				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].duration, PENDING[i].time)
 			end
 			tremove(PENDING, i)
@@ -430,6 +430,7 @@ function EffectActive(effect, unit)
 end
 
 function StartTimer(effect, unit, duration, start)
+	p.kek(effect, unit, duration, start)
 	duration = DiminishedDuration(unit, effect, duration)
 
 	if duration == 0 then
