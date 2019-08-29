@@ -35,7 +35,8 @@ local MAXBARS = 11
 local DELAY = .5
 
 local BARS, TIMERS, PENDING = {}, {}, {}
-local ACTION_OLD, TARGET_ID, TARGET_DEBUFFS
+local TARGET_ID, TARGET_DEBUFFS
+TARGET_DEBUFFS = {} -- TODO retail
 
 local FREEZING_TRAP_RANK
 
@@ -255,7 +256,7 @@ end
 -- end
 
 -- function CHAT_MSG_SPELL_FAILED_LOCALPLAYER()
--- 	for name, reason in string.gfind(arg1, 'You fail to %a+ (.*): (.*)') do
+-- 	for name, reason in string.gmatch(arg1, 'You fail to %a+ (.*): (.*)') do
 -- 		if name == cast and reason ~= 'Another action is in progress.' then
 -- 			cast = nil
 -- 			ACTION_OLD = nil
@@ -272,12 +273,15 @@ end
 -- end
 
 function UNIT_SPELLCAST_SUCCEEDED(unit, _, spell)
-	local name, rank = GetSpellInfo(spell)
+	local name = strlower(GetSpellInfo(spell))
+	if not ACTION[name] then
+		return
+	end
+	local _, _, rank = strfind(GetSpellSubtext(spell) or '', 'Rank ([1-9]%d*)')
 	if name == 'freezing trap' then
 		FREEZING_TRAP_RANK = rank
 	end
-	name = strlower(name)
-	local duration = ACTION[name].duration[min(rank, getn(ACTION[name].duration))]
+	local duration = ACTION[name].duration[min(rank or 1, getn(ACTION[name].duration))]
 	if COMBO[name] then
 		duration = duration + COMBO[name] * GetComboPoints()
 	end
@@ -342,7 +346,7 @@ function AbortCast(effect, unit)
 end
 
 function CHAT_MSG_SPELL_AURA_GONE_OTHER()
-	for effect, unit in string.gfind(arg1, '(.+) fades from (.+)%.') do
+	for effect, unit in string.gmatch(arg1, '(.+) fades from (.+)%.') do
 		if IsPlayer(unit) then
 			AuraGone(unit, effect)
 		end
@@ -350,7 +354,7 @@ function CHAT_MSG_SPELL_AURA_GONE_OTHER()
 end
 
 function CHAT_MSG_SPELL_BREAK_AURA()
-	for unit, effect in string.gfind(arg1, "(.+)'s (.+) is removed%.") do
+	for unit, effect in string.gmatch(arg1, "(.+)'s (.+) is removed%.") do
 		if IsPlayer(unit) then
 			AuraGone(unit, effect)
 		end
@@ -379,7 +383,7 @@ function ActivateDRTimer(effect, unit)
 end
 
 function CHAT_MSG_COMBAT_HOSTILE_DEATH()
-	for unit in string.gfind(arg1, '(.+) dies') do -- TODO does not work when xp is gained
+	for unit in string.gmatch(arg1, '(.+) dies') do -- TODO does not work when xp is gained
 		if IsPlayer(unit) then
 			UnitDied(unit)
 		elseif unit == UnitName'target' and UnitIsDead'target' then
@@ -389,7 +393,7 @@ function CHAT_MSG_COMBAT_HOSTILE_DEATH()
 end
 
 function CHAT_MSG_COMBAT_HONOR_GAIN()
-	for unit in string.gfind(arg1, '(.+) dies') do
+	for unit in string.gmatch(arg1, '(.+) dies') do
 		UnitDied(unit)
 	end
 end
@@ -511,7 +515,7 @@ function UnitDied(unit)
 end
 
 function CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE()
-	for unit, effect in string.gfind(arg1, '(.+) is afflicted by (.+)%.') do
+	for unit, effect in string.gmatch(arg1, '(.+) is afflicted by (.+)%.') do
 		for i = 1, getn(PENDING) do
 			if PENDING[i].effect == effect and PENDING[i].unit == unit then
 				StartTimer(effect, unit, PENDING[i].duration)
@@ -660,7 +664,7 @@ end
 do
 	local function tokenize(str)
 		local tokens = {}
-		for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
+		for token in string.gmatch(str, '%S+') do tinsert(tokens, token) end
 		return tokens
 	end
 
