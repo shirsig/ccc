@@ -1,7 +1,7 @@
 ## Interface: 11302
-## Title: ccwatch
+## Title: ccc
 ## Notes: Progress bars for CCs and DRs
 ## Author: shirsig
-## SavedVariablesPerCharacter: ccwatch_settings
+## SavedVariablesPerCharacter: ccc_settings
 constants.lua
-ccwatch.lua
+ccc.lua

@@ -18,7 +18,7 @@ do
 	} do f:RegisterEvent(event) end
 end
 
-_G.ccwatch_settings = {}
+_G.ccc_settings = {}
 
 local WIDTH = 170
 local HEIGHT = 16
@@ -32,11 +32,11 @@ local TARGET_GUID, TARGET_DEBUFFS
 local FREEZING_TRAP_RANK
 
 function Print(msg)
-	DEFAULT_CHAT_FRAME:AddMessage('<ccwatch> ' .. msg)
+	DEFAULT_CHAT_FRAME:AddMessage('<ccc> ' .. msg)
 end
 
 function CreateBar()
-	local texture = [[Interface\Addons\ccwatch\bar]]
+	local texture = [[Interface\Addons\ccc\bar]]
 	local font, _, style = GameFontHighlight:GetFont()
 	local fontsize = 11
 
@@ -95,7 +95,7 @@ function FadeBar(bar)
 		bar:SetAlpha(0)
 	else
 		local t = bar.fadetime - bar.fadeelapsed
-		local a = t / bar.fadetime * ccwatch_settings.alpha
+		local a = t / bar.fadetime * ccc_settings.alpha
 		bar:SetAlpha(a)
 	end
 end
@@ -136,7 +136,7 @@ do
 				FadeBar(bar)
 			end
 		else
-			bar:SetAlpha(ccwatch_settings.alpha)
+			bar:SetAlpha(ccc_settings.alpha)
 			bar.icon:SetTexture([[Interface\Icons\]] .. (ICON[timer.effect] or 'INV_Misc_QuestionMark'))
 			bar.text:SetText(timer.unit_name)
 
@@ -146,7 +146,7 @@ do
 				local remaining = timer.expiration - GetTime()
 				fraction = remaining / duration
 
-				local invert = ccwatch_settings.invert and not timer.DR
+				local invert = ccc_settings.invert and not timer.DR
 				
 				bar.statusbar:SetValue( invert and 1 - fraction or fraction)
 
@@ -182,12 +182,12 @@ function UnlockBars()
 	BARS:EnableMouse(true)
 	for i = 1, MAXBARS do
 		local f = BARS[i]
-		f:SetAlpha(ccwatch_settings.alpha)
+		f:SetAlpha(ccc_settings.alpha)
 		f.statusbar:SetStatusBarColor(1, 1, 1)
 		f.statusbar:SetValue(1)
 		f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
-		f.text:SetText('ccwatch bar')
-		f.timertext:SetText((ccwatch_settings.growth == 'up' and i or MAXBARS - i + 1))
+		f.text:SetText('ccc bar')
+		f.timertext:SetText((ccc_settings.growth == 'up' and i or MAXBARS - i + 1))
 		f.spark:Hide()
 	end
 end
@@ -343,7 +343,7 @@ end
 function PlaceTimers()
 	for _, timer in pairs(TIMERS) do
 		if not timer.visible then
-			local up = ccwatch_settings.growth == 'up'
+			local up = ccc_settings.growth == 'up'
 			for i = (up and 1 or MAXBARS), (up and MAXBARS or 1), (up and 1 or -1) do
 				if BARS[i].timer.stopped then
 					BARS[i].timer = timer
@@ -571,17 +571,17 @@ do
 	}
 
 	function ADDON_LOADED(arg1)
-		if arg1 ~= 'ccwatch' then return end
+		if arg1 ~= 'ccc' then return end
 
 		for k, v in pairs(defaultSettings) do
-			if ccwatch_settings[k] == nil then
-				ccwatch_settings[k] = v
+			if ccc_settings[k] == nil then
+				ccc_settings[k] = v
 			end
 		end
 		
 		local dummyTimer = {stopped=0}
 		local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
-		BARS = CreateFrame('Frame', 'ccwatch', UIParent)
+		BARS = CreateFrame('Frame', 'ccc', UIParent)
 		BARS:SetWidth(WIDTH + HEIGHT)
 		BARS:SetHeight(height)
 		BARS:SetMovable(true)
@@ -597,7 +597,7 @@ do
 		for i = 1, MAXBARS do
 			local bar = CreateBar()
 			bar:SetParent(BARS)
-			bar:SetAlpha(ccwatch_settings.alpha)
+			bar:SetAlpha(ccc_settings.alpha)
 			local offset = 20 * (i - 1)
 			bar:SetPoint('BOTTOMLEFT', 0, offset)
 			bar:SetPoint('BOTTOMRIGHT', 0, offset)
@@ -605,15 +605,15 @@ do
 			tinsert(BARS, bar)
 		end
 
-		BARS:SetScale(ccwatch_settings.scale)
+		BARS:SetScale(ccc_settings.scale)
 
-		_G.SLASH_CCWATCH1 = '/ccwatch'
-		SlashCmdList.CCWATCH = SlashCommandHandler
+		_G.SLASH_CCC1 = '/ccc'
+		SlashCmdList.CCC = SlashCommandHandler
 
 		LockBars()
 	end
 
-	Print('loaded - /ccwatch')
+	Print('loaded - /ccc')
 end
 
 do
@@ -634,17 +634,17 @@ do
 				LockBars()
 				Print('Bars locked.')
 			elseif command == 'invert' then
-				ccwatch_settings.invert = not ccwatch_settings.invert
-				Print('Bar inversion ' .. (ccwatch_settings.invert and 'on.' or 'off.'))
+				ccc_settings.invert = not ccc_settings.invert
+				Print('Bar inversion ' .. (ccc_settings.invert and 'on.' or 'off.'))
 			elseif args[1] == 'growth' and (args[2] == 'up' or args[2] == 'down') then
-				ccwatch_settings.growth = args[2]
+				ccc_settings.growth = args[2]
 				Print('Growth: ' .. args[2])
 				if not LOCKED then UnlockBars() end
 			elseif strsub(command, 1, 5) == 'scale' then
 				local scale = tonumber(strsub(command, 7))
 				if scale then
 					scale = max(.5, min(3, scale))
-					ccwatch_settings.scale = scale
+					ccc_settings.scale = scale
 					BARS:SetScale(scale)
 					Print('Scale: ' .. scale)
 				else
@@ -654,14 +654,14 @@ do
 				local alpha = tonumber(strsub(command, 7))
 				if alpha then
 					alpha = max(0, min(1, alpha))
-					ccwatch_settings.alpha = alpha
+					ccc_settings.alpha = alpha
 					if not LOCKED then UnlockBars() end
 					Print('Alpha: ' .. alpha)
 				else
 					Usage()
 				end
 			elseif command == 'clear' then
-				ccwatch_settings = nil
+				ccc_settings = nil
 				LoadVariables()
 			else
 				Usage()
