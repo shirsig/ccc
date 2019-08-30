@@ -11,8 +11,6 @@ do
 		-- 'CHAT_MSG_COMBAT_HOSTILE_DEATH',
 		'COMBAT_LOG_EVENT_UNFILTERED',
 		-- 'PLAYER_REGEN_ENABLED',
-		-- 'CHAT_MSG_SPELL_AURA_GONE_OTHER',
-		-- 'CHAT_MSG_SPELL_BREAK_AURA',
 		'UNIT_SPELLCAST_SENT',
 		'UNIT_SPELLCAST_SUCCEEDED',
 		'UNIT_AURA',
@@ -307,22 +305,6 @@ function AbortCast(effect, unit)
 	end
 end
 
--- function CHAT_MSG_SPELL_AURA_GONE_OTHER()
--- 	for effect, unit in string.gmatch(arg1, '(.+) fades from (.+)%.') do
--- 		if IsPlayer(unit) then
--- 			AuraGone(unit, effect)
--- 		end
--- 	end
--- end
-
--- function CHAT_MSG_SPELL_BREAK_AURA()
--- 	for unit, effect in string.gmatch(arg1, "(.+)'s (.+) is removed%.") do
--- 		if IsPlayer(unit) then
--- 			AuraGone(unit, effect)
--- 		end
--- 	end
--- end
-
 function AuraGone(unit, effect)
 	-- AbortCast(effect, unit) TODO retail
 	StopTimer(effect .. '@' .. unit)
@@ -344,21 +326,21 @@ function ActivateDRTimer(effect, unit)
 	end
 end
 
-function CHAT_MSG_COMBAT_HOSTILE_DEATH()
-	for unit in string.gmatch(arg1, '(.+) dies') do -- TODO does not work when xp is gained
-		if IsPlayer(unit) then
-			UnitDied(unit)
-		elseif unit == UnitName'target' and UnitIsDead'target' then
-			UnitDied(TARGET_GUID)
-		end
-	end
-end
+-- function CHAT_MSG_COMBAT_HOSTILE_DEATH()
+-- 	for unit in string.gmatch(arg1, '(.+) dies') do -- TODO does not work when xp is gained
+-- 		if IsPlayer(unit) then
+-- 			UnitDied(unit)
+-- 		elseif unit == UnitName'target' and UnitIsDead'target' then
+-- 			UnitDied(TARGET_GUID)
+-- 		end
+-- 	end
+-- end
 
-function CHAT_MSG_COMBAT_HONOR_GAIN()
-	for unit in string.gmatch(arg1, '(.+) dies') do
-		UnitDied(unit)
-	end
-end
+-- function CHAT_MSG_COMBAT_HONOR_GAIN()
+-- 	for unit in string.gmatch(arg1, '(.+) dies') do
+-- 		UnitDied(unit)
+-- 	end
+-- end
 
 function PlaceTimers()
 	for _, timer in pairs(TIMERS) do
@@ -443,18 +425,18 @@ function StartDR(effect, unit)
 	end
 end
 
-function PLAYER_REGEN_ENABLED()
-	for i = getn(PENDING), 1, -1 do
-		if not IsPlayer(PENDING[i].unit) and not IsPet(PENDING[i].unit) then
-			tremove(PENDING, i)
-		end
-	end
-	for k, timer in pairs(TIMERS) do
-		if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
-			StopTimer(k)
-		end
-	end
-end
+-- function PLAYER_REGEN_ENABLED()
+-- 	for i = getn(PENDING), 1, -1 do
+-- 		if not IsPlayer(PENDING[i].unit) and not IsPet(PENDING[i].unit) then
+-- 			tremove(PENDING, i)
+-- 		end
+-- 	end
+-- 	for k, timer in pairs(TIMERS) do
+-- 		if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
+-- 			StopTimer(k)
+-- 		end
+-- 	end
+-- end
 
 function StopTimer(key)
 	if TIMERS[key] then
@@ -508,7 +490,7 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 			StartTimer(effect, guid, PENDING[i].unit_name, 5)
 		end
 	elseif event == 'UNIT_AURA_REMOVED' then
-		AuraGone(effect, guid)
+		AuraGone(guid, effect)
 	elseif event == 'SPELL_MISSED' then
 		for i = 1, getn(PENDING) do
 			if PENDING[i].effect == effect and PENDING[i].unit == guid then
@@ -524,7 +506,7 @@ function UNIT_AURA(unit)
 	local effects = TargetDebuffs()
 	for effect in pairs(TARGET_DEBUFFS) do
 		if not effects[effect] then
-			AuraGone(effect, TARGET_GUID)
+			AuraGone(TARGET_GUID, effect)
 		end
 	end
 	for effect in pairs(effects) do
