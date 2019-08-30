@@ -26,7 +26,7 @@ local MAXBARS = 11
 
 local DELAY = 1
 
-local BARS, TIMERS, PENDING = {}, {}, {}
+local BARS, TIMERS, PENDING, CASTS = {}, {}, {}, {}
 local TARGET_GUID, TARGET_DEBUFFS
 
 local FREEZING_TRAP_RANK
@@ -248,13 +248,10 @@ end
 -- end
 
 do
-	local TARGET = {}
-	local TARGET_NAME = {}
-
 	function UNIT_SPELLCAST_SENT(_, _, cast_guid)
-		TARGET[cast_guid] = TARGET_GUID
-		TARGET_NAME[cast_guid] = UnitName'target'
+		CASTS[cast_guid] = { target = TARGET_GUID, target_name = UnitName'target' }
 	end
+
 	function UNIT_SPELLCAST_SUCCEEDED(unit, cast_guid, spell)
 		-- TODO only fires for unit player in classic?
 		local name = strlower(GetSpellInfo(spell))
@@ -272,24 +269,25 @@ do
 		if BONUS[name] then
 			duration = duration + BONUS[name]()
 		end
-		local guid = TARGET[cast_guid]
-		TARGET[cast_guid] = nil -- TODO would also have to do this when it fails
+		local cast = CASTS[cast_guid]
 		tinsert(PENDING, {
 			name = name,
 			rank = rank,
-			unit = guid,
-			unit_name = TARGET_NAME[cast_guid],
+			unit = cast.target,
+			unit_name = cast.target_name,
 			time = GetTime() + (PROJECTILE[name] and 1.5 or 0),
 			effect = ACTION[name].effect,
 			duration = duration,
+			targetChanged = cast.targetChanged,
 		})
+		CASTS = {} -- TODO does this not break anything?
 	end
 end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
 		if GetTime() >= PENDING[i].time + DELAY then
-			if not AOE[PENDING[i].name] then -- TODO retail and (PENDING[i].targetChanged or TARGET_DEBUFFS[PENDING[i].effect]) then
+			if not AOE[PENDING[i].name] and (PENDING[i].targetChanged or TARGET_DEBUFFS[PENDING[i].effect]) then -- TODO do we need targetChanged or is the combat log range large enough
 				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].unit_name, PENDING[i].duration, PENDING[i].time)
 			end
 			tremove(PENDING, i)
@@ -474,21 +472,23 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 				break
 			end
 		end
+		local duration
 		if effect == "Freezing Trap Effect" and FREEZING_TRAP_RANK then
 			local _, _, _, _, rank = GetTalentInfo(3, 7)
-			StartTimer(effect, guid, PENDING[i].unit_name, (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15))
+			duration = (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15)
 		elseif effect == "Seduction" then
 			local _, _, _, _, rank = GetTalentInfo(2, 7)
-			StartTimer(effect, guid, PENDING[i].unit_name, 15 * (1 + rank * .1))
+			duration = 15 * (1 + rank * .1)
 		elseif effect == "Crippling Poison" then
-			StartTimer(effect, guid, PENDING[i].unit_name, 12)
+			duration = 12
 		elseif effect == "Blackout" then
-			StartTimer(effect, guid, PENDING[i].unit_name, 3)
+			duration = 3
 		elseif effect == "Impact" then
-			StartTimer(effect, guid, PENDING[i].unit_name, 2)
+			duration = 2
 		elseif effect == "Aftermath" then
-			StartTimer(effect, guid, PENDING[i].unit_name, 5)
+			duration = 5
 		end
+		StartTimer(effect, guid, PENDING[i].unit_name, duration)
 	elseif event == 'UNIT_AURA_REMOVED' then
 		AuraGone(guid, effect)
 	elseif event == 'SPELL_MISSED' then
@@ -537,9 +537,9 @@ do
 				unitType[unit] = 2
 			end
 		end
-		-- if ACTION_OLD then
-		-- 	ACTION_OLD.targetChanged = true
-		-- end
+		for _, cast in pairs(CASTS) do
+			cast.targetChanged = true
+		end
 		for _, action in pairs(PENDING) do
 			action.targetChanged = true
 		end
