@@ -24,7 +24,7 @@ local WIDTH = 170
 local HEIGHT = 16
 local MAXBARS = 11
 
-local DELAY = 2
+local DELAY = 1
 
 local BARS, TIMERS, PENDING = {}, {}, {}
 local TARGET_GUID, TARGET_DEBUFFS
