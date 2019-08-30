@@ -492,9 +492,24 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 				break
 			end
 		end
+		if effect == "Freezing Trap Effect" and FREEZING_TRAP_RANK then
+			local _, _, _, _, rank = GetTalentInfo(3, 7)
+			StartTimer(effect, guid, PENDING[i].unit_name, (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15))
+		elseif effect == "Seduction" then
+			local _, _, _, _, rank = GetTalentInfo(2, 7)
+			StartTimer(effect, guid, PENDING[i].unit_name, 15 * (1 + rank * .1))
+		elseif effect == "Crippling Poison" then
+			StartTimer(effect, guid, PENDING[i].unit_name, 12)
+		elseif effect == "Blackout" then
+			StartTimer(effect, guid, PENDING[i].unit_name, 3)
+		elseif effect == "Impact" then
+			StartTimer(effect, guid, PENDING[i].unit_name, 2)
+		elseif effect == "Aftermath" then
+			StartTimer(effect, guid, PENDING[i].unit_name, 5)
+		end
 	elseif event == 'UNIT_AURA_REMOVED' then
 		AuraGone(effect, guid)
-	elseif event == 'SPELL_MISSED' then --TODO SPELL_ and not MISSED
+	elseif event == 'SPELL_MISSED' then
 		for i = 1, getn(PENDING) do
 			if PENDING[i].effect == effect and PENDING[i].unit == guid then
 				tremove(PENDING, i)
@@ -520,26 +535,6 @@ function UNIT_AURA(unit)
 					tremove(PENDING, i)
 					break
 				end
-			end
-			local _, class = UnitClass'player'
-			if effect == "Freezing Trap Effect" and FREEZING_TRAP_RANK then
-				local _, _, _, _, rank = GetTalentInfo(3, 7)
-				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15))
-			elseif effect == "Seduction" and class == 'WARLOCK' then
-				local _, _, _, _, rank = GetTalentInfo(2, 7)
-				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, 15 * (1 + rank * .1))
-			elseif effect == "Crippling Poison" and class == 'ROGUE' then
-				local _, _, _, _, rank = GetTalentInfo(2, 7)
-				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, 12)
-			elseif effect == "Blackout" and class == 'PRIEST' then
-				local _, _, _, _, rank = GetTalentInfo(2, 7)
-				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, 3)
-			elseif effect == "Impact" and class == 'MAGE' then
-				local _, _, _, _, rank = GetTalentInfo(2, 7)
-				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, 2)
-			elseif effect == "Aftermath" and class == 'WARLOCK' then
-				local _, _, _, _, rank = GetTalentInfo(2, 7)
-				StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, 5)
 			end
 		end
 	end
