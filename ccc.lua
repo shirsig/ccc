@@ -11,9 +11,8 @@ do
 		'UNIT_SPELLCAST_SUCCEEDED',
 		'COMBAT_LOG_EVENT_UNFILTERED',
 		'UNIT_AURA',
-		-- 'CHAT_MSG_COMBAT_HONOR_GAIN',
-		-- 'CHAT_MSG_COMBAT_HOSTILE_DEATH',
-		-- 'PLAYER_REGEN_ENABLED',
+		'CHAT_MSG_COMBAT_HONOR_GAIN',
+		'PLAYER_REGEN_ENABLED',
 		'PLAYER_TARGET_CHANGED',
 	} do f:RegisterEvent(event) end
 end
@@ -229,24 +228,6 @@ function TargetDebuffs()
 	return debuffs
 end
 
--- do
--- 	local orig = UseInventoryItem
--- 	function _G.UseInventoryItem(slot)
--- 		local _, _, name = strfind(GetInventoryItemLink('player', slot) or '', '%[(.*)%]')
--- 		startAction(ITEM_ACTION[name] or name)
--- 		return orig(slot)
--- 	end
--- end
-
--- do
--- 	local orig = UseContainerItem
--- 	function _G.UseContainerItem(bag, slot, onself)
--- 		local _, _, name = strfind(GetContainerItemLink(bag, slot) or '', '%[(.*)%]')
--- 		startAction(ITEM_ACTION[name] or name)
--- 		return orig(bag, slot, onself)
--- 	end
--- end
-
 do
 	function UNIT_SPELLCAST_SENT(_, _, cast_guid)
 		CASTS[cast_guid] = { target = TARGET_GUID, target_name = UnitName'target' }
@@ -324,21 +305,24 @@ function ActivateDRTimer(effect, unit)
 	end
 end
 
--- function CHAT_MSG_COMBAT_HOSTILE_DEATH()
--- 	for unit in string.gmatch(arg1, '(.+) dies') do -- TODO does not work when xp is gained
--- 		if IsPlayer(unit) then
--- 			UnitDied(unit)
--- 		elseif unit == UnitName'target' and UnitIsDead'target' then
--- 			UnitDied(TARGET_GUID)
--- 		end
--- 	end
--- end
+function CHAT_MSG_COMBAT_HONOR_GAIN(...) -- TODO retail is this needed?
+	-- for unit in string.gmatch(arg1, '(.+) dies') do
+	-- 	UnitDied(unit)
+	-- end
+end
 
--- function CHAT_MSG_COMBAT_HONOR_GAIN()
--- 	for unit in string.gmatch(arg1, '(.+) dies') do
--- 		UnitDied(unit)
--- 	end
--- end
+function PLAYER_REGEN_ENABLED(...) -- TODO retail is this needed (combat log range)
+	-- for i = getn(PENDING), 1, -1 do
+	-- 	if not IsPlayer(PENDING[i].unit) and not IsPet(PENDING[i].unit) then
+	-- 		tremove(PENDING, i)
+	-- 	end
+	-- end
+	-- for k, timer in pairs(TIMERS) do
+	-- 	if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
+	-- 		StopTimer(k)
+	-- 	end
+	-- end
+end
 
 function PlaceTimers()
 	for _, timer in pairs(TIMERS) do
@@ -423,19 +407,6 @@ function StartDR(effect, unit)
 	end
 end
 
--- function PLAYER_REGEN_ENABLED()
--- 	for i = getn(PENDING), 1, -1 do
--- 		if not IsPlayer(PENDING[i].unit) and not IsPet(PENDING[i].unit) then
--- 			tremove(PENDING, i)
--- 		end
--- 	end
--- 	for k, timer in pairs(TIMERS) do
--- 		if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
--- 			StopTimer(k)
--- 		end
--- 	end
--- end
-
 function StopTimer(key)
 	if TIMERS[key] then
 		TIMERS[key].stopped = GetTime()
@@ -444,7 +415,7 @@ function StopTimer(key)
 	end
 end
 
-function UnitDied(unit)
+function UnitDied(unit) -- TODO retail does aura gone not fire when unit dies?
 	for i = getn(PENDING), 1, -1 do
 		if PENDING[i].unit == unit then
 			tremove(PENDING, i)
@@ -459,6 +430,10 @@ end
 
 function COMBAT_LOG_EVENT_UNFILTERED()
 	local _, event, _, source_guid, _, _, _, guid, _, _, _, _, effect = CombatLogGetCurrentEventInfo()
+
+	if event == 'UNIT_DIED' then
+		UnitDied(guid)
+	end
 
 	if source_guid ~= UnitGUID'player' then
 		return

@@ -1,14 +1,14 @@
 setfenv(1, setmetatable(select(2, ...), {__index=_G}))
 
-ITEM_ACTION = {
-	["Goblin Rocket Helmet"] = "reckless charge",
-	["Horned Viking Helmet"] = "reckless charge",
-	["Slumber Sand"] = "sleep(rank 1)",
-	["Magic Dust"] = "sleep(rank 2)",
-	["Gnomish Net-o-Matic Projector"] = "net-o-matic",
-	["Large Rope Net"] = "trap",
-	["Really Sticky Glue"] = "trap",
-}
+-- ITEM_ACTION = {
+-- 	["Goblin Rocket Helmet"] = "reckless charge",
+-- 	["Horned Viking Helmet"] = "reckless charge",
+-- 	["Slumber Sand"] = "sleep(rank 1)",
+-- 	["Magic Dust"] = "sleep(rank 2)",
+-- 	["Gnomish Net-o-Matic Projector"] = "net-o-matic",
+-- 	["Large Rope Net"] = "trap",
+-- 	["Really Sticky Glue"] = "trap",
+-- }
 
 ACTION = {
 	["riposte"] = {effect="Riposte", duration={6}},
