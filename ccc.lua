@@ -246,7 +246,7 @@ do
 		end
 		local duration = ACTION[name].duration[min(rank or 1, getn(ACTION[name].duration))]
 		if COMBO[name] then
-			duration = duration + COMBO[name] * GetComboPoints()
+			duration = duration + COMBO[name] * GetComboPoints'player'
 		end
 		if BONUS[name] then
 			duration = duration + BONUS[name]()
