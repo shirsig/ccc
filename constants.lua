@@ -1,93 +1,195 @@
 setfenv(1, setmetatable(select(2, ...), {__index=_G}))
 
--- ITEM_ACTION = {
--- 	["Goblin Rocket Helmet"] = "reckless charge",
--- 	["Horned Viking Helmet"] = "reckless charge",
--- 	["Slumber Sand"] = "sleep(rank 1)",
--- 	["Magic Dust"] = "sleep(rank 2)",
--- 	["Gnomish Net-o-Matic Projector"] = "net-o-matic",
--- 	["Large Rope Net"] = "trap",
--- 	["Really Sticky Glue"] = "trap",
+-- ACTION_EFFECT = { TODO multiple effects? effect different from action?
+
 -- }
 
-ACTION = {
-	["riposte"] = {effect="Riposte", duration={6}},
-	["frostbolt"] = {effect="Frostbolt", duration={5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9}},
-	["cone of cold"] = {effect="Cone of Cold", duration={8}},
-	["blast wave"] = {effect="Blast Wave", duration={6}},
-	["wing clip"] = {effect="Wing Clip", duration={10}},
-	["curse of exhaustion"] = {effect="Curse of Exhaustion", duration={12}},
-	["curse of tongues"] = {effect="Curse of Tongues", duration={30}},
-	["disarm"] = {effect="Disarm", duration={10}},
-	["mortal strike"] = {effect="Mortal Strike", duration={10}},
-	["hamstring"] = {effect="Hamstring", duration={15}},
-	["piercing howl"] = {effect="Piercing Howl", duration={6}},
-	["frost shock"] = {effect="Frost Shock", duration={8}},
-	["gouge"] = {effect="Gouge", duration={4}},
-	["blind"] = {effect="Blind", duration={10}},
-	["sap"] = {effect="Sap", duration={25, 35, 45}},
-	["kidney shot"] = {effect="Kidney Shot", duration={0, 1}},
-	["cheap shot"] = {effect="Cheap Shot", duration={4}},
-	["shackle undead"] = {effect="Shackle Undead", duration={30, 40, 50}},
-	["psychic scream"] = {effect="Psychic Scream", duration={8}},
-	["polymorph"] = {effect="Polymorph", duration={20, 30, 40, 50}},
-	["polymorph: turtle"] = {effect="Polymorph: Turtle", duration={50}},
-	["polymorph: pig"] = {effect="Polymorph: Pig", duration={50}},
-	["frost nova"] = {effect="Frost Nova", duration={8}},
-	["entangling roots"] = {effect="Entangling Roots", duration={12, 15, 18, 21, 24, 27}},
-	["hibernate"] = {effect="Hibernate", duration={20, 30, 40}},
-	["feral charge"] = {effect="Feral Charge", duration={4}},
-	["pounce"] = {effect="Pounce", duration={2}},
-	["bash"] = {effect="Bash", duration={2, 3, 4}},
-	["scare beast"] = {effect="Scare Beast", duration={10, 15, 20}},
-	["scatter shot"] = {effect="Scatter Shot", duration={4}},
-	["wyvern sting"] = {effect="Wyvern Sting", duration={12}},
-	["concussive shot"] = {effect="Concussive Shot", duration={4}},
-	["counterattack"] = {effect="Counterattack", duration={5}},
-	["hammer of justice"] = {effect="Hammer of Justice", duration={3, 4, 5, 6}},
-	["repentance"] = {effect="Repentance", duration={6}},
-	["turn undead"] = {effect="Turn Undead", duration={10, 15, 20}},
-	["fear"] = {effect="Fear", duration={10, 15, 20}},
-	["howl of terror"] = {effect="Howl of Terror", duration={10, 15}},
-	["death coil"] = {effect="Death Coil", duration={3}},
-	["banish"] = {effect="Banish", duration={20, 30}},
-	["intimidating shout"] = {effect="Intimidating Shout", duration={8}},
-	["concussion blow"] = {effect="Concussion Blow", duration={5}},
-	["war stomp"] = {effect="War Stomp", duration={2}},
-	["intercept"] = {effect="Intercept Stun", duration={3}},
-	["reckless charge"] = {effect="Reckless Charge", duration={30}},
-	["sleep"] = {effect="Sleep", duration={20, 30}},
-	["net-o-matic"] = {effect="Net-o-Matic", duration={10}},
-	["tidal charm"] = {effect="Tidal Charm", duration={3}},
-	["silence"] = {effect="Silence", duration={5}},
-
-	["counterspell"] = {effect="Counterspell - Silenced", duration={4}}, -- TODO
-	["kick"] = {effect="Kick - Silenced", duration={2}}, -- TODO
-	["large rope net"] = {effect="Trap", duration={10}}, -- TODO
+DURATION = {
+	[14251] = 6, -- Riposte
+	[116] = 5, -- Frostbolt (Rank 1)
+	[205] = 6, -- Frostbolt (Rank 2)
+	[837] = 6, -- Frostbolt (Rank 3)
+	[7322] = 7, -- Frostbolt (Rank 4)
+	[8406] = 7, -- Frostbolt (Rank 5)
+	[8407] = 8, -- Frostbolt (Rank 6)
+	[8408] = 8, -- Frostbolt (Rank 7)
+	[10179] = 9, -- Frostbolt (Rank 8)
+	[10180] = 9, -- Frostbolt (Rank 9)
+	[10181] = 9, -- Frostbolt (Rank 10)
+	[25304] = 9, -- Frostbolt (Rank 11)
+	[120] = 8, -- Cone of Cold (Rank 1)
+	[8492] = 8, -- Cone of Cold (Rank 2)
+	[10159] = 8, -- Cone of Cold (Rank 3)
+	[10160] = 8, -- Cone of Cold (Rank 4)
+	[10161] = 8, -- Cone of Cold (Rank 5)
+	[11113] = 6, -- Blast Wave (Rank 1)
+	[13018] = 6, -- Blast Wave (Rank 2)
+	[13019] = 6, -- Blast Wave (Rank 3)
+	[13020] = 6, -- Blast Wave (Rank 4)
+	[13021] = 6, -- Blast Wave (Rank 5)
+	[2974] = 10, -- Wing Clip (Rank 1)
+	[14267] = 10, -- Wing Clip (Rank 2)
+	[14268] = 10, -- Wing Clip (Rank 3)
+	[18223] = 12, -- Curse of Exhaustion
+	[1714] = 30, -- Curse of Tongues (Rank 1)
+	[11719] = 30, -- Curse of Tongues (Rank 2)
+	[676] = 10, -- Disarm
+	[12294] = 10, -- Mortal Strike (Rank 1)
+	[21551] = 10, -- Mortal Strike (Rank 2)
+	[21552] = 10, -- Mortal Strike (Rank 3)
+	[21553] = 10, -- Mortal Strike (Rank 4)
+	[1715] = 15, -- Hamstring (Rank 1)
+	[7372] = 15, -- Hamstring (Rank 2)
+	[7373] = 15, -- Hamstring (Rank 3)
+	[12323] = 6, -- Piercing Howl
+	[8056] = 8, -- Frost Shock (Rank 1)
+	[8058] = 8, -- Frost Shock (Rank 2)
+	[10472] = 8, -- Frost Shock (Rank 3)
+	[10473] = 8, -- Frost Shock (Rank 4)
+	[1776] = 4, -- Gouge (Rank 1)
+	[1777] = 4, -- Gouge (Rank 2)
+	[8629] = 4, -- Gouge (Rank 3)
+	[11285] = 4, -- Gouge (Rank 4)
+	[11286] = 4, -- Gouge (Rank 5)
+	[2094] = 10, -- Blind
+	[6770] = 25, -- Sap (Rank 1)
+	[2070] = 35, -- Sap (Rank 2)
+	[11297] = 45, -- Sap (Rank 3)
+	[408] = 0, -- Kidney Shot (Rank 1)
+	[8643] = 1, -- Kidney Shot (Rank 2)
+	[1833] = 4, -- Cheap Shot
+	[9484] = 30, -- Shackle Undead (Rank 1)
+	[9485] = 40, -- Shackle Undead (Rank 2)
+	[10955] = 50, -- Shackle Undead (Rank 3)
+	[8122] = 8, -- Psychic Scream (Rank 1)
+	[8124] = 8, -- Psychic Scream (Rank 2)
+	[10888] = 8, -- Psychic Scream (Rank 3)
+	[10890] = 8, -- Psychic Scream (Rank 4)
+	[118] = 20, -- Polymorph (Rank 1)
+	[12824] = 30, -- Polymorph (Rank 2)
+	[12825] = 40, -- Polymorph (Rank 3)
+	[12826] = 50, -- Polymorph (Rank 4)
+	[28286] = 50, -- Polymorph: Turtle
+	[28285] = 50, -- Polymorph: Pig
+	[122] = 8, -- Frost Nova (Rank 1)
+	[865] = 8, -- Frost Nova (Rank 2)
+	[6131] = 8, -- Frost Nova (Rank 3)
+	[10230] = 8, -- Frost Nova (Rank 4)
+	[339] = 12, -- Entangling Roots (Rank 1)
+	[1062] = 15, -- Entangling Roots (Rank 2)
+	[5195] = 18, -- Entangling Roots (Rank 3)
+	[5196] = 21, -- Entangling Roots (Rank 4)
+	[9852] = 24, -- Entangling Roots (Rank 5)
+	[9853] = 27, -- Entangling Roots (Rank 6)
+	[2637] = 20, -- Hibernate (Rank 1)
+	[18657] = 30, -- Hibernate (Rank 2)
+	[18658] = 40, -- Hibernate (Rank 3)
+	[16979] = 4, -- Feral Charge
+	[9005] = 2, -- Pounce (Rank 1)
+	[9823] = 2, -- Pounce (Rank 2)
+	[9827] = 2, -- Pounce (Rank 3)
+	[5211] = 2, -- Bash (Rank 1)
+	[6798] = 3, -- Bash (Rank 2)
+	[8983] = 4, -- Bash (Rank 3)
+	[1513] = 10, -- Scare Beast (Rank 1)
+	[14326] = 15, -- Scare Beast (Rank 2)
+	[14327] = 20, -- Scare Beast (Rank 3)
+	[19503] = 4, -- Scatter Shot
+	[19386] = 12, -- Wyvern String (Rank 1)
+	[24132] = 12, -- Wyvern String (Rank 2)
+	[24133] = 12, -- Wyvern String (Rank 3)
+	[5116] = 4, -- Concussive Shot
+	[19306] = 5, -- Counterattack (Rank 1)
+	[20909] = 5, -- Counterattack (Rank 2)
+	[20910] = 5, -- Counterattack (Rank 3)
+	[853] = 3, -- Hammer of Justice (Rank 1)
+	[5588] = 4, -- Hammer of Justice (Rank 2)
+	[5589] = 5, -- Hammer of Justice (Rank 3)
+	[10308] = 6, -- Hammer of Justice (Rank 4)
+	[20066] = 6, -- Repentance
+	[2878] = 10, -- Turn Undead (Rank 1)
+	[5627] = 15, -- Turn Undead (Rank 2)
+	[10326] = 20, -- Turn Undead (Rank 3)
+	[5782] = 10, -- Fear (Rank 1)
+	[6213] = 15, -- Fear (Rank 2)
+	[6215] = 20, -- Fear (Rank 3)
+	[5484] = 10, -- Howl of Terror (Rank 1)
+	[17928] = 15, -- Howl of Terror (Rank 2)
+	[6789] = 3, -- Death Coil (Rank 1)
+	[17925] = 3, -- Death Coil (Rank 2)
+	[17926] = 3, -- Death Coil (Rank 3)
+	[710] = 20, -- Banish (Rank 1)
+	[18647] = 30, -- Banish (Rank 2)
+	[5246] = 8, -- Intimidating Shout
+	[12809] = 5, -- Concussion Blow
+	[20549] = 2, -- War Stomp
+	[20252] = 3, -- Intercept (Rank 1)
+	[20616] = 3, -- Intercept (Rank 2)
+	[20617] = 3, -- Intercept (Rank 3)
+	[15487] = 5, -- Silence
+	[22641] = 30, -- Reckless Charge (TODO)
+	[700] = 20, -- Sleep (Rank 1) (TODO)
+	[1090] = 30, -- Sleep (Rank 2) (TODO)
+	[8312] = 10, -- Trap (TODO)
+	[13120] = 10, -- Net-o-Matic (TODO)
+	[835] = 3, -- Tidal Charm (TODO)
 
 }
 
+-- ACTION = {
+-- 	["counterspell"] = {effect="Counterspell - Silenced", duration={4}}, -- TODO
+-- 	["kick"] = {effect="Kick - Silenced", duration={2}}, -- TODO
+-- }
+
 PROJECTILE = {
-	["death coil"] = true,
-	["frostbolt"] = true,
-	["wyvern sting"] = true,
-	["concussive shot"] = true,
-	["net-o-matic"] = true,
-	["trap"] = true,
+	[6789] = true, -- Death Coil (Rank 1)
+	[17925] = true, -- Death Coil (Rank 2)
+	[17926] = true, -- Death Coil (Rank 3)	[116] = true, -- Frostbolt (Rank 1)
+	[205] = true, -- Frostbolt (Rank 2)
+	[837] = true, -- Frostbolt (Rank 3)
+	[7322] = true, -- Frostbolt (Rank 4)
+	[8406] = true, -- Frostbolt (Rank 5)
+	[8407] = true, -- Frostbolt (Rank 6)
+	[8408] = true, -- Frostbolt (Rank 7)
+	[10179] = true, -- Frostbolt (Rank 8)
+	[10180] = true, -- Frostbolt (Rank 9)
+	[10181] = true, -- Frostbolt (Rank 10)
+	[25304] = true, -- Frostbolt (Rank 11)
+	[19386] = true, -- Wyvern String (Rank 1)
+	[24132] = true, -- Wyvern String (Rank 2)
+	[24133] = true, -- Wyvern String (Rank 3)	["concussive shot"] = true,
+	[8312] = true, -- Trap (TODO)
+	[13120] = true, -- Net-o-Matic (TODO)
 }
 
 AOE = {
-	["cone of cold"] = true,
-	["blast wave"] = true,
-	["piercing howl"] = true,
-	["psychic scream"] = true,
-	["frost nova"] = true,
-	["howl of terror"] = true,
-	["war stomp"] = true,
+	[120] = true, -- Cone of Cold (Rank 1)
+	[8492] = true, -- Cone of Cold (Rank 2)
+	[10159] = true, -- Cone of Cold (Rank 3)
+	[10160] = true, -- Cone of Cold (Rank 4)
+	[10161] = true, -- Cone of Cold (Rank 5)
+	[11113] = true, -- Blast Wave (Rank 1)
+	[13018] = true, -- Blast Wave (Rank 2)
+	[13019] = true, -- Blast Wave (Rank 3)
+	[13020] = true, -- Blast Wave (Rank 4)
+	[13021] = true, -- Blast Wave (Rank 5)
+	[12323] = true, -- Piercing Howl
+	[8122] = true, -- Psychic Scream (Rank 1)
+	[8124] = true, -- Psychic Scream (Rank 2)
+	[10888] = true, -- Psychic Scream (Rank 3)
+	[10890] = true, -- Psychic Scream (Rank 4)
+	[122] = true, -- Frost Nova (Rank 1)
+	[865] = true, -- Frost Nova (Rank 2)
+	[6131] = true, -- Frost Nova (Rank 3)
+	[10230] = true, -- Frost Nova (Rank 4)
+	[5484] = true, -- Howl of Terror (Rank 1)
+	[17928] = true, -- Howl of Terror (Rank 2)
+	[20549] = true, -- War Stomp
 }
 
 COMBO = {
-	["kidney shot"] = 1,
+	[408] = 1, -- Kidney Shot (Rank 1)
+	[8643] = 1, -- Kidney Shot (Rank 2)
 }
 
 local function talentRank(i, j)
@@ -95,150 +197,189 @@ local function talentRank(i, j)
 	return rank
 end
 
-BONUS = {
-	["gouge"] = function()
-		return talentRank(2, 1) * .5
-	end,
-	["cone of cold"] = function()
-		return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
-	end,
-	["frostbolt"] = function()
-		return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
-	end,
-	["pounce"] = function()
-		return talentRank(2, 4) * .5
-	end,
-	["bash"] = function()
-		return talentRank(2, 4) * .5
-	end,
-}
+do
+	local BONUS_FUNCTIONS = {
+		gouge = function()
+			return talentRank(2, 1) * .5
+		end,
+		cone_of_cold = function()
+			return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
+		end,
+		frostbolt = function()
+			return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
+		end,
+		pounce = function()
+			return talentRank(2, 4) * .5
+		end,
+		bash = function()
+			return talentRank(2, 4) * .5
+		end,
+	}
 
-ICON = {
-	["Riposte"] = 'Ability_Warrior_Challange',
-	["Frostbolt"] = 'Spell_Frost_FrostBolt02',
-	["Cone of Cold"] = 'Spell_Frost_Glacier',
-	["Blast Wave"] = 'Spell_Holy_Excorcism_02',
-	["Wing Clip"] = 'Ability_Rogue_Trip',
-	["Curse of Exhaustion"] = 'Spell_Shadow_GrimWard',
-	["Curse of Tongues"] = 'Spell_Shadow_CurseOfTounges',
-	["Disarm"] = 'Ability_Warrior_Disarm',
-	["Mortal Strike"] = 'Ability_Warrior_SavageBlow',
-	["Hamstring"] = 'Ability_ShockWave',
-	["Piercing Howl"] = 'Spell_Shadow_DeathScream',
-	["Frost Shock"] = 'Spell_Frost_FrostShock',
-	["Gouge"] = 'Ability_Gouge',
-	["Blind"] = 'Spell_Shadow_MindSteal',
-	["Sap"] = 'Ability_Sap',
-	["Kidney Shot"] = 'Ability_Rogue_KidneyShot',
-	["Cheap Shot"] = 'Ability_CheapShot',
-	["Shackle Undead"] = 'Spell_Nature_Slow',
-	["Psychic Scream"] = 'Spell_Shadow_PsychicScream',
-	["Polymorph"] = 'Spell_Nature_Polymorph',
-	["Polymorph: Turtle"] = 'Ability_Hunter_Pet_Turtle',
-	["Polymorph: Pig"] = 'Spell_Magic_PolymorphPig',
-	["Frost Nova"] = 'Spell_Frost_FrostNova',
-	["Entangling Roots"] = 'Spell_Nature_StrangleVines',
-	["Hibernate"] = 'Spell_Nature_Sleep',
-	["Feral Charge"] = 'Ability_Hunter_Pet_Bear',
-	["Pounce"] = 'Ability_Druid_SupriseAttack',
-	["Bash"] = 'Ability_Druid_Bash',
-	["Scare Beast"] = 'Ability_Druid_Cower',
-	["Scatter Shot"] = 'Ability_GolemStormBolt',
-	["Wyvern Sting"] = 'INV_Spear_02',
-	["Concussive Shot"] = 'Spell_Frost_Stun',
-	["Counterattack"] = 'Ability_Warrior_Challange',
-	["Hammer of Justice"] = 'Spell_Holy_SealOfMight',
-	["Repentance"] = 'Spell_Holy_PrayerOfHealing',
-	["Turn Undead"] = 'Spell_Holy_TurnUndead',
-	["Fear"] = 'Spell_Shadow_Possession',
-	["Howl of Terror"] = 'Spell_Shadow_DeathScream',
-	["Death Coil"] = 'Spell_Shadow_DeathCoil',
-	["Banish"] = 'Spell_Shadow_Cripple',
-	["Hamstring"] = 'Ability_ShockWave',
-	["Intimidating Shout"] = 'Ability_GolemThunderClap',
-	["Concussion Blow"] = 'Ability_ThunderBolt',
-	["War Stomp"] = 'Ability_WarStomp',
-	["Intercept Stun"] = 'Spell_Frost_Stun',
-	["Tidal Charm"] = 'Spell_Frost_SummonWaterElemental',
-	["Sleep"] = 'Spell_Holy_MindVision',
-	["Net-o-Matic"] = 'INV_Misc_Net_01',
-	["Trap"] = 'INV_Misc_Net_01',
-	["Reckless Charge"] = 'Spell_Nature_AstralRecal',
-	["Seduction"] = 'Spell_Shadow_MindSteal',
-	["Freezing Trap Effect"] = 'Spell_Frost_ChainsOfIce',
-	["Crippling Poison"] = 'Ability_PoisonSting',
-	["Silence"] = 'Spell_Shadow_ImpPhaseShift',
-	["Counterspell - Silenced"] = 'Spell_Frost_IceShock',
-	["Kick - Silenced"] = 'Ability_Kick',
-	["Blackout"] = 'Spell_Shadow_GatherShadows',
-	["Impact"] = 'Spell_Fire_MeteorStorm',
-	["Aftermath"] = 'Spell_Fire_Fire',
-}
+	BONUS = {
+		[1776] = BONUS_FUNCTIONS.gouge, -- Gouge (Rank 1)
+		[1777] = BONUS_FUNCTIONS.gouge, -- Gouge (Rank 2)
+		[8629] = BONUS_FUNCTIONS.gouge, -- Gouge (Rank 3)
+		[11285] = BONUS_FUNCTIONS.gouge, -- Gouge (Rank 4)
+		[11286] = BONUS_FUNCTIONS.gouge, -- Gouge (Rank 5)
+		[120] = BONUS_FUNCTIONS.cone_of_cold, -- Cone of Cold (Rank 1)
+		[8492] = BONUS_FUNCTIONS.cone_of_cold, -- Cone of Cold (Rank 2)
+		[10159] = BONUS_FUNCTIONS.cone_of_cold, -- Cone of Cold (Rank 3)
+		[10160] = BONUS_FUNCTIONS.cone_of_cold, -- Cone of Cold (Rank 4)
+		[10161] = BONUS_FUNCTIONS.cone_of_cold, -- Cone of Cold (Rank 5)
+		[116] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 1)
+		[205] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 2)
+		[837] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 3)
+		[7322] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 4)
+		[8406] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 5)
+		[8407] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 6)
+		[8408] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 7)
+		[10179] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 8)
+		[10180] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 9)
+		[10181] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 10)
+		[25304] = BONUS_FUNCTIONS.frostbolt, -- Frostbolt (Rank 11)
+		[9005] = BONUS_FUNCTIONS.pounce, -- Pounce (Rank 1)
+		[9823] = BONUS_FUNCTIONS.pounce, -- Pounce (Rank 2)
+		[9827] = BONUS_FUNCTIONS.pounce, -- Pounce (Rank 3)
+		[5211] = BONUS_FUNCTIONS.bash, -- Bash (Rank 1)
+		[6798] = BONUS_FUNCTIONS.bash, -- Bash (Rank 2)
+		[8983] = BONUS_FUNCTIONS.bash, -- Bash (Rank 3)
+	}
+end
 
 DR_CLASS = {
-	["Fear"] = 1,
-	["Howl of Terror"] = 1,
-	["Seduction"] = 1,
+	[5782] = 1, -- Fear (Rank 1)
+	[6213] = 1, -- Fear (Rank 2)
+	[6215] = 1, -- Fear (Rank 3)
+	[5484] = 1, -- Howl of Terror (Rank 1)
+	[17928] = 1, -- Howl of Terror (Rank 2)
+	[6358] = 1, -- Seduction
 
-	["Polymorph"] = 2,
-	["Polymorph: Turtle"] = 2,
-	["Polymorph: Pig"] = 2,
+	[118] = 2, -- Polymorph (Rank 1)
+	[12824] = 2, -- Polymorph (Rank 2)
+	[12825] = 2, -- Polymorph (Rank 3)
+	[12826] = 2, -- Polymorph (Rank 4)
+	[28286] = 2, -- Polymorph: Turtle
+	[28285] = 2, -- Polymorph: Pig
 
-	["Freezing Trap Effect"] = 3,
-	["Wyvern Sting"] = 3,
+	[14309] = 3, -- Freezing Trap Effect
+	[19386] = 3, -- Wyvern String (Rank 1)
+	[24132] = 3, -- Wyvern String (Rank 2)
+	[24133] = 3, -- Wyvern String (Rank 3)
 
-	["Sap"] = 4,
-	["Gouge"] = 4,
+	[6770] = 4, -- Sap (Rank 1)
+	[2070] = 4, -- Sap (Rank 2)
+	[11297] = 4, -- Sap (Rank 3)
+	[1776] = 4, -- Gouge (Rank 1)
+	[1777] = 4, -- Gouge (Rank 2)
+	[8629] = 4, -- Gouge (Rank 3)
+	[11285] = 4, -- Gouge (Rank 4)
+	[11286] = 4, -- Gouge (Rank 5)
 
-	["Scare Beast"] = 5,
+	[1513] = 5, -- Scare Beast (Rank 1)
+	[14326] = 5, -- Scare Beast (Rank 2)
+	[14327] = 5, -- Scare Beast (Rank 3)
 
-	["Entangling Roots"] = 6,
+	[339] = 6, -- Entangling Roots (Rank 1)
+	[1062] = 6, -- Entangling Roots (Rank 2)
+	[5195] = 6, -- Entangling Roots (Rank 3)
+	[5196] = 6, -- Entangling Roots (Rank 4)
+	[9852] = 6, -- Entangling Roots (Rank 5)
+	[9853] = 6, -- Entangling Roots (Rank 6)
 
-	["Frost Nova"] = 7,
+	[122] = 7, -- Frost Nova (Rank 1)
+	[865] = 7, -- Frost Nova (Rank 2)
+	[6131] = 7, -- Frost Nova (Rank 3)
+	[10230] = 7, -- Frost Nova (Rank 4)
+	[12497] = 6, -- Frostbite (Rank 3)
 
-	["Cheap Shot"] = 8,
+	[1833] = 8, -- Cheap Shot
 
-	["Kidney Shot"] = 9,
+	[408] = 9, -- Kidney Shot (Rank 1)
+	[8643] = 9, -- Kidney Shot (Rank 2)
 
-	["Blind"] = 10,
+	[2094] = 10, -- Blind
 
-	["Hibernate"] = 11,
+	[2637] = 11, -- Hibernate (Rank 1)
+	[18657] = 11, -- Hibernate (Rank 2)
+	[18658] = 11, -- Hibernate (Rank 3)
 
-	["Frost Shock"] = 12,
+	[8056] = 12, -- Frost Shock (Rank 1)
+	[8058] = 12, -- Frost Shock (Rank 2)
+	[10472] = 12, -- Frost Shock (Rank 3)
+	[10473] = 12, -- Frost Shock (Rank 4)
 }
 
 UNIQUENESS_CLASS = {
-	["Polymorph"] = 1,
-	["Polymorph: Turtle"] = 1,
-	["Polymorph: Pig"] = 1,
+	[118] = 1, -- Polymorph (Rank 1)
+	[12824] = 1, -- Polymorph (Rank 2)
+	[12825] = 1, -- Polymorph (Rank 3)
+	[12826] = 1, -- Polymorph (Rank 4)
+	[28286] = 1, -- Polymorph: Turtle
+	[28285] = 1, -- Polymorph: Pig
 
-	["Fear"] = 2,
+	[5782] = 2, -- Fear (Rank 1)
+	[6213] = 2, -- Fear (Rank 2)
+	[6215] = 2, -- Fear (Rank 3)
 
-	["Sap"] = 3,
+	[6770] = 3, -- Sap (Rank 1)
+	[2070] = 3, -- Sap (Rank 2)
+	[11297] = 3, -- Sap (Rank 3)
 
-	["Entangling Roots"] = 4,
+	[339] = 4, -- Entangling Roots (Rank 1)
+	[1062] = 4, -- Entangling Roots (Rank 2)
+	[5195] = 4, -- Entangling Roots (Rank 3)
+	[5196] = 4, -- Entangling Roots (Rank 4)
+	[9852] = 4, -- Entangling Roots (Rank 5)
+	[9853] = 4, -- Entangling Roots (Rank 6)
 
-	["Hibernate"] = 5,
+	[2637] = 5, -- Hibernate (Rank 1)
+	[18657] = 5, -- Hibernate (Rank 2)
+	[18658] = 5, -- Hibernate (Rank 3)
 
-	["Turn Undead"] = 6,
+	[2878] = 6, -- Turn Undead (Rank 1)
+	[5627] = 6, -- Turn Undead (Rank 2)
+	[10326] = 6, -- Turn Undead (Rank 3)
 
-	["Shackle Undead"] = 7,
+	[9484] = 7, -- Shackle Undead (Rank 1)
+	[9485] = 7, -- Shackle Undead (Rank 2)
+	[10955] = 7, -- Shackle Undead (Rank 3)
 
-	["Banish"] = 8,
+	[710] = 8, -- Banish (Rank 1)
+	[18647] = 8, -- Banish (Rank 2)
 
-	["Scare Beast"] = 9,
+	[1513] = 9, -- Scare Beast (Rank 1)
+	[14326] = 9, -- Scare Beast (Rank 2)
+	[14327] = 9, -- Scare Beast (Rank 3)
 }
 
 HEARTBEAT = {
-	["Scare Beast"] = true,
-	["Freezing Trap"] = true,
-	["Entangling Roots"] = true,
-	["Hibernate"] = true,
-	["Fear"] = true,
-	["Sap"] = true,
-	["Polymorph"] = true,
-	["Polymorph: Turtle"] = true,
-	["Polymorph: Pig"] = true,
-	["Reckless Charge"] = true,
-	["Sleep"] = true,
+	[1513] = true, -- Scare Beast (Rank 1)
+	[14326] = true, -- Scare Beast (Rank 2)
+	[14327] = true, -- Scare Beast (Rank 3)
+	-- ["Freezing Trap"] = true, TODO
+	[339] = true, -- Entangling Roots (Rank 1)
+	[1062] = true, -- Entangling Roots (Rank 2)
+	[5195] = true, -- Entangling Roots (Rank 3)
+	[5196] = true, -- Entangling Roots (Rank 4)
+	[9852] = true, -- Entangling Roots (Rank 5)
+	[9853] = true, -- Entangling Roots (Rank 6)
+	[2637] = true, -- Hibernate (Rank 1)
+	[18657] = true, -- Hibernate (Rank 2)
+	[18658] = true, -- Hibernate (Rank 3)
+	[5782] = true, -- Fear (Rank 1)
+	[6213] = true, -- Fear (Rank 2)
+	[6215] = true, -- Fear (Rank 3)
+	[6770] = true, -- Sap (Rank 1)
+	[2070] = true, -- Sap (Rank 2)
+	[11297] = true, -- Sap (Rank 3)
+	[118] = true, -- Polymorph (Rank 1)
+	[12824] = true, -- Polymorph (Rank 2)
+	[12825] = true, -- Polymorph (Rank 3)
+	[12826] = true, -- Polymorph (Rank 4)
+	[28286] = true, -- Polymorph: Turtle
+	[28285] = true, -- Polymorph: Pig
+	[22641] = true, -- Reckless Charge (TODO)
+	[700] = true, -- Sleep (Rank 1) (TODO)
+	[1090] = true, -- Sleep (Rank 2) (TODO)
 }

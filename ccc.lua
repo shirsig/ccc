@@ -1,4 +1,4 @@
-setfenv(1, setmetatable(select(2, ...), {__index=_G}))
+setfenv(1, setmetatable(select(2, ...), { __index =_G }))
 
 do
 	local f = CreateFrame'Frame'
@@ -6,7 +6,7 @@ do
 		getfenv(1)[event](...)
 	end)
 	for _, event in pairs{
-		'ADDON_LOADED',
+		'PLAYER_LOGIN',
 		'UNIT_SPELLCAST_SENT',
 		'UNIT_SPELLCAST_SUCCEEDED',
 		'COMBAT_LOG_EVENT_UNFILTERED',
@@ -59,7 +59,7 @@ function CreateBar()
 	f.statusbar:SetStatusBarColor(.5, .5, .5, 1)
 	f.statusbar:SetMinMaxValues(0, 1)
 	f.statusbar:SetValue(1)
-	f.statusbar:SetBackdrop{bgFile=texture}
+	f.statusbar:SetBackdrop{ bgFile = texture }
 	f.statusbar:SetBackdropColor(.5, .5, .5, .3)
 
 	f.spark = f.statusbar:CreateTexture(nil, 'OVERLAY')
@@ -136,7 +136,7 @@ do
 			end
 		else
 			bar:SetAlpha(ccc_settings.alpha)
-			bar.icon:SetTexture([[Interface\Icons\]] .. (ICON[timer.effect] or 'INV_Misc_QuestionMark'))
+			bar.icon:SetTexture(timer.texture or [[Interface\Icons\INV_Misc_QuestionMark]])
 			bar.text:SetText(timer.unit_name)
 
 			local fraction
@@ -200,8 +200,8 @@ function LockBars()
 end
 
 do
-	local factor = {[0] = 1, 1/2, 1/4, 0}
-	local limit = {[0] = 15, 10, 5, 0}
+	local factor = { [0] = 1, 1/2, 1/4, 0 }
+	local limit = { [0] = 15, 10, 5, 0 }
 
 	function DiminishedDuration(unit, effect, full_duration)
 		if IsPlayer(unit) or IsPet(unit) then
@@ -219,9 +219,9 @@ function TargetDebuffs()
 	local debuffs = {}
 	local i = 1
 	while UnitDebuff('target', i) do
-		local debuff, _, _, _, _, _, source = UnitDebuff('target', i)
+		local debuff_name, _, _, _, _, _, source, _, _, debuff = UnitDebuff('target', i)
 		if source == 'player' then
-			debuffs[debuff] = true
+			debuffs[debuff_name] = debuff
 		end
 		i = i + 1
 	end
@@ -237,14 +237,14 @@ do
 		-- TODO only fires for unit player in classic?
 		local name = strlower(GetSpellInfo(spell))
 
-		if not ACTION[name] then
+		if not DURATION[spell] then
 			return
 		end
 		local _, _, rank = strfind(GetSpellSubtext(spell) or '', 'Rank ([1-9]%d*)')
 		if name == 'freezing trap' then
 			FREEZING_TRAP_RANK = rank
 		end
-		local duration = ACTION[name].duration[min(rank or 1, getn(ACTION[name].duration))]
+		local duration = DURATION[spell]
 		if COMBO[name] then
 			duration = duration + COMBO[name] * GetComboPoints('player', 'target')
 		end
@@ -254,13 +254,14 @@ do
 		local cast = CASTS[cast_guid]
 		tinsert(PENDING, {
 			name = name,
+			effect = spell, -- TODO sometimes effect has different name
+			effect_name = GetSpellInfo(spell), -- TODO sometimes effect has different name
 			rank = rank,
 			unit = cast.target,
 			unit_name = cast.target_name,
 			time = GetTime() + (PROJECTILE[name] and 1.5 or 0),
-			effect = GetSpellInfo(spell), -- TODO sometimes effect has different name
 			duration = duration,
-			targetChanged = cast.targetChanged,
+			target_changed = cast.target_changed,
 		})
 		CASTS = {} -- TODO does this not break anything?
 	end
@@ -269,7 +270,7 @@ end
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
 		if GetTime() >= PENDING[i].time + DELAY then
-			if not AOE[PENDING[i].name] and (PENDING[i].targetChanged or TARGET_DEBUFFS[PENDING[i].effect]) then -- TODO do we need targetChanged or is the combat log range large enough
+			if not AOE[PENDING[i].effect] and (PENDING[i].target_changed or TARGET_DEBUFFS[PENDING[i].effect_name]) then -- TODO do we need target_changed or is the combat log range large enough
 				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].unit_name, PENDING[i].duration, PENDING[i].time)
 			end
 			tremove(PENDING, i)
@@ -285,24 +286,29 @@ function AbortCast(effect, unit)
 	end
 end
 
-function AuraGone(unit, effect)
+function AuraGone(unit, effect_name)
+	local key = effect_name .. '@' .. unit
+	local timer = TIMERS[key]
+	if timer then
 	-- AbortCast(effect, unit) TODO retail
-	StopTimer(effect .. '@' .. unit)
-	if DR_CLASS[effect] then
-		ActivateDRTimer(effect, unit)
+		StopTimer(key)
+		ActivateDRTimer(timer, unit)
 	end
 end
 
-function ActivateDRTimer(effect, unit)
-	for k, v in pairs(DR_CLASS) do
-		if v == DR_CLASS[effect] and EffectActive(k, unit) then
-			return
+function ActivateDRTimer(timer, unit)
+	local dr_class = DR_CLASS[timer.effect]
+	if dr_class then
+		for k, v in pairs(DR_CLASS) do
+			if v == dr_class and EffectActive(k, unit) then
+				return
+			end
 		end
-	end
-	local timer = TIMERS[DR_CLASS[effect] .. '@' .. unit]
-	if timer then
-		timer.start = GetTime()
-		timer.expiration = timer.start + 15
+		local timer = TIMERS[dr_class .. '@' .. unit]
+		if timer then
+			timer.start = GetTime()
+			timer.expiration = timer.start + 15
+		end
 	end
 end
 
@@ -345,25 +351,27 @@ function UpdateTimers()
 	for k, timer in pairs(TIMERS) do
 		if timer.expiration and t > timer.expiration then
 			StopTimer(k)
-			if DR_CLASS[timer.effect] and not timer.DR then
-				ActivateDRTimer(timer.effect, timer.unit)
+			if not timer.DR then
+				ActivateDRTimer(timer, timer.unit)
 			end
 		end
 	end
 end
 
 function EffectActive(effect, unit)
-	return TIMERS[effect .. '@' .. unit] and true or false
+	return TIMERS[GetSpellInfo(effect) .. '@' .. unit] and true or false
 end
 
 function StartTimer(effect, unit, unit_name, duration, start)
+	local effect_name, _, texture = GetSpellInfo(effect)
+
 	duration = DiminishedDuration(unit, effect, duration)
 
 	if duration == 0 then
 		return
 	end
 
-	local key = effect .. '@' .. unit
+	local key = effect_name .. '@' .. unit
 	local timer = TIMERS[key] or {}
 
 	if UNIQUENESS_CLASS[effect] then
@@ -377,43 +385,45 @@ function StartTimer(effect, unit, unit_name, duration, start)
 	TIMERS[key] = timer
 
 	timer.effect = effect
+	timer.effect_name = effect_name
 	timer.unit = unit
 	timer.unit_name = unit_name
 	timer.start = start or GetTime()
 	timer.expiration = timer.start + duration
+	timer.texture = texture
 
-	if IsPlayer(unit) and DR_CLASS[effect] then
-		StartDR(effect, unit)
+	if IsPlayer(unit) then
+		StartDR(timer, unit)
 	end
 
 	timer.stopped = nil
 	PlaceTimers()
 end
 
-function StartDR(effect, unit)
+function StartDR(timer, unit)
+	local dr_class = DR_CLASS[timer.effect]
+	if dr_class then
+		local key = dr_class .. '@' .. unit
+		local timer = TIMERS[key] or {}
 
-	local key = DR_CLASS[effect] .. '@' .. unit
-	local timer = TIMERS[key] or {}
+		if not timer.DR or timer.DR < 3 then
+			TIMERS[key] = timer
 
-	if not timer.DR or timer.DR < 3 then
-		TIMERS[key] = timer
+			timer.effect_name = effect_name
+			timer.unit = unit
+			timer.start = nil
+			timer.expiration = nil
+			timer.DR = min(3, (timer.DR or 0) + 1)
 
-		timer.effect = effect
-		timer.unit = unit
-		timer.start = nil
-		timer.expiration = nil
-		timer.DR = min(3, (timer.DR or 0) + 1)
-
-		PlaceTimers()
+			PlaceTimers()
+		end
 	end
 end
 
 function StopTimer(key)
-	if TIMERS[key] then
-		TIMERS[key].stopped = GetTime()
-		TIMERS[key] = nil
-		PlaceTimers()
-	end
+	TIMERS[key].stopped = GetTime()
+	TIMERS[key] = nil
+	PlaceTimers()
 end
 
 function UnitDied(unit) -- TODO retail does aura gone not fire when unit dies?
@@ -430,50 +440,57 @@ function UnitDied(unit) -- TODO retail does aura gone not fire when unit dies?
 end
 
 function COMBAT_LOG_EVENT_UNFILTERED()
-	local _, event, _, source_guid, _, _, _, guid, name, _, _, _, effect = CombatLogGetCurrentEventInfo()
+	local _, event, _, source_guid, _, _, _, guid, name, _, _, _, effect_name = CombatLogGetCurrentEventInfo()
 
 	if event == 'UNIT_DIED' then
 		UnitDied(guid)
 	end
 
-	if source_guid ~= UnitGUID'player' then
+	if source_guid ~= UnitGUID'player' and source_guid ~= UnitGUID'pet' then
 		return
 	end
 
 	if event == 'SPELL_AURA_APPLIED' then
 		for i = 1, getn(PENDING) do
-			if PENDING[i].effect == effect and PENDING[i].unit == guid then
-				StartTimer(effect, guid, name, PENDING[i].duration)
+			if PENDING[i].effect_name == effect_name and PENDING[i].unit == guid then
+				StartTimer(PENDING[i].effect, guid, name, PENDING[i].duration)
 				tremove(PENDING, i)
 				break
 			end
 		end
-		local duration
-		if effect == 'Freezing Trap Effect' and FREEZING_TRAP_RANK then
+		local effect, duration
+		if effect_name == GetSpellInfo(14309) then -- Freezing Trap Effect
 			local _, _, _, _, rank = GetTalentInfo(3, 7)
-			duration = (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15)
-		elseif effect == 'Seduction' then
+			effect = 14309
+			duration = 20 * (1 + rank * .15)
+		elseif effect_name == GetSpellInfo(6358) then -- Seduction
+			effect = 6358
 			local _, _, _, _, rank = GetTalentInfo(2, 7)
 			duration = 15 * (1 + rank * .1)
-		elseif effect == 'Crippling Poison' then
-			duration = 12
-		elseif effect == 'Blackout' then
+		-- elseif effect_name == GetSpellInfo(3421) then -- Crippling Poison
+		-- 	effect = 3421
+		-- 	duration = 12
+		elseif effect_name == GetSpellInfo(15269) then -- Blackout
+			effect = 15269
 			duration = 3
-		elseif effect == 'Impact' then
+		elseif effect_name == GetSpellInfo(12360) then -- Impact
+			effect = 12360
 			duration = 2
-		elseif effect == 'Aftermath' then
+		elseif effect_name == GetSpellInfo(18118) then -- Aftermath
+			effect = 18118
 			duration = 5
-		elseif effect == 'Frostbite' then
+		elseif effect_name == GetSpellInfo(12497) then -- Frostbite
+			effect = 12497
 			duration = 5
 		end
-		if duration then
+		if effect then
 			StartTimer(effect, guid, name, duration)
 		end
 	elseif event == 'SPELL_AURA_REMOVED' then
-		AuraGone(guid, effect)
+		AuraGone(guid, effect_name)
 	elseif event == 'SPELL_MISSED' then
 		for i = 1, getn(PENDING) do
-			if PENDING[i].effect == effect and PENDING[i].unit == guid then
+			if PENDING[i].effect_name == effect_name and PENDING[i].unit == guid then -- TODO should be spell name, not effect name
 				tremove(PENDING, i)
 				break
 			end
@@ -483,24 +500,24 @@ end
 
 function UNIT_AURA(unit)
 	if unit ~= 'target' then return end
-	local effects = TargetDebuffs()
-	for effect in pairs(TARGET_DEBUFFS) do
-		if not effects[effect] then
-			AuraGone(TARGET_GUID, effect)
+	local debuffs = TargetDebuffs()
+	for effect_name in pairs(TARGET_DEBUFFS) do
+		if not debuffs[effect_name] then
+			AuraGone(TARGET_GUID, effect_name)
 		end
 	end
-	for effect in pairs(effects) do
-		if not TARGET_DEBUFFS[effect] or TARGET_DEBUFFS[effect] ~= effects[effect] then
+	for debuff_name, debuff in pairs(debuffs) do
+		if not TARGET_DEBUFFS[debuff_name] or TARGET_DEBUFFS[debuff_name] ~= debuffs[debuff_name] then
 			for i = 1, getn(PENDING) do
-				if PENDING[i].effect == effect and (PENDING[i].unit == TARGET_GUID or AOE[PENDING[i].name]) then
-					StartTimer(effect, TARGET_GUID, PENDING[i].unit_name, PENDING[i].duration)
+				if PENDING[i].effect == debuff and (PENDING[i].unit == TARGET_GUID or AOE[PENDING[i].name]) then
+					StartTimer(PENDING[i].effect, TARGET_GUID, PENDING[i].unit_name, PENDING[i].duration)
 					tremove(PENDING, i)
 					break
 				end
 			end
 		end
 	end
-	TARGET_DEBUFFS = effects
+	TARGET_DEBUFFS = debuffs
 end
 
 do
@@ -517,10 +534,10 @@ do
 			end
 		end
 		for _, cast in pairs(CASTS) do
-			cast.targetChanged = true
+			cast.target_changed = true
 		end
 		for _, action in pairs(PENDING) do
-			action.targetChanged = true
+			action.target_changed = true
 		end
 	end
 
@@ -549,16 +566,14 @@ do
 		alpha = .85,
 	}
 
-	function ADDON_LOADED(arg1)
-		if arg1 ~= 'ccc' then return end
-
+	function PLAYER_LOGIN()
 		for k, v in pairs(defaultSettings) do
 			if ccc_settings[k] == nil then
 				ccc_settings[k] = v
 			end
 		end
 		
-		local dummyTimer = {stopped=0}
+		local dummyTimer = { stopped = 0 }
 		local height = HEIGHT * MAXBARS + 4 * (MAXBARS - 1)
 		BARS = CreateFrame('Frame', 'ccc', UIParent)
 		BARS:SetWidth(WIDTH + HEIGHT)
