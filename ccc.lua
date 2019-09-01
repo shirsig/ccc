@@ -449,19 +449,21 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 			end
 		end
 		local duration
-		if effect == "Freezing Trap Effect" and FREEZING_TRAP_RANK then
+		if effect == 'Freezing Trap Effect' and FREEZING_TRAP_RANK then
 			local _, _, _, _, rank = GetTalentInfo(3, 7)
 			duration = (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15)
-		elseif effect == "Seduction" then
+		elseif effect == 'Seduction' then
 			local _, _, _, _, rank = GetTalentInfo(2, 7)
 			duration = 15 * (1 + rank * .1)
-		elseif effect == "Crippling Poison" then
+		elseif effect == 'Crippling Poison' then
 			duration = 12
-		elseif effect == "Blackout" then
+		elseif effect == 'Blackout' then
 			duration = 3
-		elseif effect == "Impact" then
+		elseif effect == 'Impact' then
 			duration = 2
-		elseif effect == "Aftermath" then
+		elseif effect == 'Aftermath' then
+			duration = 5
+		elseif effect == 'Frostbite' then
 			duration = 5
 		end
 		if duration then
