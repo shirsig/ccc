@@ -236,6 +236,7 @@ do
 	function UNIT_SPELLCAST_SUCCEEDED(unit, cast_guid, spell)
 		-- TODO only fires for unit player in classic?
 		local name = strlower(GetSpellInfo(spell))
+
 		if not ACTION[name] then
 			return
 		end
@@ -257,7 +258,7 @@ do
 			unit = cast.target,
 			unit_name = cast.target_name,
 			time = GetTime() + (PROJECTILE[name] and 1.5 or 0),
-			effect = ACTION[name].effect,
+			effect = GetSpellInfo(spell), -- TODO sometimes effect has different name
 			duration = duration,
 			targetChanged = cast.targetChanged,
 		})
@@ -429,7 +430,7 @@ function UnitDied(unit) -- TODO retail does aura gone not fire when unit dies?
 end
 
 function COMBAT_LOG_EVENT_UNFILTERED()
-	local _, event, _, source_guid, _, _, _, guid, _, _, _, _, effect = CombatLogGetCurrentEventInfo()
+	local _, event, _, source_guid, _, _, _, guid, name, _, _, _, effect = CombatLogGetCurrentEventInfo()
 
 	if event == 'UNIT_DIED' then
 		UnitDied(guid)
@@ -439,10 +440,10 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		return
 	end
 
-	if event == 'UNIT_AURA_APPLIED' then
+	if event == 'SPELL_AURA_APPLIED' then
 		for i = 1, getn(PENDING) do
 			if PENDING[i].effect == effect and PENDING[i].unit == guid then
-				StartTimer(effect, guid, PENDING[i].unit_name, PENDING[i].duration)
+				StartTimer(effect, guid, name, PENDING[i].duration)
 				tremove(PENDING, i)
 				break
 			end
@@ -463,8 +464,10 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		elseif effect == "Aftermath" then
 			duration = 5
 		end
-		StartTimer(effect, guid, PENDING[i].unit_name, duration)
-	elseif event == 'UNIT_AURA_REMOVED' then
+		if duration then
+			StartTimer(effect, guid, name, duration)
+		end
+	elseif event == 'SPELL_AURA_REMOVED' then
 		AuraGone(guid, effect)
 	elseif event == 'SPELL_MISSED' then
 		for i = 1, getn(PENDING) do
@@ -503,13 +506,12 @@ do
 
 	function PLAYER_TARGET_CHANGED()
 		TARGET_DEBUFFS = TargetDebuffs()
-		local unit = UnitName'target'
 		TARGET_GUID = UnitGUID'target'
-		if unit then
+		if TARGET_GUID then
 			if UnitIsPlayer'target' then
-				unitType[unit] = 1
+				unitType[TARGET_GUID] = 1
 			elseif UnitPlayerControlled'target' then
-				unitType[unit] = 2
+				unitType[TARGET_GUID] = 2
 			end
 		end
 		for _, cast in pairs(CASTS) do
@@ -520,12 +522,12 @@ do
 		end
 	end
 
-	function IsPlayer(unit)
-		return unitType[unit] == 1
+	function IsPlayer(guid)
+		return unitType[guid] == 1
 	end
 
-	function IsPet(unit)
-		return unitType[unit] == 2
+	function IsPet(guid)
+		return unitType[guid] == 2
 	end
 end
 

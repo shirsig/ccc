@@ -58,11 +58,13 @@ ACTION = {
 	["reckless charge"] = {effect="Reckless Charge", duration={30}},
 	["sleep"] = {effect="Sleep", duration={20, 30}},
 	["net-o-matic"] = {effect="Net-o-Matic", duration={10}},
-	["large rope net"] = {effect="Trap", duration={10}},
 	["tidal charm"] = {effect="Tidal Charm", duration={3}},
 	["silence"] = {effect="Silence", duration={5}},
-	["counterspell"] = {effect="Counterspell - Silenced", duration={4}},
-	["kick"] = {effect="Kick - Silenced", duration={2}},
+
+	["counterspell"] = {effect="Counterspell - Silenced", duration={4}}, -- TODO
+	["kick"] = {effect="Kick - Silenced", duration={2}}, -- TODO
+	["large rope net"] = {effect="Trap", duration={10}}, -- TODO
+
 }
 
 PROJECTILE = {
