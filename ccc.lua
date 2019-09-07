@@ -245,10 +245,10 @@ do
 			FREEZING_TRAP_RANK = rank
 		end
 		local duration = DURATION[spell]
-		if COMBO[name] then
+		if COMBO[spell] then
 			duration = duration + COMBO[name] * GetComboPoints('player', 'target')
 		end
-		if BONUS[name] then
+		if BONUS[spell] then
 			duration = duration + BONUS[name]()
 		end
 		local cast = CASTS[cast_guid]
@@ -509,7 +509,7 @@ function UNIT_AURA(unit)
 	for debuff_name, debuff in pairs(debuffs) do
 		if not TARGET_DEBUFFS[debuff_name] or TARGET_DEBUFFS[debuff_name] ~= debuffs[debuff_name] then
 			for i = 1, getn(PENDING) do
-				if PENDING[i].effect_name == debuff_name and (PENDING[i].unit == TARGET_GUID or AOE[PENDING[i].name]) then -- TODO effect == debuff (need to add mapping from action to effect)
+				if PENDING[i].effect_name == debuff_name and (PENDING[i].unit == TARGET_GUID or AOE[PENDING[i].effect]) then -- TODO effect == debuff (need to add mapping from action to effect)
 					StartTimer(PENDING[i].effect, TARGET_GUID, PENDING[i].unit_name, PENDING[i].duration)
 					tremove(PENDING, i)
 					break
