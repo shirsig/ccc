@@ -235,31 +235,34 @@ do
 
 	function UNIT_SPELLCAST_SUCCEEDED(unit, cast_guid, spell)
 		-- TODO only fires for unit player in classic?
-		local name = strlower(GetSpellInfo(spell))
+		local name = GetSpellInfo(spell)
 
 		if not DURATION[spell] then
 			return
 		end
 		local _, _, rank = strfind(GetSpellSubtext(spell) or '', 'Rank ([1-9]%d*)')
-		if name == 'freezing trap' then
-			FREEZING_TRAP_RANK = rank
+		if spell == 3355 then
+			FREEZING_TRAP_RANK = 1
+		elseif spell == 14308 then
+			FREEZING_TRAP_RANK = 2
+		elseif spell == 14309 then
+			FREEZING_TRAP_RANK = 3
 		end
 		local duration = DURATION[spell]
 		if COMBO[spell] then
-			duration = duration + COMBO[name] * GetComboPoints('player', 'target')
+			duration = duration + COMBO[spell] * GetComboPoints('player', 'target')
 		end
 		if BONUS[spell] then
-			duration = duration + BONUS[name]()
+			duration = duration + BONUS[spell]()
 		end
 		local cast = CASTS[cast_guid]
 		tinsert(PENDING, {
-			name = name,
 			effect = spell, -- TODO sometimes effect has different name
 			effect_name = GetSpellInfo(spell), -- TODO sometimes effect has different name
 			rank = rank,
 			unit = cast.target,
 			unit_name = cast.target_name,
-			time = GetTime() + (PROJECTILE[name] and 1.5 or 0),
+			time = GetTime() + (PROJECTILE[spell] and 1.5 or 0),
 			duration = duration,
 			target_changed = cast.target_changed,
 		})
