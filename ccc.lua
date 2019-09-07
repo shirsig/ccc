@@ -1,4 +1,5 @@
-setfenv(1, setmetatable(select(2, ...), { __index =_G }))
+local addon_name, addon_table = ...
+setfenv(1, setmetatable(addon_table, { __index =_G }))
 
 do
 	local f = CreateFrame'Frame'
@@ -6,7 +7,7 @@ do
 		getfenv(1)[event](...)
 	end)
 	for _, event in pairs{
-		'PLAYER_LOGIN',
+		'ADDON_LOADED',
 		'UNIT_SPELLCAST_SENT',
 		'UNIT_SPELLCAST_SUCCEEDED',
 		'COMBAT_LOG_EVENT_UNFILTERED',
@@ -569,7 +570,11 @@ do
 		alpha = .85,
 	}
 
-	function PLAYER_LOGIN()
+	function ADDON_LOADED(name)
+		if name ~= addon_name then
+            return
+        end
+
 		for k, v in pairs(defaultSettings) do
 			if ccc_settings[k] == nil then
 				ccc_settings[k] = v
