@@ -278,13 +278,13 @@ CreateFrame'Frame':SetScript('OnUpdate', function()
 	end
 end)
 
-function AbortCast(effect, unit)
-	for i = getn(PENDING), 1, -1 do
-		if PENDING[i].effect == effect and PENDING[i].unit == unit then
-			tremove(PENDING, i)
-		end
-	end
-end
+-- function AbortCast(effect, unit)
+-- 	for i = getn(PENDING), 1, -1 do
+-- 		if PENDING[i].effect == effect and PENDING[i].unit == unit then
+-- 			tremove(PENDING, i)
+-- 		end
+-- 	end
+-- end
 
 function AuraGone(unit, effect_name)
 	local key = effect_name .. '@' .. unit
@@ -509,7 +509,7 @@ function UNIT_AURA(unit)
 	for debuff_name, debuff in pairs(debuffs) do
 		if not TARGET_DEBUFFS[debuff_name] or TARGET_DEBUFFS[debuff_name] ~= debuffs[debuff_name] then
 			for i = 1, getn(PENDING) do
-				if PENDING[i].effect == debuff and (PENDING[i].unit == TARGET_GUID or AOE[PENDING[i].name]) then
+				if PENDING[i].effect_name == debuff_name and (PENDING[i].unit == TARGET_GUID or AOE[PENDING[i].name]) then -- TODO effect == debuff (need to add mapping from action to effect)
 					StartTimer(PENDING[i].effect, TARGET_GUID, PENDING[i].unit_name, PENDING[i].duration)
 					tremove(PENDING, i)
 					break
