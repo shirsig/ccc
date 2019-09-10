@@ -1,12 +1,18 @@
-# ccwatch (/ccwatch for options)
-ccwatch is a new cc tracker for Vanilla WoW 1.12.
+# ccc (/ccc for options)
+ccc is a new cc tracker for Classic WoW (1.13).
 
-The tracking correctly takes into account diminishing returns (including sharing), special PvP durations, spell ranks, talent bonuses and combo points.
+This addon is meant to provide complete and accurate information for stunlocking and controlled sheeping, fearing etc.
+
+The best API available for debuff information only works for the current target, which is not enough for this purpose, so this addon uses different information sources than most other CC/debuff trackers.
+
+* Only the player's own CCs are shown.
+* CCs are shown even when the affected unit is not the target.
+* CCs are shown even when they start while the affected unit is not the target.
+* Reapplication is detected even when the affected unit is not the target.
+* Diminishing returns are taken into account.
+* Special PvP durations are taken into account.
+* Spell ranks, talent bonuses and combo points are taken into account.
 
 Green bars are active debuffs and yellow/orange/red bars are diminishing returns with reduction to 1/2, 1/4 and 0 respectively.
-
-Due to limitations of the tracking mechanisms used only the player's own spells are tracked and only those that are applied on finishing a cast. There are three exceptions to this, Seduction, Freezing Trap, and Crippling Poison, because of their importance as CCs, which use different tracking methods. To track timers for other players I recommend this addon: https://github.com/Voidmenull/DebuffTimers.
-
-In PvE off target and for reapplication of effects there is a small delay of 0.5 seconds to ensure the cast hasn't failed in some way. For initial applications in PvP this is avoided by using combat log events for confirmation.
 
 ![Alt text](http://i.imgur.com/DbC2V6d.png)
