@@ -2,7 +2,7 @@
 
 ![Alt text](http://i.imgur.com/DbC2V6d.png)
 
-ccc is a new cc tracker for Classic WoW (1.13).
+ccc is a new **CC** tracker for **C**lassic WoW (1.13).
 
 This addon is meant to provide complete and accurate information for stunlocking and controlled sheeping, fearing etc.
 
