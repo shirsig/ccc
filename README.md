@@ -1,4 +1,7 @@
 # ccc (/ccc for options)
+
+![Alt text](http://i.imgur.com/DbC2V6d.png)
+
 ccc is a new cc tracker for Classic WoW (1.13).
 
 This addon is meant to provide complete and accurate information for stunlocking and controlled sheeping, fearing etc.
@@ -14,5 +17,3 @@ The best API available for debuff information only works for the current target,
 * Spell ranks, talent bonuses and combo points are taken into account.
 
 Green bars are active debuffs and yellow/orange/red bars are diminishing returns with reduction to 1/2, 1/4 and 0 respectively.
-
-![Alt text](http://i.imgur.com/DbC2V6d.png)
