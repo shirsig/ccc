@@ -236,34 +236,34 @@ do
 
 	function UNIT_SPELLCAST_SUCCEEDED(unit, cast_guid, spell)
 		-- TODO only fires for unit player in classic?
-		local name = GetSpellInfo(spell)
+		local effect = SPELL_EFFECT[spell] or spell
 
-		if not DURATION[spell] then
+		if not DURATION[effect] then
 			return
 		end
-		local _, _, rank = strfind(GetSpellSubtext(spell) or '', 'Rank ([1-9]%d*)')
-		if spell == 3355 then
+		local _, _, rank = strfind(GetSpellSubtext(effect) or '', 'Rank ([1-9]%d*)')
+		if effect == 3355 then
 			FREEZING_TRAP_RANK = 1
-		elseif spell == 14308 then
+		elseif effect == 14308 then
 			FREEZING_TRAP_RANK = 2
-		elseif spell == 14309 then
+		elseif effect == 14309 then
 			FREEZING_TRAP_RANK = 3
 		end
-		local duration = DURATION[spell]
-		if COMBO[spell] then
-			duration = duration + COMBO[spell] * GetComboPoints('player', 'target')
+		local duration = DURATION[effect]
+		if COMBO[effect] then
+			duration = duration + COMBO[effect] * GetComboPoints('player', 'target')
 		end
-		if BONUS[spell] then
-			duration = duration + BONUS[spell]()
+		if BONUS[effect] then
+			duration = duration + BONUS[effect]()
 		end
 		local cast = CASTS[cast_guid]
 		tinsert(PENDING, {
-			effect = spell, -- TODO sometimes effect has different name
-			effect_name = GetSpellInfo(spell), -- TODO sometimes effect has different name
+			effect = SPELL_EFFECT[effect] or effect, -- TODO sometimes effect has different name
+			effect_name = GetSpellInfo(effect), -- TODO sometimes effect has different name
 			rank = rank,
 			unit = cast.target,
 			unit_name = cast.target_name,
-			time = GetTime() + (PROJECTILE[spell] and 1.5 or 0),
+			time = GetTime() + (PROJECTILE[effect] and 1.5 or 0),
 			duration = duration,
 			target_changed = cast.target_changed,
 		})
@@ -404,8 +404,8 @@ function StartTimer(effect, unit, unit_name, duration, start)
 	PlaceTimers()
 end
 
-function StartDR(timer, unit)
-	local dr_class = DR_CLASS[timer.effect]
+function StartDR(effect_timer, unit)
+	local dr_class = DR_CLASS[effect_timer.effect]
 	if dr_class then
 		local key = dr_class .. '@' .. unit
 		local timer = TIMERS[key] or {}
@@ -413,11 +413,12 @@ function StartDR(timer, unit)
 		if not timer.DR or timer.DR < 3 then
 			TIMERS[key] = timer
 
-			timer.effect_name = effect_name
+			timer.effect_name = effect_timer.effect_name
 			timer.unit = unit
 			timer.start = nil
 			timer.expiration = nil
 			timer.DR = min(3, (timer.DR or 0) + 1)
+			timer.texture = effect_timer.texture
 
 			PlaceTimers()
 		end
@@ -486,6 +487,21 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		elseif effect_name == GetSpellInfo(12497) then -- Frostbite
 			effect = 12497
 			duration = 5
+		elseif effect_name == GetSpellInfo(19229) then -- Improved Wing Clip
+			effect = 19229
+			duration = 5
+		elseif effect_name == GetSpellInfo(23694) then -- Improved Hamstring
+			effect = 23694
+			duration = 5
+		elseif effect_name == GetSpellInfo(18425) then -- Kick - Silenced
+			effect = 18425
+			duration = 2
+		elseif effect_name == GetSpellInfo(18469) then -- Counterspell - Silenced
+			effect = 18469
+			duration = 4
+		elseif effect_name == GetSpellInfo(18498) then -- Shield Bash - Silenced
+			effect = 18498
+			duration = 3
 		end
 		if effect then
 			StartTimer(effect, guid, name, duration)

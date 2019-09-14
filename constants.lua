@@ -1,8 +1,19 @@
 setfenv(1, setmetatable(select(2, ...), {__index=_G}))
 
--- ACTION_EFFECT = { TODO multiple effects? effect different from action?
-
--- }
+SPELL_EFFECT = { -- TODO multiple effects? effect different from action?
+	[1168] = 118, -- Polymorph (Rank 1)
+	[12827] = 12824, -- Polymorph (Rank 2)
+	[12828] = 12825, -- Polymorph (Rank 3)
+	[12829] = 12826, -- Polymorph (Rank 4)
+	[28286] = 28271, -- Polymorph: Turtle
+	[28285] = 28272, -- Polymorph: Pig
+	[16979] = 19675, -- Feral Charge
+	[5246] = 20511, -- Intimidating Shout
+	[20252] = 20253, -- Intercept (Rank 1)
+	[20616] = 20614, -- Intercept (Rank 2)
+	[20617] = 20615, -- Intercept (Rank 3)
+	[22641] = 13327, -- Reckless Charge
+}
 
 DURATION = {
 	[14251] = 6, -- Riposte
@@ -69,8 +80,8 @@ DURATION = {
 	[12824] = 30, -- Polymorph (Rank 2)
 	[12825] = 40, -- Polymorph (Rank 3)
 	[12826] = 50, -- Polymorph (Rank 4)
-	[28286] = 50, -- Polymorph: Turtle
-	[28285] = 50, -- Polymorph: Pig
+	[28271] = 50, -- Polymorph: Turtle
+	[28272] = 50, -- Polymorph: Pig
 	[122] = 8, -- Frost Nova (Rank 1)
 	[865] = 8, -- Frost Nova (Rank 2)
 	[6131] = 8, -- Frost Nova (Rank 3)
@@ -84,7 +95,7 @@ DURATION = {
 	[2637] = 20, -- Hibernate (Rank 1)
 	[18657] = 30, -- Hibernate (Rank 2)
 	[18658] = 40, -- Hibernate (Rank 3)
-	[16979] = 4, -- Feral Charge
+	[19675] = 4, -- Feral Charge
 	[9005] = 2, -- Pounce (Rank 1)
 	[9823] = 2, -- Pounce (Rank 2)
 	[9827] = 2, -- Pounce (Rank 3)
@@ -120,26 +131,20 @@ DURATION = {
 	[17926] = 3, -- Death Coil (Rank 3)
 	[710] = 20, -- Banish (Rank 1)
 	[18647] = 30, -- Banish (Rank 2)
-	[5246] = 8, -- Intimidating Shout
+	[20511] = 8, -- Intimidating Shout
 	[12809] = 5, -- Concussion Blow
 	[20549] = 2, -- War Stomp
-	[20252] = 3, -- Intercept (Rank 1)
-	[20616] = 3, -- Intercept (Rank 2)
-	[20617] = 3, -- Intercept (Rank 3)
+	[20253] = 3, -- Intercept (Rank 1)
+	[20614] = 3, -- Intercept (Rank 2)
+	[20615] = 3, -- Intercept (Rank 3)
 	[15487] = 5, -- Silence
-	[22641] = 30, -- Reckless Charge (TODO)
-	[700] = 20, -- Sleep (Rank 1) (TODO)
-	[1090] = 30, -- Sleep (Rank 2) (TODO)
-	[8312] = 10, -- Trap (TODO)
-	[13120] = 10, -- Net-o-Matic (TODO)
-	[835] = 3, -- Tidal Charm (TODO)
-
+	[13327] = 30, -- Reckless Charge
+	[700] = 20, -- Sleep (Rank 1)
+	[1090] = 30, -- Sleep (Rank 2)
+	[8312] = 10, -- Trap
+	[13120] = 10, -- Net-o-Matic
+	[835] = 3, -- Tidal Charm
 }
-
--- ACTION = {
--- 	["counterspell"] = {effect="Counterspell - Silenced", duration={4}}, -- TODO
--- 	["kick"] = {effect="Kick - Silenced", duration={2}}, -- TODO
--- }
 
 PROJECTILE = {
 	[6789] = true, -- Death Coil (Rank 1)
@@ -259,8 +264,8 @@ DR_CLASS = {
 	[12824] = 2, -- Polymorph (Rank 2)
 	[12825] = 2, -- Polymorph (Rank 3)
 	[12826] = 2, -- Polymorph (Rank 4)
-	[28286] = 2, -- Polymorph: Turtle
-	[28285] = 2, -- Polymorph: Pig
+	[28271] = 2, -- Polymorph: Turtle
+	[28272] = 2, -- Polymorph: Pig
 
 	[14309] = 3, -- Freezing Trap Effect
 	[19386] = 3, -- Wyvern String (Rank 1)
@@ -315,8 +320,8 @@ UNIQUENESS_CLASS = {
 	[12824] = 1, -- Polymorph (Rank 2)
 	[12825] = 1, -- Polymorph (Rank 3)
 	[12826] = 1, -- Polymorph (Rank 4)
-	[28286] = 1, -- Polymorph: Turtle
-	[28285] = 1, -- Polymorph: Pig
+	[28271] = 1, -- Polymorph: Turtle
+	[28272] = 1, -- Polymorph: Pig
 
 	[5782] = 2, -- Fear (Rank 1)
 	[6213] = 2, -- Fear (Rank 2)
@@ -377,9 +382,9 @@ HEARTBEAT = {
 	[12824] = true, -- Polymorph (Rank 2)
 	[12825] = true, -- Polymorph (Rank 3)
 	[12826] = true, -- Polymorph (Rank 4)
-	[28286] = true, -- Polymorph: Turtle
-	[28285] = true, -- Polymorph: Pig
-	[22641] = true, -- Reckless Charge (TODO)
-	[700] = true, -- Sleep (Rank 1) (TODO)
-	[1090] = true, -- Sleep (Rank 2) (TODO)
+	[28271] = true, -- Polymorph: Turtle
+	[28272] = true, -- Polymorph: Pig
+	[13327] = true, -- Reckless Charge
+	[700] = true, -- Sleep (Rank 1)
+	[1090] = true, -- Sleep (Rank 2)
 }
