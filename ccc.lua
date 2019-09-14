@@ -257,8 +257,8 @@ do
 		end
 		local cast = CASTS[cast_guid]
 		tinsert(PENDING, {
-			effect = SPELL_EFFECT[effect] or effect, -- TODO sometimes effect has different name
-			effect_name = GetSpellInfo(effect), -- TODO sometimes effect has different name
+			effect = SPELL_EFFECT[effect] or effect,
+			effect_name = GetSpellInfo(effect),
 			unit = cast.target,
 			unit_name = cast.target_name,
 			time = GetTime() + (PROJECTILE[effect] and 1.5 or 0),
@@ -508,7 +508,7 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		AuraGone(guid, effect_name)
 	elseif event == 'SPELL_MISSED' then
 		for i = 1, getn(PENDING) do
-			if PENDING[i].effect_name == effect_name and PENDING[i].unit == guid then -- TODO should be spell name, not effect name
+			if PENDING[i].effect_name == effect_name and PENDING[i].unit == guid then
 				tremove(PENDING, i)
 				break
 			end
@@ -527,7 +527,7 @@ function UNIT_AURA(unit)
 	for debuff_name, debuff in pairs(debuffs) do
 		if not TARGET_DEBUFFS[debuff_name] or TARGET_DEBUFFS[debuff_name] ~= debuffs[debuff_name] then
 			for i = 1, getn(PENDING) do
-				if PENDING[i].effect_name == debuff_name and (PENDING[i].unit == TARGET_GUID or AOE[PENDING[i].effect]) then -- TODO effect == debuff (need to add mapping from action to effect)
+				if PENDING[i].effect_name == debuff_name and (PENDING[i].unit == TARGET_GUID or AOE[PENDING[i].effect]) then
 					StartTimer(PENDING[i].effect, TARGET_GUID, PENDING[i].unit_name, PENDING[i].duration)
 					tremove(PENDING, i)
 					break
