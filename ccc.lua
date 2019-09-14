@@ -462,10 +462,10 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 			end
 		end
 		local effect, duration
-		if effect_name == GetSpellInfo(14309) then -- Freezing Trap Effect
+		if effect_name == GetSpellInfo(14309) and FREEZING_TRAP_RANK then -- Freezing Trap Effect
 			local _, _, _, _, rank = GetTalentInfo(3, 7)
 			effect = 14309
-			duration = 20 * (1 + rank * .15)
+			duration = (5 + 5 * FREEZING_TRAP_RANK) * (1 + rank * .15)
 		elseif effect_name == GetSpellInfo(6358) then -- Seduction
 			effect = 6358
 			local _, _, _, _, rank = GetTalentInfo(2, 7)
