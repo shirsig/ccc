@@ -241,7 +241,6 @@ do
 		if not DURATION[effect] then
 			return
 		end
-		local _, _, rank = strfind(GetSpellSubtext(effect) or '', 'Rank ([1-9]%d*)')
 		if effect == 3355 then
 			FREEZING_TRAP_RANK = 1
 		elseif effect == 14308 then
@@ -260,7 +259,6 @@ do
 		tinsert(PENDING, {
 			effect = SPELL_EFFECT[effect] or effect, -- TODO sometimes effect has different name
 			effect_name = GetSpellInfo(effect), -- TODO sometimes effect has different name
-			rank = rank,
 			unit = cast.target,
 			unit_name = cast.target_name,
 			time = GetTime() + (PROJECTILE[effect] and 1.5 or 0),
