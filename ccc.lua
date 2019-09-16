@@ -27,7 +27,7 @@ local MAXBARS = 11
 local DELAY = 1
 
 local BARS, TIMERS, PENDING, CASTS = {}, {}, {}, {}
-local TARGET_GUID, TARGET_DEBUFFS
+local TARGET_GUIDS, TARGET_DEBUFFS = {}, {}
 
 local FREEZING_TRAP_RANK
 
@@ -230,12 +230,16 @@ function TargetDebuffs()
 end
 
 do
-	function UNIT_SPELLCAST_SENT(_, _, cast_guid)
-		CASTS[cast_guid] = { target = TARGET_GUID, target_name = UnitName'target' }
+	function UNIT_SPELLCAST_SENT(_, target_name, cast_guid) -- TODO no better way to get the target GUID?
+		CASTS[cast_guid] = { target = TARGET_GUIDS[target_name], target_name = target_name }
 	end
 
 	function UNIT_SPELLCAST_SUCCEEDED(unit, cast_guid, spell)
 		-- TODO only fires for unit player in classic?
+		local cast = CASTS[cast_guid] -- TODO sometimes this event is firing multiple times?
+		if not cast then
+			return
+		end
 
 		if spell == 3355 then
 			FREEZING_TRAP_RANK = 1
@@ -258,7 +262,6 @@ do
 		if BONUS[effect] then
 			duration = duration + BONUS[effect]()
 		end
-		local cast = CASTS[cast_guid]
 		tinsert(PENDING, {
 			effect = SPELL_EFFECT[effect] or effect,
 			effect_name = GetSpellInfo(effect),
@@ -521,17 +524,18 @@ end
 
 function UNIT_AURA(unit)
 	if unit ~= 'target' then return end
+	local target_guid = UnitGUID'target'
 	local debuffs = TargetDebuffs()
 	for effect_name in pairs(TARGET_DEBUFFS) do
 		if not debuffs[effect_name] then
-			AuraGone(TARGET_GUID, effect_name)
+			AuraGone(target_guid, effect_name)
 		end
 	end
 	for debuff_name, debuff in pairs(debuffs) do
 		if not TARGET_DEBUFFS[debuff_name] or TARGET_DEBUFFS[debuff_name] ~= debuffs[debuff_name] then
 			for i = 1, getn(PENDING) do
-				if PENDING[i].effect_name == debuff_name and (PENDING[i].unit == TARGET_GUID or AOE[PENDING[i].effect]) then
-					StartTimer(PENDING[i].effect, TARGET_GUID, PENDING[i].unit_name, PENDING[i].duration)
+				if PENDING[i].effect_name == debuff_name and (PENDING[i].unit == target_guid or AOE[PENDING[i].effect]) then
+					StartTimer(PENDING[i].effect, target_guid, PENDING[i].unit_name, PENDING[i].duration)
 					tremove(PENDING, i)
 					break
 				end
@@ -546,12 +550,13 @@ do
 
 	function PLAYER_TARGET_CHANGED()
 		TARGET_DEBUFFS = TargetDebuffs()
-		TARGET_GUID = UnitGUID'target'
-		if TARGET_GUID then
+		local target_guid = UnitGUID'target'
+		if target_guid then
+			TARGET_GUIDS[UnitName'target'] = target_guid
 			if UnitIsPlayer'target' then
-				unitType[TARGET_GUID] = 1
+				unitType[target_guid] = 1
 			elseif UnitPlayerControlled'target' then
-				unitType[TARGET_GUID] = 2
+				unitType[target_guid] = 2
 			end
 		end
 		for _, cast in pairs(CASTS) do
