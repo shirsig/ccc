@@ -241,11 +241,11 @@ do
 			return
 		end
 
-		if spell == 3355 then
+		if spell == 1499 then
 			FREEZING_TRAP_RANK = 1
-		elseif spell == 14308 then
+		elseif spell == 14310 then
 			FREEZING_TRAP_RANK = 2
-		elseif spell == 14309 then
+		elseif spell == 14311 then
 			FREEZING_TRAP_RANK = 3
 		end
 
