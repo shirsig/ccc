@@ -230,7 +230,14 @@ function TargetDebuffs()
 end
 
 do
-	function UNIT_SPELLCAST_SENT(_, target_name, cast_guid) -- TODO no better way to get the target GUID?
+	function UNIT_SPELLCAST_SENT(_, target_name, cast_guid, spell) -- TODO no better way to get the target GUID?
+		if spell == 1499 then -- TODO why not working in succeeded
+			FREEZING_TRAP_RANK = 1
+		elseif spell == 14310 then
+			FREEZING_TRAP_RANK = 2
+		elseif spell == 14311 then
+			FREEZING_TRAP_RANK = 3
+		end
 		CASTS[cast_guid] = { target = TARGET_GUIDS[target_name], target_name = target_name }
 	end
 
@@ -241,15 +248,7 @@ do
 			return
 		end
 
-		if spell == 1499 then
-			FREEZING_TRAP_RANK = 1
-		elseif spell == 14310 then
-			FREEZING_TRAP_RANK = 2
-		elseif spell == 14311 then
-			FREEZING_TRAP_RANK = 3
-		end
-
-		local effect = SPELL_EFFECT[spell] or spell
+		local effect = SPELL_EFFECT[spell] or spell -- TODO is spell here already the effect?
 
 		if not DURATION[effect] then
 			return
