@@ -236,18 +236,21 @@ do
 
 	function UNIT_SPELLCAST_SUCCEEDED(unit, cast_guid, spell)
 		-- TODO only fires for unit player in classic?
+
+		if spell == 3355 then
+			FREEZING_TRAP_RANK = 1
+		elseif spell == 14308 then
+			FREEZING_TRAP_RANK = 2
+		elseif spell == 14309 then
+			FREEZING_TRAP_RANK = 3
+		end
+
 		local effect = SPELL_EFFECT[spell] or spell
 
 		if not DURATION[effect] then
 			return
 		end
-		if effect == 3355 then
-			FREEZING_TRAP_RANK = 1
-		elseif effect == 14308 then
-			FREEZING_TRAP_RANK = 2
-		elseif effect == 14309 then
-			FREEZING_TRAP_RANK = 3
-		end
+
 		local duration = DURATION[effect]
 		if COMBO[effect] then
 			duration = duration + COMBO[effect] * GetComboPoints('player', 'target')
