@@ -243,12 +243,12 @@ do
 
 	function UNIT_SPELLCAST_SUCCEEDED(unit, cast_guid, spell)
 		-- TODO only fires for unit player in classic?
-		local cast = CASTS[cast_guid] -- TODO sometimes this event is firing multiple times?
+		local cast = CASTS[cast_guid] -- TODO sometimes this event is firing twice when using targeting macros in the same macro as the cast
 		if not cast then
 			return
 		end
 
-		local effect = SPELL_EFFECT[spell] or spell -- TODO is spell here already the effect?
+		local effect = SPELL_EFFECT[spell] or spell
 
 		if not DURATION[effect] then
 			return
