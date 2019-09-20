@@ -208,10 +208,10 @@ do
 			return talentRank(2, 1) * .5
 		end,
 		cone_of_cold = function()
-			return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
+			return min(1, talentRank(3, 7)) * .5 + talentRank(3, 2) * .5
 		end,
 		frostbolt = function()
-			return min(1, talentRank(3, 2)) * .5 + talentRank(3, 2) * .5
+			return min(1, talentRank(3, 7)) * .5 + talentRank(3, 2) * .5
 		end,
 		pounce = function()
 			return talentRank(2, 4) * .5
