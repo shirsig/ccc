@@ -505,6 +505,9 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		elseif effect_name == GetSpellInfo(18498) then -- Shield Bash - Silenced
 			effect = 18498
 			duration = 3
+		elseif effect_name == GetSpellInfo(5530) then -- Mace Stun Effect
+			effect = 5530
+			duration = 3
 		end
 		if effect then
 			StartTimer(effect, guid, name, duration)
