@@ -372,6 +372,10 @@ end
 function StartTimer(effect, unit, unit_name, duration, start)
 	local effect_name, _, texture = GetSpellInfo(effect)
 
+	if ccc_settings.ignore[effect_name] then
+		return
+	end
+
 	duration = DiminishedDuration(unit, effect, duration)
 
 	if duration == 0 then
@@ -592,6 +596,7 @@ do
 		growth = 'up',
 		scale = 1,
 		alpha = .85,
+		ignore = {},
 	}
 
 	function ADDON_LOADED(name)
@@ -666,8 +671,8 @@ do
 				ccc_settings.growth = args[2]
 				Print('Growth: ' .. args[2])
 				if not LOCKED then UnlockBars() end
-			elseif strsub(command, 1, 5) == 'scale' then
-				local scale = tonumber(strsub(command, 7))
+			elseif args[1] == 'scale' then
+				local scale = tonumber(args[2])
 				if scale then
 					scale = max(.5, min(3, scale))
 					ccc_settings.scale = scale
@@ -676,8 +681,8 @@ do
 				else
 					Usage()
 				end
-			elseif strsub(command, 1, 5) == 'alpha' then
-				local alpha = tonumber(strsub(command, 7))
+			elseif args[1] == 'alpha' then
+				local alpha = tonumber(args[2])
 				if alpha then
 					alpha = max(0, min(1, alpha))
 					ccc_settings.alpha = alpha
@@ -686,9 +691,14 @@ do
 				else
 					Usage()
 				end
-			elseif command == 'clear' then
-				ccc_settings = nil
-				LoadVariables()
+			elseif command == 'ignore' then
+				for effect_name in pairs(ccc_settings.ignore) do
+					Print('Ignored effects:')
+					Print('  ' .. effect_name)
+				end
+			elseif args[1] == 'ignore' then
+				ccc_settings.ignore[args[2]] = not ccc_settings.ignore[args[2]] or nil
+				Print('Ignoring "' .. args[2] .. '" ' .. (ccc_settings.ignore[args[2]] and 'on. ' or 'off.'))
 			else
 				Usage()
 			end
@@ -703,4 +713,6 @@ function Usage()
 	Print('  growth (up | down)')
 	Print('  scale [0.5,3]')
 	Print('  alpha [0,1]')
+	Print('  ignore {name}')
+	Print('  ignore')
 end
