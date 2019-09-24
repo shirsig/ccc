@@ -144,6 +144,7 @@ DURATION = {
 	[8312] = 10, -- Trap
 	[13120] = 10, -- Net-o-Matic
 	[835] = 3, -- Tidal Charm
+	[589] = 18
 }
 
 PROJECTILE = {

@@ -24,7 +24,7 @@ local WIDTH = 170
 local HEIGHT = 16
 local MAXBARS = 11
 
-local DELAY = .5
+-- local DELAY = .5 -- TODO perhaps not necessary with SPELL_AURA_REFRESH (combat log range?)
 
 local BARS, TIMERS, PENDING, CASTS = {}, {}, {}, {}
 local TARGET_GUIDS, TARGET_DEBUFFS = {}, {}
@@ -276,10 +276,10 @@ end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
-		if GetTime() >= PENDING[i].time + DELAY then
-			if not AOE[PENDING[i].effect] and (PENDING[i].target_changed or TARGET_DEBUFFS[PENDING[i].effect_name]) then -- TODO do we need target_changed or is the combat log range large enough
-				StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].unit_name, PENDING[i].duration, PENDING[i].time)
-			end
+		if GetTime() >= PENDING[i].time + 10 then
+			-- if not AOE[PENDING[i].effect] and (PENDING[i].target_changed or TARGET_DEBUFFS[PENDING[i].effect_name]) then -- TODO do we need target_changed or is the combat log range large enough
+			-- 	StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].unit_name, PENDING[i].duration, PENDING[i].time)
+			-- end
 			tremove(PENDING, i)
 		end
 	end
@@ -320,22 +320,22 @@ function ActivateDRTimer(timer, unit)
 end
 
 function CHAT_MSG_COMBAT_HONOR_GAIN(...) -- TODO retail is this needed?
-	-- for unit in string.gmatch(arg1, '(.+) dies') do
-	-- 	UnitDied(unit)
-	-- end
+	for unit in string.gmatch(arg1, '(.+) dies') do
+		UnitDied(unit)
+	end
 end
 
 function PLAYER_REGEN_ENABLED(...) -- TODO retail is this needed (combat log range)
-	-- for i = getn(PENDING), 1, -1 do
-	-- 	if not IsPlayer(PENDING[i].unit) and not IsPet(PENDING[i].unit) then
-	-- 		tremove(PENDING, i)
-	-- 	end
-	-- end
-	-- for k, timer in pairs(TIMERS) do
-	-- 	if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
-	-- 		StopTimer(k)
-	-- 	end
-	-- end
+	for i = getn(PENDING), 1, -1 do
+		if not IsPlayer(PENDING[i].unit) and not IsPet(PENDING[i].unit) then
+			tremove(PENDING, i)
+		end
+	end
+	for k, timer in pairs(TIMERS) do
+		if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
+			StopTimer(k)
+		end
+	end
 end
 
 function PlaceTimers()
@@ -462,7 +462,7 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		return
 	end
 
-	if event == 'SPELL_AURA_APPLIED' then
+	if event == 'SPELL_AURA_APPLIED' or event == 'SPELL_AURA_REFRESH' then
 		for i = 1, getn(PENDING) do
 			if PENDING[i].effect_name == effect_name and PENDING[i].unit == guid then
 				StartTimer(PENDING[i].effect, guid, name, PENDING[i].duration)
@@ -479,9 +479,9 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 			effect = 6358
 			local _, _, _, _, rank = GetTalentInfo(2, 7)
 			duration = 15 * (1 + rank * .1)
-		-- elseif effect_name == GetSpellInfo(3421) then -- Crippling Poison
-		-- 	effect = 3421
-		-- 	duration = 12
+		elseif effect_name == GetSpellInfo(3421) then -- Crippling Poison
+			effect = 3421
+			duration = 12
 		elseif effect_name == GetSpellInfo(15269) then -- Blackout
 			effect = 15269
 			duration = 3
