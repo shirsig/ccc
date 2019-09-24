@@ -9,9 +9,7 @@ do
 	for _, event in pairs{
 		'ADDON_LOADED',
 		'UNIT_SPELLCAST_SENT',
-		'UNIT_SPELLCAST_SUCCEEDED',
 		'COMBAT_LOG_EVENT_UNFILTERED',
-		'UNIT_AURA',
 		'CHAT_MSG_COMBAT_HONOR_GAIN',
 		'PLAYER_REGEN_ENABLED',
 		'PLAYER_TARGET_CHANGED',
@@ -24,10 +22,7 @@ local WIDTH = 170
 local HEIGHT = 16
 local MAXBARS = 11
 
--- local DELAY = .5 -- TODO perhaps not necessary with SPELL_AURA_REFRESH (combat log range?)
-
-local BARS, TIMERS, PENDING = {}, {}, {}
-local TARGET_GUIDS, TARGET_DEBUFFS = {}, {}
+local BARS, TIMERS, EFFECT = {}, {}, {}
 
 local FREEZING_TRAP_RANK
 
@@ -229,78 +224,35 @@ function TargetDebuffs()
 	return debuffs
 end
 
-do
-	local CASTS = {}
-
-	function UNIT_SPELLCAST_SENT(_, target_name, cast_guid, spell) -- TODO no better way to get the target GUID? Also, perhaps GUID not needed at all? Also, can't we queue timer here already?
-		if spell == 1499 then
-			FREEZING_TRAP_RANK = 1
-		elseif spell == 14310 then
-			FREEZING_TRAP_RANK = 2
-		elseif spell == 14311 then
-			FREEZING_TRAP_RANK = 3
-		end
-		CASTS[cast_guid] = { target = TARGET_GUIDS[target_name], target_name = target_name }
+function UNIT_SPELLCAST_SENT(_, target_name, cast_guid, spell)
+	if spell == 1499 then
+		FREEZING_TRAP_RANK = 1
+	elseif spell == 14310 then
+		FREEZING_TRAP_RANK = 2
+	elseif spell == 14311 then
+		FREEZING_TRAP_RANK = 3
 	end
 
-	function UNIT_SPELLCAST_SUCCEEDED(_, cast_guid, spell)
-		-- TODO only fires for unit player in classic?
-		local cast = CASTS[cast_guid] -- TODO sometimes this event is firing twice when using targeting macros in the same macro as the cast
-		if not cast then
-			return
-		end
+	local effect = SPELL_EFFECT[spell] or spell
 
-		local effect = SPELL_EFFECT[spell] or spell
-
-		if not DURATION[effect] then
-			return
-		end
-
-		local duration = DURATION[effect]
-		if COMBO[effect] then
-			duration = duration + COMBO[effect] * GetComboPoints('player', 'target')
-		end
-		if BONUS[effect] then
-			duration = duration + BONUS[effect]()
-		end
-		tinsert(PENDING, {
-			effect = SPELL_EFFECT[effect] or effect,
-			effect_name = GetSpellInfo(effect),
-			unit = cast.target,
-			unit_name = cast.target_name,
-			time = GetTime() + (PROJECTILE[effect] and 1.5 or 0),
-			duration = duration,
-			-- target_changed = cast.target_changed,
-		})	
-
-		CASTS = {} -- TODO does this not break anything?
+	if not DURATION[effect] then
+		return
 	end
+
+	local duration = DURATION[effect]
+	if COMBO[effect] then
+		duration = duration + COMBO[effect] * GetComboPoints('player', 'target')
+	end
+	if BONUS[effect] then
+		duration = duration + BONUS[effect]()
+	end
+	EFFECT[GetSpellInfo(effect)] = { id = effect, duration = duration }	
 end
-
-CreateFrame'Frame':SetScript('OnUpdate', function()
-	for i = getn(PENDING), 1, -1 do
-		if GetTime() > PENDING[i].time + 10 then
-			-- if not AOE[PENDING[i].effect] and (PENDING[i].target_changed or TARGET_DEBUFFS[PENDING[i].effect_name]) then -- TODO do we need target_changed or is the combat log range large enough
-			-- 	StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].unit_name, PENDING[i].duration, PENDING[i].time)
-			-- end
-			tremove(PENDING, i)
-		end
-	end
-end)
-
--- function AbortCast(effect, unit)
--- 	for i = getn(PENDING), 1, -1 do
--- 		if PENDING[i].effect == effect and PENDING[i].unit == unit then
--- 			tremove(PENDING, i)
--- 		end
--- 	end
--- end
 
 function AuraGone(unit, effect_name)
 	local key = effect_name .. '@' .. unit
 	local timer = TIMERS[key]
 	if timer then
-	-- AbortCast(effect, unit) TODO retail
 		StopTimer(key)
 		ActivateDRTimer(timer, unit)
 	end
@@ -329,11 +281,6 @@ function CHAT_MSG_COMBAT_HONOR_GAIN(...) -- TODO retail is this needed?
 end
 
 function PLAYER_REGEN_ENABLED(...) -- TODO retail is this needed (combat log range)
-	for i = getn(PENDING), 1, -1 do
-		if not IsPlayer(PENDING[i].unit) and not IsPet(PENDING[i].unit) then
-			tremove(PENDING, i)
-		end
-	end
 	for k, timer in pairs(TIMERS) do
 		if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
 			StopTimer(k)
@@ -442,11 +389,6 @@ function StopTimer(key)
 end
 
 function UnitDied(unit) -- TODO retail does aura gone not fire when unit dies?
-	for i = getn(PENDING), 1, -1 do
-		if PENDING[i].unit == unit then
-			tremove(PENDING, i)
-		end
-	end
 	for k, timer in pairs(TIMERS) do
 		if timer.unit == unit then
 			StopTimer(k)
@@ -465,12 +407,9 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		return
 	end
 	if event == 'SPELL_AURA_APPLIED' or event == 'SPELL_AURA_REFRESH' then
-		for i = 1, getn(PENDING) do
-			if PENDING[i].effect_name == effect_name and PENDING[i].unit == unit then
-				StartTimer(PENDING[i].effect, unit, unit_name, PENDING[i].duration)
-				tremove(PENDING, i)
-				break
-			end
+		local effect_info = EFFECT[effect_name]
+		if effect_info then
+			StartTimer(effect_info.id, unit, unit_name, effect_info.duration)
 		end
 		local effect, duration
 		if effect_name == GetSpellInfo(14309) and FREEZING_TRAP_RANK then -- Freezing Trap Effect
@@ -520,61 +459,21 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		end
 	elseif event == 'SPELL_AURA_REMOVED' then
 		AuraGone(unit, effect_name)
-	elseif event == 'SPELL_MISSED' then
-		for i = 1, getn(PENDING) do
-			if PENDING[i].effect_name == effect_name and PENDING[i].unit == unit then
-				tremove(PENDING, i)
-				break
-			end
-		end
 	end
-end
-
-function UNIT_AURA(unit) -- TODO probably not needed
-	if unit ~= 'target' then
-		return
-	end
-	local target_guid = UnitGUID'target'
-	local debuffs = TargetDebuffs()
-	for effect_name in pairs(TARGET_DEBUFFS) do
-		if not debuffs[effect_name] then
-			AuraGone(target_guid, effect_name)
-		end
-	end
-	for debuff_name in pairs(debuffs) do
-		if not TARGET_DEBUFFS[debuff_name] then
-			for i = 1, getn(PENDING) do
-				if PENDING[i].effect_name == debuff_name and (PENDING[i].unit == target_guid or AOE[PENDING[i].effect]) then
-					StartTimer(PENDING[i].effect, target_guid, PENDING[i].unit_name, PENDING[i].duration)
-					tremove(PENDING, i)
-					break
-				end
-			end
-		end
-	end
-	TARGET_DEBUFFS = debuffs
 end
 
 do
 	local unitType = {}
 
 	function PLAYER_TARGET_CHANGED()
-		TARGET_DEBUFFS = TargetDebuffs()
 		local target_guid = UnitGUID'target'
 		if target_guid then
-			TARGET_GUIDS[UnitName'target'] = target_guid
 			if UnitIsPlayer'target' then
 				unitType[target_guid] = 1
 			elseif UnitPlayerControlled'target' then
 				unitType[target_guid] = 2
 			end
 		end
-		-- for _, cast in pairs(CASTS) do
-		-- 	cast.target_changed = true
-		-- end
-		-- for _, action in pairs(PENDING) do
-		-- 	action.target_changed = true
-		-- end
 	end
 
 	function IsPlayer(guid)
