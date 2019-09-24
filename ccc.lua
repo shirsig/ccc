@@ -26,7 +26,7 @@ local MAXBARS = 11
 
 -- local DELAY = .5 -- TODO perhaps not necessary with SPELL_AURA_REFRESH (combat log range?)
 
-local BARS, TIMERS, PENDING, CASTS = {}, {}, {}, {}
+local BARS, TIMERS, PENDING = {}, {}, {}
 local TARGET_GUIDS, TARGET_DEBUFFS = {}, {}
 
 local FREEZING_TRAP_RANK
@@ -230,8 +230,10 @@ function TargetDebuffs()
 end
 
 do
-	function UNIT_SPELLCAST_SENT(_, target_name, cast_guid, spell) -- TODO no better way to get the target GUID?
-		if spell == 1499 then -- TODO why not working in succeeded
+	local CASTS = {}
+
+	function UNIT_SPELLCAST_SENT(_, target_name, cast_guid, spell) -- TODO no better way to get the target GUID? Also, perhaps GUID not needed at all? Also, can't we queue timer here already?
+		if spell == 1499 then
 			FREEZING_TRAP_RANK = 1
 		elseif spell == 14310 then
 			FREEZING_TRAP_RANK = 2
@@ -241,7 +243,7 @@ do
 		CASTS[cast_guid] = { target = TARGET_GUIDS[target_name], target_name = target_name }
 	end
 
-	function UNIT_SPELLCAST_SUCCEEDED(unit, cast_guid, spell)
+	function UNIT_SPELLCAST_SUCCEEDED(_, cast_guid, spell)
 		-- TODO only fires for unit player in classic?
 		local cast = CASTS[cast_guid] -- TODO sometimes this event is firing twice when using targeting macros in the same macro as the cast
 		if not cast then
@@ -268,15 +270,16 @@ do
 			unit_name = cast.target_name,
 			time = GetTime() + (PROJECTILE[effect] and 1.5 or 0),
 			duration = duration,
-			target_changed = cast.target_changed,
-		})
+			-- target_changed = cast.target_changed,
+		})	
+
 		CASTS = {} -- TODO does this not break anything?
 	end
 end
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
 	for i = getn(PENDING), 1, -1 do
-		if GetTime() >= PENDING[i].time + 10 then
+		if GetTime() > PENDING[i].time + 10 then
 			-- if not AOE[PENDING[i].effect] and (PENDING[i].target_changed or TARGET_DEBUFFS[PENDING[i].effect_name]) then -- TODO do we need target_changed or is the combat log range large enough
 			-- 	StartTimer(PENDING[i].effect, PENDING[i].unit, PENDING[i].unit_name, PENDING[i].duration, PENDING[i].time)
 			-- end
@@ -452,20 +455,19 @@ function UnitDied(unit) -- TODO retail does aura gone not fire when unit dies?
 end
 
 function COMBAT_LOG_EVENT_UNFILTERED()
-	local _, event, _, source_guid, _, _, _, guid, name, _, _, _, effect_name = CombatLogGetCurrentEventInfo()
+	local _, event, _, source, _, _, _, unit, unit_name, _, _, spell, effect_name = CombatLogGetCurrentEventInfo()
 
 	if event == 'UNIT_DIED' then
-		UnitDied(guid)
+		UnitDied(unit)
 	end
 
-	if source_guid ~= UnitGUID'player' and source_guid ~= UnitGUID'pet' then
+	if source ~= UnitGUID'player' and source ~= UnitGUID'pet' then
 		return
 	end
-
 	if event == 'SPELL_AURA_APPLIED' or event == 'SPELL_AURA_REFRESH' then
 		for i = 1, getn(PENDING) do
-			if PENDING[i].effect_name == effect_name and PENDING[i].unit == guid then
-				StartTimer(PENDING[i].effect, guid, name, PENDING[i].duration)
+			if PENDING[i].effect_name == effect_name and PENDING[i].unit == unit then
+				StartTimer(PENDING[i].effect, unit, unit_name, PENDING[i].duration)
 				tremove(PENDING, i)
 				break
 			end
@@ -479,8 +481,8 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 			effect = 6358
 			local _, _, _, _, rank = GetTalentInfo(2, 7)
 			duration = 15 * (1 + rank * .1)
-		elseif effect_name == GetSpellInfo(3421) then -- Crippling Poison
-			effect = 3421
+		elseif effect_name == GetSpellInfo(11201) then -- Crippling Poison
+			effect = 11201
 			duration = 12
 		elseif effect_name == GetSpellInfo(15269) then -- Blackout
 			effect = 15269
@@ -514,13 +516,13 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 			duration = 3
 		end
 		if effect then
-			StartTimer(effect, guid, name, duration)
+			StartTimer(effect, unit, unit_name, duration)
 		end
 	elseif event == 'SPELL_AURA_REMOVED' then
-		AuraGone(guid, effect_name)
+		AuraGone(unit, effect_name)
 	elseif event == 'SPELL_MISSED' then
 		for i = 1, getn(PENDING) do
-			if PENDING[i].effect_name == effect_name and PENDING[i].unit == guid then
+			if PENDING[i].effect_name == effect_name and PENDING[i].unit == unit then
 				tremove(PENDING, i)
 				break
 			end
@@ -528,8 +530,10 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 	end
 end
 
-function UNIT_AURA(unit)
-	if unit ~= 'target' then return end
+function UNIT_AURA(unit) -- TODO probably not needed
+	if unit ~= 'target' then
+		return
+	end
 	local target_guid = UnitGUID'target'
 	local debuffs = TargetDebuffs()
 	for effect_name in pairs(TARGET_DEBUFFS) do
@@ -565,12 +569,12 @@ do
 				unitType[target_guid] = 2
 			end
 		end
-		for _, cast in pairs(CASTS) do
-			cast.target_changed = true
-		end
-		for _, action in pairs(PENDING) do
-			action.target_changed = true
-		end
+		-- for _, cast in pairs(CASTS) do
+		-- 	cast.target_changed = true
+		-- end
+		-- for _, action in pairs(PENDING) do
+		-- 	action.target_changed = true
+		-- end
 	end
 
 	function IsPlayer(guid)
