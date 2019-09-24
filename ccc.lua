@@ -24,7 +24,7 @@ local WIDTH = 170
 local HEIGHT = 16
 local MAXBARS = 11
 
-local DELAY = 1
+local DELAY = .5
 
 local BARS, TIMERS, PENDING, CASTS = {}, {}, {}, {}
 local TARGET_GUIDS, TARGET_DEBUFFS = {}, {}
@@ -220,9 +220,9 @@ function TargetDebuffs()
 	local debuffs = {}
 	local i = 1
 	while UnitDebuff('target', i) do
-		local debuff_name, _, _, _, _, _, source, _, _, debuff = UnitDebuff('target', i)
+		local debuff_name, _, _, _, _, _, source = UnitDebuff('target', i)
 		if source == 'player' then
-			debuffs[debuff_name] = debuff
+			debuffs[debuff_name] = true
 		end
 		i = i + 1
 	end
@@ -533,8 +533,8 @@ function UNIT_AURA(unit)
 			AuraGone(target_guid, effect_name)
 		end
 	end
-	for debuff_name, debuff in pairs(debuffs) do
-		if not TARGET_DEBUFFS[debuff_name] or TARGET_DEBUFFS[debuff_name] ~= debuffs[debuff_name] then
+	for debuff_name in pairs(debuffs) do
+		if not TARGET_DEBUFFS[debuff_name] then
 			for i = 1, getn(PENDING) do
 				if PENDING[i].effect_name == debuff_name and (PENDING[i].unit == target_guid or AOE[PENDING[i].effect]) then
 					StartTimer(PENDING[i].effect, target_guid, PENDING[i].unit_name, PENDING[i].duration)
