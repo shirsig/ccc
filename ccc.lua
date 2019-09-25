@@ -9,6 +9,7 @@ do
 	for _, event in pairs{
 		'ADDON_LOADED',
 		'UNIT_SPELLCAST_SENT',
+		'UNIT_SPELLCAST_SUCCEEDED',
 		'COMBAT_LOG_EVENT_UNFILTERED',
 		'CHAT_MSG_COMBAT_HONOR_GAIN',
 		'PLAYER_REGEN_ENABLED',
@@ -224,7 +225,7 @@ function TargetDebuffs()
 	return debuffs
 end
 
-function UNIT_SPELLCAST_SENT(_, target_name, cast_guid, spell)
+function UNIT_SPELLCAST_SENT(_, _, _, spell)
 	if spell == 1499 then
 		FREEZING_TRAP_RANK = 1
 	elseif spell == 14310 then
@@ -233,6 +234,16 @@ function UNIT_SPELLCAST_SENT(_, target_name, cast_guid, spell)
 		FREEZING_TRAP_RANK = 3
 	end
 
+	if spell == 6770 or spell == 2070 or spell == 11297 then -- Sap
+		SetEffectDuration(spell)
+	end
+end
+
+function UNIT_SPELLCAST_SUCCEEDED(_, _, spell)
+	SetEffectDuration(spell)
+end
+
+function SetEffectDuration(spell)
 	local effect = SPELL_EFFECT[spell] or spell
 
 	if not DURATION[effect] then
@@ -246,7 +257,8 @@ function UNIT_SPELLCAST_SENT(_, target_name, cast_guid, spell)
 	if BONUS[effect] then
 		duration = duration + BONUS[effect]()
 	end
-	EFFECT[GetSpellInfo(effect)] = { id = effect, duration = duration }	
+
+	EFFECT[GetSpellInfo(effect)] = { id = effect, duration = duration }
 end
 
 function AuraGone(unit, effect_name)
