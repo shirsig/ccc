@@ -430,8 +430,8 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		elseif effect_name == GetSpellInfo(18118) then -- Aftermath
 			effect = 18118
 			duration = 5
-		elseif effect_name == GetSpellInfo(12497) then -- Frostbite
-			effect = 12497
+		elseif effect_name == GetSpellInfo(12494) then -- Frostbite
+			effect = 12494
 			duration = 5
 		elseif effect_name == GetSpellInfo(19229) then -- Improved Wing Clip
 			effect = 19229

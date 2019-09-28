@@ -304,7 +304,7 @@ DR_CLASS = {
 	[865] = 7, -- Frost Nova (Rank 2)
 	[6131] = 7, -- Frost Nova (Rank 3)
 	[10230] = 7, -- Frost Nova (Rank 4)
-	[12497] = 6, -- Frostbite (Rank 3)
+	[12494] = 7, -- Frostbite (Rank 1)
 
 	[1833] = 8, -- Cheap Shot
 
