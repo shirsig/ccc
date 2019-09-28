@@ -403,15 +403,18 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 
 	if event == 'UNIT_DIED' then
 		UnitDied(unit)
+		return
 	end
 
 	if source ~= UnitGUID'player' and source ~= UnitGUID'pet' then
 		return
 	end
+
 	if event == 'SPELL_AURA_APPLIED' or event == 'SPELL_AURA_REFRESH' then
 		local effect_info = EFFECT[effect_name]
 		if effect_info then
 			StartTimer(effect_info.id, unit, unit_name, effect_info.duration)
+			return
 		end
 		local effect, duration
 		if effect_name == GetSpellInfo(6358) then -- Seduction
@@ -421,6 +424,9 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		elseif effect_name == GetSpellInfo(11201) then -- Crippling Poison
 			effect = 11201
 			duration = 12
+		elseif effect_name == GetSpellInfo(13810) then -- Frost Trap Aura
+			effect = 13810
+			duration = 30
 		elseif effect_name == GetSpellInfo(15269) then -- Blackout
 			effect = 15269
 			duration = 3
