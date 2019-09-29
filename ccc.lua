@@ -482,7 +482,7 @@ do
 	end
 
 	function IsPlayer(guid)
-		return true
+		return unitType[guid] == 1
 	end
 
 	function IsPet(guid)
