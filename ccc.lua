@@ -557,14 +557,15 @@ end
 do
 	local function tokenize(str)
 		local tokens = {}
-		for token in string.gmatch(str, '%S+') do tinsert(tokens, token) end
+		for token in string.gmatch(str, '%S+') do
+			tinsert(tokens, token)
+		end
 		return tokens
 	end
 
-	function SlashCommandHandler(msg)
-		if msg then
-			local args = tokenize(msg)
-			local command = strlower(msg)
+	function SlashCommandHandler(command)
+		if command then
+			local args = tokenize(command)
 			if command == 'unlock' then
 				UnlockBars()
 				Print('Bars unlocked.')
@@ -604,8 +605,9 @@ do
 					Print('  ' .. effect_name)
 				end
 			elseif args[1] == 'ignore' then
-				ccc_settings.ignore[args[2]] = not ccc_settings.ignore[args[2]] or nil
-				Print('Ignoring "' .. args[2] .. '" ' .. (ccc_settings.ignore[args[2]] and 'on. ' or 'off.'))
+				local _, _, effect_name = strfind(command, '^%s*ignore%s+(.*)')
+				ccc_settings.ignore[effect_name] = not ccc_settings.ignore[effect_name] or nil
+				Print('Ignoring "' .. effect_name .. '" ' .. (ccc_settings.ignore[effect_name] and 'on. ' or 'off.'))
 			else
 				Usage()
 			end
