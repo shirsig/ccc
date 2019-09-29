@@ -282,7 +282,7 @@ function CHAT_MSG_COMBAT_HONOR_GAIN(...) -- TODO retail is this needed?
 	end
 end
 
-function PLAYER_REGEN_ENABLED(...) -- TODO retail is this needed (combat log range)
+function PLAYER_REGEN_ENABLED(...)
 	for k, timer in pairs(TIMERS) do
 		if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
 			StopTimer(k)
