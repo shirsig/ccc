@@ -224,7 +224,7 @@ function TargetDebuffs()
 end
 
 function UNIT_SPELLCAST_SENT(_, _, _, spell)
-	if spell == 6770 or spell == 2070 or spell == 11297 or spell == 1499 or spell == 14310 or spell == 14311 then -- Sap, Freezing Trap
+	if spell == 1833 or spell == 6770 or spell == 2070 or spell == 11297 or spell == 1499 or spell == 14310 or spell == 14311 then -- Cheap Shot, Sap, Freezing Trap
 		SetEffectDuration(spell)
 	end
 end
@@ -374,6 +374,7 @@ function StartDR(effect_timer, unit)
 
 			timer.effect_name = effect_timer.effect_name
 			timer.unit = unit
+			timer.unit_name = effect_timer.unit_name
 			timer.start = nil
 			timer.expiration = nil
 			timer.DR = min(3, (timer.DR or 0) + 1)
@@ -481,7 +482,7 @@ do
 	end
 
 	function IsPlayer(guid)
-		return unitType[guid] == 1
+		return true
 	end
 
 	function IsPet(guid)
