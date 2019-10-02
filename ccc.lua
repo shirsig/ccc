@@ -25,6 +25,8 @@ local MAXBARS = 11
 
 local BARS, TIMERS, EFFECT = {}, {}, {}
 
+local LATEST_TARGET
+
 function Print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage('<ccc> ' .. msg)
 end
@@ -328,6 +330,10 @@ function StartTimer(effect, unit, unit_name, duration, start)
 		return
 	end
 
+	if ccc_settings.aoe == 'target' and AOE[effect] and unit ~= LATEST_TARGET then
+		return
+	end
+
 	duration = DiminishedDuration(unit, effect, duration)
 
 	if duration == 0 then
@@ -473,6 +479,7 @@ do
 	function PLAYER_TARGET_CHANGED()
 		local target_guid = UnitGUID'target'
 		if target_guid then
+			LATEST_TARGET = target_guid
 			if UnitIsPlayer'target' then
 				unitType[target_guid] = 1
 			elseif UnitPlayerControlled'target' then
@@ -504,6 +511,7 @@ do
 		growth = 'up',
 		scale = 1,
 		alpha = .85,
+		aoe = 'target',
 		ignore = {},
 	}
 
@@ -600,6 +608,10 @@ do
 				else
 					Usage()
 				end
+			elseif args[1] == 'aoe' and (args[2] == 'target' or args[2] == 'all') then
+				ccc_settings.aoe = args[2]
+				Print('AOE: ' .. args[2])
+				if not LOCKED then UnlockBars() end
 			elseif command == 'ignore' then
 				for effect_name in pairs(ccc_settings.ignore) do
 					Print('Ignored effects:')
@@ -623,6 +635,7 @@ function Usage()
 	Print('  growth (up | down)')
 	Print('  scale [0.5,3]')
 	Print('  alpha [0,1]')
+	Print('  aoe (target | all)')
 	Print('  ignore {name}')
 	Print('  ignore')
 end
