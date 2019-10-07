@@ -258,6 +258,9 @@ do
 		[5211] = BONUS_FUNCTIONS.bash, -- Bash (Rank 1)
 		[6798] = BONUS_FUNCTIONS.bash, -- Bash (Rank 2)
 		[8983] = BONUS_FUNCTIONS.bash, -- Bash (Rank 3)
+		[3355] = BONUS_FUNCTIONS.freezing_trap_effect, -- Freezing Trap (Rank 1)
+		[14308] = BONUS_FUNCTIONS.freezing_trap_effect, -- Freezing Trap (Rank 2)
+		[14309] = BONUS_FUNCTIONS.freezing_trap_effect, -- Freezing Trap (Rank 3)
 	}
 end
 
