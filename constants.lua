@@ -144,6 +144,13 @@ DURATION = {
 	[20614] = 3, -- Intercept (Rank 2)
 	[20615] = 3, -- Intercept (Rank 3)
 	[15487] = 5, -- Silence
+	[1098] = 300, -- Enslave Demon (Rank 1)
+	[11725] = 300, -- Enslave Demon (Rank 2)
+	[11726] = 300, -- Enslave Demon (Rank 3)
+	[605] = 60, -- Mind Control (Rank 1)
+	[10911] = 60, -- Mind Control (Rank 2)
+	[10912] = 60, -- Mind Control (Rank 3)
+	[26740] = 20, -- Gnomish Mind Control Cap
 	[13327] = 30, -- Reckless Charge
 	[700] = 20, -- Sleep (Rank 1)
 	[1090] = 30, -- Sleep (Rank 2)
@@ -370,4 +377,14 @@ UNIQUENESS_CLASS = {
 	[1513] = 9, -- Scare Beast (Rank 1)
 	[14326] = 9, -- Scare Beast (Rank 2)
 	[14327] = 9, -- Scare Beast (Rank 3)
+
+	[1098] = 10, -- Enslave Demon (Rank 1)
+	[11725] = 10, -- Enslave Demon (Rank 2)
+	[11726] = 10, -- Enslave Demon (Rank 3)
+
+	[605] = 11, -- Mind Control (Rank 1)
+	[10911] = 11, -- Mind Control (Rank 2)
+	[10912] = 11, -- Mind Control (Rank 3)
+
+	[26740] = 12, -- Gnomish Mind Control Cap
 }
