@@ -198,14 +198,13 @@ end
 
 do
 	local factor = { [0] = 1, 1/2, 1/4, 0 }
-	local pvp_limit = { [0] = 15, 10, 5, 0 }
 
 	function DiminishedDuration(unit, effect, full_duration)
 		if IsPlayer(unit) or IsPet(unit) then
 			local class = DR_CLASS[effect]
 			local timer = class and TIMERS[class .. '@' .. unit]
 			local DR = IsPlayer(unit) and timer and timer.DR or 0
-			return PVP_DURATION[effect] and min(pvp_limit[DR], full_duration * factor[DR]) or full_duration * factor[DR]
+			return full_duration * factor[DR]
 		else
 			return full_duration
 		end

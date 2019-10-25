@@ -388,33 +388,3 @@ UNIQUENESS_CLASS = {
 
 	[26740] = 12, -- Gnomish Mind Control Cap
 }
-
-PVP_DURATION = {
-	[1513] = true, -- Scare Beast (Rank 1)
-	[14326] = true, -- Scare Beast (Rank 2)
-	[14327] = true, -- Scare Beast (Rank 3)
-	[3355] = true, -- Freezing Trap Effect (Rank 1)
-	[14308] = true, -- Freezing Trap Effect (Rank 2)
-	[14309] = true, -- Freezing Trap Effect (Rank 3)
-	[339] = true, -- Entangling Roots (Rank 1)
-	[1062] = true, -- Entangling Roots (Rank 2)
-	[5195] = true, -- Entangling Roots (Rank 3)
-	[5196] = true, -- Entangling Roots (Rank 4)
-	[9852] = true, -- Entangling Roots (Rank 5)
-	[9853] = true, -- Entangling Roots (Rank 6)
-	[2637] = true, -- Hibernate (Rank 1)
-	[18657] = true, -- Hibernate (Rank 2)
-	[18658] = true, -- Hibernate (Rank 3)
-	[5782] = true, -- Fear (Rank 1)
-	[6213] = true, -- Fear (Rank 2)
-	[6215] = true, -- Fear (Rank 3)
-	[118] = true, -- Polymorph (Rank 1)
-	[12824] = true, -- Polymorph (Rank 2)
-	[12825] = true, -- Polymorph (Rank 3)
-	[12826] = true, -- Polymorph (Rank 4)
-	[28271] = true, -- Polymorph: Turtle
-	[28272] = true, -- Polymorph: Pig
-	[13327] = true, -- Reckless Charge
-	[700] = true, -- Sleep (Rank 1)
-	[1090] = true, -- Sleep (Rank 2)
-}
