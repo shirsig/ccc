@@ -285,7 +285,7 @@ end
 
 function PLAYER_REGEN_ENABLED(...)
 	for k, timer in pairs(TIMERS) do
-		if not IsPlayer(timer.unit) and not IsPet(timer.unit) then
+		if not IsPlayer(timer.unit) and not IsPet(timer.unit) and not OOC[timer.effect] then
 			StopTimer(k)
 		end
 	end

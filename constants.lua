@@ -388,3 +388,13 @@ UNIQUENESS_CLASS = {
 
 	[26740] = 12, -- Gnomish Mind Control Cap
 }
+
+OOC_TIMERS = {
+	[1098] = true, -- Enslave Demon (Rank 1)
+	[11725] = true, -- Enslave Demon (Rank 2)
+	[11726] = true, -- Enslave Demon (Rank 3)
+	[605] = true, -- Mind Control (Rank 1)
+	[10911] = true, -- Mind Control (Rank 2)
+	[10912] = true, -- Mind Control (Rank 3)
+	[26740] = true, -- Gnomish Mind Control Cap
+}
