@@ -1,4 +1,4 @@
-setfenv(1, setmetatable(select(2, ...), {__index=_G}))
+setfenv(1, setmetatable(select(2, ...), { __index = _G }))
 
 SPELL_EFFECT = { -- TODO multiple effects? effect different from action?
 	[1168] = 118, -- Polymorph (Rank 1)
@@ -157,27 +157,18 @@ DURATION = {
 	[8312] = 10, -- Trap
 	[13120] = 10, -- Net-o-Matic
 	[835] = 3, -- Tidal Charm
-}
-
-PROJECTILE = {
-	[6789] = true, -- Death Coil (Rank 1)
-	[17925] = true, -- Death Coil (Rank 2)
-	[17926] = true, -- Death Coil (Rank 3)	[116] = true, -- Frostbolt (Rank 1)
-	[205] = true, -- Frostbolt (Rank 2)
-	[837] = true, -- Frostbolt (Rank 3)
-	[7322] = true, -- Frostbolt (Rank 4)
-	[8406] = true, -- Frostbolt (Rank 5)
-	[8407] = true, -- Frostbolt (Rank 6)
-	[8408] = true, -- Frostbolt (Rank 7)
-	[10179] = true, -- Frostbolt (Rank 8)
-	[10180] = true, -- Frostbolt (Rank 9)
-	[10181] = true, -- Frostbolt (Rank 10)
-	[25304] = true, -- Frostbolt (Rank 11)
-	[19386] = true, -- Wyvern String (Rank 1)
-	[24132] = true, -- Wyvern String (Rank 2)
-	[24133] = true, -- Wyvern String (Rank 3)	["concussive shot"] = true,
-	[8312] = true, -- Trap (TODO)
-	[13120] = true, -- Net-o-Matic (TODO)
+	[703] = 18, -- Garrote (Rank 1)
+	[8631] = 18, -- Garrote (Rank 2)
+	[8632] = 18, -- Garrote (Rank 3)
+	[8633] = 18, -- Garrote (Rank 4)
+	[11289] = 18, -- Garrote (Rank 5)
+	[11290] = 18, -- Garrote (Rank 6)
+	[1943] = 6, -- Rupture (Rank 1)
+	[8639] = 6, -- Rupture (Rank 2)
+	[8640] = 6, -- Rupture (Rank 3)
+	[11273] = 6, -- Rupture (Rank 4)
+	[11274] = 6, -- Rupture (Rank 5)
+	[11275] = 6, -- Rupture (Rank 6)
 }
 
 AOE = {
@@ -205,9 +196,41 @@ AOE = {
 	[20549] = true, -- War Stomp
 }
 
+STEALTH = {
+	[9005] = true, -- Pounce (Rank 1)
+	[9823] = true, -- Pounce (Rank 2)
+	[9827] = true, -- Pounce (Rank 3)
+	[1833] = true, -- Cheap Shot
+	[6770] = true, -- Sap (Rank 1)
+	[2070] = true, -- Sap (Rank 2)
+	[11297] = true, -- Sap (Rank 3)
+	[703] = true, -- Garrote (Rank 1)
+	[8631] = true, -- Garrote (Rank 2)
+	[8632] = true, -- Garrote (Rank 3)
+	[8633] = true, -- Garrote (Rank 4)
+	[11289] = true, -- Garrote (Rank 5)
+	[11290] = true, -- Garrote (Rank 6)
+}
+
+OOC = {
+	[1098] = true, -- Enslave Demon (Rank 1)
+	[11725] = true, -- Enslave Demon (Rank 2)
+	[11726] = true, -- Enslave Demon (Rank 3)
+	[605] = true, -- Mind Control (Rank 1)
+	[10911] = true, -- Mind Control (Rank 2)
+	[10912] = true, -- Mind Control (Rank 3)
+	[26740] = true, -- Gnomish Mind Control Cap
+}
+
 COMBO = {
 	[408] = 1, -- Kidney Shot (Rank 1)
 	[8643] = 1, -- Kidney Shot (Rank 2)
+	[1943] = 2, -- Rupture (Rank 1)
+	[8639] = 2, -- Rupture (Rank 2)
+	[8640] = 2, -- Rupture (Rank 3)
+	[11273] = 2, -- Rupture (Rank 4)
+	[11274] = 2, -- Rupture (Rank 5)
+	[11275] = 2, -- Rupture (Rank 6)
 }
 
 local function talentRank(i, j)
@@ -387,14 +410,4 @@ UNIQUENESS_CLASS = {
 	[10912] = 11, -- Mind Control (Rank 3)
 
 	[26740] = 12, -- Gnomish Mind Control Cap
-}
-
-OOC_TIMERS = {
-	[1098] = true, -- Enslave Demon (Rank 1)
-	[11725] = true, -- Enslave Demon (Rank 2)
-	[11726] = true, -- Enslave Demon (Rank 3)
-	[605] = true, -- Mind Control (Rank 1)
-	[10911] = true, -- Mind Control (Rank 2)
-	[10912] = true, -- Mind Control (Rank 3)
-	[26740] = true, -- Gnomish Mind Control Cap
 }

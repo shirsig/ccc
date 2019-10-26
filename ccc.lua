@@ -1,5 +1,5 @@
 local addon_name, addon_table = ...
-setfenv(1, setmetatable(addon_table, { __index =_G }))
+setfenv(1, setmetatable(addon_table, { __index = _G }))
 
 do
 	local f = CreateFrame'Frame'
@@ -225,7 +225,7 @@ function TargetDebuffs()
 end
 
 function UNIT_SPELLCAST_SENT(_, _, _, spell)
-	if spell == 1833 or spell == 6770 or spell == 2070 or spell == 11297 or spell == 1499 or spell == 14310 or spell == 14311 then -- Cheap Shot, Sap, Freezing Trap
+	if STEALTH[spell] or spell == 1499 or spell == 14310 or spell == 14311 then -- Freezing Trap
 		SetEffectDuration(spell)
 	end
 end
