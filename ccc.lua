@@ -277,13 +277,11 @@ function ActivateDRTimer(timer, unit)
 	end
 end
 
-function CHAT_MSG_COMBAT_HONOR_GAIN(...) -- TODO retail is this needed?
-	for unit in string.gmatch(arg1, '(.+) dies') do
-		UnitDied(unit)
-	end
+function CHAT_MSG_COMBAT_HONOR_GAIN(_, _, _, _, player_name)
+	UnitDied(player_name)
 end
 
-function PLAYER_REGEN_ENABLED(...)
+function PLAYER_REGEN_ENABLED()
 	for k, timer in pairs(TIMERS) do
 		if not IsPlayer(timer.unit) and not IsPet(timer.unit) and not OOC[timer.effect] then
 			StopTimer(k)
