@@ -315,6 +315,7 @@ DR_CLASS = {
 	[19386] = 3, -- Wyvern String (Rank 1)
 	[24132] = 3, -- Wyvern String (Rank 2)
 	[24133] = 3, -- Wyvern String (Rank 3)
+	[19503] = 3, -- Scatter Shot
 
 	[6770] = 4, -- Sap (Rank 1)
 	[2070] = 4, -- Sap (Rank 2)
