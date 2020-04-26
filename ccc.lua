@@ -309,9 +309,6 @@ function UpdateTimers()
 	for k, timer in pairs(TIMERS) do
 		if timer.expiration and t > timer.expiration then
 			StopTimer(k)
-			if not timer.DR then
-				ActivateDRTimer(timer, timer.unit)
-			end
 		end
 	end
 end
@@ -392,7 +389,9 @@ function StopTimer(key)
 	local timer = TIMERS[key]
 	TIMERS[key] = nil
 	timer.stopped = GetTime()
-	ActivateDRTimer(timer, timer.unit)
+	if not timer.DR then
+		ActivateDRTimer(timer, timer.unit)
+	end
 	PlaceTimers()
 end
 
@@ -488,7 +487,7 @@ do
 	end
 
 	function IsPlayer(guid)
-		return unitType[guid] == 1
+		return true
 	end
 
 	function IsPet(guid)
