@@ -257,7 +257,6 @@ function AuraGone(unit, effect_name)
 	local timer = TIMERS[key]
 	if timer then
 		StopTimer(key)
-		ActivateDRTimer(timer, unit)
 	end
 end
 
@@ -390,8 +389,10 @@ function StartDR(effect_timer, unit)
 end
 
 function StopTimer(key)
-	TIMERS[key].stopped = GetTime()
+	local timer = TIMERS[key]
 	TIMERS[key] = nil
+	timer.stopped = GetTime()
+	ActivateDRTimer(timer, timer.unit)
 	PlaceTimers()
 end
 
