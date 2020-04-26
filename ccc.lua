@@ -275,6 +275,7 @@ function ActivateDRTimer(timer, unit)
 			timer.expiration = timer.start + 15
 		end
 	end
+	PlaceTimers()
 end
 
 function CHAT_MSG_COMBAT_HONOR_GAIN(_, _, _, _, player_name)
@@ -294,7 +295,7 @@ function PlaceTimers()
 		if not timer.visible then
 			local up = ccc_settings.growth == 'up'
 			for i = (up and 1 or MAXBARS), (up and MAXBARS or 1), (up and 1 or -1) do
-				if BARS[i].timer.stopped then
+				if BARS[i].timer.stopped and (not timer.DR or timer.DR > 1 or timer.expiration) then
 					BARS[i].timer = timer
 					timer.visible = true
 					break
@@ -486,7 +487,7 @@ do
 	end
 
 	function IsPlayer(guid)
-		return unitType[guid] == 1
+		return true
 	end
 
 	function IsPet(guid)
