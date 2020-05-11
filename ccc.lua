@@ -273,8 +273,8 @@ function ActivateDRTimer(timer, unit)
 			timer.start = GetTime()
 			timer.expiration = timer.start + 15
 		end
+		PlaceTimers()
 	end
-	PlaceTimers()
 end
 
 function CHAT_MSG_COMBAT_HONOR_GAIN(_, _, _, _, player_name)
@@ -291,10 +291,10 @@ end
 
 function PlaceTimers()
 	for _, timer in pairs(TIMERS) do
-		if not timer.visible then
+		if not timer.visible and (not timer.DR or timer.DR > 1 or timer.expiration) then
 			local up = ccc_settings.growth == 'up'
 			for i = (up and 1 or MAXBARS), (up and MAXBARS or 1), (up and 1 or -1) do
-				if BARS[i].timer.stopped and (not timer.DR or timer.DR > 1 or timer.expiration) then
+				if BARS[i].timer.stopped then
 					BARS[i].timer = timer
 					timer.visible = true
 					break
@@ -339,7 +339,7 @@ function StartTimer(effect, unit, unit_name, duration, start)
 
 	if UNIQUENESS_CLASS[effect] then
 		for k, v in pairs(TIMERS) do
-			if not v.DR and UNIQUENESS_CLASS[v.effect] == UNIQUENESS_CLASS[effect] then
+			if v ~= timer and not v.DR and UNIQUENESS_CLASS[v.effect] == UNIQUENESS_CLASS[effect] then
 				StopTimer(k)
 			end
 		end
