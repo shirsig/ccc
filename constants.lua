@@ -169,6 +169,37 @@ DURATION = {
 	[11273] = 6, -- Rupture (Rank 4)
 	[11274] = 6, -- Rupture (Rank 5)
 	[11275] = 6, -- Rupture (Rank 6)
+	[980] = 24, -- Curse of Agony (Rank 1)
+	[1014] = 24, -- Curse of Agony (Rank 2)
+	[6217] = 24, -- Curse of Agony (Rank 3)
+	[11711] = 24, -- Curse of Agony (Rank 4)
+	[11712] = 24, -- Curse of Agony (Rank 5)
+	[11713] = 24, -- Curse of Agony (Rank 6)
+	[172] = 12, -- Corruption (Rank 1)
+	[6222] = 15, -- Corruption (Rank 2)
+	[6223] = 18, -- Corruption (Rank 3)
+	[7648] = 18, -- Corruption (Rank 4)
+	[11671] = 18, -- Corruption (Rank 5)
+	[11672] = 18, -- Corruption (Rank 6)
+	[25311] = 18, -- Corruption (Rank 7)
+	[18265] = 30, -- Siphon Life (Rank 1)
+	[18879] = 30, -- Siphon Life (Rank 2)
+	[18880] = 30, -- Siphon Life (Rank 3)
+	[18881] = 30, -- Siphon Life (Rank 4)
+	[2944] = 24, -- Devouring Plague (Rank 1)
+	[19276] = 24, -- Devouring Plague (Rank 2)
+	[19277] = 24, -- Devouring Plague (Rank 3)
+	[19278] = 24, -- Devouring Plague (Rank 4)
+	[19279] = 24, -- Devouring Plague (Rank 5)
+	[19280] = 24, -- Devouring Plague (Rank 6)
+	[589] = 18, -- Shadow Word: Pain (Rank 1)
+	[594] = 18, -- Shadow Word: Pain (Rank 2)
+	[970] = 18, -- Shadow Word: Pain (Rank 3)
+	[992] = 18, -- Shadow Word: Pain (Rank 4)
+	[2767] = 18, -- Shadow Word: Pain (Rank 5)
+	[10892] = 18, -- Shadow Word: Pain (Rank 6)
+	[10893] = 18, -- Shadow Word: Pain (Rank 7)
+	[10894] = 18, -- Shadow Word: Pain (Rank 8)
 }
 
 AOE = {
@@ -258,6 +289,9 @@ do
 		freezing_trap_effect = function(duration)
 			return duration * talentRank(3, 7) * .15
 		end,
+		shadow_word_pain = function(duration)
+			return talentRank(2, 2) * 3
+		end,
 	}
 
 	BONUS = {
@@ -291,6 +325,14 @@ do
 		[3355] = BONUS_FUNCTIONS.freezing_trap_effect, -- Freezing Trap (Rank 1)
 		[14308] = BONUS_FUNCTIONS.freezing_trap_effect, -- Freezing Trap (Rank 2)
 		[14309] = BONUS_FUNCTIONS.freezing_trap_effect, -- Freezing Trap (Rank 3)
+		[589] = BONUS_FUNCTIONS.shadow_word_pain, -- Shadow Word: Pain (Rank 1)
+		[594] = BONUS_FUNCTIONS.shadow_word_pain, -- Shadow Word: Pain (Rank 2)
+		[970] = BONUS_FUNCTIONS.shadow_word_pain, -- Shadow Word: Pain (Rank 3)
+		[992] = BONUS_FUNCTIONS.shadow_word_pain, -- Shadow Word: Pain (Rank 4)
+		[2767] = BONUS_FUNCTIONS.shadow_word_pain, -- Shadow Word: Pain (Rank 5)
+		[10892] = BONUS_FUNCTIONS.shadow_word_pain, -- Shadow Word: Pain (Rank 6)
+		[10893] = BONUS_FUNCTIONS.shadow_word_pain, -- Shadow Word: Pain (Rank 7)
+		[10894] = BONUS_FUNCTIONS.shadow_word_pain, -- Shadow Word: Pain (Rank 8)
 	}
 end
 
