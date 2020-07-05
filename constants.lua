@@ -290,7 +290,7 @@ do
 			return duration * talentRank(3, 7) * .15
 		end,
 		shadow_word_pain = function(duration)
-			return talentRank(2, 2) * 3
+			return talentRank(3, 4) * 3
 		end,
 	}
 
