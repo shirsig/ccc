@@ -233,6 +233,14 @@ DURATION = {
 	[9752] = 12, -- Rip (Rank 4)
 	[9894] = 12, -- Rip (Rank 5)
 	[9896] = 12, -- Rip (Rank 6)
+	[770] = 40, -- Faerie Fire (Rank 1)
+	[778] = 40, -- Faerie Fire (Rank 2)
+	[9749] = 40, -- Faerie Fire (Rank 3)
+	[9907] = 40, -- Faerie Fire (Rank 4)
+	[16857] = 40, -- Faerie Fire (Rank 1)
+	[17390] = 40, -- Faerie Fire (Rank 2)
+	[17391] = 40, -- Faerie Fire (Rank 3)
+	[17392] = 40, -- Faerie Fire (Rank 4)
 }
 
 AOE = {
