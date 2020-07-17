@@ -1,6 +1,6 @@
 ## Interface: 11305
 ## Title: ccc
-## Version: 1.1.4
+## Version: 1.1.5
 ## Notes: Progress bars for CCs and DRs
 ## Author: shirsig
 ## SavedVariablesPerCharacter: ccc_settings
