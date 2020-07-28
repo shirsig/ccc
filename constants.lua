@@ -1,21 +1,30 @@
 setfenv(1, setmetatable(select(2, ...), { __index = _G }))
 
-SPELL_EFFECT = { -- TODO multiple effects? effect different from action?
-	[1168] = 118, -- Polymorph (Rank 1)
-	[12827] = 12824, -- Polymorph (Rank 2)
-	[12828] = 12825, -- Polymorph (Rank 3)
-	[12829] = 12826, -- Polymorph (Rank 4)
-	[28286] = 28271, -- Polymorph: Turtle
-	[28285] = 28272, -- Polymorph: Pig
-	[16979] = 19675, -- Feral Charge
-	[5246] = 20511, -- Intimidating Shout
-	[20252] = 20253, -- Intercept (Rank 1)
-	[20616] = 20614, -- Intercept (Rank 2)
-	[20617] = 20615, -- Intercept (Rank 3)
-	[22641] = 13327, -- Reckless Charge
-	[1499] = 3355, -- Freezing Trap (Rank 1)
-	[14310] = 14308, -- Freezing Trap (Rank 2)
-	[14311] = 14309, -- Freezing Trap (Rank 3)
+SPELL_EFFECTS = { -- TODO multiple effects? effect different from action?
+	[1168] = {118}, -- Polymorph (Rank 1)
+	[12827] = {12824}, -- Polymorph (Rank 2)
+	[12828] = {12825}, -- Polymorph (Rank 3)
+	[12829] = {12826}, -- Polymorph (Rank 4)
+	[28286] = {28271}, -- Polymorph: Turtle
+	[28285] = {28272}, -- Polymorph: Pig
+	[16979] = {19675}, -- Feral Charge
+	[5246] = {20511}, -- Intimidating Shout
+	[20252] = {20253}, -- Intercept (Rank 1)
+	[20616] = {20614}, -- Intercept (Rank 2)
+	[20617] = {20615}, -- Intercept (Rank 3)
+	[22641] = {13327}, -- Reckless Charge
+	[1499] = {3355}, -- Freezing Trap (Rank 1)
+	[14310] = {14308}, -- Freezing Trap (Rank 2)
+	[14311] = {14309}, -- Freezing Trap (Rank 3)
+	[9005] = {9005, 9007}, -- Pounce (Rank 1)
+	[9823] = {9823, 9824}, -- Pounce (Rank 2)
+	[9827] = {9827, 9826}, -- Pounce (Rank 3)
+	[16689] = {19975}, -- Nature's Grasp (Rank 1)
+	[16810] = {19974}, -- Nature's Grasp (Rank 2)
+	[16811] = {19973}, -- Nature's Grasp (Rank 3)
+	[16812] = {19972}, -- Nature's Grasp (Rank 4)
+	[16813] = {19971}, -- Nature's Grasp (Rank 5)
+	[17329] = {19970}, -- Nature's Grasp (Rank 6)
 }
 
 DURATION = {
@@ -95,6 +104,12 @@ DURATION = {
 	[5196] = 21, -- Entangling Roots (Rank 4)
 	[9852] = 24, -- Entangling Roots (Rank 5)
 	[9853] = 27, -- Entangling Roots (Rank 6)
+	[19975] = 12, -- Nature's Grasp (Rank 1)
+	[19974] = 15, -- Nature's Grasp (Rank 2)
+	[19973] = 18, -- Nature's Grasp (Rank 3)
+	[19972] = 21, -- Nature's Grasp (Rank 4)
+	[19971] = 24, -- Nature's Grasp (Rank 5)
+	[19970] = 27, -- Nature's Grasp (Rank 6)
 	[2637] = 20, -- Hibernate (Rank 1)
 	[18657] = 30, -- Hibernate (Rank 2)
 	[18658] = 40, -- Hibernate (Rank 3)
@@ -102,6 +117,9 @@ DURATION = {
 	[9005] = 2, -- Pounce (Rank 1)
 	[9823] = 2, -- Pounce (Rank 2)
 	[9827] = 2, -- Pounce (Rank 3)
+	[9007] = 18, -- Pounce Bleed (Rank 1)
+	[9824] = 18, -- Pounce Bleed (Rank 2)
+	[9826] = 18, -- Pounce Bleed (Rank 3)
 	[5211] = 2, -- Bash (Rank 1)
 	[6798] = 3, -- Bash (Rank 2)
 	[8983] = 4, -- Bash (Rank 3)
@@ -268,10 +286,13 @@ AOE = {
 	[20549] = true, -- War Stomp
 }
 
-STEALTH = {
+SPECIAL_EVENT = { -- TODO perhaps this is not needed anymore for stealth spells
 	[9005] = true, -- Pounce (Rank 1)
 	[9823] = true, -- Pounce (Rank 2)
 	[9827] = true, -- Pounce (Rank 3)
+	[9007] = true, -- Pounce Bleed (Rank 1)
+	[9824] = true, -- Pounce Bleed (Rank 2)
+	[9826] = true, -- Pounce Bleed (Rank 3)
 	[1833] = true, -- Cheap Shot
 	[6770] = true, -- Sap (Rank 1)
 	[2070] = true, -- Sap (Rank 2)
@@ -282,6 +303,9 @@ STEALTH = {
 	[8633] = true, -- Garrote (Rank 4)
 	[11289] = true, -- Garrote (Rank 5)
 	[11290] = true, -- Garrote (Rank 6)
+	[1499] = true, -- Freezing Trap (Rank 1)
+	[14310] = true, -- Freezing Trap (Rank 2)
+	[14311] = true, -- Freezing Trap (Rank 3)
 }
 
 OOC = {
@@ -330,7 +354,7 @@ do
 		freezing_trap_effect = function(duration)
 			return duration * talentRank(3, 7) * .15
 		end,
-		shadow_word_pain = function(duration)
+		shadow_word_pain = function()
 			return talentRank(3, 4) * 3
 		end,
 	}
@@ -419,6 +443,12 @@ DR_CLASS = {
 	[5196] = 6, -- Entangling Roots (Rank 4)
 	[9852] = 6, -- Entangling Roots (Rank 5)
 	[9853] = 6, -- Entangling Roots (Rank 6)
+	[19975] = 6, -- Nature's Grasp (Rank 1)
+	[19974] = 6, -- Nature's Grasp (Rank 2)
+	[19973] = 6, -- Nature's Grasp (Rank 3)
+	[19972] = 6, -- Nature's Grasp (Rank 4)
+	[19971] = 6, -- Nature's Grasp (Rank 5)
+	[19970] = 6, -- Nature's Grasp (Rank 6)
 
 	[122] = 7, -- Frost Nova (Rank 1)
 	[865] = 7, -- Frost Nova (Rank 2)

@@ -225,31 +225,29 @@ function TargetDebuffs()
 end
 
 function UNIT_SPELLCAST_SENT(_, _, _, spell)
-	if STEALTH[spell] or spell == 1499 or spell == 14310 or spell == 14311 then -- Freezing Trap
-		SetEffectDuration(spell)
+	if SPECIAL_EVENT[spell] then
+		SetEffectDurations(spell)
 	end
 end
 
 function UNIT_SPELLCAST_SUCCEEDED(_, _, spell)
-	SetEffectDuration(spell)
+	SetEffectDurations(spell)
 end
 
-function SetEffectDuration(spell)
-	local effect = SPELL_EFFECT[spell] or spell
-
-	if not DURATION[effect] then
-		return
+function SetEffectDurations(spell)
+	local effects = SPELL_EFFECTS[spell] or {spell}
+	for _, effect in pairs(effects) do
+		local duration = DURATION[effect]
+		if duration then
+			if COMBO[effect] then
+				duration = duration + COMBO[effect] * GetComboPoints('player', 'target')
+			end
+			if BONUS[effect] then
+				duration = duration + BONUS[effect](duration)
+			end
+			EFFECT[GetSpellInfo(effect)] = { id = effect, duration = duration }
+		end
 	end
-
-	local duration = DURATION[effect]
-	if COMBO[effect] then
-		duration = duration + COMBO[effect] * GetComboPoints('player', 'target')
-	end
-	if BONUS[effect] then
-		duration = duration + BONUS[effect](duration)
-	end
-
-	EFFECT[GetSpellInfo(effect)] = { id = effect, duration = duration }
 end
 
 function AuraGone(unit, effect_name)
