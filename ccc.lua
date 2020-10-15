@@ -200,10 +200,10 @@ do
 	local factor = { [0] = 1, 1/2, 1/4, 0 }
 
 	function DiminishedDuration(unit, effect, full_duration)
-		if IsPlayer(unit) or IsPet(unit) then
+		if IsPlayer(unit) then
 			local class = DR_CLASS[effect]
 			local timer = class and TIMERS[class .. '@' .. unit]
-			local DR = IsPlayer(unit) and timer and timer.DR or 0
+			local DR = timer and timer.DR or 0
 			return full_duration * factor[DR]
 		else
 			return full_duration
@@ -281,7 +281,7 @@ end
 
 function PLAYER_REGEN_ENABLED()
 	for k, timer in pairs(TIMERS) do
-		if not IsPlayer(timer.unit) and not IsPet(timer.unit) and not OOC[timer.effect] then
+		if not IsPlayer(timer.unit) and not OOC[timer.effect] then
 			StopTimer(k)
 		end
 	end
@@ -315,7 +315,7 @@ function EffectActive(effect, unit)
 	return TIMERS[GetSpellInfo(effect) .. '@' .. unit] and true or false
 end
 
-function StartTimer(effect, unit, unit_name, duration, start)
+function StartTimer(effect, unit, unit_name, duration)
 	local effect_name, _, texture = GetSpellInfo(effect)
 
 	if ccc_settings.ignore[effect_name] then
@@ -349,8 +349,8 @@ function StartTimer(effect, unit, unit_name, duration, start)
 	timer.effect_name = effect_name
 	timer.unit = unit
 	timer.unit_name = unit_name
-	timer.start = start or GetTime()
-	timer.expiration = timer.start + duration
+	timer.start = GetTime()
+	timer.expiration = max(timer.expiration or 0, timer.start + duration)
 	timer.texture = texture
 
 	if IsPlayer(unit) then
@@ -470,26 +470,20 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 end
 
 do
-	local unitType = {}
+	local isPlayer = {}
 
 	function PLAYER_TARGET_CHANGED()
 		local target_guid = UnitGUID'target'
 		if target_guid then
 			LATEST_TARGET = target_guid
-			if UnitIsPlayer'target' then
-				unitType[target_guid] = 1
-			elseif UnitPlayerControlled'target' then
-				unitType[target_guid] = 2
+			if UnitIsPlayer'target' or UnitPlayerControlled'target' then
+				isPlayer[target_guid] = true
 			end
 		end
 	end
 
 	function IsPlayer(guid)
-		return unitType[guid] == 1
-	end
-
-	function IsPet(guid)
-		return unitType[guid] == 2
+		return true
 	end
 end
 
