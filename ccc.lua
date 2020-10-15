@@ -350,7 +350,7 @@ function StartTimer(effect, unit, unit_name, duration)
 	timer.unit = unit
 	timer.unit_name = unit_name
 	timer.start = GetTime()
-	timer.expiration = max(timer.expiration or 0, timer.start + duration)
+	timer.expiration = timer.start + duration
 	timer.texture = texture
 
 	if IsPlayer(unit) then
@@ -483,7 +483,7 @@ do
 	end
 
 	function IsPlayer(guid)
-		return true
+		return isPlayer[guid]
 	end
 end
 
