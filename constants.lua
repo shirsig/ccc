@@ -134,14 +134,17 @@ DURATION = {
 	[24132] = 12, -- Wyvern Sting (Rank 2)
 	[24133] = 12, -- Wyvern Sting (Rank 3)
 	[1978] = 15, -- Serpent String (Rank 1)
-	[13549] = 15, -- Serpent String (Rank 2)
-	[13550] = 15, -- Serpent String (Rank 3)
-	[13551] = 15, -- Serpent String (Rank 4)
-	[13552] = 15, -- Serpent String (Rank 5)
-	[13553] = 15, -- Serpent String (Rank 6)
-	[13554] = 15, -- Serpent String (Rank 7)
-	[13555] = 15, -- Serpent String (Rank 8)
-	[25295] = 15, -- Serpent String (Rank 9)
+	[13549] = 15, -- Serpent Sting (Rank 2)
+	[13550] = 15, -- Serpent Sting (Rank 3)
+	[13551] = 15, -- Serpent Sting (Rank 4)
+	[13552] = 15, -- Serpent Sting (Rank 5)
+	[13553] = 15, -- Serpent Sting (Rank 6)
+	[13554] = 15, -- Serpent Sting (Rank 7)
+	[13555] = 15, -- Serpent Sting (Rank 8)
+	[25295] = 15, -- Serpent Sting (Rank 9)
+	[3034] = 8, -- Viper Sting (Rank 1)
+	[14279] = 8, -- Viper Sting (Rank 2)
+	[14280] = 8, -- Viper Sting (Rank 3)
 	[5116] = 4, -- Concussive Shot
 	[19306] = 5, -- Counterattack (Rank 1)
 	[20909] = 5, -- Counterattack (Rank 2)
@@ -533,4 +536,8 @@ UNIQUENESS_CLASS = {
 	[10912] = 11, -- Mind Control (Rank 3)
 
 	[26740] = 12, -- Gnomish Mind Control Cap
+
+	[3034] = 13, -- Viper Sting (Rank 1)
+	[14279] = 13, -- Viper Sting (Rank 2)
+	[14280] = 13, -- Viper Sting (Rank 3)
 }
