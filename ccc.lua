@@ -49,7 +49,7 @@ function CreateBar()
 	f.icon:SetTexture[[Interface\Icons\INV_Misc_QuestionMark]]
 	f.icon:SetTexCoord(.08, .92, .08, .92)
 
-	f.statusbar = CreateFrame('StatusBar', nil, f)
+	f.statusbar = CreateFrame('StatusBar', nil, f, 'BackdropTemplate')
 	f.statusbar:SetPoint('TOPLEFT', f.icon, 'TOPRIGHT', 0, 0)
 	f.statusbar:SetPoint('BOTTOMRIGHT', 0, 0)
 	f.statusbar:SetStatusBarTexture(texture)
@@ -201,10 +201,11 @@ do
 
 	function DiminishedDuration(unit, effect, full_duration)
 		if IsPlayer(unit) then
+			local pvp_duration = PVP_DURATION[effect] or full_duration
 			local class = DR_CLASS[effect]
 			local timer = class and TIMERS[class .. '@' .. unit]
 			local DR = timer and timer.DR or 0
-			return full_duration * factor[DR]
+			return pvp_duration * factor[DR]
 		else
 			return full_duration
 		end
@@ -269,7 +270,7 @@ function ActivateDRTimer(timer, unit)
 		local timer = TIMERS[dr_class .. '@' .. unit]
 		if timer then
 			timer.start = GetTime()
-			timer.expiration = timer.start + 15
+			timer.expiration = timer.start + 18
 		end
 		PlaceTimers()
 	end
@@ -433,6 +434,9 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		elseif effect_name == GetSpellInfo(15269) then -- Blackout
 			effect = 15269
 			duration = 3
+		elseif effect_name == GetSpellInfo(20170) then -- Stun
+			effect = 20170
+			duration = 2
 		elseif effect_name == GetSpellInfo(12360) then -- Impact
 			effect = 12360
 			duration = 2
