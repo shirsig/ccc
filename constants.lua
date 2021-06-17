@@ -448,7 +448,7 @@ do
 			return talentRank(2, 4) * .5
 		end,
 		freezing_trap_effect = function(duration)
-			return duration * talentRank(3, 7) * .15
+			return duration * talentRank(3, 8) * .15
 		end,
 		shadow_word_pain = function()
 			return talentRank(3, 4) * 3
