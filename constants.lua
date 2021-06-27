@@ -354,6 +354,22 @@ DURATION = {
 	[33986] = 12, -- Mangle (Bear) (Rank 2)
 	[33987] = 12, -- Mangle (Bear) (Rank 3)
 	[33745] = 15, -- Lacerate (Rank 1)
+	[30108] = 18, -- Unstable Affliction (Rank 1)
+	[30404] = 18, -- Unstable Affliction (Rank 2)
+	[30405] = 18, -- Unstable Affliction (Rank 3)
+	[1160] = 30, -- Demoralizing Shout (Rank 1)
+	[6190] = 30, -- Demoralizing Shout (Rank 2)
+	[11554] = 30, -- Demoralizing Shout (Rank 3)
+	[11555] = 30, -- Demoralizing Shout (Rank 4)
+	[11556] = 30, -- Demoralizing Shout (Rank 5)
+	[25202] = 30, -- Demoralizing Shout (Rank 6)
+	[25203] = 30, -- Demoralizing Shout (Rank 7)
+	[99] = 30, -- Demoralizing Roar (Rank 1)
+	[1735] = 30, -- Demoralizing Roar (Rank 2)
+	[9490] = 30, -- Demoralizing Roar (Rank 3)
+	[9747] = 30, -- Demoralizing Roar (Rank 4)
+	[9898] = 30, -- Demoralizing Roar (Rank 5)
+	[26998] = 30, -- Demoralizing Roar (Rank 6)
 }
 
 AOE = {

@@ -464,6 +464,9 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		elseif effect_name == GetSpellInfo(5530) then -- Mace Stun Effect
 			effect = 5530
 			duration = 3
+		elseif effect_name == GetSpellInfo(43523) then -- Unstable
+			effect = 43523
+			duration = 5
 		end
 		if effect then
 			StartTimer(effect, unit, unit_name, duration)
