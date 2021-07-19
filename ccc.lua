@@ -270,7 +270,7 @@ function ActivateDRTimer(timer, unit)
 		local timer = TIMERS[dr_class .. '@' .. unit]
 		if timer then
 			timer.start = GetTime()
-			timer.expiration = timer.start + 18
+			timer.expiration = timer.start + 20
 		end
 		PlaceTimers()
 	end
