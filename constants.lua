@@ -1,6 +1,6 @@
 setfenv(1, setmetatable(select(2, ...), { __index = _G }))
 
-SPELL_EFFECTS = { -- TODO multiple effects? effect different from action?
+SPELL_EFFECTS = {
 	[1168] = {118}, -- Polymorph (Rank 1)
 	[12827] = {12824}, -- Polymorph (Rank 2)
 	[12828] = {12825}, -- Polymorph (Rank 3)
@@ -139,7 +139,7 @@ DURATION = {
 	[19386] = 12, -- Wyvern Sting (Rank 1)
 	[24132] = 12, -- Wyvern Sting (Rank 2)
 	[24133] = 12, -- Wyvern Sting (Rank 3)
-	[1978] = 15, -- Serpent String (Rank 1)
+	[1978] = 15, -- Serpent Sting (Rank 1)
 	[13549] = 15, -- Serpent Sting (Rank 2)
 	[13550] = 15, -- Serpent Sting (Rank 3)
 	[13551] = 15, -- Serpent Sting (Rank 4)
@@ -273,10 +273,20 @@ DURATION = {
 	[778] = 40, -- Faerie Fire (Rank 2)
 	[9749] = 40, -- Faerie Fire (Rank 3)
 	[9907] = 40, -- Faerie Fire (Rank 4)
-	[16857] = 40, -- Faerie Fire (Rank 1)
-	[17390] = 40, -- Faerie Fire (Rank 2)
-	[17391] = 40, -- Faerie Fire (Rank 3)
-	[17392] = 40, -- Faerie Fire (Rank 4)
+	[16857] = 40, -- Faerie Fire (Feral) (Rank 1)
+	[17390] = 40, -- Faerie Fire (Feral) (Rank 2)
+	[17391] = 40, -- Faerie Fire (Feral) (Rank 3)
+	[17392] = 40, -- Faerie Fire (Feral) (Rank 4)
+    [1160] = 30, -- Demoralizing Shout (Rank 1)
+    [6190] = 30, -- Demoralizing Shout (Rank 2)
+    [11554] = 30, -- Demoralizing Shout (Rank 3)
+    [11555] = 30, -- Demoralizing Shout (Rank 4)
+    [11556] = 30, -- Demoralizing Shout (Rank 5)
+    [99] = 30, -- Demoralizing Roar (Rank 1)
+    [1735] = 30, -- Demoralizing Roar (Rank 2)
+    [9490] = 30, -- Demoralizing Roar (Rank 3)
+    [9747] = 30, -- Demoralizing Roar (Rank 4)
+    [9898] = 30, -- Demoralizing Roar (Rank 5)
 }
 
 AOE = {
@@ -437,9 +447,9 @@ DR_CLASS = {
 	[3355] = 3, -- Freezing Trap Effect (Rank 1)
 	[14308] = 3, -- Freezing Trap Effect (Rank 2)
 	[14309] = 3, -- Freezing Trap Effect (Rank 3)
-	[19386] = 3, -- Wyvern String (Rank 1)
-	[24132] = 3, -- Wyvern String (Rank 2)
-	[24133] = 3, -- Wyvern String (Rank 3)
+	[19386] = 3, -- Wyvern Sting (Rank 1)
+	[24132] = 3, -- Wyvern Sting (Rank 2)
+	[24133] = 3, -- Wyvern Sting (Rank 3)
 	[19503] = 3, -- Scatter Shot
 
 	[6770] = 4, -- Sap (Rank 1)
