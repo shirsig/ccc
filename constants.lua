@@ -312,6 +312,16 @@ AOE = {
 	[5484] = true, -- Howl of Terror (Rank 1)
 	[17928] = true, -- Howl of Terror (Rank 2)
 	[20549] = true, -- War Stomp
+    [1160] = true, -- Demoralizing Shout (Rank 1)
+    [6190] = true, -- Demoralizing Shout (Rank 2)
+    [11554] = true, -- Demoralizing Shout (Rank 3)
+    [11555] = true, -- Demoralizing Shout (Rank 4)
+    [11556] = true, -- Demoralizing Shout (Rank 5)
+    [99] = true, -- Demoralizing Roar (Rank 1)
+    [1735] = true, -- Demoralizing Roar (Rank 2)
+    [9490] = true, -- Demoralizing Roar (Rank 3)
+    [9747] = true, -- Demoralizing Roar (Rank 4)
+    [9898] = true, -- Demoralizing Roar (Rank 5)
 }
 
 SPECIAL_EVENT = { -- TODO perhaps this is not needed anymore for stealth spells
