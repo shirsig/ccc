@@ -370,6 +370,7 @@ DURATION = {
 	[9747] = 30, -- Demoralizing Roar (Rank 4)
 	[9898] = 30, -- Demoralizing Roar (Rank 5)
 	[26998] = 30, -- Demoralizing Roar (Rank 6)
+	[28730] = 2, -- Arcane Torrent
 }
 
 AOE = {
@@ -402,6 +403,27 @@ AOE = {
 	[30283] = true, -- Shadowfury (Rank 1)
 	[30413] = true, -- Shadowfury (Rank 2)
 	[30414] = true, -- Shadowfury (Rank 3)
+	[1160] = true, -- Demoralizing Shout (Rank 1)
+	[6190] = true, -- Demoralizing Shout (Rank 2)
+	[11554] = true, -- Demoralizing Shout (Rank 3)
+	[11555] = true, -- Demoralizing Shout (Rank 4)
+	[11556] = true, -- Demoralizing Shout (Rank 5)
+	[25202] = true, -- Demoralizing Shout (Rank 6)
+	[25203] = true, -- Demoralizing Shout (Rank 7)
+	[99] = true, -- Demoralizing Roar (Rank 1)
+	[1735] = true, -- Demoralizing Roar (Rank 2)
+	[9490] = true, -- Demoralizing Roar (Rank 3)
+	[9747] = true, -- Demoralizing Roar (Rank 4)
+	[9898] = true, -- Demoralizing Roar (Rank 5)
+	[26998] = true, -- Demoralizing Roar (Rank 6)
+	[31661] = true, -- Dragon's Breath (Rank 1)
+	[33041] = true, -- Dragon's Breath (Rank 2)
+	[33042] = true, -- Dragon's Breath (Rank 3)
+	[33043] = true, -- Dragon's Breath (Rank 4)
+	[30283] = true, -- Shadowfury (Rank 1)
+	[30413] = true, -- Shadowfury (Rank 2)
+	[30414] = true, -- Shadowfury (Rank 3)
+	[28730] = true, -- Arcane Torrent
 }
 
 SPECIAL_EVENT = { -- TODO perhaps this is not needed anymore for stealth spells
