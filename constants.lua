@@ -371,6 +371,15 @@ DURATION = {
 	[9898] = 30, -- Demoralizing Roar (Rank 5)
 	[26998] = 30, -- Demoralizing Roar (Rank 6)
 	[28730] = 2, -- Arcane Torrent
+	[14914] = 10, -- Holy Fire (Rank 1)
+	[15262] = 10, -- Holy Fire (Rank 2)
+	[15263] = 10, -- Holy Fire (Rank 3)
+	[15264] = 10, -- Holy Fire (Rank 4)
+	[15265] = 10, -- Holy Fire (Rank 5)
+	[15266] = 10, -- Holy Fire (Rank 6)
+	[15267] = 10, -- Holy Fire (Rank 7)
+	[15261] = 10, -- Holy Fire (Rank 8)
+	[25384] = 10, -- Holy Fire (Rank 9)
 }
 
 AOE = {
