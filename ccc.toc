@@ -1,4 +1,4 @@
-## Interface: 11507
+## Interface: 20505
 ## Title: ccc
 ## Version: @project-version@
 ## Notes: Progress bars for CCs and DRs

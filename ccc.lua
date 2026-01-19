@@ -201,10 +201,11 @@ do
 
 	function DiminishedDuration(unit, effect, full_duration)
 		if IsPlayer(unit) then
+			local pvp_duration = PVP_DURATION[effect] or full_duration
 			local class = DR_CLASS[effect]
 			local timer = class and TIMERS[class .. '@' .. unit]
 			local DR = timer and timer.DR or 0
-			return full_duration * factor[DR]
+            return pvp_duration * factor[DR]
 		else
 			return full_duration
 		end
@@ -463,6 +464,9 @@ function COMBAT_LOG_EVENT_UNFILTERED()
 		elseif effect_name == GetSpellInfo(5530) then -- Mace Stun Effect
 			effect = 5530
 			duration = 3
+		elseif effect_name == GetSpellInfo(43523) then -- Unstable
+			effect = 43523
+			duration = 5
 		end
 		if effect then
 			StartTimer(effect, unit, unit_name, duration)
